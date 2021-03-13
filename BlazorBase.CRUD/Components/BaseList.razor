@@ -1,0 +1,77 @@
+﻿@typeparam TModel
+@using VirtualDungeonMaster.Extensions;
+@using VirtualDungeonMaster.Attributes;
+@using VirtualDungeonMaster.Modules.Base.Models;
+
+<h3>
+    @PluralDisplayName
+    <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
+</h3>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th></th>
+            @foreach (var caption in ColumnCaptions)
+            {
+                <th>@caption</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Entries)
+        {
+            <tr>
+                <td>
+                    <Buttons>
+                        <Button Color="Color.Primary" Clicked="(() => EditEntryAsync(entry))"><Icon Name="IconName.Edit" /></Button>
+                        <Button Color="Color.Danger" Clicked="(() => RemoveEntryAsync(entry))"><Icon Name=" IconName.Delete" /></Button>
+                    </Buttons>
+                </td>
+
+                @foreach (var property in VisibleProperties)
+                {
+                    if (property.IsImage())
+                    {
+                        <td>
+                            <Figure Style="display:flex;justify-content:center">
+                                <FigureImage Style="height:38px" Rounded="true" Source="@property.GetValueAsImageData(entry)" AlternateText="Fehler" />
+                            </Figure>
+                        </td>
+                    }
+                    else if (property.HasAttribute(typeof(FileLinkAttribute)))
+                    {
+                        <td>
+                            <Figure Style="display:flex;justify-content:center">
+                                @if (entry is BaseFile baseFile && baseFile.IsImage())
+                                {
+                                    <FigureImage Style="height:100px" Rounded="true" Source="@property.GetValue(entry).ToString()" />
+                                }
+                                else
+                                {
+                                    <iframe height="100" width="200" src="@property.GetValue(entry)" allowfullscreen="allowfullscreen"></iframe>
+                                }
+
+                                <a href="@property.GetValue(entry)" target="_blank"><i class="fas fa-external-link-alt"></i></a>
+                            </Figure>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>
+                            @property.GetValue(entry)
+                        </td>
+                    }
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<BaseCard @ref="BaseCard" Service="Service" TModel="TModel" OnCardClosed="OnCardClosedAsync" OnEntryAdded="OnEntryAddedAsync" />
+
+<ConfirmDialog @ref="ConfirmDialog" Title="@DeleteConfirmDialogTitle" ConfirmButtonText="Löschen" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
+    <span>
+        @DeleteConfirmDialogDeleteMessage
+    </span>
+</ConfirmDialog>

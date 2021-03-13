@@ -1,0 +1,16 @@
+﻿<Modal @ref="Modal">
+    <ModalBackdrop />
+    <ModalContent Centered="true">
+        <ModalHeader>
+            <ModalTitle>@Title</ModalTitle>
+            <CloseButton Clicked="AbortModal" />
+        </ModalHeader>
+        <ModalBody>
+            @ChildContent
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="@AbortButtonColor" Clicked="AbortModal">@AbortButtonText</Button>
+            <Button Color="@ConfirmButtonColor" Clicked="SaveModal">@ConfirmButtonText</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>

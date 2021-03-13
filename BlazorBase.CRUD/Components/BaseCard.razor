@@ -1,0 +1,55 @@
+﻿@typeparam TModel
+@using VirtualDungeonMaster.Extensions;
+@using VirtualDungeonMaster.Modules.Base.Models;
+
+<Modal @ref="Modal">
+    <ModalBackdrop />
+    <ModalContent Centered="true" Size="ModalSize.Large">
+        <ModalHeader>
+            <ModalTitle>@Title</ModalTitle>
+            <CloseButton Clicked="RejectModal" />
+        </ModalHeader>
+        <ModalBody>
+            @if (Entry != null)
+            {
+                @if (!String.IsNullOrEmpty(CardSummaryInvalidFeedback))
+                {
+                    <p class="card-summary-invalid-feedback">
+                        @CardSummaryInvalidFeedback
+                    </p>
+                }
+
+                @foreach (var property in VisibleProperties)
+                {
+                    <Fields>
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">@property.GetDisplayName()</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is8">
+                                @if (ForeignKeyProperties.ContainsKey(property))
+                                {
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="property" Data="ForeignKeyProperties[property]" />
+                                }
+                                else if (property.PropertyType == typeof(BinaryFile))
+                                {
+                                    <BaseInputFile Model="Entry" Property="property" ReadOnly="!AddingMode && property.IsKey()" />
+                                }
+                                else if (property.IsImage())
+                                {
+                                    <BaseInputForImage @ref="AddToBaseInputForImages" Model="Entry" Property="property" ReadOnly="!AddingMode && property.IsKey()" />
+                                }
+                                else
+                                {
+                                    <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="property" ReadOnly="!AddingMode && property.IsKey()" />
+                                }
+                            </FieldBody>
+                        </Field>
+                    </Fields>
+                }
+            }
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="RejectModal">Schließen</Button>
+            <Button Color="Color.Primary" Clicked="SaveModal">Speichern</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>

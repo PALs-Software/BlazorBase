@@ -1,0 +1,12 @@
+﻿@inherits BaseInput
+
+<FileEdit MaxMessageSize="10000" Multiple="false" Filter="@FileFilter" Changed="@OnFileChanged" />
+
+<div class="valid-feedback">
+    @ValidFeedback
+</div>
+
+<div class="invalid-feedback">
+    @InvalidFeedback
+</div>
+
