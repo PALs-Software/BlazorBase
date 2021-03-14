@@ -1,7 +1,6 @@
 ﻿@typeparam TModel
-@using VirtualDungeonMaster.Extensions;
-@using VirtualDungeonMaster.Attributes;
-@using VirtualDungeonMaster.Modules.Base.Models;
+@using BlazorBase.CRUD.Services
+@using BlazorBase.Components
 
 <h3>
     @PluralDisplayName
@@ -31,37 +30,9 @@
 
                 @foreach (var property in VisibleProperties)
                 {
-                    if (property.IsImage())
-                    {
-                        <td>
-                            <Figure Style="display:flex;justify-content:center">
-                                <FigureImage Style="height:38px" Rounded="true" Source="@property.GetValueAsImageData(entry)" AlternateText="Fehler" />
-                            </Figure>
-                        </td>
-                    }
-                    else if (property.HasAttribute(typeof(FileLinkAttribute)))
-                    {
-                        <td>
-                            <Figure Style="display:flex;justify-content:center">
-                                @if (entry is BaseFile baseFile && baseFile.IsImage())
-                                {
-                                    <FigureImage Style="height:100px" Rounded="true" Source="@property.GetValue(entry).ToString()" />
-                                }
-                                else
-                                {
-                                    <iframe height="100" width="200" src="@property.GetValue(entry)" allowfullscreen="allowfullscreen"></iframe>
-                                }
-
-                                <a href="@property.GetValue(entry)" target="_blank"><i class="fas fa-external-link-alt"></i></a>
-                            </Figure>
-                        </td>
-                    }
-                    else
-                    {
-                        <td>
-                            @property.GetValue(entry)
-                        </td>
-                    }
+                    <td>
+                        @property.GetValue(entry)
+                    </td>
                 }
             </tr>
         }
@@ -70,8 +41,8 @@
 
 <BaseCard @ref="BaseCard" Service="Service" TModel="TModel" OnCardClosed="OnCardClosedAsync" OnEntryAdded="OnEntryAddedAsync" />
 
-<ConfirmDialog @ref="ConfirmDialog" Title="@DeleteConfirmDialogTitle" ConfirmButtonText="Löschen" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
+<ConfirmDialog @ref="ConfirmDialog" Title="@ConfirmDialogDeleteTitle" ConfirmButtonText="Löschen" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
     <span>
-        @DeleteConfirmDialogDeleteMessage
+        @ConfirmDialogDeleteMessage
     </span>
 </ConfirmDialog>

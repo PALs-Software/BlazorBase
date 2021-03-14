@@ -1,7 +1,17 @@
-﻿using System;
+﻿using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.Extensions;
+using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.Modules;
+using BlazorBase.CRUD.Services;
+using Blazorise;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
@@ -17,6 +27,12 @@ namespace BlazorBase.CRUD.Components
         [Parameter]
         public BaseService Service { get; set; }
 
+        [Inject]
+        private IStringLocalizer<TModel> ModelLocalizer { get; set; }
+
+        [Inject]
+        private IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
+
 
         private string Title;
         private string CardSummaryInvalidFeedback;
@@ -30,11 +46,9 @@ namespace BlazorBase.CRUD.Components
         private Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
         private List<BaseInput> BaseInputs = new List<BaseInput>();
         private List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
-        private List<BaseInputForImage> BaseInputForImages = new List<BaseInputForImage>();
 
         BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
         BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
-        BaseInputForImage AddToBaseInputForImages { set { BaseInputForImages.Add(value); } }
 
         protected override async Task OnInitializedAsync()
         {
@@ -43,7 +57,7 @@ namespace BlazorBase.CRUD.Components
                 TModelType = typeof(TModel);
                 VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
 
-                Title = $"{TModelType.GetDisplayName()} bearbeiten";
+                Title = Localizer["TitleEdit", ModelLocalizer[nameof(TModel)]];
             });
         }
 
@@ -67,7 +81,7 @@ namespace BlazorBase.CRUD.Components
                 primaryKeys.Add(BaseConstants.GenericNullString, "");
                 foreach (var entry in entries)
                 {
-                    var primaryKeysAsString = entry.GetPrimaryKeysAsString();
+                    var primaryKeysAsString = ((BaseModel) entry).GetPrimaryKeysAsString();
                     if (displayKeyProperty == null)
                         primaryKeys.Add(primaryKeysAsString, primaryKeysAsString);
                     else
@@ -110,7 +124,7 @@ namespace BlazorBase.CRUD.Components
 
                     if (!await Service.AddEntry(Entry))
                     {
-                        CardSummaryInvalidFeedback = $"Es existiert bereits ein Eintrag mit den Primärschlüssel(n): {Entry.GetPrimaryKeysAsString()}";
+                        CardSummaryInvalidFeedback = Localizer["EntryAlreadyExistError",Entry.GetPrimaryKeysAsString()];
                         return;
                     }
 
@@ -130,7 +144,7 @@ namespace BlazorBase.CRUD.Components
             }
             catch (Exception e)
             {
-                CardSummaryInvalidFeedback = $"Unbekannter Fehler beim Speichern: {e.Message}";
+                CardSummaryInvalidFeedback = Localizer["UnknownSavingError", e.Message];
                 return;
             }
 

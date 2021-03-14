@@ -1,9 +1,9 @@
 ﻿@typeparam TModel
-@using VirtualDungeonMaster.Extensions;
-@using VirtualDungeonMaster.Modules.Base.Models;
+@using BlazorBase.CRUD.Extensions
+@using BlazorBase.CRUD.Models
+@using System.Reflection
 
 <Modal @ref="Modal">
-    <ModalBackdrop />
     <ModalContent Centered="true" Size="ModalSize.Large">
         <ModalHeader>
             <ModalTitle>@Title</ModalTitle>
@@ -23,19 +23,11 @@
                 {
                     <Fields>
                         <Field Horizontal="true">
-                            <FieldLabel ColumnSize="ColumnSize.Is4">@property.GetDisplayName()</FieldLabel>
+                            <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[property.Name]</FieldLabel>
                             <FieldBody ColumnSize="ColumnSize.Is8">
                                 @if (ForeignKeyProperties.ContainsKey(property))
                                 {
                                     <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="property" Data="ForeignKeyProperties[property]" />
-                                }
-                                else if (property.PropertyType == typeof(BinaryFile))
-                                {
-                                    <BaseInputFile Model="Entry" Property="property" ReadOnly="!AddingMode && property.IsKey()" />
-                                }
-                                else if (property.IsImage())
-                                {
-                                    <BaseInputForImage @ref="AddToBaseInputForImages" Model="Entry" Property="property" ReadOnly="!AddingMode && property.IsKey()" />
                                 }
                                 else
                                 {

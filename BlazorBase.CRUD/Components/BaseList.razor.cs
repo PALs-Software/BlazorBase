@@ -1,6 +1,14 @@
-﻿using System;
+﻿using BlazorBase.Components;
+using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.Extensions;
+using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,15 +19,21 @@ namespace BlazorBase.CRUD.Components
         [Inject]
         public BaseService Service { get; set; }
 
+        [Inject]
+        private IStringLocalizer<TModel> ModelLocalizer { get; set; }
+
+        [Inject]
+        private IStringLocalizer<BaseList<TModel>> Localizer { get; set; }
+
         private string SingleDisplayName;
         private string PluralDisplayName;
-        private string DeleteConfirmDialogTitle;
-        private string DeleteConfirmDialogDeleteMessage;
+        private string ConfirmDialogDeleteTitle;
+        private string ConfirmDialogDeleteMessage;
         private List<string> ColumnCaptions = new List<string>();
         private List<TModel> Entries = new List<TModel>();
         private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
         private Type TModelType;
-
+        
         private BaseCard<TModel> BaseCard = default!;
         private ConfirmDialog ConfirmDialog = default!;
 
@@ -27,12 +41,12 @@ namespace BlazorBase.CRUD.Components
         {
             TModelType = typeof(TModel);
             VisibleProperties = TModelType.GetVisibleProperties(GUIType.List);
-            SingleDisplayName = TModelType.GetDisplayName();
-            PluralDisplayName = TModelType.GetPluralDisplayName();
-            DeleteConfirmDialogTitle = $"{SingleDisplayName} löschen";
+            SingleDisplayName = ModelLocalizer[nameof(TModel)];
+            PluralDisplayName = ModelLocalizer[$"{nameof(TModel)}_Plural"];
+            ConfirmDialogDeleteTitle = Localizer["ConfirmDialogDeleteTitle", SingleDisplayName];
 
-            foreach (var item in VisibleProperties)
-                ColumnCaptions.Add(item.GetDisplayName());
+            foreach (var property in VisibleProperties)
+                ColumnCaptions.Add(ModelLocalizer[property.Name]);
 
             await LoadListDataAsync();
         }
@@ -58,7 +72,7 @@ namespace BlazorBase.CRUD.Components
                 return;
 
             var primaryKeyString = String.Join(", ", entry.GetPrimaryKeys());
-            DeleteConfirmDialogDeleteMessage = $"Wollen Sie den Eintrag {primaryKeyString} wirklich löschen?";
+            ConfirmDialogDeleteMessage = Localizer["ConfirmDialogDeleteMessage", primaryKeyString];
 
             await ConfirmDialog.Show(entry);
         }

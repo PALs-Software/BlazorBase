@@ -1,6 +1,11 @@
-﻿using System;
+﻿using BlazorBase.CRUD.Extensions;
+using BlazorBase.CRUD.Resources.ValidationAttributes;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,17 +22,16 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Additional Properties
-        [ReadOnlyInGUI]
-        [Display(Name = "Erstellt am")]
+        [Display]
+        [Editable(false)]
         public DateTime CreatedOn { get; set; }
 
-        [ReadOnlyInGUI]
-        [Display(Name = "Geändert am")]
+        [Display]
+        [Editable(false)]
         public DateTime ModifiedOn { get; set; }
         #endregion
 
         #region [] Extension Methods
-        [HideInGUI]
         public object this[PropertyInfo property]
         {
             get
@@ -40,7 +44,6 @@ namespace BlazorBase.CRUD.Models
             }
         }
 
-        [HideInGUI]
         public object this[string property]
         {
             get
@@ -60,9 +63,23 @@ namespace BlazorBase.CRUD.Models
             return GetType().GetVisibleProperties();
         }
 
-        public string GetDisplayName(string propertyName)
+        public object[] GetPrimaryKeys()
         {
-            return GetType().GetProperty(propertyName).GetDisplayName();
+            var keyProperties = GetType().GetProperties().Where(property =>
+                (!property.PropertyType.IsSubclassOf(typeof(BaseModel))) &&
+                property.IsKey()
+            ).ToList();
+
+            var keys = new object[keyProperties.Count];
+            for (int i = 0; i < keyProperties.Count; i++)
+                keys[i] = keyProperties.ElementAt(i).GetValue(this);
+
+            return keys;
+        }
+
+        public string GetPrimaryKeysAsString()
+        {
+            return String.Join(", ", GetPrimaryKeys());
         }
         #endregion
 
@@ -103,7 +120,6 @@ namespace BlazorBase.CRUD.Models
 
         #region Validation Methods
         private ValidationContext ObjectValidationContextInstance;
-        [HideInGUI]
         public ValidationContext ObjectValidationContext
         {
             get

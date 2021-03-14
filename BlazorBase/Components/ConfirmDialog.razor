@@ -1,5 +1,4 @@
 ﻿<Modal @ref="Modal">
-    <ModalBackdrop />
     <ModalContent Centered="true">
         <ModalHeader>
             <ModalTitle>@Title</ModalTitle>
@@ -9,8 +8,8 @@
             @ChildContent
         </ModalBody>
         <ModalFooter>
-            <Button Color="@AbortButtonColor" Clicked="AbortModal">@AbortButtonText</Button>
-            <Button Color="@ConfirmButtonColor" Clicked="SaveModal">@ConfirmButtonText</Button>
+            <Button Color="@AbortButtonColor" Clicked="AbortModal">@Localizer["Abort"]</Button>
+            <Button Color="@ConfirmButtonColor" Clicked="SaveModal">@Localizer["Confirm"]</Button>
         </ModalFooter>
     </ModalContent>
 </Modal>

@@ -1,39 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Blazorise;
+using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
+using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace BlazorBase.Components
 {
     public partial class ConfirmDialog
     {
-        public enum ConfirmDialogResult
-        {
-            Confirmed,
-            Aborted
-        }
-
-        public class ConfirmDialogEventArgs : EventArgs
-        {
-            public ConfirmDialogResult ConfirmDialogResult { get; set; }
-            public object Sender { get; set; }
-
-            public ConfirmDialogEventArgs(ConfirmDialogResult confirmDialogResult, object sender)
-            {
-                ConfirmDialogResult = confirmDialogResult;
-                Sender = sender;
-            }
-        }
-
         [Parameter]
         public string Title { get; set; }
-
-        [Parameter]
-        public string ConfirmButtonText { get; set; } = "Ok";
-
-        [Parameter]
-        public string AbortButtonText { get; set; } = "Abbrechen";
 
         [Parameter]
         public Color ConfirmButtonColor { get; set; } = Color.Primary;
@@ -49,6 +26,9 @@ namespace BlazorBase.Components
 
         [Parameter]
         public object Sender { get; set; }
+
+        [Inject]
+        private IStringLocalizer<ConfirmDialog> Localizer { get; set; }
 
         private Modal Modal = default!;
 
