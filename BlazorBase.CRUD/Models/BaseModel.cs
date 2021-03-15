@@ -1,5 +1,6 @@
 ﻿using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -98,22 +99,22 @@ namespace BlazorBase.CRUD.Models
         {
         }
 
-        public virtual async Task<bool> OnBeforeAddEntry()
+        public virtual async Task<bool> OnBeforeAddEntry(DbContext dbContext)
         {
 
             return await Task.FromResult(true);
         }
 
-        public virtual async Task OnAfterAddEntry()
+        public virtual async Task OnAfterAddEntry(DbContext dbContext)
         {
         }
 
-        public virtual async Task<bool> OnBeforeUpdateEntry()
+        public virtual async Task<bool> OnBeforeUpdateEntry(DbContext dbContext)
         {
             return await Task.FromResult(true);
         }
 
-        public virtual async Task OnAfterUpdateEntry()
+        public virtual async Task OnAfterUpdateEntry(DbContext dbContext)
         {
         }
         #endregion

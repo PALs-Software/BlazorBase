@@ -13,6 +13,12 @@ namespace BlazorBase.Components
         public string Title { get; set; }
 
         [Parameter]
+        public string ConfirmButtonText { get; set; }
+
+        [Parameter]
+        public string AbortButtonText { get; set; }
+
+        [Parameter]
         public Color ConfirmButtonColor { get; set; } = Color.Primary;
 
         [Parameter]
@@ -36,6 +42,9 @@ namespace BlazorBase.Components
         {
             await InvokeAsync(() =>
             {
+                ConfirmButtonText = Localizer["Abort"];
+                AbortButtonText = Localizer["Confirm"];
+
                 Modal.Show();
             });
         }

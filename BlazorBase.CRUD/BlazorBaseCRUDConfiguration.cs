@@ -1,7 +1,10 @@
 ﻿using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,15 +19,17 @@ namespace BlazorBase.CRUD
         /// <param name="serviceCollection"></param>
         /// <param name="configureOptions"></param>
         /// <returns></returns>
-        public static IServiceCollection AddBlazorBaseCRUD(this IServiceCollection serviceCollection, Action<BlazorBaseCRUDOptions> configureOptions = null)
+        public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Action<BlazorBaseCRUDOptions> configureOptions = null) where TDbContextImplementation : DbContext
         {
             // If options handler is not defined we will get an exception so
             // we need to initialize and empty action.
             if (configureOptions == null)
                 configureOptions = (e) => { };
 
-            serviceCollection.AddSingleton(configureOptions);
-            serviceCollection.AddSingleton<BlazorBaseCRUDOptions>();
+            serviceCollection.AddSingleton(configureOptions)
+            .AddSingleton<BlazorBaseCRUDOptions>()
+            .AddTransient<BaseService>()
+            .AddTransient<DbContext, TDbContextImplementation>();
 
             return serviceCollection;
         }

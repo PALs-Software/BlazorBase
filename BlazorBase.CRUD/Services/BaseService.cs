@@ -11,7 +11,7 @@ namespace BlazorBase.CRUD.Services
 {
     public class BaseService
     {
-        readonly DbContext DbContext;
+        public DbContext DbContext { get; }
 
         public BaseService(DbContext context)
         {

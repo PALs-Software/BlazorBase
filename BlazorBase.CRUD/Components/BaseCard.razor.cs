@@ -119,7 +119,7 @@ namespace BlazorBase.CRUD.Components
             {
                 if (AddingMode)
                 {
-                    if (!await Entry.OnBeforeAddEntry())
+                    if (!await Entry.OnBeforeAddEntry(Service.DbContext))
                         return;
 
                     if (!await Service.AddEntry(Entry))
@@ -128,16 +128,16 @@ namespace BlazorBase.CRUD.Components
                         return;
                     }
 
-                    await Entry.OnAfterAddEntry();
+                    await Entry.OnAfterAddEntry(Service.DbContext);
                     await OnEntryAdded.InvokeAsync(Entry);
                 }
                 else
                 {
-                    if (!await Entry.OnBeforeUpdateEntry())
+                    if (!await Entry.OnBeforeUpdateEntry(Service.DbContext))
                         return;
 
                     Service.UpdateEntry(Entry);
-                    await Entry.OnAfterUpdateEntry();
+                    await Entry.OnAfterUpdateEntry(Service.DbContext);
                 }
 
                 await Service.SaveChangesAsync();

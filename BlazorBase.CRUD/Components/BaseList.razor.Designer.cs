@@ -61,6 +61,15 @@ namespace BlazorBase.CRUD.Components {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Delete ähnelt.
+        /// </summary>
+        internal static string ConfirmDelete {
+            get {
+                return ResourceManager.GetString("ConfirmDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Do you really want to delete the entry {0}? ähnelt.
         /// </summary>
         internal static string ConfirmDialogDeleteMessage {

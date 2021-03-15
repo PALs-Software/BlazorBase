@@ -41,7 +41,7 @@
 
 <BaseCard @ref="BaseCard" Service="Service" TModel="TModel" OnCardClosed="OnCardClosedAsync" OnEntryAdded="OnEntryAddedAsync" />
 
-<ConfirmDialog @ref="ConfirmDialog" Title="@ConfirmDialogDeleteTitle" ConfirmButtonText="Löschen" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
+<ConfirmDialog @ref="ConfirmDialog" Title="@ConfirmDialogDeleteTitle" ConfirmButtonText="@Localizer["ConfirmDelete"]" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
     <span>
         @ConfirmDialogDeleteMessage
     </span>
