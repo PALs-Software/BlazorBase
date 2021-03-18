@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -29,9 +30,11 @@ namespace BlazorBase.CRUD.Components
 
         [Inject]
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
-
+        
         [Inject]
-        private IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
+        private GenericClassStringLocalizer GenericClassStringLocalizer { get; set; }
+
+        private IStringLocalizer Localizer { get; set; }
 
 
         private string Title;
@@ -54,10 +57,12 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
+                Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseCard<TModel>));
                 TModelType = typeof(TModel);
                 VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
-
-                Title = Localizer["TitleEdit", ModelLocalizer[nameof(TModel)]];
+                Debug.WriteLine(TModelType.Name);
+                Debug.WriteLine(ModelLocalizer[TModelType.Name]);
+                Title = Localizer[nameof(Title), ModelLocalizer[TModelType.Name]];
             });
         }
 
@@ -81,7 +86,7 @@ namespace BlazorBase.CRUD.Components
                 primaryKeys.Add(BaseConstants.GenericNullString, "");
                 foreach (var entry in entries)
                 {
-                    var primaryKeysAsString = ((BaseModel) entry).GetPrimaryKeysAsString();
+                    var primaryKeysAsString = ((BaseModel)entry).GetPrimaryKeysAsString();
                     if (displayKeyProperty == null)
                         primaryKeys.Add(primaryKeysAsString, primaryKeysAsString);
                     else
@@ -124,7 +129,7 @@ namespace BlazorBase.CRUD.Components
 
                     if (!await Service.AddEntry(Entry))
                     {
-                        CardSummaryInvalidFeedback = Localizer["EntryAlreadyExistError",Entry.GetPrimaryKeysAsString()];
+                        CardSummaryInvalidFeedback = Localizer["EntryAlreadyExistError", Entry.GetPrimaryKeysAsString()];
                         return;
                     }
 

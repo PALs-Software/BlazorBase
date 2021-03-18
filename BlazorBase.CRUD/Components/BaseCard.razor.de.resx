@@ -120,7 +120,7 @@
   <data name="EntryAlreadyExistError" xml:space="preserve">
     <value>Es existiert bereits ein Eintrag mit den Primärschlüssel(n): {0}</value>
   </data>
-  <data name="TitleEdit" xml:space="preserve">
+  <data name="Title" xml:space="preserve">
     <value>{0} bearbeiten</value>
   </data>
   <data name="UnknownSavingError" xml:space="preserve">

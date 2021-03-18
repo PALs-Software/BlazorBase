@@ -42,8 +42,8 @@ namespace BlazorBase.Components
         {
             await InvokeAsync(() =>
             {
-                ConfirmButtonText = Localizer["Abort"];
-                AbortButtonText = Localizer["Confirm"];
+                ConfirmButtonText = Localizer["Confirm"];
+                AbortButtonText = Localizer["Abort"];
 
                 Modal.Show();
             });

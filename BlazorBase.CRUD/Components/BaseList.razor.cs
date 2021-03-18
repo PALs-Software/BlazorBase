@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -23,7 +24,8 @@ namespace BlazorBase.CRUD.Components
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
 
         [Inject]
-        private IStringLocalizer<BaseList<TModel>> Localizer { get; set; }
+        private GenericClassStringLocalizer GenericClassStringLocalizer { get; set; }
+        private IStringLocalizer Localizer { get; set; }
 
         private string SingleDisplayName;
         private string PluralDisplayName;
@@ -39,11 +41,12 @@ namespace BlazorBase.CRUD.Components
 
         protected override async Task OnInitializedAsync()
         {
+            Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseList<TModel>));
             TModelType = typeof(TModel);
             VisibleProperties = TModelType.GetVisibleProperties(GUIType.List);
-            SingleDisplayName = ModelLocalizer[nameof(TModel)];
-            PluralDisplayName = ModelLocalizer[$"{nameof(TModel)}_Plural"];
-            ConfirmDialogDeleteTitle = Localizer["ConfirmDialogDeleteTitle", SingleDisplayName];
+            SingleDisplayName = ModelLocalizer[TModelType.Name];
+            PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
+            ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
 
             foreach (var property in VisibleProperties)
                 ColumnCaptions.Add(ModelLocalizer[property.Name]);
@@ -72,7 +75,7 @@ namespace BlazorBase.CRUD.Components
                 return;
 
             var primaryKeyString = String.Join(", ", entry.GetPrimaryKeys());
-            ConfirmDialogDeleteMessage = Localizer["ConfirmDialogDeleteMessage", primaryKeyString];
+            ConfirmDialogDeleteMessage = Localizer[nameof(ConfirmDialogDeleteMessage), primaryKeyString];
 
             await ConfirmDialog.Show(entry);
         }
