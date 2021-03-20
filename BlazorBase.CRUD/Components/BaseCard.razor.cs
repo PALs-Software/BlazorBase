@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseCard<TModel> where TModel : BaseModel, new()
+    public partial class BaseCard<TModel> where TModel : class, IBaseModel, new()
     {
         [Parameter]
         public EventCallback OnCardClosed { get; set; }
@@ -86,7 +86,7 @@ namespace BlazorBase.CRUD.Components
                 primaryKeys.Add(BaseConstants.GenericNullString, "");
                 foreach (var entry in entries)
                 {
-                    var primaryKeysAsString = ((BaseModel)entry).GetPrimaryKeysAsString();
+                    var primaryKeysAsString = ((IBaseModel)entry).GetPrimaryKeysAsString();
                     if (displayKeyProperty == null)
                         primaryKeys.Add(primaryKeysAsString, primaryKeysAsString);
                     else

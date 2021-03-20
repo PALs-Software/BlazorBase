@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Models.Pages
 {
-    public class TestModel : BaseModel
+    public class TestModel : BaseModel<TestModel>, IBaseModel
     {
         public string Id { get; set; }
         public string Name { get; set; }
@@ -64,7 +64,7 @@ namespace BlazorBase.CRUD.Models.Pages
         };
     }
 
-    public abstract class Page<T> where T : BaseModel
+    public abstract class Page<T> where T : IBaseModel
     {
         public abstract string Caption { get; }
         public abstract PageType PageType { get; }

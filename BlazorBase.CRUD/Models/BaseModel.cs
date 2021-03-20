@@ -1,5 +1,8 @@
-﻿using BlazorBase.CRUD.Extensions;
+﻿using BlazorBase.CRUD.Components;
+using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Models
 {
-    public class BaseModel
+    public class BaseModel<TModel> : ComponentBase where TModel : class, IBaseModel, new()
     {
         public event EventHandler<string> OnForcePropertyRepaint;
 
@@ -67,7 +70,7 @@ namespace BlazorBase.CRUD.Models
         public object[] GetPrimaryKeys()
         {
             var keyProperties = GetType().GetProperties().Where(property =>
-                (!property.PropertyType.IsSubclassOf(typeof(BaseModel))) &&
+                (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
                 property.IsKey()
             ).ToList();
 
@@ -86,27 +89,29 @@ namespace BlazorBase.CRUD.Models
 
         #region CRUD Methods
 
-        public virtual void ForcePropertyRepaint(string propertyName)
+        public void ForcePropertyRepaint(string propertyName)
         {
             OnForcePropertyRepaint?.Invoke(this, propertyName);
         }
 
+        #region Events
         public virtual async Task OnBeforePropertyChanged(PropertyInfo property, object newValue)
         {
+            await Task.Run(() => Task.CompletedTask);
         }
-
         public virtual async Task OnAfterPropertyChanged(PropertyInfo property)
         {
+            await Task.Run(() => Task.CompletedTask);
         }
 
         public virtual async Task<bool> OnBeforeAddEntry(DbContext dbContext)
         {
-
             return await Task.FromResult(true);
         }
 
         public virtual async Task OnAfterAddEntry(DbContext dbContext)
         {
+            await Task.Run(() => Task.CompletedTask);
         }
 
         public virtual async Task<bool> OnBeforeUpdateEntry(DbContext dbContext)
@@ -116,8 +121,12 @@ namespace BlazorBase.CRUD.Models
 
         public virtual async Task OnAfterUpdateEntry(DbContext dbContext)
         {
+            await Task.Run(() => Task.CompletedTask);
         }
         #endregion
+
+        #endregion
+
 
         #region Validation Methods
         private ValidationContext ObjectValidationContextInstance;
@@ -156,5 +165,14 @@ namespace BlazorBase.CRUD.Models
         }
         #endregion
 
+        #region ComponentBase
+        protected override void BuildRenderTree(RenderTreeBuilder builder)
+        {
+            base.BuildRenderTree(builder);
+
+            builder.OpenComponent<BaseList<TModel>>(0);
+            builder.CloseComponent();
+        }
+        #endregion
     }
 }

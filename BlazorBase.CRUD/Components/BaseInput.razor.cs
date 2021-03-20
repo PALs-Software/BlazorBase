@@ -16,7 +16,7 @@ namespace BlazorBase.CRUD.Components
     public partial class BaseInput
     {
         [Parameter]
-        public BaseModel Model { get; set; }
+        public IBaseModel Model { get; set; }
 
         [Parameter]
         public PropertyInfo Property { get; set; }

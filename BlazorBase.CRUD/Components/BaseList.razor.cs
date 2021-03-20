@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseList<TModel> where TModel : BaseModel, new()
+    public partial class BaseList<TModel> where TModel : class, IBaseModel, new()
     {
         [Inject]
         public BaseService Service { get; set; }

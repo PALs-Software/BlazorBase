@@ -36,7 +36,7 @@ namespace BlazorBase.CRUD.Services
             await DbContext.Entry(entry).ReloadAsync();
         }
 
-        public async Task<bool> AddEntry<T>(T entry) where T : BaseModel
+        public async Task<bool> AddEntry<T>(T entry) where T : class, IBaseModel
         {
             if (entry == null)
                 return false;
@@ -54,7 +54,7 @@ namespace BlazorBase.CRUD.Services
             DbContext.Set<T>().Update(entry);
         }
 
-        public async Task<bool> RemoveEntryAsync<T>(T entry) where T : BaseModel
+        public async Task<bool> RemoveEntryAsync<T>(T entry) where T : class, IBaseModel
         {
             if (await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) == null)
                 return false;
