@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BlazorBase.CRUD.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -26,17 +27,17 @@ namespace BlazorBase.CRUD.Models
         #region CRUD Methods
         public void ForcePropertyRepaint(string propertyName);
 
-        public Task OnBeforePropertyChanged(PropertyInfo property, object newValue);
+        public Task OnBeforePropertyChanged(string propertyName, ref bool isHandled, ref string newValue, ref InputValidation inputValidation, EventServices eventServices);
 
-        public Task OnAfterPropertyChanged(PropertyInfo property);
+        public Task OnAfterPropertyChanged(string propertyName);
 
-        public Task<bool> OnBeforeAddEntry(DbContext dbContext);
+        public Task<bool> OnBeforeAddEntry(EventServices eventServices);
 
-        public Task OnAfterAddEntry(DbContext dbContext);
+        public Task OnAfterAddEntry(EventServices eventServices);
 
-        public Task<bool> OnBeforeUpdateEntry(DbContext dbContext);
+        public Task<bool> OnBeforeUpdateEntry(EventServices eventServices);
 
-        public Task OnAfterUpdateEntry(DbContext dbContext);
+        public Task OnAfterUpdateEntry(EventServices eventServices);
         #endregion
 
         #region Validation Methods

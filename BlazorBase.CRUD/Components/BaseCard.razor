@@ -1,4 +1,5 @@
 ﻿@typeparam TModel
+
 @using BlazorBase.CRUD.Extensions
 @using BlazorBase.CRUD.Models
 @using System.Reflection
@@ -27,11 +28,11 @@
                             <FieldBody ColumnSize="ColumnSize.Is8">
                                 @if (ForeignKeyProperties.ContainsKey(property))
                                 {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="property" Data="ForeignKeyProperties[property]" />
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="property" Data="ForeignKeyProperties[property]" />
                                 }
                                 else
                                 {
-                                    <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="property" ReadOnly="!AddingMode && property.IsKey()" />
+                                    <BaseInput @ref="AddToBaseInputs" Model="Entry" TModel="TModel" Property="property" ReadOnly="!AddingMode && property.IsKey()" Service="Service" />
                                 }
                             </FieldBody>
                         </Field>

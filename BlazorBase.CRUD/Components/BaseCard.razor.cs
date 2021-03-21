@@ -3,6 +3,7 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Modules;
 using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.ViewModels;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -30,7 +31,7 @@ namespace BlazorBase.CRUD.Components
 
         [Inject]
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
-        
+
         [Inject]
         private GenericClassStringLocalizer GenericClassStringLocalizer { get; set; }
 
@@ -47,11 +48,11 @@ namespace BlazorBase.CRUD.Components
 
         private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
         private Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
-        private List<BaseInput> BaseInputs = new List<BaseInput>();
-        private List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
+        private List<BaseInput<TModel>> BaseInputs = new List<BaseInput<TModel>>();
+        private List<BaseInputSelectList<TModel>> BaseInputSelectLists = new List<BaseInputSelectList<TModel>>();
 
-        BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
-        BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        BaseInput<TModel> AddToBaseInputs { set { BaseInputs.Add(value); } }
+        BaseInputSelectList<TModel> AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
 
         protected override async Task OnInitializedAsync()
         {
@@ -124,7 +125,7 @@ namespace BlazorBase.CRUD.Components
             {
                 if (AddingMode)
                 {
-                    if (!await Entry.OnBeforeAddEntry(Service.DbContext))
+                    if (!await Entry.OnBeforeAddEntry(GetEventServices()))
                         return;
 
                     if (!await Service.AddEntry(Entry))
@@ -133,16 +134,16 @@ namespace BlazorBase.CRUD.Components
                         return;
                     }
 
-                    await Entry.OnAfterAddEntry(Service.DbContext);
+                    await Entry.OnAfterAddEntry(GetEventServices());
                     await OnEntryAdded.InvokeAsync(Entry);
                 }
                 else
                 {
-                    if (!await Entry.OnBeforeUpdateEntry(Service.DbContext))
+                    if (!await Entry.OnBeforeUpdateEntry(GetEventServices()))
                         return;
 
                     Service.UpdateEntry(Entry);
-                    await Entry.OnAfterUpdateEntry(Service.DbContext);
+                    await Entry.OnAfterUpdateEntry(GetEventServices());
                 }
 
                 await Service.SaveChangesAsync();
@@ -166,6 +167,15 @@ namespace BlazorBase.CRUD.Components
             Modal.Hide();
             await OnCardClosed.InvokeAsync(null);
             Entry = null;
+        }
+
+        private EventServices GetEventServices()
+        {
+            return new EventServices()
+            {
+                DbContext = Service.DbContext,
+                Localizer = ModelLocalizer
+            };
         }
     }
 }

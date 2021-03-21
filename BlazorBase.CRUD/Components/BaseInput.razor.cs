@@ -2,7 +2,10 @@
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Modules;
+using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,16 +16,22 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseInput
+    public partial class BaseInput<TModel> where TModel : IBaseModel
     {
         [Parameter]
-        public IBaseModel Model { get; set; }
+        public TModel Model { get; set; }
 
         [Parameter]
         public PropertyInfo Property { get; set; }
 
         [Parameter]
         public bool ReadOnly { get; set; }
+
+        [Parameter]
+        public BaseService Service { get; set; }
+
+        [Inject]
+        private IStringLocalizer<TModel> ModelLocalizer { get; set; }
 
         protected string ValidationClass;
         protected string ValidFeedback;
@@ -73,18 +82,26 @@ namespace BlazorBase.CRUD.Components
         protected async void OnValueChanged(ChangeEventArgs e)
         {
             CurrentValueAsString = e.Value.ToString();
-            await Model.OnBeforePropertyChanged(Property, CurrentValueAsString);
-
             var newValue = CurrentValueAsString;
             if (UseGenericNullString && newValue == BaseConstants.GenericNullString)
                 newValue = null;
+
+            bool isHandled = false;
+            InputValidation validation = null;
+            await Model.OnBeforePropertyChanged(Property.Name, ref isHandled, ref newValue, ref validation, GetEventServices());
+            if (isHandled)
+            {
+                if (validation != null)
+                    SetValidation(validation.ShowValidation, validation.IsValid, validation.Feedback);
+                return;
+            }
 
             if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue, out object parsedValue, out string errorMessage))
             {
                 Property.SetValue(Model, parsedValue);
                 ValidatePropertyValue();
 
-                await Model.OnAfterPropertyChanged(Property);
+                await Model.OnAfterPropertyChanged(Property.Name);
             }
             else
                 SetValidation(feedback: errorMessage);
@@ -149,6 +166,15 @@ namespace BlazorBase.CRUD.Components
 
             if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                 InputAttributes.Add("placeholder", placeholderAttribute.Placeholder);
+        }
+
+        private EventServices GetEventServices()
+        {
+            return new EventServices()
+            {
+                DbContext = Service.DbContext,
+                Localizer = ModelLocalizer
+            };
         }
     }
 }

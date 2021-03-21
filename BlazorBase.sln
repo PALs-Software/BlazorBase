@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.Files", "BlazorB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Themes", "BlazorBase.Themes\BlazorBase.Themes.csproj", "{AFEAB725-1AF9-4BAC-8F5D-F762712C8B08}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.CRUD.NumberSeries", "BlazorBase.CRUD.NumberSeries\BlazorBase.CRUD.NumberSeries.csproj", "{A4C81894-82DD-4C39-91D3-FA3494B0206A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{AFEAB725-1AF9-4BAC-8F5D-F762712C8B08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFEAB725-1AF9-4BAC-8F5D-F762712C8B08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFEAB725-1AF9-4BAC-8F5D-F762712C8B08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A4C81894-82DD-4C39-91D3-FA3494B0206A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A4C81894-82DD-4C39-91D3-FA3494B0206A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A4C81894-82DD-4C39-91D3-FA3494B0206A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A4C81894-82DD-4C39-91D3-FA3494B0206A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,6 @@
-﻿<input type="@InputType" value="@CurrentValueAsString" @onchange="OnValueChanged" @attributes="InputAttributes" class="form-control @ValidationClass" />
+﻿@typeparam TModel
+
+<input type="@InputType" value="@CurrentValueAsString" @onchange="OnValueChanged" @attributes="InputAttributes" class="form-control @ValidationClass" />
 
 <div class="valid-feedback">
     @ValidFeedback

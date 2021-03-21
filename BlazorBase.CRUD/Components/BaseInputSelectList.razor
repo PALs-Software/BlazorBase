@@ -1,6 +1,7 @@
-﻿@inherits BaseInput
- 
-<SelectList Data="@Data" TextField="@((item)=>item.Value)" ValueField="@((item)=>item.Key)" SelectedValue="CurrentValueAsString" @onchange="OnValueChanged" class="@ValidationClass"/>
+﻿@inherits BaseInput<TModel>
+@typeparam TModel
+
+<SelectList Data="@Data" TextField="@((item)=>item.Value)" ValueField="@((item)=>item.Key)" SelectedValue="CurrentValueAsString" @onchange="OnValueChanged" class="@ValidationClass" />
 
 <div class="valid-feedback">
     @ValidFeedback

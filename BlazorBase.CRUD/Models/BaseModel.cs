@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Components;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
+using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -95,33 +96,34 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Events
-        public virtual async Task OnBeforePropertyChanged(PropertyInfo property, object newValue)
+        public virtual Task OnBeforePropertyChanged(string propertyName, ref bool isHandled, ref string newValue, ref InputValidation inputValidation, EventServices eventServices)
         {
-            await Task.Run(() => Task.CompletedTask);
-        }
-        public virtual async Task OnAfterPropertyChanged(PropertyInfo property)
-        {
-            await Task.Run(() => Task.CompletedTask);
+            return Task.CompletedTask;
         }
 
-        public virtual async Task<bool> OnBeforeAddEntry(DbContext dbContext)
+        public virtual Task OnAfterPropertyChanged(string propertyName)
         {
-            return await Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
-        public virtual async Task OnAfterAddEntry(DbContext dbContext)
+        public virtual Task<bool> OnBeforeAddEntry(EventServices eventServices)
         {
-            await Task.Run(() => Task.CompletedTask);
+            return Task.FromResult(true);
         }
 
-        public virtual async Task<bool> OnBeforeUpdateEntry(DbContext dbContext)
+        public virtual Task OnAfterAddEntry(EventServices eventServices)
         {
-            return await Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
-        public virtual async Task OnAfterUpdateEntry(DbContext dbContext)
+        public virtual Task<bool> OnBeforeUpdateEntry(EventServices eventServices)
         {
-            await Task.Run(() => Task.CompletedTask);
+            return Task.FromResult(true);
+        }
+
+        public virtual Task OnAfterUpdateEntry(EventServices eventServices)
+        {
+            return Task.FromResult(true);
         }
         #endregion
 
