@@ -3,7 +3,9 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Modules;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 
@@ -23,60 +25,72 @@ namespace BlazorBase.CRUD.NumberSeries
 
         [Visible]
         [Required]
+        [CheckValidSeriesNo]
         public string StartingNo { get; set; }
 
         [Visible]
         [Required]
+        [CheckValidSeriesNo]
         public string EndingNo { get; set; }
 
         [Visible]
         [Editable(false)]
         public string LastNoUsed { get; set; }
 
-        public override Task OnBeforePropertyChanged(string propertyName, ref bool isHandled, ref string newValue, ref InputValidation inputValidation, EventServices services)
+
+        public override Task OnAfterPropertyChanged(string propertyName, object newValue, bool isValid, EventServices eventServices)
         {
+            if (!isValid)
+                return base.OnAfterPropertyChanged(propertyName, newValue, isValid, eventServices);
+
             switch (propertyName)
             {
                 case nameof(StartingNo):
                 case nameof(EndingNo):
-                    ValidateNo(ref newValue, propertyName == nameof(StartingNo) ? nameof(EndingNo) : nameof(StartingNo), ref isHandled, ref inputValidation, services);
+                    CopyNo(propertyName, (string)newValue);
                     break;
             }
 
-            return base.OnBeforePropertyChanged(propertyName, ref isHandled, ref newValue, ref inputValidation, services);
+            return base.OnAfterPropertyChanged(propertyName, newValue, isValid, eventServices);
         }
 
-        private void ValidateNo(ref string newValue, string otherNoPropertyName, ref bool isHandled, ref InputValidation inputValidation, EventServices services)
+        private void CopyNo(string propertyName, string newValue)
         {
-            if (String.IsNullOrEmpty(newValue))
+            var isStartingNo = propertyName == nameof(StartingNo);
+            var otherNo = isStartingNo ? EndingNo : StartingNo;
+            if (!String.IsNullOrEmpty(otherNo))
                 return;
 
-            if (!NoSeriesManager.IsValidNoSeries(newValue, ref inputValidation, services))
-            {
-                isHandled = true;
-                return;
-            }
+            var maxSeriesNo = NoSeriesManager.GetMaxSeriesNo(newValue);
+            if (isStartingNo)
+                EndingNo = maxSeriesNo;
+            else
+                StartingNo = maxSeriesNo;
 
-            var otherNo = otherNoPropertyName == nameof(StartingNo) ? StartingNo : EndingNo;
-            if (String.IsNullOrEmpty(otherNo))
-            {
-                var maxSeriesNo = NoSeriesManager.GetMaxSeriesNo(newValue);
-                if (otherNoPropertyName == nameof(StartingNo))
-                    StartingNo = maxSeriesNo;
-                else
-                    EndingNo = maxSeriesNo;
-
-                ForcePropertyRepaint(otherNoPropertyName);
-                return;
-            }
-
-            if (!NoSeriesManager.NoSeriesAreEqualExceptOfDigits(newValue, otherNo))
-            {
-                inputValidation = new InputValidation(feedback: services.Localizer["The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical"]);
-                isHandled = true;
-                return;
-            }
+            ForcePropertyRepaint(isStartingNo ? nameof(EndingNo) : nameof(StartingNo));
         }
 
+        public class CheckValidSeriesNoAttribute : ValidationAttribute
+        {
+            protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+            {
+                var localizer = (IStringLocalizer<NoSeries>)validationContext.Items[typeof(IStringLocalizer<NoSeries>)];
+
+                var newValue = value as string;
+                var model = (NoSeries)validationContext.ObjectInstance;
+
+                if (String.IsNullOrEmpty(newValue))
+                    return ValidationResult.Success;
+
+                if (!NoSeriesManager.IsValidNoSeries(newValue))
+                    return new ValidationResult(localizer["The no series must contain at least one digit"], new List<string>() { validationContext.MemberName });
+
+                var otherNo = validationContext.MemberName == nameof(StartingNo) ? model.EndingNo : model.StartingNo;
+                if (!NoSeriesManager.NoSeriesAreEqualExceptOfDigits(newValue, otherNo))
+                    return new ValidationResult(localizer["The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical"], new List<string>() { validationContext.MemberName });
+
+                return ValidationResult.Success;
+            }
+        }
     }
 }

@@ -5,6 +5,7 @@ using BlazorBase.CRUD.Modules;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -33,6 +34,9 @@ namespace BlazorBase.CRUD.Components
         [Inject]
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
 
+        [Inject]
+        private IServiceProvider ServiceProvider { get; set; }
+
         protected string ValidationClass;
         protected string ValidFeedback;
         protected string InvalidFeedback;
@@ -54,7 +58,13 @@ namespace BlazorBase.CRUD.Components
 
                 InputType = GetInputType();
 
-                PropertyValidationContext = new ValidationContext(Model, serviceProvider: null, items: null)
+                var dict = new Dictionary<object, object>()
+                {
+                    [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
+                    [typeof(DbContext)] = Service.DbContext
+                };
+
+                PropertyValidationContext = new ValidationContext(Model, ServiceProvider, dict)
                 {
                     MemberName = Property.Name
                 };
@@ -86,22 +96,14 @@ namespace BlazorBase.CRUD.Components
             if (UseGenericNullString && newValue == BaseConstants.GenericNullString)
                 newValue = null;
 
-            bool isHandled = false;
-            InputValidation validation = null;
-            await Model.OnBeforePropertyChanged(Property.Name, ref isHandled, ref newValue, ref validation, GetEventServices());
-            if (isHandled)
-            {
-                if (validation != null)
-                    SetValidation(validation.ShowValidation, validation.IsValid, validation.Feedback);
-                return;
-            }
-
+            await Model.OnBeforePropertyChanged(Property.Name, ref newValue, GetEventServices());
+         
             if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue, out object parsedValue, out string errorMessage))
             {
                 Property.SetValue(Model, parsedValue);
-                ValidatePropertyValue();
+                var valid = ValidatePropertyValue();
 
-                await Model.OnAfterPropertyChanged(Property.Name);
+                await Model.OnAfterPropertyChanged(Property.Name, parsedValue, valid, GetEventServices());
             }
             else
                 SetValidation(feedback: errorMessage);
@@ -172,8 +174,9 @@ namespace BlazorBase.CRUD.Components
         {
             return new EventServices()
             {
-                DbContext = Service.DbContext,
-                Localizer = ModelLocalizer
+                ServiceProvider = ServiceProvider,
+                Localizer = ModelLocalizer,
+                DbContext = Service.DbContext                
             };
         }
     }

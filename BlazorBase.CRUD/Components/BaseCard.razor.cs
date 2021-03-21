@@ -6,12 +6,12 @@ using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -37,6 +37,9 @@ namespace BlazorBase.CRUD.Components
 
         private IStringLocalizer Localizer { get; set; }
 
+        [Inject]
+        private IServiceProvider ServiceProvider { get; set; }
+
 
         private string Title;
         private string CardSummaryInvalidFeedback;
@@ -53,6 +56,7 @@ namespace BlazorBase.CRUD.Components
 
         BaseInput<TModel> AddToBaseInputs { set { BaseInputs.Add(value); } }
         BaseInputSelectList<TModel> AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        protected ValidationContext ValidationContext;
 
         protected override async Task OnInitializedAsync()
         {
@@ -61,8 +65,6 @@ namespace BlazorBase.CRUD.Components
                 Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseCard<TModel>));
                 TModelType = typeof(TModel);
                 VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
-                Debug.WriteLine(TModelType.Name);
-                Debug.WriteLine(ModelLocalizer[TModelType.Name]);
                 Title = Localizer[nameof(Title), ModelLocalizer[TModelType.Name]];
             });
         }
@@ -103,6 +105,16 @@ namespace BlazorBase.CRUD.Components
             await PrepareForeignKeyProperties();
             AddingMode = addingMode;
             Entry = entry;
+
+            BaseInputs.Clear();
+            BaseInputSelectLists.Clear();
+
+            ValidationContext = new ValidationContext(Entry, ServiceProvider, new Dictionary<object, object>()
+            {
+                [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
+                [typeof(DbContext)] = Service.DbContext
+            });
+
             Modal.Show();
         }
 
@@ -111,7 +123,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var input in BaseInputs)
                 input.ValidatePropertyValue();
 
-            return Entry.TryValidate(out List<ValidationResult> validationResults);
+            return Entry.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
         }
 
         protected async Task SaveModal()

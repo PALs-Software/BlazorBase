@@ -21,15 +21,10 @@ namespace BlazorBase.CRUD.NumberSeries
             return result;
         }
 
-        public static bool IsValidNoSeries(string noSeries, ref InputValidation inputValidation, EventServices services)
+        public static bool IsValidNoSeries(string noSeries)
         {
             var digits = noSeries.Where(entry => char.IsDigit(entry)).ToList();
-            if (digits.Count != 0)
-                return true;
-
-            inputValidation = new InputValidation(feedback: services.Localizer["The no series must contain at least one digit"]);
-
-            return false;
+            return digits.Count != 0;
         }
 
         public static bool NoSeriesAreEqualExceptOfDigits(string noSeries1, string noSeries2)

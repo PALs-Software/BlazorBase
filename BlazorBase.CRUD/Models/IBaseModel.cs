@@ -27,9 +27,9 @@ namespace BlazorBase.CRUD.Models
         #region CRUD Methods
         public void ForcePropertyRepaint(string propertyName);
 
-        public Task OnBeforePropertyChanged(string propertyName, ref bool isHandled, ref string newValue, ref InputValidation inputValidation, EventServices eventServices);
+        public Task OnBeforePropertyChanged(string propertyName, ref string newValue, EventServices eventServices);
 
-        public Task OnAfterPropertyChanged(string propertyName);
+        public Task OnAfterPropertyChanged(string propertyName, object newValue, bool isValid, EventServices eventServices);
 
         public Task<bool> OnBeforeAddEntry(EventServices eventServices);
 
@@ -41,7 +41,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Validation Methods
-        public bool TryValidate(out List<ValidationResult> validationResults);
+        public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
         #endregion
     }

@@ -37,12 +37,10 @@
 
   <ItemGroup>
     <EmbeddedResource Update="NoSeries.de.resx">
-      <LastGenOutput>NoSeries.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator></Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="NoSeries.resx">
-      <LastGenOutput>NoSeries.Designer.cs</LastGenOutput>
-      <Generator>ResXFileCodeGenerator</Generator>
+      <Generator></Generator>
     </EmbeddedResource>
   </ItemGroup>
 

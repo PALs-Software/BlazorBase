@@ -10,8 +10,9 @@ namespace BlazorBase.CRUD.ViewModels
 {
     public class EventServices
     {
-        public DbContext DbContext { get; set; }
-
+        public IServiceProvider ServiceProvider { get; set; }
         public IStringLocalizer Localizer { get; set; }
+        public DbContext DbContext { get; set; }
+        
     }
 }

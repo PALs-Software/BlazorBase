@@ -96,12 +96,12 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Events
-        public virtual Task OnBeforePropertyChanged(string propertyName, ref bool isHandled, ref string newValue, ref InputValidation inputValidation, EventServices eventServices)
+        public virtual Task OnBeforePropertyChanged(string propertyName, ref string newValue, EventServices eventServices)
         {
             return Task.CompletedTask;
         }
 
-        public virtual Task OnAfterPropertyChanged(string propertyName)
+        public virtual Task OnAfterPropertyChanged(string propertyName, object newValue, bool isValid, EventServices eventServices)
         {
             return Task.CompletedTask;
         }
@@ -131,22 +131,10 @@ namespace BlazorBase.CRUD.Models
 
 
         #region Validation Methods
-        private ValidationContext ObjectValidationContextInstance;
-        public ValidationContext ObjectValidationContext
-        {
-            get
-            {
-                if (ObjectValidationContextInstance == null)
-                    ObjectValidationContextInstance = new ValidationContext(this, serviceProvider: null, items: null);
-
-                return ObjectValidationContextInstance;
-            }
-        }
-
-        public bool TryValidate(out List<ValidationResult> validationResults)
+        public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext)
         {
             validationResults = new List<ValidationResult>();
-            return Validator.TryValidateObject(this, ObjectValidationContext, validationResults);
+            return Validator.TryValidateObject(this, validationContext, validationResults, true);
         }
 
         public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo)
