@@ -140,7 +140,7 @@ namespace BlazorBase.CRUD.Components
                     if (!await Entry.OnBeforeAddEntry(GetEventServices()))
                         return;
 
-                    if (!await Service.AddEntry(Entry))
+                    if (!await Service.AddEntryAsync(Entry))
                     {
                         CardSummaryInvalidFeedback = Localizer["EntryAlreadyExistError", Entry.GetPrimaryKeysAsString()];
                         return;
@@ -185,8 +185,9 @@ namespace BlazorBase.CRUD.Components
         {
             return new EventServices()
             {
-                DbContext = Service.DbContext,
-                Localizer = ModelLocalizer
+                ServiceProvider = ServiceProvider,
+                Localizer = ModelLocalizer,
+                Service = Service                
             };
         }
     }

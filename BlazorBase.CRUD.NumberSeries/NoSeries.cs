@@ -18,14 +18,14 @@ namespace BlazorBase.CRUD.NumberSeries
         [Required]
         [Visible]
         [StringLength(20)]
-        public string Code { get; set; }
+        public string Id { get; set; }
 
         [Visible]
         public string Description { get; set; }
 
         [Visible]
         [Required]
-        [CheckValidSeriesNo]
+        [CheckValidSeriesNo(onlyCheckHasDigits: true)]
         public string StartingNo { get; set; }
 
         [Visible]
@@ -37,6 +37,9 @@ namespace BlazorBase.CRUD.NumberSeries
         [Editable(false)]
         public string LastNoUsed { get; set; }
 
+        public long EndingNoNumeric { get; set; }
+        public long LastNoUsedNumeric { get; set; }
+        public int NoOfDigits{ get; set; }
 
         public override Task OnAfterPropertyChanged(string propertyName, object newValue, bool isValid, EventServices eventServices)
         {
@@ -46,32 +49,49 @@ namespace BlazorBase.CRUD.NumberSeries
             switch (propertyName)
             {
                 case nameof(StartingNo):
-                case nameof(EndingNo):
-                    CopyNo(propertyName, (string)newValue);
+                    GenerateEndingNo((string)newValue);
                     break;
             }
 
             return base.OnAfterPropertyChanged(propertyName, newValue, isValid, eventServices);
         }
 
-        private void CopyNo(string propertyName, string newValue)
+        private void GenerateEndingNo(string newValue)
         {
-            var isStartingNo = propertyName == nameof(StartingNo);
-            var otherNo = isStartingNo ? EndingNo : StartingNo;
-            if (!String.IsNullOrEmpty(otherNo))
-                return;
+            EndingNo = NoSeriesManager.GetMaxSeriesNo(newValue);
+            ForcePropertyRepaint(nameof(EndingNo));
+        }
 
-            var maxSeriesNo = NoSeriesManager.GetMaxSeriesNo(newValue);
-            if (isStartingNo)
-                EndingNo = maxSeriesNo;
-            else
-                StartingNo = maxSeriesNo;
+        public void IncreaseNo()
+        {
+            if (LastNoUsedNumeric + 1 > EndingNoNumeric)
+                throw new CRUDException($"The defined maximum of the no series is reached, please create a new number series");
 
-            ForcePropertyRepaint(isStartingNo ? nameof(EndingNo) : nameof(StartingNo));
+            LastNoUsedNumeric++;
+            var lastNoUsed = LastNoUsedNumeric.ToString().PadLeft(NoOfDigits, '0');
+
+            var result = String.Empty;
+            foreach (var item in LastNoUsed)
+            {
+                if (char.IsDigit(item)) { 
+                    result += lastNoUsed[0];
+                    lastNoUsed = lastNoUsed.Substring(1);
+                }
+                else
+                    result += item;
+            }
+
+            LastNoUsed = result;
         }
 
         public class CheckValidSeriesNoAttribute : ValidationAttribute
         {
+            public bool OnlyCheckHasDigits { get; init; }
+            public CheckValidSeriesNoAttribute(bool onlyCheckHasDigits = false)
+            {
+                OnlyCheckHasDigits = onlyCheckHasDigits;
+            }
+
             protected override ValidationResult IsValid(object value, ValidationContext validationContext)
             {
                 var localizer = (IStringLocalizer<NoSeries>)validationContext.Items[typeof(IStringLocalizer<NoSeries>)];
@@ -85,9 +105,12 @@ namespace BlazorBase.CRUD.NumberSeries
                 if (!NoSeriesManager.IsValidNoSeries(newValue))
                     return new ValidationResult(localizer["The no series must contain at least one digit"], new List<string>() { validationContext.MemberName });
 
-                var otherNo = validationContext.MemberName == nameof(StartingNo) ? model.EndingNo : model.StartingNo;
-                if (!NoSeriesManager.NoSeriesAreEqualExceptOfDigits(newValue, otherNo))
-                    return new ValidationResult(localizer["The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical"], new List<string>() { validationContext.MemberName });
+                if (!OnlyCheckHasDigits)
+                {
+                    var otherNo = validationContext.MemberName == nameof(StartingNo) ? model.EndingNo : model.StartingNo;
+                    if (!NoSeriesManager.NoSeriesAreEqualExceptOfDigits(newValue, otherNo))
+                        return new ValidationResult(localizer["The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical"], new List<string>() { validationContext.MemberName });
+                }
 
                 return ValidationResult.Success;
             }

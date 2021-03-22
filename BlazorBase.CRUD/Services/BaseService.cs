@@ -18,7 +18,12 @@ namespace BlazorBase.CRUD.Services
             DbContext = context;
         }
 
-        public async Task<List<T>> GetDataAsync<T>() where T : class
+        public async virtual Task<T> GetAsync<T>(params object[] keyValues) where T : class
+        {
+            return await DbContext.Set<T>().FindAsync(keyValues);
+        }
+
+        public async virtual Task<List<T>> GetDataAsync<T>() where T : class
         {
             return await DbContext.Set<T>().ToListAsync();
         }
@@ -26,17 +31,17 @@ namespace BlazorBase.CRUD.Services
         /// <summary>
         /// Super Slow -> use only if neccessary!
         /// </summary>
-        public async Task<List<object>> GetDataAsync(Type type)
+        public async virtual Task<List<object>> GetDataAsync(Type type)
         {
             return await DbContext.Set(type).ToListAsync();
         }
 
-        public async Task ReloadAsync<T>(T entry) where T : class
+        public async virtual Task ReloadAsync<T>(T entry) where T : class
         {
             await DbContext.Entry(entry).ReloadAsync();
         }
 
-        public async Task<bool> AddEntry<T>(T entry) where T : class, IBaseModel
+        public async virtual Task<bool> AddEntryAsync<T>(T entry) where T : class, IBaseModel
         {
             if (entry == null)
                 return false;
@@ -49,12 +54,12 @@ namespace BlazorBase.CRUD.Services
             return true;
         }
 
-        public void UpdateEntry<T>(T entry) where T : class
+        public virtual void UpdateEntry<T>(T entry) where T : class
         {
             DbContext.Set<T>().Update(entry);
         }
 
-        public async Task<bool> RemoveEntryAsync<T>(T entry) where T : class, IBaseModel
+        public async virtual Task<bool> RemoveEntryAsync<T>(T entry) where T : class, IBaseModel
         {
             if (await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) == null)
                 return false;
@@ -65,7 +70,7 @@ namespace BlazorBase.CRUD.Services
         }
 
 
-        public async Task SaveChangesAsync()
+        public async virtual Task SaveChangesAsync()
         {
             await DbContext.SaveChangesAsync();
         }

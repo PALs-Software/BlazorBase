@@ -28,7 +28,7 @@
                             <FieldBody ColumnSize="ColumnSize.Is8">
                                 @if (ForeignKeyProperties.ContainsKey(property))
                                 {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="property" Data="ForeignKeyProperties[property]" />
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="property" Data="ForeignKeyProperties[property]" Service="Service" />
                                 }
                                 else
                                 {

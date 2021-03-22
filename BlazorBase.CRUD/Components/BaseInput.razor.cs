@@ -176,7 +176,7 @@ namespace BlazorBase.CRUD.Components
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                DbContext = Service.DbContext                
+                Service = Service
             };
         }
     }

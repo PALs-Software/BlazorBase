@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BlazorBase.CRUD.Services;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -12,7 +13,6 @@ namespace BlazorBase.CRUD.ViewModels
     {
         public IServiceProvider ServiceProvider { get; set; }
         public IStringLocalizer Localizer { get; set; }
-        public DbContext DbContext { get; set; }
-        
+        public BaseService Service { get; set; }        
     }
 }

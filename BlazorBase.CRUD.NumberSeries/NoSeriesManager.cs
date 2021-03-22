@@ -1,6 +1,10 @@
-﻿using BlazorBase.CRUD.ViewModels;
+﻿using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.ViewModels;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.NumberSeries
 {
@@ -29,7 +33,7 @@ namespace BlazorBase.CRUD.NumberSeries
 
         public static bool NoSeriesAreEqualExceptOfDigits(string noSeries1, string noSeries2)
         {
-            if (noSeries1.Length != noSeries2.Length)
+            if (noSeries1.Length != (noSeries2?.Length ?? -1))
                 return false;
 
             for (int i = 0; i < noSeries1.Length; i++)
@@ -38,6 +42,29 @@ namespace BlazorBase.CRUD.NumberSeries
 
             return true;
         }
+
+        public static async Task<string> GetNextNoAsync(BaseService service, string noSeriesId)
+        {
+            var noSeries = await service.GetAsync<NoSeries>(noSeriesId);
+            if (noSeries == null)
+                throw new CRUDException($"Cant get next number in series, because number series can not be found with the key {noSeriesId}");
+
+            if (String.IsNullOrEmpty(noSeries.LastNoUsed)) { 
+                noSeries.LastNoUsed = noSeries.StartingNo;
+                noSeries.LastNoUsedNumeric = long.Parse(new String(noSeries.LastNoUsed.Where(entry => char.IsDigit(entry)).ToArray()));
+                noSeries.EndingNoNumeric = long.Parse(new String(noSeries.EndingNo.Where(entry => char.IsDigit(entry)).ToArray()));
+                noSeries.NoOfDigits = noSeries.StartingNo.Where(entry => char.IsDigit(entry)).Count();
+            }
+            else
+                noSeries.IncreaseNo();
+            
+            service.UpdateEntry(noSeries);
+            return noSeries.LastNoUsed;
+        }
+
+
+      
+
 
     }
 }
