@@ -126,4 +126,7 @@
   <data name="ConfirmDialogDeleteTitle" xml:space="preserve">
     <value>{0} löschen</value>
   </data>
+  <data name="Error while deleting" xml:space="preserve">
+    <value>Fehler beim löschen</value>
+  </data>
 </root>

@@ -4,6 +4,10 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\blazor.base.crud.css" />
+  </ItemGroup>
+
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -15,11 +19,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
     <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <None Include="wwwroot\blazor.base.crud.css" />
+    <None Include="wwwroot\base.card.css" />
   </ItemGroup>
 
   <ItemGroup>

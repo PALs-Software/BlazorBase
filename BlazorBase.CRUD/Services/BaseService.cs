@@ -70,9 +70,9 @@ namespace BlazorBase.CRUD.Services
         }
 
 
-        public async virtual Task SaveChangesAsync()
+        public async virtual Task<int> SaveChangesAsync()
         {
-            await DbContext.SaveChangesAsync();
+            return await DbContext.SaveChangesAsync();
         }
     }
 }

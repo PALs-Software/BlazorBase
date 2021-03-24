@@ -3,6 +3,7 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
+using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
@@ -27,6 +28,9 @@ namespace BlazorBase.CRUD.Components
         private GenericClassStringLocalizer GenericClassStringLocalizer { get; set; }
         private IStringLocalizer Localizer { get; set; }
 
+        [CascadingParameter]
+        protected IMessageHandler MessageHandler { get; set; }
+
         private string SingleDisplayName;
         private string PluralDisplayName;
         private string ConfirmDialogDeleteTitle;
@@ -35,7 +39,7 @@ namespace BlazorBase.CRUD.Components
         private List<TModel> Entries = new List<TModel>();
         private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
         private Type TModelType;
-        
+
         private BaseCard<TModel> BaseCard = default!;
         private ConfirmDialog ConfirmDialog = default!;
 
@@ -85,9 +89,16 @@ namespace BlazorBase.CRUD.Components
             if (args.ConfirmDialogResult == ConfirmDialogResult.Aborted || args.Sender == null)
                 return;
 
-            Entries.Remove((TModel)args.Sender);
-            await Service.RemoveEntryAsync((TModel)args.Sender);
-            await Service.SaveChangesAsync();
+            try
+            {
+                await Service.RemoveEntryAsync((TModel)args.Sender);
+                await Service.SaveChangesAsync();
+                Entries.Remove((TModel)args.Sender);
+            }
+            catch (Exception e)
+            {
+                MessageHandler.ShowMessage(Localizer["Error while deleting"], e.InnerException.Message);
+            }
         }
 
 

@@ -1,0 +1,21 @@
+﻿@inherits LayoutComponentBase
+@implements Interfaces.IMessageHandler
+
+<Modal @ref="Modal">
+    <ModalContent Centered="true" Size="ModalSize.Large">
+        <ModalHeader>
+            <ModalTitle>@MessageTitle </ModalTitle>
+            <CloseButton Clicked="HideModal" />
+        </ModalHeader>
+        <ModalBody>
+            @Message
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Ok"]</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+<CascadingValue Value="this">
+    @Body
+</CascadingValue>

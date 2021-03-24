@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Modules;
@@ -50,6 +51,7 @@ namespace BlazorBase.CRUD.Components
         private bool AddingMode;
 
         private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
+        private Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>> DisplayGroups = new Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>>();
         private Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
         private List<BaseInput<TModel>> BaseInputs = new List<BaseInput<TModel>>();
         private List<BaseInputSelectList<TModel>> BaseInputSelectLists = new List<BaseInputSelectList<TModel>>();
@@ -64,8 +66,23 @@ namespace BlazorBase.CRUD.Components
             {
                 Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseCard<TModel>));
                 TModelType = typeof(TModel);
-                VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
                 Title = Localizer[nameof(Title), ModelLocalizer[TModelType.Name]];
+
+                VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
+                foreach (var property in VisibleProperties)
+                {
+                    var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
+                    attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? "General" : attribute.DisplayGroup;
+
+                    if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
+                        DisplayGroups[attribute.DisplayGroup] = new List<(VisibleAttribute Attribute, PropertyInfo Property)>();
+
+                    DisplayGroups[attribute.DisplayGroup].Add((attribute, property));
+                }
+
+                DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.FirstOrDefault().Attribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
+                foreach (var properties in DisplayGroups)
+                    properties.Value.Sort((x, y) => x.Attribute.DisplayOrder.CompareTo(y.Attribute.DisplayOrder));
             });
         }
 
@@ -187,7 +204,7 @@ namespace BlazorBase.CRUD.Components
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                Service = Service                
+                Service = Service
             };
         }
     }

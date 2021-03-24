@@ -1,48 +1,66 @@
 ﻿@typeparam TModel
 
 @using BlazorBase.CRUD.Extensions
-@using BlazorBase.CRUD.Models
-@using System.Reflection
-
-<Modal @ref="Modal">
-    <ModalContent Centered="true" Size="ModalSize.Large">
-        <ModalHeader>
-            <ModalTitle>@Title</ModalTitle>
-            <CloseButton Clicked="RejectModal" />
-        </ModalHeader>
-        <ModalBody>
-            @if (Entry != null)
-            {
-                @if (!String.IsNullOrEmpty(CardSummaryInvalidFeedback))
+@using System.Diagnostics;
+<div class="base-card">
+    <Modal @ref="Modal" Class="modal-fullscreen">
+        <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+            <ModalHeader>
+                <ModalTitle>@Title</ModalTitle>
+                <CloseButton Clicked="RejectModal" />
+            </ModalHeader>
+            <ModalBody>
+                @if (Entry != null)
                 {
-                    <p class="card-summary-invalid-feedback">
-                        @CardSummaryInvalidFeedback
-                    </p>
-                }
+                    @if (!String.IsNullOrEmpty(CardSummaryInvalidFeedback))
+                    {
+                        <Alert Class="card-summary-invalid-feedback" Color="Color.Danger">
+                            @CardSummaryInvalidFeedback
+                        </Alert>
+                    }
 
-                @foreach (var property in VisibleProperties)
-                {
-                    <Fields>
-                        <Field Horizontal="true">
-                            <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[property.Name]</FieldLabel>
-                            <FieldBody ColumnSize="ColumnSize.Is8">
-                                @if (ForeignKeyProperties.ContainsKey(property))
-                                {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="property" Data="ForeignKeyProperties[property]" Service="Service" />
-                                }
-                                else
-                                {
-                                    <BaseInput @ref="AddToBaseInputs" Model="Entry" TModel="TModel" Property="property" ReadOnly="!AddingMode && property.IsKey()" Service="Service" />
-                                }
-                            </FieldBody>
-                        </Field>
-                    </Fields>
+                    <Accordion>
+                        @foreach (var displayGroup in DisplayGroups)
+                        {
+                            <Collapse Visible="!displayGroup.Value.First().Attribute.Collapsed">
+                                <CollapseHeader>
+                                    <Heading Size="HeadingSize.Is4">
+                                        <Button Clicked="@(() => displayGroup.Value.First().Attribute.Collapsed = !displayGroup.Value.First().Attribute.Collapsed)">@ModelLocalizer[displayGroup.Key]</Button>
+                                    </Heading>
+                                </CollapseHeader>
+                                <CollapseBody>
+                                    <Row>
+                                        @foreach (var value in displayGroup.Value)
+                                        {
+                                            <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
+                                                <Fields>
+                                                    <Field Horizontal="true">
+                                                        <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[value.Property.Name]</FieldLabel>
+                                                        <FieldBody ColumnSize="ColumnSize.Is8">
+                                                            @if (ForeignKeyProperties.ContainsKey(value.Property))
+                                                            {
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" />
+                                                            }
+                                                            else
+                                                            {
+                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" TModel="TModel" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" />
+                                                            }
+                                                        </FieldBody>
+                                                    </Field>
+                                                </Fields>
+                                            </Column>
+                                        }
+                                    </Row>
+                                </CollapseBody>
+                            </Collapse>
+                        }
+                    </Accordion>
                 }
-            }
-        </ModalBody>
-        <ModalFooter>
-            <Button Color="Color.Secondary" Clicked="RejectModal">Schließen</Button>
-            <Button Color="Color.Primary" Clicked="SaveModal">Speichern</Button>
-        </ModalFooter>
-    </ModalContent>
-</Modal>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="RejectModal">@Localizer["Close"]</Button>
+                <Button Color="Color.Primary" Clicked="SaveModal">@Localizer["Save"]</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+</div>

@@ -1,0 +1,31 @@
+﻿.base-card .card-header {
+    padding: .2rem 0rem;
+}
+
+    .base-card .card-header button {
+        width: 100%;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    .base-card .card-header h4 {
+        margin-bottom: 0rem;
+    }
+
+@media (min-width: 1600px) {
+    .base-card .modal-xl {
+        max-width: 1500px;
+    }
+
+    .base-card .col-xxl-4 {
+        -ms-flex: 0 0 33.333333%;
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+    }
+}
+
+@media (min-width: 1900px) {
+    .base-card .modal-xl {
+        max-width: 1850px;
+    }
+}

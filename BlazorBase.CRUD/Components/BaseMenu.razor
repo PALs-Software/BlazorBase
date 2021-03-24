@@ -1,0 +1,19 @@
+﻿<BarItem>
+    <BarDropdown @bind-Visible="DropDownIsVisible">
+        <BarDropdownToggle>
+            <BarIcon IconName="@MenuIcon" />
+            @MenuName
+        </BarDropdownToggle>
+
+        <BarDropdownMenu>
+            @foreach (var navigationEntry in NavigationEntries)
+            {
+                <BarDropdownItem To="@navigationEntry.Link">
+                    <BarIcon Class="@navigationEntry.Icon" />
+                    @navigationEntry.Name
+                </BarDropdownItem>
+            }
+        </BarDropdownMenu>
+    </BarDropdown>
+</BarItem>
+
