@@ -3,6 +3,7 @@
     public enum GUIType
     {
         List,
-        Card
+        ListPart,
+        Card        
     }
 }

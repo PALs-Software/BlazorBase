@@ -1,5 +1,6 @@
 ﻿@typeparam TModel
-@using BlazorBase.CRUD.Services
+@inherits BaseDisplayComponent
+
 @using BlazorBase.Components
 
 <h3>
@@ -11,9 +12,14 @@
     <thead>
         <tr>
             <th></th>
-            @foreach (var caption in ColumnCaptions)
+            @foreach (var displayGroup in DisplayGroups)
             {
-                <th>@caption</th>
+                @foreach (var value in displayGroup.Value)
+                {
+                    <td>
+                        @ModelLocalizer[value.Property.Name]
+                    </td>
+                }
             }
         </tr>
     </thead>
@@ -23,37 +29,43 @@
             <tr>
                 <td>
                     <Buttons>
-                        <Button Color="Color.Primary" Clicked="(() => EditEntryAsync(entry))"><Icon Name="IconName.Edit" /></Button>
-                        <Button Color="Color.Danger" Clicked="(() => RemoveEntryAsync(entry))"><Icon Name=" IconName.Delete" /></Button>
+                        <Button Color="Color.Primary" Clicked="() => EditEntryAsync(entry)"><Icon Name="IconName.Edit" /></Button>
+                        <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)"><Icon Name=" IconName.Delete" /></Button>
                     </Buttons>
                 </td>
 
-                @foreach (var property in VisibleProperties)
+                @foreach (var displayGroup in DisplayGroups)
                 {
-                    <td>
-                        @property.GetValue(entry)
-                    </td>
+                    @foreach (var value in displayGroup.Value)
+                    {
+                        <td>
+                            @value.Property.GetValue(entry)
+                        </td>
+                    }
                 }
             </tr>
         }
     </tbody>
 </table>
 
-<BaseCard @ref="BaseCard" 
-          Service="Service" 
+<BaseCard @ref="BaseCard"
           TModel="TModel"
           SingleDisplayName="@SingleDisplayName"
-
           OnCardClosed="OnCardClosedAsync"
-          
-          OnBeforeAddEntry="CardOnBeforeAddEntry"
-          OnAfterAddEntry="CardOnAfterAddEntry"           
-          OnBeforeUpdateEntry="CardOnBeforeUpdateEntry"
+          OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
+          OnAfterAddEntry="CardOnAfterAddEntry"
+          OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
           OnAfterUpdateEntry="CardOnAfterUpdateEntry"
-          OnBeforePropertyChanged="CardOnBeforePropertyChanged"
-          OnAfterPropertyChanged="CardOnAfterPropertyChanged"
-
-          />
+          OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
+          OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+          OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+          OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+          OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
+          OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
+          OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+          OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+          OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+          OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
 
 <ConfirmDialog @ref="ConfirmDialog" Title="@ConfirmDialogDeleteTitle" ConfirmButtonText="@Localizer["ConfirmDelete"]" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
     <span>

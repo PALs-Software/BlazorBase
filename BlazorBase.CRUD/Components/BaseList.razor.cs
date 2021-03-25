@@ -3,6 +3,7 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -17,7 +18,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseList<TModel> where TModel : class, IBaseModel, new()
+    public partial class BaseList<TModel> : BaseDisplayComponent where TModel : class, IBaseModel, new()
     {
         #region Parameters
 
@@ -29,6 +30,19 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterUpdateEntryArgs> OnAfterUpdateEntry { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnBeforeRemoveEntryArgs> OnBeforeRemoveEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterRemoveEntryArgs> OnAfterRemoveEntry { get; set; }
+
+        #region List Events
+        [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
+        #endregion
         #endregion
 
         [Parameter]
@@ -55,6 +69,9 @@ namespace BlazorBase.CRUD.Components
         private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
         private IStringLocalizer Localizer { get; set; }
 
+        [Inject]
+        private IServiceProvider ServiceProvider { get; set; }
+
         [CascadingParameter]
         protected IMessageHandler MessageHandler { get; set; }
 
@@ -64,9 +81,7 @@ namespace BlazorBase.CRUD.Components
 
         private string ConfirmDialogDeleteTitle;
         private string ConfirmDialogDeleteMessage;
-        private List<string> ColumnCaptions = new List<string>();
         private List<TModel> Entries = new List<TModel>();
-        private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
         private Type TModelType;
 
         private BaseCard<TModel> BaseCard = default!;
@@ -79,16 +94,14 @@ namespace BlazorBase.CRUD.Components
         {
             Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseList<TModel>));
             TModelType = typeof(TModel);
-            VisibleProperties = TModelType.GetVisibleProperties(GUIType.List);
+
+            SetUpDisplayLists(TModelType, GUIType.List);
 
             if (String.IsNullOrEmpty(SingleDisplayName))
                 SingleDisplayName = ModelLocalizer[TModelType.Name];
             if (String.IsNullOrEmpty(PluralDisplayName))
                 PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
             ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
-
-            foreach (var property in VisibleProperties)
-                ColumnCaptions.Add(ModelLocalizer[property.Name]);
 
             await LoadListDataAsync();
         }
@@ -107,11 +120,11 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task AddEntryAsync()
         {
-            await BaseCard.Show(new TModel(), addingMode: true);
+            await BaseCard.Show(addingMode: true);
         }
         protected async Task EditEntryAsync(TModel entry)
         {
-            await BaseCard.Show(entry);
+            await BaseCard.Show(addingMode: false, entry.GetPrimaryKeys());
         }
 
         protected async Task RemoveEntryAsync(TModel entry)
@@ -134,11 +147,24 @@ namespace BlazorBase.CRUD.Components
             if (args.ConfirmDialogResult == ConfirmDialogResult.Aborted || args.Sender == null)
                 return;
 
+            var model = (TModel)args.Sender;
+            var eventServices = GetEventServices();
+
+            var beforeRemoveArgs = new OnBeforeRemoveEntryArgs(model, false, eventServices);
+            await OnBeforeRemoveEntry.InvokeAsync(beforeRemoveArgs);
+            await model.OnBeforeRemoveEntry(beforeRemoveArgs);
+            if (beforeRemoveArgs.AbortRemoving)
+                return;
+
             try
             {
-                await Service.RemoveEntryAsync((TModel)args.Sender);
+                await Service.RemoveEntryAsync(model);
                 await Service.SaveChangesAsync();
-                Entries.Remove((TModel)args.Sender);
+                Entries.Remove(model);
+
+                var afterRemoveArgs = new OnAfterRemoveEntryArgs(model, eventServices);
+                await OnAfterRemoveEntry.InvokeAsync(afterRemoveArgs);
+                await model.OnAfterRemoveEntry(afterRemoveArgs);
             }
             catch (Exception e)
             {
@@ -156,11 +182,6 @@ namespace BlazorBase.CRUD.Components
             await OnCardClosed.InvokeAsync();
         }
 
-        protected async Task CardOnBeforeAddEntry(OnBeforeAddEntryArgs args)
-        {
-            await OnBeforeAddEntry.InvokeAsync(args);
-        }
-
         protected async Task CardOnAfterAddEntry(OnAfterAddEntryArgs args)
         {
             await InvokeAsync(() =>
@@ -171,24 +192,25 @@ namespace BlazorBase.CRUD.Components
             await OnAfterAddEntry.InvokeAsync(args);
         }
 
-        protected async Task CardOnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args)
-        {
-            await OnBeforeUpdateEntry.InvokeAsync(args);
-        }
-
         protected async Task CardOnAfterUpdateEntry(OnAfterUpdateEntryArgs args)
         {
+            var primaryKeys = args.Model.GetPrimaryKeys();
+            var entryIndex = Entries.FindIndex(entry => entry.GetPrimaryKeys().SequenceEqual(primaryKeys));
+            Entries[entryIndex] = (TModel)args.Model;
+
             await OnAfterUpdateEntry.InvokeAsync(args);
-        }
+        }     
+        #endregion
 
-        protected async Task CardOnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
+        #region Other
+        private EventServices GetEventServices()
         {
-            await OnBeforePropertyChanged.InvokeAsync(args);
-        }
-
-        protected async Task CardOnAfterPropertyChanged(OnAfterPropertyChangedArgs args)
-        {
-            await OnAfterPropertyChanged.InvokeAsync(args);
+            return new EventServices()
+            {
+                ServiceProvider = ServiceProvider,
+                Localizer = ModelLocalizer,
+                BaseService = Service
+            };
         }
         #endregion
     }

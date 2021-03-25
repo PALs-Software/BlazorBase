@@ -6,16 +6,24 @@ using System.Text;
 using System.Threading.Tasks;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorBase.CRUD.Services
 {
     public class BaseService
     {
-        public DbContext DbContext { get; }
+        public DbContext DbContext { get; protected set; }
+        public IServiceProvider ServiceProvider { get; }
 
-        public BaseService(DbContext context)
+        public BaseService(DbContext context, IServiceProvider provider)
         {
             DbContext = context;
+            ServiceProvider = provider;
+        }
+
+        public async void RefreshDbContext() {
+            await DbContext.DisposeAsync();
+            DbContext = ServiceProvider.GetService<DbContext>();
         }
 
         public async virtual Task<T> GetAsync<T>(params object[] keyValues) where T : class

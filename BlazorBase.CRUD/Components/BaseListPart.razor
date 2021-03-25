@@ -1,0 +1,42 @@
+﻿@inherits BaseDisplayComponent
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>
+                <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
+            </th>
+            @foreach (var displayGroup in DisplayGroups)
+            {
+                @foreach (var value in displayGroup.Value)
+                {
+                    <td>
+                        @ModelLocalizer[value.Property.Name]
+                    </td>
+                }
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Entries)
+        {
+            <tr>
+                <td>
+                    <Buttons>
+                        <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)"><Icon Name=" IconName.Delete" /></Button>
+                    </Buttons>
+                </td>
+
+                @foreach (var displayGroup in DisplayGroups)
+                {
+                    @foreach (var value in displayGroup.Value)
+                    {
+                        <td>
+                            @value.Property.GetValue(entry)
+                        </td>
+                    }
+                }
+            </tr>
+        }
+    </tbody>
+</table>

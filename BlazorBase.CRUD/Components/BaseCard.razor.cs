@@ -20,21 +20,32 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseCard<TModel> where TModel : class, IBaseModel, new()
+    public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : class, IBaseModel, new()
     {
         #region Parameter
 
         #region Events
-        [Parameter] public EventCallback OnCardClosed { get; set; }        
-        [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }        
-        [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }        
-        [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }        
+        [Parameter] public EventCallback OnCardClosed { get; set; }
+        [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
         [Parameter] public EventCallback<OnAfterUpdateEntryArgs> OnAfterUpdateEntry { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+
+        #region List Events
+        [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
+        #endregion
         #endregion
 
-        [Parameter]
+        [Inject]
         public BaseService Service { get; set; }
 
         [Parameter]
@@ -71,15 +82,13 @@ namespace BlazorBase.CRUD.Components
 
         #region Property Infos
 
-        private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
-        private Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>> DisplayGroups = new Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>>();
+        protected Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
 
-        private Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
-        private List<BaseInput<TModel>> BaseInputs = new List<BaseInput<TModel>>();
-        private List<BaseInputSelectList<TModel>> BaseInputSelectLists = new List<BaseInputSelectList<TModel>>();
+        protected List<BaseInput<TModel>> BaseInputs = new List<BaseInput<TModel>>();
+        protected List<BaseInputSelectList<TModel>> BaseInputSelectLists = new List<BaseInputSelectList<TModel>>();
 
-        BaseInput<TModel> AddToBaseInputs { set { BaseInputs.Add(value); } }
-        BaseInputSelectList<TModel> AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        protected BaseInput<TModel> AddToBaseInputs { set { BaseInputs.Add(value); } }
+        protected BaseInputSelectList<TModel> AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
 
         #endregion
 
@@ -95,21 +104,7 @@ namespace BlazorBase.CRUD.Components
                     SingleDisplayName = ModelLocalizer[TModelType.Name];
                 Title = Localizer[nameof(Title), SingleDisplayName];
 
-                VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
-                foreach (var property in VisibleProperties)
-                {
-                    var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
-                    attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? "General" : attribute.DisplayGroup;
-
-                    if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
-                        DisplayGroups[attribute.DisplayGroup] = new List<(VisibleAttribute Attribute, PropertyInfo Property)>();
-
-                    DisplayGroups[attribute.DisplayGroup].Add((attribute, property));
-                }
-
-                DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.FirstOrDefault().Attribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
-                foreach (var properties in DisplayGroups)
-                    properties.Value.Sort((x, y) => x.Attribute.DisplayOrder.CompareTo(y.Attribute.DisplayOrder));
+                SetUpDisplayLists(TModelType, GUIType.Card);
             });
         }
 
@@ -146,11 +141,21 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Modal
-        public async Task Show(TModel entry, bool addingMode = false)
+        public async Task Show(bool addingMode = false, params object[] primaryKeys)
         {
+            Service.RefreshDbContext();
+            Service.DbContext.Database.BeginTransaction();
+
             await PrepareForeignKeyProperties();
             AddingMode = addingMode;
-            Entry = entry;
+
+            if (AddingMode)
+                Entry = new TModel();
+            else
+                Entry = await Service.GetAsync<TModel>(primaryKeys);
+
+            if (Entry == null)
+                throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
             BaseInputs.Clear();
             BaseInputSelectLists.Clear();
@@ -192,11 +197,11 @@ namespace BlazorBase.CRUD.Components
 
                     var onAfterArgs = new OnAfterAddEntryArgs(Entry, eventServices);
                     await OnAfterAddEntry.InvokeAsync(onAfterArgs);
-                    await Entry.OnAfterAddEntry(onAfterArgs);                    
+                    await Entry.OnAfterAddEntry(onAfterArgs);
                 }
                 else
                 {
-                    var args = new OnBeforeUpdateEntryArgs(Entry, false ,eventServices);
+                    var args = new OnBeforeUpdateEntryArgs(Entry, false, eventServices);
                     await OnBeforeUpdateEntry.InvokeAsync(args);
                     await Entry.OnBeforeUpdateEntry(args);
                     if (args.AbortUpdating)
@@ -206,10 +211,11 @@ namespace BlazorBase.CRUD.Components
 
                     var onAfterArgs = new OnAfterUpdateEntryArgs(Entry, eventServices);
                     await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
-                    await Entry.OnAfterUpdateEntry(onAfterArgs);                    
+                    await Entry.OnAfterUpdateEntry(onAfterArgs);
                 }
 
-                _ = await Service.SaveChangesAsync();
+                await Service.SaveChangesAsync();
+                Service.DbContext.Database.CommitTransaction();
             }
             catch (CRUDException e)
             {
@@ -250,18 +256,6 @@ namespace BlazorBase.CRUD.Components
                 input.ValidatePropertyValue();
 
             return Entry.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
-        }
-        #endregion
-
-        #region Events
-        protected async Task InputOnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
-        {
-            await OnBeforePropertyChanged.InvokeAsync(args);
-        }
-
-        protected async Task InputOnAfterPropertyChanged(OnAfterPropertyChangedArgs args)
-        {
-            await OnAfterPropertyChanged.InvokeAsync(args);
         }
         #endregion
 

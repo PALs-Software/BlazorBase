@@ -126,10 +126,60 @@ namespace BlazorBase.CRUD.Models
         {
             return Task.CompletedTask;
         }
+
+        public virtual Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
         #endregion
 
-        #endregion
+        #region List Events 
+        public virtual Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args)
+        {
+            return Task.CompletedTask;
+        }
 
+        public virtual Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnBeforeAddListEntry(OnBeforeAddListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterAddListEntry(OnAfterAddListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnBeforeUpdateListEntry(OnBeforeUpdateListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterUpdateListEntry(OnAfterUpdateListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnBeforeRemoveListEntry(OnBeforeRemoveListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+        #endregion
+        #endregion
 
         #region Validation Methods
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext)
