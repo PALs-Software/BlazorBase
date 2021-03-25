@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Models
 {
@@ -96,34 +97,34 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Events
-        public virtual Task OnBeforePropertyChanged(string propertyName, ref string newValue, EventServices eventServices)
+        public virtual Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
         {
             return Task.CompletedTask;
         }
 
-        public virtual Task OnAfterPropertyChanged(string propertyName, object newValue, bool isValid, EventServices eventServices)
+        public virtual Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args)
         {
             return Task.CompletedTask;
         }
 
-        public virtual Task<bool> OnBeforeAddEntry(EventServices eventServices)
-        {
-            return Task.FromResult(true);
-        }
-
-        public virtual Task OnAfterAddEntry(EventServices eventServices)
+        public virtual Task OnBeforeAddEntry(OnBeforeAddEntryArgs args)
         {
             return Task.CompletedTask;
         }
 
-        public virtual Task<bool> OnBeforeUpdateEntry(EventServices eventServices)
+        public virtual Task OnAfterAddEntry(OnAfterAddEntryArgs args)
         {
-            return Task.FromResult(true);
+            return Task.CompletedTask;
         }
 
-        public virtual Task OnAfterUpdateEntry(EventServices eventServices)
+        public virtual Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args)
         {
-            return Task.FromResult(true);
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args)
+        {
+            return Task.CompletedTask;
         }
         #endregion
 

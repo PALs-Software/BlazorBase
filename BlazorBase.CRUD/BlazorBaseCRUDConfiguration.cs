@@ -28,7 +28,8 @@ namespace BlazorBase.CRUD
 
             serviceCollection.AddSingleton(configureOptions)
             .AddSingleton<BlazorBaseCRUDOptions>()
-            .AddSingleton<GenericClassStringLocalizer>()
+            .AddSingleton<StringLocalizerFactory>()
+            .AddSingleton<BaseParser>()
             .AddTransient<BaseService>()
             .AddTransient<DbContext, TDbContextImplementation>();
             

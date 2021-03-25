@@ -1,7 +1,8 @@
 ﻿@typeparam TModel
 
 @using BlazorBase.CRUD.Extensions
-@using System.Diagnostics;
+@using static BlazorBase.CRUD.Models.IBaseModel;
+
 <div class="base-card">
     <Modal @ref="Modal" Class="modal-fullscreen">
         <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
@@ -12,12 +13,9 @@
             <ModalBody>
                 @if (Entry != null)
                 {
-                    @if (!String.IsNullOrEmpty(CardSummaryInvalidFeedback))
-                    {
-                        <Alert Class="card-summary-invalid-feedback" Color="Color.Danger">
-                            @CardSummaryInvalidFeedback
-                        </Alert>
-                    }
+                    <Alert Class="card-summary-invalid-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+                        @CardSummaryInvalidFeedback
+                    </Alert>
 
                     <Accordion>
                         @foreach (var displayGroup in DisplayGroups)
@@ -39,11 +37,15 @@
                                                         <FieldBody ColumnSize="ColumnSize.Is8">
                                                             @if (ForeignKeyProperties.ContainsKey(value.Property))
                                                             {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" />
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" OnBeforePropertyChanged="InputOnBeforePropertyChanged" OnAfterPropertyChanged="InputOnAfterPropertyChanged" />
+                                                            }
+                                                            else if (value.Property.PropertyType.IsEnum)
+                                                            {
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="value.Property" Data="GetEnumValueDictionary(value.Property.PropertyType)" Service="Service" OnBeforePropertyChanged="InputOnBeforePropertyChanged" OnAfterPropertyChanged="InputOnAfterPropertyChanged" />
                                                             }
                                                             else
                                                             {
-                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" TModel="TModel" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" />
+                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" TModel="TModel" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" OnBeforePropertyChanged="InputOnBeforePropertyChanged" OnAfterPropertyChanged="InputOnAfterPropertyChanged"/>
                                                             }
                                                         </FieldBody>
                                                     </Field>

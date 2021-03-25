@@ -14,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -22,20 +23,20 @@ namespace BlazorBase.CRUD.Components
         [Parameter]
         public TModel Model { get; set; }
 
-        [Parameter]
-        public PropertyInfo Property { get; set; }
+        [Parameter] public PropertyInfo Property { get; set; }
 
-        [Parameter]
-        public bool ReadOnly { get; set; }
+        [Parameter] public bool ReadOnly { get; set; }
 
-        [Parameter]
-        public BaseService Service { get; set; }
+        [Parameter] public BaseService Service { get; set; }
 
-        [Inject]
-        private IStringLocalizer<TModel> ModelLocalizer { get; set; }
+        [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
 
-        [Inject]
-        private IServiceProvider ServiceProvider { get; set; }
+        [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
+
+        [Inject] protected IServiceProvider ServiceProvider { get; set; }
+
+        [Inject] protected BaseParser BaseParser { get; set; }
 
         protected string ValidationClass;
         protected string ValidFeedback;
@@ -96,20 +97,27 @@ namespace BlazorBase.CRUD.Components
             if (UseGenericNullString && newValue == BaseConstants.GenericNullString)
                 newValue = null;
 
-            await Model.OnBeforePropertyChanged(Property.Name, ref newValue, GetEventServices());
-         
+            var eventServices = GetEventServices();
+
+            var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
+            await OnBeforePropertyChanged.InvokeAsync(args);
+            await Model.OnBeforePropertyChanged(args);
+            newValue = args.NewValue;
+
             if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue, out object parsedValue, out string errorMessage))
             {
                 Property.SetValue(Model, parsedValue);
                 var valid = ValidatePropertyValue();
 
-                await Model.OnAfterPropertyChanged(Property.Name, parsedValue, valid, GetEventServices());
+                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, parsedValue, valid, eventServices);
+                await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
+                await Model.OnAfterPropertyChanged(onAfterArgs);                
             }
             else
                 SetValidation(feedback: errorMessage);
         }
 
-        protected string GetInputType()
+        protected virtual string GetInputType()
         {
             var type = Property.PropertyType;
             if (type == typeof(String))
@@ -127,7 +135,7 @@ namespace BlazorBase.CRUD.Components
             if (type == typeof(Guid))
                 return "text";
             else
-                throw new Exception("Type not supported");
+                throw new Exception($"Type {type} is not supported!");
         }
 
         public bool ValidatePropertyValue()
@@ -176,7 +184,7 @@ namespace BlazorBase.CRUD.Components
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                Service = Service
+                BaseService = Service
             };
         }
     }

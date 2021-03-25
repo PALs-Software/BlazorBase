@@ -42,6 +42,9 @@
     <EmbeddedResource Update="NoSeries.resx">
       <Generator></Generator>
     </EmbeddedResource>
+    <EmbeddedResource Update="NoSeriesService.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

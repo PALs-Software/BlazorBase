@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,16 +7,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Modules
+namespace BlazorBase.CRUD.Services
 {
-    public static class BaseParser
+    public class BaseParser
     {
-        public static bool TryParseValueFromString<T>(string inputValue, out object outputValue, out string errorMessage)
+        protected IStringLocalizer<BaseParser> Localizer { get; set; }
+
+        public BaseParser(IStringLocalizer<BaseParser> localizer) {
+            Localizer = localizer;
+        }        
+
+        public bool TryParseValueFromString<T>(string inputValue, out object outputValue, out string errorMessage)
         {
             return TryParseValueFromString(typeof(T), inputValue, out outputValue, out errorMessage);
         }
 
-        public static bool TryParseValueFromString(Type outputType, string inputValue, out object outputValue, out string errorMessage)
+        public bool TryParseValueFromString(Type outputType, string inputValue, out object outputValue, out string errorMessage)
         {
             bool success;
             if (outputType == typeof(String))
@@ -35,8 +42,7 @@ namespace BlazorBase.CRUD.Modules
             }
             else if (outputType == typeof(bool))
             {
-                success = Boolean.TryParse(inputValue, out var parsedValue);
-                //success = BindConverter.TryConvertToBool(inputValue, CultureInfo.CurrentCulture, out var parsedValue);
+                success = BindConverter.TryConvertToBool(inputValue, CultureInfo.CurrentCulture, out var parsedValue);
                 outputValue = parsedValue;
             }
             else if (outputType == typeof(DateTime))
@@ -49,8 +55,13 @@ namespace BlazorBase.CRUD.Modules
                 success = Guid.TryParse(inputValue, out var parsedValue);
                 outputValue = parsedValue;
             }
+            else if (outputType.IsEnum)
+            {
+                success = Enum.TryParse(outputType, inputValue, true, out var parsedValue);
+                outputValue = parsedValue;
+            }
             else
-                throw new Exception("Type not supported");
+                throw new Exception("Type is not supported!");
 
             if (success)
             {
@@ -60,7 +71,7 @@ namespace BlazorBase.CRUD.Modules
             else
             {
                 outputValue = default;
-                errorMessage = $"Der Wert \"{inputValue}\" konnte nicht in das Format {outputType.Name} formatiert werden";
+                errorMessage = Localizer["The Value {0} can not be converted to the format {1}", inputValue, outputType.Name];
                 return false;
             }
         }

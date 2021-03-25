@@ -47,6 +47,9 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>ValidationAttributesTranslations.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Services\BaseParser.resx">
+      <Generator></Generator>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

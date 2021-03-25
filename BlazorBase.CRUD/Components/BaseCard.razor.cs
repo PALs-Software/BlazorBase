@@ -16,57 +16,84 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
     public partial class BaseCard<TModel> where TModel : class, IBaseModel, new()
     {
-        [Parameter]
-        public EventCallback OnCardClosed { get; set; }
+        #region Parameter
 
-        [Parameter]
-        public EventCallback<TModel> OnEntryAdded { get; set; }
+        #region Events
+        [Parameter] public EventCallback OnCardClosed { get; set; }        
+        [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }        
+        [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }        
+        [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }        
+        [Parameter] public EventCallback<OnAfterUpdateEntryArgs> OnAfterUpdateEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+        #endregion
 
         [Parameter]
         public BaseService Service { get; set; }
+
+        [Parameter]
+        public string SingleDisplayName { get; set; }
+
+        #endregion
+
+        #region Injects
 
         [Inject]
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
 
         [Inject]
-        private GenericClassStringLocalizer GenericClassStringLocalizer { get; set; }
+        private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
 
         private IStringLocalizer Localizer { get; set; }
 
         [Inject]
         private IServiceProvider ServiceProvider { get; set; }
+        #endregion
 
-
+        #region Member
         private string Title;
         private string CardSummaryInvalidFeedback;
+        private bool ShowInvalidFeedback = false;
         private Modal Modal = default!;
         private TModel Entry;
         private Type TModelType;
 
         private bool AddingMode;
 
+        protected ValidationContext ValidationContext;
+        #endregion
+
+        #region Property Infos
+
         private List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
         private Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>> DisplayGroups = new Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>>();
+
         private Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
         private List<BaseInput<TModel>> BaseInputs = new List<BaseInput<TModel>>();
         private List<BaseInputSelectList<TModel>> BaseInputSelectLists = new List<BaseInputSelectList<TModel>>();
 
         BaseInput<TModel> AddToBaseInputs { set { BaseInputs.Add(value); } }
         BaseInputSelectList<TModel> AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
-        protected ValidationContext ValidationContext;
 
+        #endregion
+
+        #region Init
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
             {
                 Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseCard<TModel>));
                 TModelType = typeof(TModel);
-                Title = Localizer[nameof(Title), ModelLocalizer[TModelType.Name]];
+
+                if (String.IsNullOrEmpty(SingleDisplayName))
+                    SingleDisplayName = ModelLocalizer[TModelType.Name];
+                Title = Localizer[nameof(Title), SingleDisplayName];
 
                 VisibleProperties = TModelType.GetVisibleProperties(GUIType.Card);
                 foreach (var property in VisibleProperties)
@@ -116,7 +143,9 @@ namespace BlazorBase.CRUD.Components
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
             }
         }
+        #endregion
 
+        #region Modal
         public async Task Show(TModel entry, bool addingMode = false)
         {
             await PrepareForeignKeyProperties();
@@ -135,26 +164,24 @@ namespace BlazorBase.CRUD.Components
             Modal.Show();
         }
 
-        protected virtual bool CardIsValid()
-        {
-            foreach (var input in BaseInputs)
-                input.ValidatePropertyValue();
-
-            return Entry.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
-        }
-
         protected async Task SaveModal()
         {
             CardSummaryInvalidFeedback = String.Empty;
+            ShowInvalidFeedback = false;
 
             if (!CardIsValid())
                 return;
+
+            var eventServices = GetEventServices();
 
             try
             {
                 if (AddingMode)
                 {
-                    if (!await Entry.OnBeforeAddEntry(GetEventServices()))
+                    var args = new OnBeforeAddEntryArgs(Entry, false, eventServices);
+                    await OnBeforeAddEntry.InvokeAsync(args);
+                    await Entry.OnBeforeAddEntry(args);
+                    if (args.AbortAdding)
                         return;
 
                     if (!await Service.AddEntryAsync(Entry))
@@ -163,23 +190,37 @@ namespace BlazorBase.CRUD.Components
                         return;
                     }
 
-                    await Entry.OnAfterAddEntry(GetEventServices());
-                    await OnEntryAdded.InvokeAsync(Entry);
+                    var onAfterArgs = new OnAfterAddEntryArgs(Entry, eventServices);
+                    await OnAfterAddEntry.InvokeAsync(onAfterArgs);
+                    await Entry.OnAfterAddEntry(onAfterArgs);                    
                 }
                 else
                 {
-                    if (!await Entry.OnBeforeUpdateEntry(GetEventServices()))
+                    var args = new OnBeforeUpdateEntryArgs(Entry, false ,eventServices);
+                    await OnBeforeUpdateEntry.InvokeAsync(args);
+                    await Entry.OnBeforeUpdateEntry(args);
+                    if (args.AbortUpdating)
                         return;
 
                     Service.UpdateEntry(Entry);
-                    await Entry.OnAfterUpdateEntry(GetEventServices());
+
+                    var onAfterArgs = new OnAfterUpdateEntryArgs(Entry, eventServices);
+                    await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
+                    await Entry.OnAfterUpdateEntry(onAfterArgs);                    
                 }
 
-                await Service.SaveChangesAsync();
+                _ = await Service.SaveChangesAsync();
+            }
+            catch (CRUDException e)
+            {
+                CardSummaryInvalidFeedback = e.Message;
+                ShowInvalidFeedback = true;
+                return;
             }
             catch (Exception e)
             {
                 CardSummaryInvalidFeedback = Localizer["UnknownSavingError", e.Message];
+                ShowInvalidFeedback = true;
                 return;
             }
 
@@ -197,15 +238,55 @@ namespace BlazorBase.CRUD.Components
             await OnCardClosed.InvokeAsync(null);
             Entry = null;
         }
+        #endregion
 
+        #region Validation
+        protected virtual bool CardIsValid()
+        {
+            foreach (var input in BaseInputs)
+                input.ValidatePropertyValue();
+
+            foreach (var input in BaseInputSelectLists)
+                input.ValidatePropertyValue();
+
+            return Entry.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
+        }
+        #endregion
+
+        #region Events
+        protected async Task InputOnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
+        {
+            await OnBeforePropertyChanged.InvokeAsync(args);
+        }
+
+        protected async Task InputOnAfterPropertyChanged(OnAfterPropertyChangedArgs args)
+        {
+            await OnAfterPropertyChanged.InvokeAsync(args);
+        }
+        #endregion
+
+        #region Other
         private EventServices GetEventServices()
         {
             return new EventServices()
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                Service = Service
+                BaseService = Service
             };
         }
+
+        private Dictionary<string, string> GetEnumValueDictionary(Type enumType)
+        {
+            var result = new Dictionary<string, string>();
+            var values = Enum.GetNames(enumType);
+            var localizer = GenericClassStringLocalizer.GetLocalizer(enumType);
+            foreach (var value in values)
+                result.Add(value, localizer[value]);
+
+            return result;
+        }
+
+        #endregion
     }
 }

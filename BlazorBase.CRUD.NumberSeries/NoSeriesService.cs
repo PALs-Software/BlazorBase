@@ -2,15 +2,22 @@
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.NumberSeries
 {
-    public static class NoSeriesManager
+    public class NoSeriesService
     {
-        public static string GetMaxSeriesNo(string noSeries)
+        protected IStringLocalizer<NoSeriesService> Localizer { get; set; }
+        public NoSeriesService(IStringLocalizer<NoSeriesService> localizer)
+        {
+            Localizer = localizer;
+        }
+
+        public string GetMaxSeriesNo(string noSeries)
         {
             string result = String.Empty;
 
@@ -25,13 +32,13 @@ namespace BlazorBase.CRUD.NumberSeries
             return result;
         }
 
-        public static bool IsValidNoSeries(string noSeries)
+        public bool IsValidNoSeries(string noSeries)
         {
             var digits = noSeries.Where(entry => char.IsDigit(entry)).ToList();
             return digits.Count != 0;
         }
 
-        public static bool NoSeriesAreEqualExceptOfDigits(string noSeries1, string noSeries2)
+        public bool NoSeriesAreEqualExceptOfDigits(string noSeries1, string noSeries2)
         {
             if (noSeries1.Length != (noSeries2?.Length ?? -1))
                 return false;
@@ -43,28 +50,47 @@ namespace BlazorBase.CRUD.NumberSeries
             return true;
         }
 
-        public static async Task<string> GetNextNoAsync(BaseService service, string noSeriesId)
+        public async Task<string> GetNextNoAsync(BaseService service, string noSeriesId)
         {
             var noSeries = await service.GetAsync<NoSeries>(noSeriesId);
             if (noSeries == null)
-                throw new CRUDException($"Cant get next number in series, because number series can not be found with the key {noSeriesId}");
+                throw new CRUDException(Localizer["Cant get next number in series, because number series can not be found with the key {0}", noSeriesId]);
 
-            if (String.IsNullOrEmpty(noSeries.LastNoUsed)) { 
+            if (String.IsNullOrEmpty(noSeries.LastNoUsed))
+            {
                 noSeries.LastNoUsed = noSeries.StartingNo;
                 noSeries.LastNoUsedNumeric = long.Parse(new String(noSeries.LastNoUsed.Where(entry => char.IsDigit(entry)).ToArray()));
                 noSeries.EndingNoNumeric = long.Parse(new String(noSeries.EndingNo.Where(entry => char.IsDigit(entry)).ToArray()));
                 noSeries.NoOfDigits = noSeries.StartingNo.Where(entry => char.IsDigit(entry)).Count();
             }
             else
-                noSeries.IncreaseNo();
-            
+                IncreaseNo(noSeries);
+
             service.UpdateEntry(noSeries);
             return noSeries.LastNoUsed;
         }
 
+        protected void IncreaseNo(NoSeries noSeries)
+        {
+            if (noSeries.LastNoUsedNumeric + 1 > noSeries.EndingNoNumeric)
+                throw new CRUDException(Localizer["The defined maximum of the no series is reached, please create a new number series"]);
 
-      
+            noSeries.LastNoUsedNumeric++;
+            var lastNoUsed = noSeries.LastNoUsedNumeric.ToString().PadLeft(noSeries.NoOfDigits, '0');
 
+            var result = String.Empty;
+            foreach (var item in noSeries.LastNoUsed)
+            {
+                if (char.IsDigit(item))
+                {
+                    result += lastNoUsed[0];
+                    lastNoUsed = lastNoUsed.Substring(1);
+                }
+                else
+                    result += item;
+            }
 
+            noSeries.LastNoUsed = result;
+        }
     }
 }

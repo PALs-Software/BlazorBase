@@ -11,5 +11,11 @@ namespace BlazorBase.CRUD.Components
         public Dictionary<string, string> Data { get; set; }
 
         protected override bool UseGenericNullString { get; set; } = true;
+
+        protected override string GetInputType()
+        {
+            return string.Empty; // Is not needed for select list
+        }
+
     }
 }

@@ -13,6 +13,6 @@ namespace BlazorBase.CRUD.ViewModels
     {
         public IServiceProvider ServiceProvider { get; set; }
         public IStringLocalizer Localizer { get; set; }
-        public BaseService Service { get; set; }        
+        public BaseService BaseService { get; set; }        
     }
 }

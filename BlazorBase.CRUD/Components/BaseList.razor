@@ -39,7 +39,21 @@
     </tbody>
 </table>
 
-<BaseCard @ref="BaseCard" Service="Service" TModel="TModel" OnCardClosed="OnCardClosedAsync" OnEntryAdded="OnEntryAddedAsync" />
+<BaseCard @ref="BaseCard" 
+          Service="Service" 
+          TModel="TModel"
+          SingleDisplayName="@SingleDisplayName"
+
+          OnCardClosed="OnCardClosedAsync"
+          
+          OnBeforeAddEntry="CardOnBeforeAddEntry"
+          OnAfterAddEntry="CardOnAfterAddEntry"           
+          OnBeforeUpdateEntry="CardOnBeforeUpdateEntry"
+          OnAfterUpdateEntry="CardOnAfterUpdateEntry"
+          OnBeforePropertyChanged="CardOnBeforePropertyChanged"
+          OnAfterPropertyChanged="CardOnAfterPropertyChanged"
+
+          />
 
 <ConfirmDialog @ref="ConfirmDialog" Title="@ConfirmDialogDeleteTitle" ConfirmButtonText="@Localizer["ConfirmDelete"]" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
     <span>

@@ -27,17 +27,29 @@ namespace BlazorBase.CRUD.Models
         #region CRUD Methods
         public void ForcePropertyRepaint(string propertyName);
 
-        public Task OnBeforePropertyChanged(string propertyName, ref string newValue, EventServices eventServices);
 
-        public Task OnAfterPropertyChanged(string propertyName, object newValue, bool isValid, EventServices eventServices);
+        public record OnBeforePropertyChangedArgs(IBaseModel Model, string PropertyName, string NewValue, EventServices EventServices);
+        public Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args);
 
-        public Task<bool> OnBeforeAddEntry(EventServices eventServices);
 
-        public Task OnAfterAddEntry(EventServices eventServices);
+        public record OnAfterPropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, bool IsValid, EventServices EventServices);
+        public Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args);
 
-        public Task<bool> OnBeforeUpdateEntry(EventServices eventServices);
 
-        public Task OnAfterUpdateEntry(EventServices eventServices);
+        public record OnBeforeAddEntryArgs(IBaseModel Model, bool AbortAdding, EventServices EventServices);
+        public Task OnBeforeAddEntry(OnBeforeAddEntryArgs args);
+
+
+        public record OnAfterAddEntryArgs(IBaseModel Model, EventServices EventServices);
+        public Task OnAfterAddEntry(OnAfterAddEntryArgs args);
+
+
+        public record OnBeforeUpdateEntryArgs(IBaseModel Model, bool AbortUpdating, EventServices EventServices);
+        public Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args);
+
+
+        public record OnAfterUpdateEntryArgs(IBaseModel Model, EventServices EventServices);
+        public Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args);
         #endregion
 
         #region Validation Methods

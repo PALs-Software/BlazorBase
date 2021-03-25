@@ -28,6 +28,11 @@ namespace BlazorBase.CRUD.Services
             return await DbContext.Set<T>().ToListAsync();
         }
 
+        public virtual Task<List<T>> GetDataAsync<T>(Func<T, bool> dataLoadCondition) where T : class
+        {
+            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).ToList());
+        }
+
         /// <summary>
         /// Super Slow -> use only if neccessary!
         /// </summary>

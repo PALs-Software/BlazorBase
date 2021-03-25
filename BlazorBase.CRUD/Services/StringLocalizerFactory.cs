@@ -8,22 +8,25 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Services
 {
-    class GenericClassStringLocalizer
+    class StringLocalizerFactory
     {
-        private readonly IStringLocalizerFactory StringLocalizerFactory;
+        private readonly IStringLocalizerFactory IStringLocalizerFactory;
 
-        public GenericClassStringLocalizer(IStringLocalizerFactory factory)
+        public StringLocalizerFactory(IStringLocalizerFactory factory)
         {
-            StringLocalizerFactory = factory;
+            IStringLocalizerFactory = factory;
         }
 
         public IStringLocalizer GetLocalizer(Type type)
         {
             string assemblyName = type.GetTypeInfo().Assembly.GetName().Name;
-            string typeName = type.Name.Remove(type.Name.IndexOf('`'));
+            string typeName = type.Name;
+            if (typeName.Contains('`'))
+                typeName = typeName.Remove(typeName.IndexOf('`'));
+
             string baseName = (type.Namespace + "." + typeName).Substring(assemblyName.Length).Trim('.');
 
-            var localizer = StringLocalizerFactory.Create(baseName, assemblyName);
+            var localizer = IStringLocalizerFactory.Create(baseName, assemblyName);
 
             return localizer;
         }

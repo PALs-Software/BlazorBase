@@ -13,11 +13,38 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
     public partial class BaseList<TModel> where TModel : class, IBaseModel, new()
     {
+        #region Parameters
+
+        #region Events
+        [Parameter] public EventCallback OnCardClosed { get; set; }
+        [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterUpdateEntryArgs> OnAfterUpdateEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+        #endregion
+
+        [Parameter]
+        public string SingleDisplayName { get; set; }
+
+        [Parameter]
+        public string PluralDisplayName { get; set; }
+
+        [Parameter]
+        public Func<TModel, bool> DataLoadCondition { get; set; }
+
+
+        #endregion
+
+        #region Injects
+
         [Inject]
         public BaseService Service { get; set; }
 
@@ -25,14 +52,16 @@ namespace BlazorBase.CRUD.Components
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
 
         [Inject]
-        private GenericClassStringLocalizer GenericClassStringLocalizer { get; set; }
+        private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
         private IStringLocalizer Localizer { get; set; }
 
         [CascadingParameter]
         protected IMessageHandler MessageHandler { get; set; }
 
-        private string SingleDisplayName;
-        private string PluralDisplayName;
+        #endregion
+
+        #region Members
+
         private string ConfirmDialogDeleteTitle;
         private string ConfirmDialogDeleteMessage;
         private List<string> ColumnCaptions = new List<string>();
@@ -42,14 +71,20 @@ namespace BlazorBase.CRUD.Components
 
         private BaseCard<TModel> BaseCard = default!;
         private ConfirmDialog ConfirmDialog = default!;
+        #endregion
+
+        #region Init
 
         protected override async Task OnInitializedAsync()
         {
             Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseList<TModel>));
             TModelType = typeof(TModel);
             VisibleProperties = TModelType.GetVisibleProperties(GUIType.List);
-            SingleDisplayName = ModelLocalizer[TModelType.Name];
-            PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
+
+            if (String.IsNullOrEmpty(SingleDisplayName))
+                SingleDisplayName = ModelLocalizer[TModelType.Name];
+            if (String.IsNullOrEmpty(PluralDisplayName))
+                PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
             ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
 
             foreach (var property in VisibleProperties)
@@ -60,9 +95,15 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task LoadListDataAsync()
         {
-            Entries = await Service.GetDataAsync<TModel>();
+            if (DataLoadCondition == null)
+                Entries = await Service.GetDataAsync<TModel>();
+            else
+                Entries = await Service.GetDataAsync(DataLoadCondition);
         }
 
+        #endregion
+
+        #region CRUD
 
         protected async Task AddEntryAsync()
         {
@@ -84,6 +125,10 @@ namespace BlazorBase.CRUD.Components
             await ConfirmDialog.Show(entry);
         }
 
+        #endregion
+
+        #region Modal Events
+
         protected async Task OnConfirmDialogClosedAsync(ConfirmDialogEventArgs args)
         {
             if (args.ConfirmDialogResult == ConfirmDialogResult.Aborted || args.Sender == null)
@@ -101,21 +146,50 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-
         protected async Task OnCardClosedAsync()
         {
             await InvokeAsync(() =>
             {
                 StateHasChanged();
             });
+
+            await OnCardClosed.InvokeAsync();
         }
 
-        protected async Task OnEntryAddedAsync(TModel entry)
+        protected async Task CardOnBeforeAddEntry(OnBeforeAddEntryArgs args)
+        {
+            await OnBeforeAddEntry.InvokeAsync(args);
+        }
+
+        protected async Task CardOnAfterAddEntry(OnAfterAddEntryArgs args)
         {
             await InvokeAsync(() =>
             {
-                Entries.Add(entry);
+                Entries.Add((TModel)args.Model);
             });
+
+            await OnAfterAddEntry.InvokeAsync(args);
         }
+
+        protected async Task CardOnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args)
+        {
+            await OnBeforeUpdateEntry.InvokeAsync(args);
+        }
+
+        protected async Task CardOnAfterUpdateEntry(OnAfterUpdateEntryArgs args)
+        {
+            await OnAfterUpdateEntry.InvokeAsync(args);
+        }
+
+        protected async Task CardOnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
+        {
+            await OnBeforePropertyChanged.InvokeAsync(args);
+        }
+
+        protected async Task CardOnAfterPropertyChanged(OnAfterPropertyChangedArgs args)
+        {
+            await OnAfterPropertyChanged.InvokeAsync(args);
+        }
+        #endregion
     }
 }
