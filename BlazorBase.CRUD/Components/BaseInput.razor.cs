@@ -1,9 +1,9 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Modules;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -18,51 +18,59 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseInput<TModel> where TModel : IBaseModel
+    public partial class BaseInput
     {
-        [Parameter]
-        public TModel Model { get; set; }
-
+        #region Parameters
+        [Parameter] public IBaseModel Model { get; set; }
         [Parameter] public PropertyInfo Property { get; set; }
-
         [Parameter] public bool ReadOnly { get; set; }
-
         [Parameter] public BaseService Service { get; set; }
+        [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
+
+        #region Events
 
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
 
-        [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
+        #endregion
 
-        [Inject] protected IServiceProvider ServiceProvider { get; set; }
+        #endregion
 
+        #region Injects
         [Inject] protected BaseParser BaseParser { get; set; }
+        [Inject] protected IServiceProvider ServiceProvider { get; set; }
+        #endregion
 
-        protected string ValidationClass;
-        protected string ValidFeedback;
-        protected string InvalidFeedback;
-        protected string InputType;
-        protected string CurrentValueAsString;
-        protected virtual bool UseGenericNullString { get; set; } = false;
+        #region Members
+        protected string InputClass;
+        protected string FeedbackClass;
+        protected string Feedback;
+        protected string PlaceHolder;
+        protected bool IsReadOnly;
+
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
         protected ValidationContext PropertyValidationContext;
 
+        #endregion
+
+        #region Init
 
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
             {
-                var nullString = UseGenericNullString ? BaseConstants.GenericNullString : String.Empty;
-                CurrentValueAsString = Property.GetValue(Model)?.ToString() ?? nullString;
                 Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
-                SetInputAttributes();
 
-                InputType = GetInputType();
+                IsReadOnly = ReadOnly || Property.IsReadOnlyInGUI();
 
+                if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
+                    PlaceHolder = placeholderAttribute.Placeholder;
+
+                var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
                 {
-                    [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
-                    [typeof(DbContext)] = Service.DbContext
+                    [iStringModelLocalizerType] = ModelLocalizer,
+                    [typeof(BaseService)] = Service
                 };
 
                 PropertyValidationContext = new ValidationContext(Model, ServiceProvider, dict)
@@ -73,70 +81,55 @@ namespace BlazorBase.CRUD.Components
                 ValidatePropertyValue();
             });
         }
+        #endregion
+
+        #region Events
 
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)
         {
             if (propertyName != Property.Name)
                 return;
 
-            var nullString = UseGenericNullString ? BaseConstants.GenericNullString : String.Empty;
-            CurrentValueAsString = Property.GetValue(Model)?.ToString() ?? nullString;
             ValidatePropertyValue();
             StateHasChanged();
         }
 
-        public object GetCurrentPropertyValue()
+        protected void ConvertValueIfNeeded(ref object newValue)
         {
-            return Property.GetValue(Model);
+            if (newValue.GetType() == Property.PropertyType)
+                return;
+
+            if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue.ToString(), out object parsedValue, out string errorMessage))
+            {
+                newValue = parsedValue;
+                return;
+            }
+
+            SetValidation(feedback: errorMessage);
+            return;
         }
 
-        protected async void OnValueChanged(ChangeEventArgs e)
+        protected async Task OnValueChangedAsync(object newValue)
         {
-            CurrentValueAsString = e.Value.ToString();
-            var newValue = CurrentValueAsString;
-            if (UseGenericNullString && newValue == BaseConstants.GenericNullString)
-                newValue = null;
-
             var eventServices = GetEventServices();
+            ConvertValueIfNeeded(ref newValue);
 
             var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
             await OnBeforePropertyChanged.InvokeAsync(args);
             await Model.OnBeforePropertyChanged(args);
             newValue = args.NewValue;
 
-            if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue, out object parsedValue, out string errorMessage))
-            {
-                Property.SetValue(Model, parsedValue);
-                var valid = ValidatePropertyValue();
+            Property.SetValue(Model, newValue);
+            var valid = ValidatePropertyValue();
 
-                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, parsedValue, valid, eventServices);
-                await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
-                await Model.OnAfterPropertyChanged(onAfterArgs);                
-            }
-            else
-                SetValidation(feedback: errorMessage);
+            var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
+            await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
+            await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
-        protected virtual string GetInputType()
-        {
-            var type = Property.PropertyType;
-            if (type == typeof(String))
-                return "text";
-            else if (type == typeof(int))
-                return "number";
-            else if (type == typeof(decimal))
-                return "number";
-            else if (type == typeof(long))
-                return "number";
-            else if (type == typeof(bool))
-                return "checkbox";
-            else if (type == typeof(DateTime))
-                return "datetime";
-            if (type == typeof(Guid))
-                return "text";
-            else
-                throw new Exception($"Type {type} is not supported!");
-        }
+        #endregion
+
+        #region Validation
 
         public bool ValidatePropertyValue()
         {
@@ -152,31 +145,20 @@ namespace BlazorBase.CRUD.Components
 
         public void SetValidation(bool showValidation = true, bool isValid = false, string feedback = "")
         {
+            FeedbackClass = isValid ? "valid-feedback" : "invalid-feedback";
             if (!showValidation)
             {
-                ValidationClass = String.Empty;
+                Feedback = InputClass = String.Empty;
                 return;
             }
 
-            ValidFeedback = feedback;
-            InvalidFeedback = feedback;
-            ValidationClass = isValid ? "is-valid" : "is-invalid";
+            Feedback = feedback;
+            InputClass = isValid ? "is-valid" : "is-invalid";
         }
 
-        private void SetInputAttributes()
-        {
-            if (ReadOnly || Property.IsReadOnlyInGUI())
-                InputAttributes.Add("disabled", "");
+        #endregion
 
-            if (Property.TryGetAttribute(out RangeAttribute rangeAttribute))
-            {
-                InputAttributes.Add("min", rangeAttribute.Minimum);
-                InputAttributes.Add("max", rangeAttribute.Maximum);
-            }
-
-            if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
-                InputAttributes.Add("placeholder", placeholderAttribute.Placeholder);
-        }
+        #region Other
 
         private EventServices GetEventServices()
         {
@@ -187,5 +169,7 @@ namespace BlazorBase.CRUD.Components
                 BaseService = Service
             };
         }
+
+        #endregion
     }
 }

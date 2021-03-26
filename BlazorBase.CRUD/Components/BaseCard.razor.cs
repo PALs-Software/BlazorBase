@@ -2,7 +2,6 @@
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Modules;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Blazorise;
@@ -82,13 +81,13 @@ namespace BlazorBase.CRUD.Components
 
         #region Property Infos
 
-        protected Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
+        protected Dictionary<PropertyInfo, List<(string Key, string Value)>> ForeignKeyProperties;
 
-        protected List<BaseInput<TModel>> BaseInputs = new List<BaseInput<TModel>>();
-        protected List<BaseInputSelectList<TModel>> BaseInputSelectLists = new List<BaseInputSelectList<TModel>>();
+        protected List<BaseInput> BaseInputs = new List<BaseInput>();
+        protected List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
 
-        protected BaseInput<TModel> AddToBaseInputs { set { BaseInputs.Add(value); } }
-        protected BaseInputSelectList<TModel> AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
+        protected BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
 
         #endregion
 
@@ -113,7 +112,7 @@ namespace BlazorBase.CRUD.Components
             if (ForeignKeyProperties != null)
                 return;
 
-            ForeignKeyProperties = new Dictionary<PropertyInfo, Dictionary<string, string>>();
+            ForeignKeyProperties = new Dictionary<PropertyInfo, List<(string Key, string Value)>>();
 
             var foreignKeyProperties = VisibleProperties.Where(entry => entry.IsForeignKey());
             foreach (var foreignKeyProperty in foreignKeyProperties)
@@ -123,16 +122,19 @@ namespace BlazorBase.CRUD.Components
                 var displayKeyProperty = type.GetDisplayKeyProperty();
 
                 var entries = (await Service.GetDataAsync(type));
-                var primaryKeys = new Dictionary<string, string>();
 
-                primaryKeys.Add(BaseConstants.GenericNullString, "");
+                var primaryKeys = new List<(string Key, string Value)>
+                {
+                    (null, String.Empty)
+                };
+
                 foreach (var entry in entries)
                 {
                     var primaryKeysAsString = ((IBaseModel)entry).GetPrimaryKeysAsString();
                     if (displayKeyProperty == null)
-                        primaryKeys.Add(primaryKeysAsString, primaryKeysAsString);
+                        primaryKeys.Add((primaryKeysAsString, primaryKeysAsString));
                     else
-                        primaryKeys.Add(primaryKeysAsString, displayKeyProperty.GetValue(entry).ToString());
+                        primaryKeys.Add((primaryKeysAsString, displayKeyProperty.GetValue(entry).ToString()));
                 }
 
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
@@ -144,7 +146,7 @@ namespace BlazorBase.CRUD.Components
         public async Task Show(bool addingMode = false, params object[] primaryKeys)
         {
             Service.RefreshDbContext();
-            Service.DbContext.Database.BeginTransaction();
+            //Service.DbContext.Database.BeginTransaction();
 
             await PrepareForeignKeyProperties();
             AddingMode = addingMode;
@@ -192,6 +194,7 @@ namespace BlazorBase.CRUD.Components
                     if (!await Service.AddEntryAsync(Entry))
                     {
                         CardSummaryInvalidFeedback = Localizer["EntryAlreadyExistError", Entry.GetPrimaryKeysAsString()];
+                        ShowInvalidFeedback = true;
                         return;
                     }
 
@@ -215,7 +218,7 @@ namespace BlazorBase.CRUD.Components
                 }
 
                 await Service.SaveChangesAsync();
-                Service.DbContext.Database.CommitTransaction();
+                //Service.DbContext.Database.CommitTransaction();
             }
             catch (CRUDException e)
             {
@@ -270,13 +273,13 @@ namespace BlazorBase.CRUD.Components
             };
         }
 
-        private Dictionary<string, string> GetEnumValueDictionary(Type enumType)
+        private List<(string Key, string Value)> GetEnumValueDictionary(Type enumType)
         {
-            var result = new Dictionary<string, string>();
+            var result = new List<(string Key, string Value)>();
             var values = Enum.GetNames(enumType);
             var localizer = GenericClassStringLocalizer.GetLocalizer(enumType);
             foreach (var value in values)
-                result.Add(value, localizer[value]);
+                result.Add((value, localizer[value]));
 
             return result;
         }

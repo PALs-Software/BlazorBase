@@ -2,19 +2,25 @@
 using System.Collections.Generic;
 using Blazorise;
 using BlazorBase.CRUD.Models;
+using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseInputSelectList<TModel> : BaseInput<TModel> where TModel : IBaseModel
+    public partial class BaseInputSelectList : BaseInput
     {
-        [Parameter]
-        public Dictionary<string, string> Data { get; set; }
+        [Parameter] public List<(string Key, string Value)> Data { get; set; }
 
-        protected override bool UseGenericNullString { get; set; } = true;
-
-        protected override string GetInputType()
+        protected Dictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
+           
+        protected override async Task OnInitializedAsync()
         {
-            return string.Empty; // Is not needed for select list
+            await base.OnInitializedAsync();
+
+            await InvokeAsync(() =>
+            {
+                if (IsReadOnly)
+                    Attributes.Add("disabled", "disabled");
+            });
         }
 
     }

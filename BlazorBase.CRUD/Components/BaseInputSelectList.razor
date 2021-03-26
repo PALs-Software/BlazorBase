@@ -1,12 +1,7 @@
-﻿@inherits BaseInput<TModel>
-@typeparam TModel
+﻿@inherits BaseInput
 
-<SelectList Data="@Data" TextField="@((item)=>item.Value)" ValueField="@((item)=>item.Key)" SelectedValue="CurrentValueAsString" @onchange="OnValueChanged" class="@ValidationClass" />
+<SelectList Data="@Data" TItem="(string Key, string Value)" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="Property.GetValue(Model)?.ToString()" SelectedValueChanged="(x) => OnValueChangedAsync(x)" Class="@InputClass" Attributes="Attributes" />
 
-<div class="valid-feedback">
-    @ValidFeedback
-</div>
-
-<div class="invalid-feedback">
-    @InvalidFeedback
+<div class="@FeedbackClass">
+    @Feedback
 </div>

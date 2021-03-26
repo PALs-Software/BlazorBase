@@ -1,4 +1,6 @@
-﻿using BlazorBase.CRUD.Components;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
 using BlazorBase.CRUD.ViewModels;
@@ -28,11 +30,11 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Additional Properties
-        [Display]
+        [Visible(hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
         public DateTime CreatedOn { get; set; }
 
-        [Display]
+        [Visible(hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
         public DateTime ModifiedOn { get; set; }
         #endregion
@@ -213,6 +215,18 @@ namespace BlazorBase.CRUD.Models
 
             builder.OpenComponent<BaseList<TModel>>(0);
             builder.CloseComponent();
+        }
+        #endregion
+
+        #region Other
+        public Type GetUnproxiedType()
+        {
+            var type = GetType();
+
+            if (type.Namespace == "Castle.Proxies")
+                return type.BaseType;
+
+            return type;
         }
         #endregion
     }

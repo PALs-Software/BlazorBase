@@ -61,9 +61,19 @@ namespace BlazorBase.CRUD.Components
 
         #region Members
         protected IStringLocalizer ModelLocalizer { get; set; }
-
+        protected Type IStringModelLocalizerType { get; set; }
         protected IList Entries { get; set; }
         protected Type ModelListEntryType { get; set; }
+
+        #region Property Infos
+        protected Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
+
+        protected List<BaseInput> BaseInputs = new List<BaseInput>();
+        protected List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
+
+        protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
+        protected BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        #endregion
         #endregion
 
         #region Init
@@ -75,6 +85,8 @@ namespace BlazorBase.CRUD.Components
                 ModelListEntryType = Property.PropertyType.GenericTypeArguments[0];
 
                 ModelLocalizer = GenericClassStringLocalizer.GetLocalizer(ModelListEntryType);
+                
+
                 SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
 
                 if (String.IsNullOrEmpty(SingleDisplayName))

@@ -1,6 +1,5 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Modules;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -50,7 +49,7 @@ namespace BlazorBase.CRUD.NumberSeries
             switch (args.PropertyName)
             {
                 case nameof(StartingNo):
-                    var noSeriesService = (NoSeriesService) args.EventServices.ServiceProvider.GetService(typeof(NoSeriesService));
+                    var noSeriesService = (NoSeriesService)args.EventServices.ServiceProvider.GetService(typeof(NoSeriesService));
                     GenerateEndingNo(noSeriesService, (string)args.NewValue);
                     break;
             }
@@ -64,7 +63,7 @@ namespace BlazorBase.CRUD.NumberSeries
             ForcePropertyRepaint(nameof(EndingNo));
         }
 
-      
+
 
         public class CheckValidSeriesNoAttribute : ValidationAttribute
         {
@@ -77,7 +76,7 @@ namespace BlazorBase.CRUD.NumberSeries
             protected override ValidationResult IsValid(object value, ValidationContext validationContext)
             {
                 var localizer = (IStringLocalizer<NoSeries>)validationContext.Items[typeof(IStringLocalizer<NoSeries>)];
-                
+
                 var newValue = value as string;
                 var model = (NoSeries)validationContext.ObjectInstance;
 

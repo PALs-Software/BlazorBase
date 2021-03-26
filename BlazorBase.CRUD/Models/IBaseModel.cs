@@ -29,7 +29,7 @@ namespace BlazorBase.CRUD.Models
 
         #region Model
 
-        public record OnBeforePropertyChangedArgs(IBaseModel Model, string PropertyName, string NewValue, EventServices EventServices);
+        public record OnBeforePropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args);
 
 
@@ -62,7 +62,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region ListProperty
-        public record OnBeforeListPropertyChangedArgs(IBaseModel Model, string PropertyName, string NewValue, EventServices EventServices);
+        public record OnBeforeListPropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args);
 
 
@@ -98,6 +98,10 @@ namespace BlazorBase.CRUD.Models
         #region Validation Methods
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
+        #endregion
+
+        #region Other
+        public Type GetUnproxiedType();
         #endregion
     }
 }

@@ -1,11 +1,73 @@
-﻿@typeparam TModel
+﻿
+@if (Property.PropertyType == typeof(decimal))
+{
+    <NumericEdit TValue="decimal" Value="(decimal)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(decimal?))
+{
+    <NumericEdit TValue="decimal?" Value="(decimal?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(double))
+{
+    <NumericEdit TValue="double" Value="(double)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(double?))
+{
+    <NumericEdit TValue="double?" Value="( double?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(float))
+{
+    <NumericEdit TValue="float" Value="(float)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(float?))
+{
+    <NumericEdit TValue="float?" Value="(float?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(int))
+{
+    <NumericEdit TValue="int" Value="(int)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(int?))
+{
+    <NumericEdit TValue="int?" Value="(int?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(long))
+{
+    <NumericEdit TValue="long" Value="(long)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(long?))
+{
+    <NumericEdit TValue="long?" Value="(long?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(bool))
+{
+    <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(bool?))
+{
+    <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(DateTime))
+{
+    <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(DateTime?))
+{
+    <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(DateTimeOffset))
+{
+    <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(DateTimeOffset?))
+{
+    <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
+else if (Property.PropertyType == typeof(string))
+{
+    <TextEdit Text="@((string)Property.GetValue(Model))" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+}
 
-<input type="@InputType" value="@CurrentValueAsString" @onchange="OnValueChanged" @attributes="InputAttributes" class="form-control @ValidationClass" />
-
-<div class="valid-feedback">
-    @ValidFeedback
-</div>
-
-<div class="invalid-feedback">
-    @InvalidFeedback
+<div class="@FeedbackClass">
+    @Feedback
 </div>

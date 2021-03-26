@@ -2,6 +2,7 @@
 @inherits BaseDisplayComponent
 
 @using BlazorBase.CRUD.Extensions
+@using Microsoft.Extensions.Localization
 
 <div class="base-card">
     <Modal @ref="Modal" Class="modal-fullscreen">
@@ -37,15 +38,15 @@
                                                         <FieldBody ColumnSize="ColumnSize.Is8">
                                                             @if (ForeignKeyProperties.ContainsKey(value.Property))
                                                             {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                             else if (value.Property.PropertyType.IsEnum)
                                                             {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" TModel="TModel" Property="value.Property" Data="GetEnumValueDictionary(value.Property.PropertyType)" Service="Service" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="GetEnumValueDictionary(value.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                             else
                                                             {
-                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" TModel="TModel" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                         </FieldBody>
                                                     </Field>
