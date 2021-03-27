@@ -96,7 +96,7 @@ namespace BlazorBase.CRUD.Components
 
         protected void ConvertValueIfNeeded(ref object newValue)
         {
-            if (newValue.GetType() == Property.PropertyType)
+            if (newValue == null || newValue.GetType() == Property.PropertyType)
                 return;
 
             if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue.ToString(), out object parsedValue, out string errorMessage))

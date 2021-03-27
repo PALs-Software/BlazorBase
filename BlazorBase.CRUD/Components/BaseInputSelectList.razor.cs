@@ -8,7 +8,7 @@ namespace BlazorBase.CRUD.Components
 {
     public partial class BaseInputSelectList : BaseInput
     {
-        [Parameter] public List<(string Key, string Value)> Data { get; set; }
+        [Parameter] public List<KeyValuePair<string, string>> Data { get; set; }
 
         protected Dictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
            

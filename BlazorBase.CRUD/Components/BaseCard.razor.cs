@@ -57,9 +57,6 @@ namespace BlazorBase.CRUD.Components
         [Inject]
         private IStringLocalizer<TModel> ModelLocalizer { get; set; }
 
-        [Inject]
-        private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
-
         private IStringLocalizer Localizer { get; set; }
 
         [Inject]
@@ -80,9 +77,6 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Property Infos
-
-        protected Dictionary<PropertyInfo, List<(string Key, string Value)>> ForeignKeyProperties;
-
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
         protected List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
 
@@ -96,7 +90,7 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
-                Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseCard<TModel>));
+                Localizer = StringLocalizerFactory.GetLocalizer(typeof(BaseCard<TModel>));
                 TModelType = typeof(TModel);
 
                 if (String.IsNullOrEmpty(SingleDisplayName))
@@ -107,39 +101,7 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        public async Task PrepareForeignKeyProperties()
-        {
-            if (ForeignKeyProperties != null)
-                return;
-
-            ForeignKeyProperties = new Dictionary<PropertyInfo, List<(string Key, string Value)>>();
-
-            var foreignKeyProperties = VisibleProperties.Where(entry => entry.IsForeignKey());
-            foreach (var foreignKeyProperty in foreignKeyProperties)
-            {
-                var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                var type = TModelType.GetProperty(foreignKey.Name).PropertyType;
-                var displayKeyProperty = type.GetDisplayKeyProperty();
-
-                var entries = (await Service.GetDataAsync(type));
-
-                var primaryKeys = new List<(string Key, string Value)>
-                {
-                    (null, String.Empty)
-                };
-
-                foreach (var entry in entries)
-                {
-                    var primaryKeysAsString = ((IBaseModel)entry).GetPrimaryKeysAsString();
-                    if (displayKeyProperty == null)
-                        primaryKeys.Add((primaryKeysAsString, primaryKeysAsString));
-                    else
-                        primaryKeys.Add((primaryKeysAsString, displayKeyProperty.GetValue(entry).ToString()));
-                }
-
-                ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
-            }
-        }
+       
         #endregion
 
         #region Modal
@@ -148,7 +110,7 @@ namespace BlazorBase.CRUD.Components
             Service.RefreshDbContext();
             //Service.DbContext.Database.BeginTransaction();
 
-            await PrepareForeignKeyProperties();
+            await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;
 
             if (AddingMode)
@@ -273,16 +235,7 @@ namespace BlazorBase.CRUD.Components
             };
         }
 
-        private List<(string Key, string Value)> GetEnumValueDictionary(Type enumType)
-        {
-            var result = new List<(string Key, string Value)>();
-            var values = Enum.GetNames(enumType);
-            var localizer = GenericClassStringLocalizer.GetLocalizer(enumType);
-            foreach (var value in values)
-                result.Add((value, localizer[value]));
 
-            return result;
-        }
 
         #endregion
     }

@@ -37,18 +37,18 @@
                         <td>
                             @if (entry is IBaseModel baseEntry)
                             {
-                                // @if (ForeignKeyProperties.ContainsKey(value.Property))
-                                //  {
-                                // <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                //  }
-                                // else if (value.Property.PropertyType.IsEnum)
-                                //  {
-                                // <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="GetEnumValueDictionary(value.Property.PropertyType)" Service="Service" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                //  }
-                                //    else
-                                //  {
-                                <BaseInput @ref="AddToBaseInputs" Model="baseEntry" Property="value.Property" ReadOnly="value.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
-                                // }
+                                @if (ForeignKeyProperties.ContainsKey(value.Property))
+                                {
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" ModelLocalizer="ModelLocalizer" Service="Service"  OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                }
+                                else if (value.Property.PropertyType.IsEnum)
+                                {
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" ModelLocalizer="ModelLocalizer" Service="Service"  OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                }
+                                else
+                                {
+                                    <BaseInput @ref="AddToBaseInputs" Model="baseEntry" Property="value.Property" ReadOnly="value.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                }
                             }
                             else
                             {

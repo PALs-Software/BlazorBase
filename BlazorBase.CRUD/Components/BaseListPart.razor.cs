@@ -66,8 +66,6 @@ namespace BlazorBase.CRUD.Components
         protected Type ModelListEntryType { get; set; }
 
         #region Property Infos
-        protected Dictionary<PropertyInfo, Dictionary<string, string>> ForeignKeyProperties;
-
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
         protected List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
 
@@ -85,7 +83,6 @@ namespace BlazorBase.CRUD.Components
                 ModelListEntryType = Property.PropertyType.GenericTypeArguments[0];
 
                 ModelLocalizer = GenericClassStringLocalizer.GetLocalizer(ModelListEntryType);
-                
 
                 SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
 
@@ -98,6 +95,8 @@ namespace BlazorBase.CRUD.Components
                     Property.SetValue(Model, CreateGenericListInstance());
                 Entries = (IList)Property.GetValue(Model);
             });
+
+            await PrepareForeignKeyProperties(ModelListEntryType, Service);
         }
         #endregion
 

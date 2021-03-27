@@ -42,7 +42,7 @@
                                                             }
                                                             else if (value.Property.PropertyType.IsEnum)
                                                             {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="GetEnumValueDictionary(value.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                             else
                                                             {
