@@ -31,14 +31,23 @@ namespace BlazorBase.CRUD.Services
             return await DbContext.Set<T>().FindAsync(keyValues);
         }
 
+        #region GetData
         public async virtual Task<List<T>> GetDataAsync<T>() where T : class
         {
             return await DbContext.Set<T>().ToListAsync();
+        }
+        public async virtual Task<List<T>> GetDataAsync<T>(int index, int count) where T : class
+        {
+            return await DbContext.Set<T>().Skip(index).Take(count).ToListAsync();
         }
 
         public virtual Task<List<T>> GetDataAsync<T>(Func<T, bool> dataLoadCondition) where T : class
         {
             return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).ToList());
+        }
+        public virtual Task<List<T>> GetDataAsync<T>(Func<T, bool> dataLoadCondition, int index, int count) where T : class
+        {
+            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count).ToList());
         }
 
         /// <summary>
@@ -48,6 +57,19 @@ namespace BlazorBase.CRUD.Services
         {
             return await DbContext.Set(type).ToListAsync();
         }
+        #endregion
+
+        #region Count Data
+        public async virtual Task<int> CountDataAsync<T>() where T : class
+        {
+            return await DbContext.Set<T>().CountAsync();
+        }
+        public virtual Task<int> CountDataAsync<T>(Func<T, bool> dataLoadCondition) where T : class
+        {
+            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Count());
+        }
+        #endregion
+
 
         public async virtual Task ReloadAsync<T>(T entry) where T : class
         {

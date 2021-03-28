@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
@@ -92,26 +94,38 @@ namespace BlazorBase.CRUD.Components
 
         protected override async Task OnInitializedAsync()
         {
-            Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseList<TModel>));
-            TModelType = typeof(TModel);
+            await InvokeAsync(() =>
+            {
+                Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseList<TModel>));
+                TModelType = typeof(TModel);
 
-            SetUpDisplayLists(TModelType, GUIType.List);
+                SetUpDisplayLists(TModelType, GUIType.List);
 
-            if (String.IsNullOrEmpty(SingleDisplayName))
-                SingleDisplayName = ModelLocalizer[TModelType.Name];
-            if (String.IsNullOrEmpty(PluralDisplayName))
-                PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
-            ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
-
-            await LoadListDataAsync();
+                if (String.IsNullOrEmpty(SingleDisplayName))
+                    SingleDisplayName = ModelLocalizer[TModelType.Name];
+                if (String.IsNullOrEmpty(PluralDisplayName))
+                    PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
+                ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
+            });
         }
 
-        protected async Task LoadListDataAsync()
+        private async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
         {
+            var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
+
+            int totalEntries;
             if (DataLoadCondition == null)
-                Entries = await Service.GetDataAsync<TModel>();
+            {
+                Entries = await baseService.GetDataAsync<TModel>(request.StartIndex, request.Count);
+                totalEntries = await baseService.CountDataAsync<TModel>();
+            }
             else
-                Entries = await Service.GetDataAsync(DataLoadCondition);
+            {
+                Entries = await baseService.GetDataAsync(DataLoadCondition, request.StartIndex, request.Count);
+                totalEntries = await baseService.CountDataAsync(DataLoadCondition);
+            }
+
+            return new ItemsProviderResult<TModel>(Entries, totalEntries);
         }
 
         #endregion
@@ -199,7 +213,7 @@ namespace BlazorBase.CRUD.Components
             Entries[entryIndex] = (TModel)args.Model;
 
             await OnAfterUpdateEntry.InvokeAsync(args);
-        }     
+        }
         #endregion
 
         #region Other

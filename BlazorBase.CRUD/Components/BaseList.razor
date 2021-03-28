@@ -24,13 +24,12 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var entry in Entries)
-        {
+        <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync">
             <tr>
                 <td>
                     <Buttons>
-                        <Button Color="Color.Primary" Clicked="() => EditEntryAsync(entry)"><Icon Name="IconName.Edit" /></Button>
-                        <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)"><Icon Name=" IconName.Delete" /></Button>
+                        <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)"><Icon Name="IconName.Edit" /></Button>
+                        <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)"><Icon Name=" IconName.Delete" /></Button>
                     </Buttons>
                 </td>
 
@@ -39,12 +38,12 @@
                     @foreach (var value in displayGroup.Value)
                     {
                         <td>
-                            @value.Property.GetValue(entry)
+                            @value.Property.GetValue(context)
                         </td>
                     }
                 }
             </tr>
-        }
+        </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
     </tbody>
 </table>
 
