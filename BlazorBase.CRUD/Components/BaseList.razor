@@ -5,13 +5,14 @@
 
 <h3>
     @PluralDisplayName
-    <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
 </h3>
 
 <table class="table table-hover">
     <thead>
         <tr>
-            <th></th>
+            <th class="th-actions">
+                <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
+            </th>
             @foreach (var displayGroup in DisplayGroups)
             {
                 @foreach (var value in displayGroup.Value)

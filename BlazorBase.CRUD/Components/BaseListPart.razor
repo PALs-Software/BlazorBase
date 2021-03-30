@@ -3,7 +3,7 @@
 @using BlazorBase.CRUD.Extensions
 @using Microsoft.Extensions.Localization;
 
-<table class="table table-hover">
+<table class="table table-responsive table-hover">
     <thead>
         <tr>
             <th>
@@ -39,11 +39,11 @@
                             {
                                 @if (ForeignKeyProperties.ContainsKey(value.Property))
                                 {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" ModelLocalizer="ModelLocalizer" Service="Service"  OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" ModelLocalizer="ModelLocalizer" Service="Service" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
                                 }
                                 else if (value.Property.PropertyType.IsEnum)
                                 {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" ModelLocalizer="ModelLocalizer" Service="Service"  OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" ModelLocalizer="ModelLocalizer" Service="Service" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
                                 }
                                 else
                                 {
