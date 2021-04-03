@@ -14,6 +14,45 @@
             <ModalBody>
                 @if (Entry != null)
                 {
+                    <Card>
+                        <CardBody Padding="Padding.Is0">
+                            <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
+                                <Items>
+                                    @foreach (var group in Entry.PageActionGroups)
+                                    {
+                                        if (group.Visible(GetEventServices()).Result)
+                                        {
+                                            <Tab Name="@(group.Caption)" title="@Localizer[group.ToolTip]">
+                                                <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
+                                                @Localizer[group.Caption]
+                                            </Tab>
+                                        }
+                                    }
+                                </Items>
+                                <Content>
+                                    <TabsContent Padding="Padding.Is2">
+                                        @foreach (var group in Entry.PageActionGroups)
+                                        {
+                                            <TabPanel Name="@(group.Caption)">
+                                                @foreach (var action in group.PageActions)
+                                                {
+                                                    if (action.Visible(GetEventServices()).Result)
+                                                    {
+                                                        <Button Color="action.Color" Clicked="async () => await action.Action(GetEventServices())" title="@Localizer[action.ToolTip]" >
+                                                            <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
+
+                                                            @Localizer[action.Caption]
+                                                        </Button>
+                                                    }
+                                                }
+                                            </TabPanel>
+                                        }
+                                    </TabsContent>
+                                </Content>
+                            </Tabs>
+                        </CardBody>
+                    </Card>
+
                     <Alert Class="card-summary-invalid-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
                         @CardSummaryInvalidFeedback
                     </Alert>
@@ -70,6 +109,7 @@
                                     <BaseListPart Model="Entry"
                                                   Property="listProperty.Key"
                                                   Service="Service"
+                                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
                                                   OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
                                                   OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
                                                   OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"

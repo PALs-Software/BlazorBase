@@ -25,7 +25,7 @@
         </tr>
     </thead>
     <tbody>
-        <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync">
+        <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList">
             <tr>
                 <td>
                     <Buttons>
@@ -52,12 +52,14 @@
           TModel="TModel"
           SingleDisplayName="@SingleDisplayName"
           OnCardClosed="OnCardClosedAsync"
+          OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
           OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
-          OnAfterAddEntry="CardOnAfterAddEntry"
+          OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
           OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
-          OnAfterUpdateEntry="CardOnAfterUpdateEntry"
+          OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
           OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
           OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+          OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
           OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
           OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
           OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"

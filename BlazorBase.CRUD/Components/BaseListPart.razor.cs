@@ -25,6 +25,7 @@ namespace BlazorBase.CRUD.Components
         #region Parameters
 
         #region Events
+        [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
@@ -111,6 +112,7 @@ namespace BlazorBase.CRUD.Components
         protected async Task AddEntryAsync()
         {
             var newEntry = Activator.CreateInstance(ModelListEntryType);
+            await OnCreateNewListEntryInstanceAsync(newEntry);
 
             var args = new HandledEventArgs();
             await OnBeforeAddEntryAsync(newEntry, args);
@@ -136,6 +138,21 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Events
+        protected async Task OnCreateNewListEntryInstanceAsync(object newEntry)
+        {
+            var eventServices = GetEventServices();
+
+            var onCreateNewListEntryInstanceArgs = new OnCreateNewListEntryInstanceArgs(Model, newEntry, eventServices);
+            await OnCreateNewListEntryInstance.InvokeAsync(onCreateNewListEntryInstanceArgs);
+
+            if (newEntry is not IBaseModel newBaseEntry)
+                return;
+
+            var onCreateNewEntryInstanceArgs = new OnCreateNewEntryInstanceArgs(Model, eventServices);
+            await newBaseEntry.OnCreateNewEntryInstance(onCreateNewEntryInstanceArgs);
+        }
+
+
         protected async Task OnBeforeAddEntryAsync(object newEntry, HandledEventArgs args)
         {
             var eventServices = GetEventServices();
@@ -161,7 +178,7 @@ namespace BlazorBase.CRUD.Components
             }
 
         }
-        
+
         protected async Task OnAfterAddEntryAsync(object newEntry)
         {
             var eventServices = GetEventServices();

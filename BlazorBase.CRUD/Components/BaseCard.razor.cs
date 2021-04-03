@@ -25,6 +25,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Events
         [Parameter] public EventCallback OnCardClosed { get; set; }
+        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -35,6 +36,7 @@ namespace BlazorBase.CRUD.Components
         #region List Events
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
+        [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
@@ -74,6 +76,7 @@ namespace BlazorBase.CRUD.Components
         private bool AddingMode;
 
         protected ValidationContext ValidationContext;
+        protected string SelectedPageActionGroup { get; set; }
         #endregion
 
         #region Property Infos
@@ -112,9 +115,15 @@ namespace BlazorBase.CRUD.Components
 
             await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;
-
+            
             if (AddingMode)
+            {
+                var eventServices = GetEventServices();
                 Entry = new TModel();
+                var args = new OnCreateNewEntryInstanceArgs(Entry, eventServices);
+                await OnCreateNewEntryInstance.InvokeAsync(args);
+                await Entry.OnCreateNewEntryInstance(args);
+            }
             else
                 Entry = await Service.GetAsync<TModel>(primaryKeys);
 
@@ -129,6 +138,7 @@ namespace BlazorBase.CRUD.Components
                 [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
                 [typeof(DbContext)] = Service.DbContext
             });
+            SelectedPageActionGroup = Entry.PageActionGroups.FirstOrDefault()?.Caption;
 
             Modal.Show();
         }
@@ -208,6 +218,13 @@ namespace BlazorBase.CRUD.Components
             Modal.Hide();
             await OnCardClosed.InvokeAsync(null);
             Entry = null;
+        }
+        #endregion
+
+        #region Page Actions
+        private void SelectedPageActionGroupChanged(string name)
+        {
+            SelectedPageActionGroup = name;
         }
         #endregion
 

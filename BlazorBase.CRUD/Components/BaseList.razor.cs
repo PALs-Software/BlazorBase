@@ -26,6 +26,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Events
         [Parameter] public EventCallback OnCardClosed { get; set; }
+        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -36,6 +37,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterRemoveEntryArgs> OnAfterRemoveEntry { get; set; }
 
         #region List Events
+        [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
@@ -88,6 +90,7 @@ namespace BlazorBase.CRUD.Components
 
         private BaseCard<TModel> BaseCard = default!;
         private ConfirmDialog ConfirmDialog = default!;
+        protected Virtualize<TModel> VirtualizeList = default!;
         #endregion
 
         #region Init
@@ -188,31 +191,9 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task OnCardClosedAsync()
         {
-            await InvokeAsync(() =>
-            {
-                StateHasChanged();
-            });
-
+            await VirtualizeList.RefreshDataAsync();
+            StateHasChanged();            
             await OnCardClosed.InvokeAsync();
-        }
-
-        protected async Task CardOnAfterAddEntry(OnAfterAddEntryArgs args)
-        {
-            await InvokeAsync(() =>
-            {
-                Entries.Add((TModel)args.Model);
-            });
-
-            await OnAfterAddEntry.InvokeAsync(args);
-        }
-
-        protected async Task CardOnAfterUpdateEntry(OnAfterUpdateEntryArgs args)
-        {
-            var primaryKeys = args.Model.GetPrimaryKeys();
-            var entryIndex = Entries.FindIndex(entry => entry.GetPrimaryKeys().SequenceEqual(primaryKeys));
-            Entries[entryIndex] = (TModel)args.Model;
-
-            await OnAfterUpdateEntry.InvokeAsync(args);
         }
         #endregion
 

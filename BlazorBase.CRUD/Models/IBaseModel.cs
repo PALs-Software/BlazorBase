@@ -37,6 +37,10 @@ namespace BlazorBase.CRUD.Models
         public Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args);
 
 
+        public record OnCreateNewEntryInstanceArgs(IBaseModel Model, EventServices EventServices);
+        public Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args);
+
+
         public record OnBeforeAddEntryArgs(IBaseModel Model, bool AbortAdding, EventServices EventServices);
         public Task OnBeforeAddEntry(OnBeforeAddEntryArgs args);
 
@@ -69,6 +73,8 @@ namespace BlazorBase.CRUD.Models
         public record OnAfterListPropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, bool IsValid, EventServices EventServices);
         public Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args);
 
+        public record OnCreateNewListEntryInstanceArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
+        public Task OnCreateNewListEntryInstance(OnCreateNewListEntryInstanceArgs args);
 
         public record OnBeforeAddListEntryArgs(IBaseModel Model, object ListEntry, bool AbortAdding, EventServices EventServices);
         public Task OnBeforeAddListEntry(OnBeforeAddListEntryArgs args);
@@ -98,6 +104,10 @@ namespace BlazorBase.CRUD.Models
         #region Validation Methods
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
+        #endregion
+
+        #region PageActions
+        public List<PageActionGroup> PageActionGroups { get; set; }
         #endregion
 
         #region Other

@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -27,6 +28,8 @@ namespace BlazorBase.CRUD.Models
         {
             CreatedOn = DateTime.Now;
             ModifiedOn = CreatedOn;
+
+            PageActionGroups = InitializePageActions();
         }
 
         #region Additional Properties
@@ -109,6 +112,11 @@ namespace BlazorBase.CRUD.Models
             return Task.CompletedTask;
         }
 
+        public virtual Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
         public virtual Task OnBeforeAddEntry(OnBeforeAddEntryArgs args)
         {
             return Task.CompletedTask;
@@ -147,6 +155,11 @@ namespace BlazorBase.CRUD.Models
         }
 
         public virtual Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnCreateNewListEntryInstance(OnCreateNewListEntryInstanceArgs args)
         {
             return Task.CompletedTask;
         }
@@ -216,6 +229,15 @@ namespace BlazorBase.CRUD.Models
             builder.OpenComponent<BaseList<TModel>>(0);
             builder.CloseComponent();
         }
+        #endregion
+
+        #region PageActions
+        [NotMapped]
+        public List<PageActionGroup> PageActionGroups { get; set; }
+        public virtual List<PageActionGroup> InitializePageActions() { return null; }
+
+        [NotMapped]
+        public static List<PageActionGroup> ListPageActions { get; set; }
         #endregion
 
         #region Other
