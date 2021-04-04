@@ -1,4 +1,5 @@
 ﻿using BlazorBase.Components;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
@@ -81,7 +82,7 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
-                ModelListEntryType = Property.PropertyType.GenericTypeArguments[0];
+                ModelListEntryType = Property.GetCustomAttribute<VisibleAttribute>()?.RenderAsType ?? Property.PropertyType.GenericTypeArguments[0];
 
                 ModelLocalizer = GenericClassStringLocalizer.GetLocalizer(ModelListEntryType);
 

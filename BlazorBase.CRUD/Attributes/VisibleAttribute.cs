@@ -12,26 +12,7 @@ namespace BlazorBase.CRUD.Attributes
     {
         public VisibleAttribute() { }
 
-        public VisibleAttribute(string displaygroup, int displayGroupOrder = 0, int displayOrder = 0, bool collapsed = false)
-        {
-            DisplayGroup = displaygroup;
-            DisplayGroupOrder = displayGroupOrder;
-            DisplayOrder = displayOrder;
-            Collapsed = collapsed;
-        }
-
-        public VisibleAttribute(params GUIType[] hideInGUITypes)
-        {
-            HideInGUITypes = hideInGUITypes.ToList();
-        }
-
-        public VisibleAttribute(string displaygroup, params GUIType[] hideInGUITypes)
-        {
-            HideInGUITypes = hideInGUITypes.ToList();
-            DisplayGroup = displaygroup;
-        }
-
-        public VisibleAttribute(string displaygroup, int displayGroupOrder = 0, int displayOrder = 0, bool collapsed = false, params GUIType[] hideInGUITypes)
+        public VisibleAttribute(string displaygroup = "", int displayGroupOrder = 0, int displayOrder = 0, bool collapsed = false, params GUIType[] hideInGUITypes)
         {
             HideInGUITypes = hideInGUITypes.ToList();
             DisplayGroupOrder = displayGroupOrder;
@@ -49,5 +30,7 @@ namespace BlazorBase.CRUD.Attributes
         public int DisplayOrder { get; set; }
 
         public bool Collapsed { get; set; }
+
+        public Type RenderAsType { get; set; }
     }
 }

@@ -47,6 +47,7 @@ namespace BlazorBase.CRUD.Components
         protected string Feedback;
         protected string PlaceHolder;
         protected bool IsReadOnly;
+        protected Type RenderType;
 
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
         protected ValidationContext PropertyValidationContext;
@@ -62,9 +63,10 @@ namespace BlazorBase.CRUD.Components
                 Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
 
                 IsReadOnly = ReadOnly || Property.IsReadOnlyInGUI();
-
+                
                 if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                     PlaceHolder = placeholderAttribute.Placeholder;
+                RenderType = Property.GetCustomAttribute<VisibleAttribute>()?.RenderAsType ?? Property.PropertyType; 
 
                 var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
@@ -96,10 +98,10 @@ namespace BlazorBase.CRUD.Components
 
         protected void ConvertValueIfNeeded(ref object newValue)
         {
-            if (newValue == null || newValue.GetType() == Property.PropertyType)
+            if (newValue == null || newValue.GetType() == RenderType)
                 return;
 
-            if (BaseParser.TryParseValueFromString(Property.PropertyType, newValue.ToString(), out object parsedValue, out string errorMessage))
+            if (BaseParser.TryParseValueFromString(RenderType, newValue.ToString(), out object parsedValue, out string errorMessage))
             {
                 newValue = parsedValue;
                 return;

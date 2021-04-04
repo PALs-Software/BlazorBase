@@ -1,69 +1,69 @@
 ﻿
-@if (Property.PropertyType == typeof(decimal))
+@if (RenderType == typeof(decimal))
 {
     <NumericEdit TValue="decimal" Value="(decimal)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(decimal?))
+else if (RenderType == typeof(decimal?))
 {
     <NumericEdit TValue="decimal?" Value="(decimal?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(double))
+else if (RenderType == typeof(double))
 {
     <NumericEdit TValue="double" Value="(double)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(double?))
+else if (RenderType == typeof(double?))
 {
     <NumericEdit TValue="double?" Value="( double?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(float))
+else if (RenderType == typeof(float))
 {
     <NumericEdit TValue="float" Value="(float)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(float?))
+else if (RenderType == typeof(float?))
 {
     <NumericEdit TValue="float?" Value="(float?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(int))
+else if (RenderType == typeof(int))
 {
     <NumericEdit TValue="int" Value="(int)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(int?))
+else if (RenderType == typeof(int?))
 {
     <NumericEdit TValue="int?" Value="(int?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(long))
+else if (RenderType == typeof(long))
 {
     <NumericEdit TValue="long" Value="(long)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(long?))
+else if (RenderType == typeof(long?))
 {
     <NumericEdit TValue="long?" Value="(long?)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(bool))
+else if (RenderType == typeof(bool))
 {
     <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(bool?))
+else if (RenderType == typeof(bool?))
 {
     <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(DateTime))
+else if (RenderType == typeof(DateTime))
 {
     <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(DateTime?))
+else if (RenderType == typeof(DateTime?))
 {
     <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(DateTimeOffset))
+else if (RenderType == typeof(DateTimeOffset))
 {
     <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(DateTimeOffset?))
+else if (RenderType == typeof(DateTimeOffset?))
 {
     <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }
-else if (Property.PropertyType == typeof(string))
+else if (RenderType == typeof(string))
 {
     <TextEdit Text="@((string)Property.GetValue(Model))" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
 }

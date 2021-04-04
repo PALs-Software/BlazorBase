@@ -33,11 +33,11 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Additional Properties
-        [Visible(hideInGUITypes: GUIType.ListPart)]
+        [Visible(displayOrder:9999, hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
         public DateTime CreatedOn { get; set; }
 
-        [Visible(hideInGUITypes: GUIType.ListPart)]
+        [Visible(displayOrder: 9999, hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
         public DateTime ModifiedOn { get; set; }
         #endregion
@@ -226,9 +226,14 @@ namespace BlazorBase.CRUD.Models
         {
             base.BuildRenderTree(builder);
 
+            BuildComponent(builder);
+        }
+
+        protected virtual void BuildComponent(RenderTreeBuilder builder) {
             builder.OpenComponent<BaseList<TModel>>(0);
             builder.CloseComponent();
         }
+
         #endregion
 
         #region PageActions
