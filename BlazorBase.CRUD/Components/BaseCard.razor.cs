@@ -25,11 +25,12 @@ namespace BlazorBase.CRUD.Components
 
         #region Events
         [Parameter] public EventCallback OnCardClosed { get; set; }
-        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
+        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }        
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
         [Parameter] public EventCallback<OnAfterUpdateEntryArgs> OnAfterUpdateEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
 
@@ -39,6 +40,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeConvertListPropertyTypeArgs> OnBeforeConvertListPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
@@ -138,7 +140,7 @@ namespace BlazorBase.CRUD.Components
                 [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
                 [typeof(DbContext)] = Service.DbContext
             });
-            SelectedPageActionGroup = Entry.PageActionGroups.FirstOrDefault()?.Caption;
+            SelectedPageActionGroup = Entry.PageActionGroups?.FirstOrDefault()?.Caption;
 
             Modal.Show();
         }

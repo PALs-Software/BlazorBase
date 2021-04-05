@@ -28,6 +28,8 @@ namespace BlazorBase.CRUD.Models
         public void ForcePropertyRepaint(string propertyName);
 
         #region Model
+        public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
+        public Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args);
 
         public record OnBeforePropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args);
@@ -66,6 +68,10 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region ListProperty
+        public record OnBeforeConvertListPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
+        public Task OnBeforeConvertListPropertyType(OnBeforeConvertListPropertyTypeArgs args);
+
+
         public record OnBeforeListPropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args);
 

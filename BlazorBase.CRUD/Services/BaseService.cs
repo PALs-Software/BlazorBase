@@ -96,10 +96,11 @@ namespace BlazorBase.CRUD.Services
 
         public async virtual Task<bool> RemoveEntryAsync<T>(T entry) where T : class, IBaseModel
         {
-            if (await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) == null)
+            var entryToDelete = await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys());
+            if (entryToDelete == null)
                 return false;
 
-            DbContext.Set<T>().Remove(entry);
+            DbContext.Set<T>().Remove(entryToDelete);
 
             return true;
         }

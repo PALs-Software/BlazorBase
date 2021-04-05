@@ -76,7 +76,8 @@ namespace BlazorBase.CRUD.Components
             foreach (var foreignKeyProperty in foreignKeyProperties)
             {
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                var foreignKeyType = modelType.GetProperty(foreignKey.Name).PropertyType;
+                var foreignProperty = modelType.GetProperties().Where(entry => entry.Name == foreignKey.Name).First();
+                var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty.PropertyType;
 
                 if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                     continue;

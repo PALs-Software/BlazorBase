@@ -102,6 +102,11 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Events
+        public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
         public virtual Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
         {
             return Task.CompletedTask;
@@ -149,6 +154,10 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region List Events 
+        public virtual Task OnBeforeConvertListPropertyType(OnBeforeConvertListPropertyTypeArgs args)
+        {
+            return Task.CompletedTask;
+        }
         public virtual Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args)
         {
             return Task.CompletedTask;

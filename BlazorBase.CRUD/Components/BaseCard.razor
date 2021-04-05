@@ -14,44 +14,47 @@
             <ModalBody>
                 @if (Entry != null)
                 {
-                    <Card>
-                        <CardBody Padding="Padding.Is0">
-                            <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
-                                <Items>
-                                    @foreach (var group in Entry.PageActionGroups)
-                                    {
-                                        if (group.Visible(GetEventServices()).Result)
-                                        {
-                                            <Tab Name="@(group.Caption)" title="@Localizer[group.ToolTip]">
-                                                <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
-                                                @Localizer[group.Caption]
-                                            </Tab>
-                                        }
-                                    }
-                                </Items>
-                                <Content>
-                                    <TabsContent Padding="Padding.Is2">
+                    if (Entry.PageActionGroups != null && Entry.PageActionGroups.Count > 0)
+                    {
+                        <Card>
+                            <CardBody Padding="Padding.Is0">
+                                <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
+                                    <Items>
                                         @foreach (var group in Entry.PageActionGroups)
                                         {
-                                            <TabPanel Name="@(group.Caption)">
-                                                @foreach (var action in group.PageActions)
-                                                {
-                                                    if (action.Visible(GetEventServices()).Result)
-                                                    {
-                                                        <Button Color="action.Color" Clicked="async () => await action.Action(GetEventServices())" title="@Localizer[action.ToolTip]" >
-                                                            <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
-
-                                                            @Localizer[action.Caption]
-                                                        </Button>
-                                                    }
-                                                }
-                                            </TabPanel>
+                                            if (group.Visible(GetEventServices()).Result)
+                                            {
+                                                <Tab Name="@(group.Caption ?? String.Empty)" title="@Localizer[group.ToolTip ?? String.Empty]">
+                                                    <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
+                                                    @Localizer[group.Caption ?? String.Empty]
+                                                </Tab>
+                                            }
                                         }
-                                    </TabsContent>
-                                </Content>
-                            </Tabs>
-                        </CardBody>
-                    </Card>
+                                    </Items>
+                                    <Content>
+                                        <TabsContent Padding="Padding.Is2">
+                                            @foreach (var group in Entry.PageActionGroups)
+                                            {
+                                                <TabPanel Name="@(group.Caption ?? String.Empty)">
+                                                    @foreach (var action in group.PageActions)
+                                                    {
+                                                        if (action.Visible(GetEventServices()).Result)
+                                                        {
+                                                            <Button Color="action.Color" Clicked="async () => await action.Action(GetEventServices())" title="@Localizer[action.ToolTip ?? String.Empty]">
+                                                                <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
+
+                                                                @Localizer[action.Caption ?? String.Empty]
+                                                            </Button>
+                                                        }
+                                                    }
+                                                </TabPanel>
+                                            }
+                                        </TabsContent>
+                                    </Content>
+                                </Tabs>
+                            </CardBody>
+                        </Card>
+                    }
 
                     <Alert Class="card-summary-invalid-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
                         @CardSummaryInvalidFeedback
@@ -77,15 +80,15 @@
                                                         <FieldBody ColumnSize="ColumnSize.Is8">
                                                             @if (ForeignKeyProperties.ContainsKey(value.Property))
                                                             {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                             else if (value.Property.PropertyType.IsEnum)
                                                             {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                             else
                                                             {
-                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                             }
                                                         </FieldBody>
                                                     </Field>
@@ -116,6 +119,7 @@
                                                   OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
                                                   OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
                                                   OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
                                                   OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
                                                   OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
                                 </CollapseBody>

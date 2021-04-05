@@ -28,7 +28,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
 
         #region Events
-
+        [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
 
@@ -66,7 +66,7 @@ namespace BlazorBase.CRUD.Components
                 
                 if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                     PlaceHolder = placeholderAttribute.Placeholder;
-                RenderType = Property.GetCustomAttribute<VisibleAttribute>()?.RenderAsType ?? Property.PropertyType; 
+                RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType; 
 
                 var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
@@ -96,25 +96,31 @@ namespace BlazorBase.CRUD.Components
             StateHasChanged();
         }
 
-        protected void ConvertValueIfNeeded(ref object newValue)
+        protected bool ConvertValueIfNeeded(ref object newValue)
         {
             if (newValue == null || newValue.GetType() == RenderType)
-                return;
+                return true;
 
             if (BaseParser.TryParseValueFromString(RenderType, newValue.ToString(), out object parsedValue, out string errorMessage))
             {
                 newValue = parsedValue;
-                return;
+                return true;
             }
 
             SetValidation(feedback: errorMessage);
-            return;
+            return false;
         }
 
         protected async Task OnValueChangedAsync(object newValue)
         {
             var eventServices = GetEventServices();
-            ConvertValueIfNeeded(ref newValue);
+            var convertArgs = new OnBeforeConvertPropertyTypeArgs(Model, Property.Name, newValue, eventServices);
+            await OnBeforeConvertPropertyType.InvokeAsync(convertArgs);
+            await Model.OnBeforeConvertPropertyType(convertArgs);
+            newValue = convertArgs.NewValue;
+
+            if (!ConvertValueIfNeeded(ref newValue))
+                return;            
 
             var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
             await OnBeforePropertyChanged.InvokeAsync(args);

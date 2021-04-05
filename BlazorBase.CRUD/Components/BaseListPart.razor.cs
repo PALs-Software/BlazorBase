@@ -31,6 +31,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
+        [Parameter] public EventCallback<OnBeforeConvertListPropertyTypeArgs> OnBeforeConvertListPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
@@ -82,7 +83,7 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
-                ModelListEntryType = Property.GetCustomAttribute<VisibleAttribute>()?.RenderAsType ?? Property.PropertyType.GenericTypeArguments[0];
+                ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
 
                 ModelLocalizer = GenericClassStringLocalizer.GetLocalizer(ModelListEntryType);
 
@@ -106,7 +107,7 @@ namespace BlazorBase.CRUD.Components
         protected object CreateGenericListInstance()
         {
             var listType = typeof(List<>);
-            var constructedListType = listType.MakeGenericType(ModelListEntryType);
+            var constructedListType = listType.MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
             return Activator.CreateInstance(constructedListType);
         }
 
