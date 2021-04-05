@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -52,6 +53,8 @@ namespace BlazorBase.CRUD.Components
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
         protected ValidationContext PropertyValidationContext;
 
+        protected PropertyInfo ForeignKeyProperty { get; set; }
+
         #endregion
 
         #region Init
@@ -63,10 +66,10 @@ namespace BlazorBase.CRUD.Components
                 Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
 
                 IsReadOnly = ReadOnly || Property.IsReadOnlyInGUI();
-                
+
                 if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                     PlaceHolder = placeholderAttribute.Placeholder;
-                RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType; 
+                RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
 
                 var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
@@ -79,6 +82,10 @@ namespace BlazorBase.CRUD.Components
                 {
                     MemberName = Property.Name
                 };
+
+                var foreignKey = Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+                if (foreignKey != null)
+                    ForeignKeyProperty = Model.GetType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
 
                 ValidatePropertyValue();
             });
@@ -111,7 +118,7 @@ namespace BlazorBase.CRUD.Components
             return false;
         }
 
-        protected async Task OnValueChangedAsync(object newValue)
+        protected async virtual Task OnValueChangedAsync(object newValue)
         {
             var eventServices = GetEventServices();
             var convertArgs = new OnBeforeConvertPropertyTypeArgs(Model, Property.Name, newValue, eventServices);
@@ -120,7 +127,7 @@ namespace BlazorBase.CRUD.Components
             newValue = convertArgs.NewValue;
 
             if (!ConvertValueIfNeeded(ref newValue))
-                return;            
+                return;
 
             var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
             await OnBeforePropertyChanged.InvokeAsync(args);
@@ -130,11 +137,21 @@ namespace BlazorBase.CRUD.Components
             Property.SetValue(Model, newValue);
             var valid = ValidatePropertyValue();
 
+            if (valid)
+                await ReLoadForeignProperties();
+
             var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
             await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
             await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
+        protected async virtual Task ReLoadForeignProperties()
+        {
+            if (ForeignKeyProperty == null || (!typeof(IBaseModel).IsAssignableFrom(ForeignKeyProperty.PropertyType)))
+                return;
+
+            await Service.DbContext.Entry(Model).Reference(ForeignKeyProperty.Name).LoadAsync();
+        }
         #endregion
 
         #region Validation
