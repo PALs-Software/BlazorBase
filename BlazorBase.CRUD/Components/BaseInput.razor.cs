@@ -138,19 +138,22 @@ namespace BlazorBase.CRUD.Components
             var valid = ValidatePropertyValue();
 
             if (valid)
-                await ReLoadForeignProperties();
+                await ReLoadForeignProperties(newValue);
 
             var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
             await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
             await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
-        protected async virtual Task ReLoadForeignProperties()
+        protected async virtual Task ReLoadForeignProperties(object newValue)
         {
             if (ForeignKeyProperty == null || (!typeof(IBaseModel).IsAssignableFrom(ForeignKeyProperty.PropertyType)))
                 return;
 
-            await Service.DbContext.Entry(Model).Reference(ForeignKeyProperty.Name).LoadAsync();
+            if (Service.DbContext.Entry(Model).State == EntityState.Detached)
+                ForeignKeyProperty.SetValue(Model, await Service.GetAsync(ForeignKeyProperty.PropertyType, newValue));
+            else
+                await Service.DbContext.Entry(Model).Reference(ForeignKeyProperty.Name).LoadAsync();
         }
         #endregion
 

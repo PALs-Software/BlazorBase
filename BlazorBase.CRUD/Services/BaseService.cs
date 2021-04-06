@@ -26,12 +26,20 @@ namespace BlazorBase.CRUD.Services
             DbContext = ServiceProvider.GetService<DbContext>();
         }
 
+
+
+        #region GetData
+
         public async virtual Task<T> GetAsync<T>(params object[] keyValues) where T : class
         {
             return await DbContext.Set<T>().FindAsync(keyValues);
         }
 
-        #region GetData
+        public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
+        {
+            return await DbContext.FindAsync(type, keyValues);
+        }
+
         public async virtual Task<List<T>> GetDataAsync<T>() where T : class
         {
             return await DbContext.Set<T>().ToListAsync();

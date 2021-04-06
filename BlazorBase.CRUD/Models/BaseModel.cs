@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Resources.ValidationAttributes;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Additional Properties
-        [Visible(displayOrder:9999, hideInGUITypes: GUIType.ListPart)]
+        [Visible(displayOrder: 9999, hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
         public DateTime CreatedOn { get; set; }
 
@@ -76,10 +77,7 @@ namespace BlazorBase.CRUD.Models
 
         public object[] GetPrimaryKeys()
         {
-            var keyProperties = GetType().GetProperties().Where(property =>
-                (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
-                property.IsKey()
-            ).ToList();
+            var keyProperties = GetKeyProperties();
 
             var keys = new object[keyProperties.Count];
             for (int i = 0; i < keyProperties.Count; i++)
@@ -91,6 +89,29 @@ namespace BlazorBase.CRUD.Models
         public string GetPrimaryKeysAsString()
         {
             return String.Join(", ", GetPrimaryKeys());
+        }
+
+        public List<PropertyInfo> GetKeyProperties()
+        {
+            return GetType().GetProperties().Where(property =>
+                        (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
+                        property.IsKey()
+                    ).ToList();
+        }
+
+        public Dictionary<string, string> GetNavigationQuery(string baseQuery = null)
+        {
+            var query = new Dictionary<string, string>();
+            if (baseQuery != null)
+                query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => val.Value.ToString());
+
+            var keyProperties = GetKeyProperties();
+
+            var primaryKeys = new List<object>();
+            foreach (var keyProperty in keyProperties)
+                query[keyProperty.Name] = keyProperty.GetValue(this).ToString();
+
+            return query;
         }
         #endregion
 
@@ -228,6 +249,18 @@ namespace BlazorBase.CRUD.Models
 
             return Validator.TryValidateValue(propertyInfo.GetValue(this), propertyValidationContext, validationResults, attributes);
         }
+
+        public bool TryValidate(out List<ValidationResult> validationResults, EventServices eventServices)
+        {
+            var validationContext = new ValidationContext(this, eventServices.ServiceProvider, new Dictionary<object, object>()
+            {
+                [eventServices.Localizer.GetType()] = eventServices.Localizer,
+                [typeof(DbContext)] = eventServices.BaseService.DbContext
+            });
+
+            return TryValidate(out validationResults, validationContext);
+        }
+
         #endregion
 
         #region ComponentBase
@@ -238,7 +271,8 @@ namespace BlazorBase.CRUD.Models
             BuildComponent(builder);
         }
 
-        protected virtual void BuildComponent(RenderTreeBuilder builder) {
+        protected virtual void BuildComponent(RenderTreeBuilder builder)
+        {
             builder.OpenComponent<BaseList<TModel>>(0);
             builder.CloseComponent();
         }

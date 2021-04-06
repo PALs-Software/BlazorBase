@@ -40,7 +40,7 @@
                                                     {
                                                         if (action.Visible(GetEventServices()).Result)
                                                         {
-                                                            <Button Color="action.Color" Clicked="async () => await action.Action(GetEventServices())" title="@Localizer[action.ToolTip ?? String.Empty]">
+                                                            <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@Localizer[action.ToolTip ?? String.Empty]">
                                                                 <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
 
                                                                 @Localizer[action.Caption ?? String.Empty]

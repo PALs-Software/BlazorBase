@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using static BlazorBase.CRUD.Models.IBaseModel;
@@ -69,7 +70,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Member
         private string Title;
-        private string CardSummaryInvalidFeedback;
+        private MarkupString CardSummaryInvalidFeedback;
         private bool ShowInvalidFeedback = false;
         private Modal Modal = default!;
         private TModel Entry;
@@ -147,8 +148,7 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task SaveModal()
         {
-            CardSummaryInvalidFeedback = String.Empty;
-            ShowInvalidFeedback = false;
+            ResetInvalidFeedback();
 
             if (!CardIsValid())
                 return;
@@ -167,8 +167,7 @@ namespace BlazorBase.CRUD.Components
 
                     if (!await Service.AddEntryAsync(Entry))
                     {
-                        CardSummaryInvalidFeedback = Localizer["EntryAlreadyExistError", Entry.GetPrimaryKeysAsString()];
-                        ShowInvalidFeedback = true;
+                        ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Entry.GetPrimaryKeysAsString()]);
                         return;
                     }
 
@@ -196,14 +195,12 @@ namespace BlazorBase.CRUD.Components
             }
             catch (CRUDException e)
             {
-                CardSummaryInvalidFeedback = e.Message;
-                ShowInvalidFeedback = true;
+                ShowFormattedInvalidFeedback(e.Message);
                 return;
             }
             catch (Exception e)
             {
-                CardSummaryInvalidFeedback = Localizer["UnknownSavingError", e.Message];
-                ShowInvalidFeedback = true;
+                ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", e.Message]);
                 return;
             }
 
@@ -228,6 +225,20 @@ namespace BlazorBase.CRUD.Components
         {
             SelectedPageActionGroup = name;
         }
+
+        private async Task InvokePageAction(PageAction action) {
+            ResetInvalidFeedback();
+
+            try
+            {
+                await action.Action(GetEventServices());
+            }
+            catch (Exception e)
+            {
+                ShowFormattedInvalidFeedback(e.Message);
+            }            
+        }
+
         #endregion
 
         #region Validation
@@ -240,6 +251,22 @@ namespace BlazorBase.CRUD.Components
                 input.ValidatePropertyValue();
 
             return Entry.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
+        }
+
+        private void ShowFormattedInvalidFeedback(string feedback)
+        {
+            feedback = feedback.Replace(Environment.NewLine, "<br />");
+            CardSummaryInvalidFeedback = (MarkupString)ConvertWhiteListedHtmlBack(WebUtility.HtmlEncode(feedback));
+            ShowInvalidFeedback = true;
+        }
+
+        private void ResetInvalidFeedback() {
+            CardSummaryInvalidFeedback = (MarkupString)String.Empty;
+            ShowInvalidFeedback = false;
+        }
+
+        private string ConvertWhiteListedHtmlBack(string input) {
+            return input.Replace("&lt;br /&gt;", "<br />");
         }
         #endregion
 

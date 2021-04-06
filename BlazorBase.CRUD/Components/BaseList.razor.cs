@@ -17,6 +17,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using static BlazorBase.CRUD.Models.IBaseModel;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -26,7 +27,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Events
         [Parameter] public EventCallback OnCardClosed { get; set; }
-        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }        
+        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -78,6 +79,11 @@ namespace BlazorBase.CRUD.Components
         [Inject]
         private IServiceProvider ServiceProvider { get; set; }
 
+        [Inject]
+        private NavigationManager NavigationManager { get; set; }
+
+        [Inject] protected BaseParser BaseParser { get; set; }
+
         [CascadingParameter]
         protected IMessageHandler MessageHandler { get; set; }
 
@@ -112,6 +118,8 @@ namespace BlazorBase.CRUD.Components
                     PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
                 ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
             });
+
+            await ProcessQueryParameters();
         }
 
         private async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
@@ -133,6 +141,39 @@ namespace BlazorBase.CRUD.Components
             return new ItemsProviderResult<TModel>(Entries, totalEntries);
         }
 
+        private async Task ProcessQueryParameters()
+        {
+            var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            var query = QueryHelpers.ParseQuery(uri.Query);
+            if (query.Count == 0)
+                return;
+
+            var keyProperties = TModelType.GetProperties().Where(property =>
+               (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
+               property.IsKey()
+           ).ToList();
+
+            var primaryKeys = new List<object>();
+            foreach (var keyProperty in keyProperties)
+                if (query.TryGetValue(keyProperty.Name, out var keyValue))
+                    if (BaseParser.TryParseValueFromString(keyProperty.PropertyType, keyValue.ToString(), out object parsedValue, out string errorMessage))
+                        primaryKeys.Add(parsedValue);
+                    else
+                        return;
+
+            var entry = await Service.GetAsync<TModel>(primaryKeys.ToArray());
+            if (entry != null)
+                await EditEntryAsync(entry, false);
+        }
+
+        private void NavigateToEntry(TModel entry)
+        {
+            var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            var query = entry.GetNavigationQuery(uri.Query);
+
+            var newUrl = QueryHelpers.AddQueryString(uri.GetLeftPart(UriPartial.Path), query);
+            NavigationManager.NavigateTo(newUrl);
+        }
         #endregion
 
         #region CRUD
@@ -141,10 +182,15 @@ namespace BlazorBase.CRUD.Components
         {
             await BaseCard.Show(addingMode: true);
         }
-        protected async Task EditEntryAsync(TModel entry)
+        protected async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
+            if (changeQueryUrl)
+                NavigateToEntry(entry);
+
             await BaseCard.Show(addingMode: false, entry.GetPrimaryKeys());
         }
+
+
 
         protected async Task RemoveEntryAsync(TModel entry)
         {
@@ -194,7 +240,7 @@ namespace BlazorBase.CRUD.Components
         protected async Task OnCardClosedAsync()
         {
             await VirtualizeList.RefreshDataAsync();
-            StateHasChanged();            
+            StateHasChanged();
             await OnCardClosed.InvokeAsync();
         }
         #endregion

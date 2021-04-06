@@ -22,6 +22,8 @@ namespace BlazorBase.CRUD.Models
         public object[] GetPrimaryKeys();
 
         public string GetPrimaryKeysAsString();
+
+        public Dictionary<string, string> GetNavigationQuery(string baseQuery = null);
         #endregion
 
         #region CRUD Methods
