@@ -16,6 +16,8 @@ namespace BlazorBase.CRUD.Components
 {
     public class BaseDisplayComponent : ComponentBase
     {
+        public record DisplayGroup(VisibleAttribute GroupAttribute, List<DisplayItem> DisplayItems) { public VisibleAttribute GroupAttribute { get; set; } };
+        public record DisplayItem(PropertyInfo Property, VisibleAttribute Attribute, bool IsListProperty);
 
         #region Injects
         [Inject]
@@ -24,8 +26,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Members
         protected List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
-        protected Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>> DisplayGroups = new Dictionary<string, List<(VisibleAttribute Attribute, PropertyInfo Property)>>();
-        protected Dictionary<PropertyInfo, VisibleAttribute> ListProperties = new Dictionary<PropertyInfo, VisibleAttribute>();
+        protected Dictionary<string, DisplayGroup> DisplayGroups = new Dictionary<string, DisplayGroup>();
         protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties;
         protected static Dictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
         protected Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
@@ -40,16 +41,10 @@ namespace BlazorBase.CRUD.Components
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
                 attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? "General" : attribute.DisplayGroup;
 
-                if (property.IsListProperty())
-                {
-                    ListProperties.Add(property, attribute);
-                    continue;
-                }
-
                 if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
-                    DisplayGroups[attribute.DisplayGroup] = new List<(VisibleAttribute Attribute, PropertyInfo Property)>();
+                    DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
 
-                DisplayGroups[attribute.DisplayGroup].Add((attribute, property));
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsListProperty()));
             }
 
             SortDisplayLists();
@@ -57,12 +52,13 @@ namespace BlazorBase.CRUD.Components
 
         protected void SortDisplayLists()
         {
-            DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.FirstOrDefault().Attribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
+            foreach (var displayGroup in DisplayGroups)
+            {
+                displayGroup.Value.DisplayItems.Sort((x, y) => x.Attribute.DisplayOrder.CompareTo(y.Attribute.DisplayOrder));
+                displayGroup.Value.GroupAttribute = displayGroup.Value.DisplayItems.First().Attribute;
+            }
 
-            foreach (var properties in DisplayGroups)
-                properties.Value.Sort((x, y) => x.Attribute.DisplayOrder.CompareTo(y.Attribute.DisplayOrder));
-
-            ListProperties = ListProperties.OrderBy(entry => entry.Value.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
+            DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
         public async Task PrepareForeignKeyProperties(Type modelType, BaseService service)

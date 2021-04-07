@@ -63,65 +63,58 @@
                     <Accordion>
                         @foreach (var displayGroup in DisplayGroups)
                         {
-                            <Collapse Visible="!displayGroup.Value.First().Attribute.Collapsed">
+                            <Collapse Visible="!displayGroup.Value.GroupAttribute.Collapsed">
                                 <CollapseHeader>
                                     <Heading Size="HeadingSize.Is4">
-                                        <Button Clicked="@(() => displayGroup.Value.First().Attribute.Collapsed = !displayGroup.Value.First().Attribute.Collapsed)">@ModelLocalizer[displayGroup.Key]</Button>
+                                        <Button Clicked="@(() => displayGroup.Value.GroupAttribute.Collapsed = !displayGroup.Value.GroupAttribute.Collapsed)">@ModelLocalizer[displayGroup.Key]</Button>
                                     </Heading>
                                 </CollapseHeader>
                                 <CollapseBody>
                                     <Row>
-                                        @foreach (var value in displayGroup.Value)
+                                        @foreach (var displayItem in displayGroup.Value.DisplayItems)
                                         {
-                                            <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
-                                                <Fields>
-                                                    <Field Horizontal="true">
-                                                        <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[value.Property.Name]</FieldLabel>
-                                                        <FieldBody ColumnSize="ColumnSize.Is8">
-                                                            @if (ForeignKeyProperties.ContainsKey(value.Property))
-                                                            {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="ForeignKeyProperties[value.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                                            }
-                                                            else if (value.Property.PropertyType.IsEnum)
-                                                            {
-                                                                <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="value.Property" Data="GetEnumValues(value.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                                            }
-                                                            else
-                                                            {
-                                                                <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="value.Property" ReadOnly="!AddingMode && value.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                                            }
-                                                        </FieldBody>
-                                                    </Field>
-                                                </Fields>
-                                            </Column>
+                                            if (displayItem.IsListProperty)
+                                            {
+                                                <BaseListPart Model="Entry"
+                                                              Property="displayItem.Property"
+                                                              Service="Service"
+                                                              OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                                                              OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                                                              OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                                                              OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
+                                                              OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
+                                                              OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                                                              OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                                                              OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                                                              OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                                                              OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
+                                            }
+                                            else
+                                            {
+                                                <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
+                                                    <Fields>
+                                                        <Field Horizontal="true">
+                                                            <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[displayItem.Property.Name]</FieldLabel>
+                                                            <FieldBody ColumnSize="ColumnSize.Is8">
+                                                                @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                                                {
+                                                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="displayItem.Property" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                }
+                                                                else if (displayItem.Property.PropertyType.IsEnum)
+                                                                {
+                                                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="Entry" Property="displayItem.Property" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                }
+                                                                else
+                                                                {
+                                                                    <BaseInput @ref="AddToBaseInputs" Model="Entry" Property="displayItem.Property" ReadOnly="!AddingMode && displayItem.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                                }
+                                                            </FieldBody>
+                                                        </Field>
+                                                    </Fields>
+                                                </Column>
+                                            }
                                         }
                                     </Row>
-                                </CollapseBody>
-                            </Collapse>
-                        }
-
-                        @foreach (var listProperty in ListProperties)
-                        {
-                            <Collapse Visible="true">
-                                <CollapseHeader>
-                                    <Heading Size="HeadingSize.Is4">
-                                        <Button>@ModelLocalizer[listProperty.Value.DisplayGroup]</Button>
-                                    </Heading>
-                                </CollapseHeader>
-                                <CollapseBody>
-                                    <BaseListPart Model="Entry"
-                                                  Property="listProperty.Key"
-                                                  Service="Service"
-                                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                                                  OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
-                                                  OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
-                                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
                                 </CollapseBody>
                             </Collapse>
                         }

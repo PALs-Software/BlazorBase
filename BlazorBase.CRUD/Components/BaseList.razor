@@ -15,10 +15,10 @@
             </th>
             @foreach (var displayGroup in DisplayGroups)
             {
-                @foreach (var value in displayGroup.Value)
+                @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
                     <td>
-                        @ModelLocalizer[value.Property.Name]
+                        @ModelLocalizer[displayItem.Property.Name]
                     </td>
                 }
             }
@@ -36,10 +36,10 @@
 
                 @foreach (var displayGroup in DisplayGroups)
                 {
-                    @foreach (var value in displayGroup.Value)
+                    @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
                         <td>
-                            @value.Property.GetValue(context)
+                            @displayItem.Property.GetValue(context)
                         </td>
                     }
                 }
