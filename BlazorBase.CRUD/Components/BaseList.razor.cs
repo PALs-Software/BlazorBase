@@ -66,26 +66,15 @@ namespace BlazorBase.CRUD.Components
 
         #region Injects
 
-        [Inject]
-        public BaseService Service { get; set; }
-
-        [Inject]
-        private IStringLocalizer<TModel> ModelLocalizer { get; set; }
-
+        [Inject] public BaseService Service { get; set; }
+        [Inject] private IStringLocalizer<TModel> ModelLocalizer { get; set; }
         [Inject]
         private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
         private IStringLocalizer Localizer { get; set; }
-
-        [Inject]
-        private IServiceProvider ServiceProvider { get; set; }
-
-        [Inject]
-        private NavigationManager NavigationManager { get; set; }
-
+        [Inject] private IServiceProvider ServiceProvider { get; set; }
+        [Inject]private NavigationManager NavigationManager { get; set; }
         [Inject] protected BaseParser BaseParser { get; set; }
-
-        [CascadingParameter]
-        protected IMessageHandler MessageHandler { get; set; }
+        [Inject]protected IMessageHandler MessageHandler { get; set; }
 
         #endregion
 
@@ -166,10 +155,19 @@ namespace BlazorBase.CRUD.Components
                 await EditEntryAsync(entry, false);
         }
 
-        private void NavigateToEntry(TModel entry)
+        protected void NavigateToEntry(TModel entry)
         {
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             var query = entry.GetNavigationQuery(uri.Query);
+
+            var newUrl = QueryHelpers.AddQueryString(uri.GetLeftPart(UriPartial.Path), query);
+            NavigationManager.NavigateTo(newUrl);
+        }
+
+        protected void NavigateToList()
+        {
+            var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+            var query = RemoveNavigationQueryByType(TModelType, uri.Query);
 
             var newUrl = QueryHelpers.AddQueryString(uri.GetLeftPart(UriPartial.Path), query);
             NavigationManager.NavigateTo(newUrl);
@@ -240,7 +238,8 @@ namespace BlazorBase.CRUD.Components
         protected async Task OnCardClosedAsync()
         {
             await VirtualizeList.RefreshDataAsync();
-            StateHasChanged();
+            NavigateToList();
+
             await OnCardClosed.InvokeAsync();
         }
         #endregion

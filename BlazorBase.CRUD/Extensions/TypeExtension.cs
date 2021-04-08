@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,6 +10,14 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class TypeExtension
     {
+        public static List<PropertyInfo> GetKeyProperties(this Type type)
+        {
+            return type.GetProperties().Where(property =>
+                        (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
+                        property.IsKey()
+                    ).ToList();
+        }
+
         public static List<PropertyInfo> GetVisibleProperties(this Type type)
         {
             return type.GetProperties().Where(entry => entry.IsVisibleInGUI()).ToList();

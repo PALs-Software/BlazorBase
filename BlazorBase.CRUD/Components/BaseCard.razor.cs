@@ -26,7 +26,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Events
         [Parameter] public EventCallback OnCardClosed { get; set; }
-        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }        
+        [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -107,7 +107,7 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-       
+
         #endregion
 
         #region Modal
@@ -118,7 +118,7 @@ namespace BlazorBase.CRUD.Components
 
             await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;
-            
+
             if (AddingMode)
             {
                 var eventServices = GetEventServices();
@@ -211,12 +211,16 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task RejectModal()
         {
-            if (!AddingMode)
-                await Service.ReloadAsync(Entry);
-
             Modal.Hide();
-            await OnCardClosed.InvokeAsync(null);
             Entry = null;
+
+            await OnCardClosed.InvokeAsync(null);
+        }
+
+        protected void OnModalClosing(ModalClosingEventArgs args)
+        {
+            if (args.CloseReason != CloseReason.UserClosing)
+                Task.Run(async () => await RejectModal());
         }
         #endregion
 
@@ -226,7 +230,8 @@ namespace BlazorBase.CRUD.Components
             SelectedPageActionGroup = name;
         }
 
-        private async Task InvokePageAction(PageAction action) {
+        private async Task InvokePageAction(PageAction action)
+        {
             ResetInvalidFeedback();
 
             try
@@ -236,7 +241,7 @@ namespace BlazorBase.CRUD.Components
             catch (Exception e)
             {
                 ShowFormattedInvalidFeedback(e.Message);
-            }            
+            }
         }
 
         #endregion
@@ -260,12 +265,14 @@ namespace BlazorBase.CRUD.Components
             ShowInvalidFeedback = true;
         }
 
-        private void ResetInvalidFeedback() {
+        private void ResetInvalidFeedback()
+        {
             CardSummaryInvalidFeedback = (MarkupString)String.Empty;
             ShowInvalidFeedback = false;
         }
 
-        private string ConvertWhiteListedHtmlBack(string input) {
+        private string ConvertWhiteListedHtmlBack(string input)
+        {
             return input.Replace("&lt;br /&gt;", "<br />");
         }
         #endregion

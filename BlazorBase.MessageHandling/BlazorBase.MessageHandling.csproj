@@ -42,10 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Components\MessageHandler.razor.de.resx">
+    <EmbeddedResource Update="Components\MessageGenerator.razor.de.resx">
       <Generator></Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Components\MessageHandler.razor.resx">
+    <EmbeddedResource Update="Components\MessageGenerator.razor.resx">
       <Generator></Generator>
     </EmbeddedResource>
   </ItemGroup>

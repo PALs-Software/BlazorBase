@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -16,8 +17,30 @@ namespace BlazorBase.CRUD.Components
 {
     public class BaseDisplayComponent : ComponentBase
     {
-        public record DisplayGroup(VisibleAttribute GroupAttribute, List<DisplayItem> DisplayItems) { public VisibleAttribute GroupAttribute { get; set; } };
-        public record DisplayItem(PropertyInfo Property, VisibleAttribute Attribute, bool IsListProperty);
+        public class DisplayGroup
+        {
+            public DisplayGroup(VisibleAttribute groupAttribute, List<DisplayItem> displayItems)
+            {
+                GroupAttribute = groupAttribute;
+                DisplayItems = displayItems;
+            }
+            public VisibleAttribute GroupAttribute { get; set; }
+            public List<DisplayItem> DisplayItems { get; set; }
+        }
+
+        public class DisplayItem
+        {
+            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isListProperty)
+            {
+                Property = property;
+                Attribute = attribute;
+                IsListProperty = isListProperty;
+            }
+
+            public PropertyInfo Property { get; set; }
+            public VisibleAttribute Attribute { get; set; }
+            public bool IsListProperty { get; set; }
+        }
 
         #region Injects
         [Inject]
@@ -83,7 +106,7 @@ namespace BlazorBase.CRUD.Components
                     ForeignKeyProperties.Add(foreignKeyProperty, CachedForeignKeys[foreignKeyType]);
                     continue;
                 }
-               
+
                 var entries = (await service.GetDataAsync(foreignKeyType));
                 var primaryKeys = new List<KeyValuePair<string, string>>()
                 {
@@ -118,6 +141,19 @@ namespace BlazorBase.CRUD.Components
 
             CachedEnumValueDictionary.Add(enumType, result);
             return result;
+        }
+
+        protected Dictionary<string, string> RemoveNavigationQueryByType(Type type, string baseQuery)
+        {
+            var query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => val.Value.ToString());
+
+            var keyProperties = type.GetKeyProperties();
+
+            var primaryKeys = new List<object>();
+            foreach (var keyProperty in keyProperties)
+                query.Remove(keyProperty.Name);
+
+            return query;
         }
     }
 }

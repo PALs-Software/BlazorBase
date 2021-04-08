@@ -93,10 +93,7 @@ namespace BlazorBase.CRUD.Models
 
         public List<PropertyInfo> GetKeyProperties()
         {
-            return GetType().GetProperties().Where(property =>
-                        (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
-                        property.IsKey()
-                    ).ToList();
+            return GetType().GetKeyProperties();
         }
 
         public Dictionary<string, string> GetNavigationQuery(string baseQuery = null)

@@ -1,0 +1,17 @@
+﻿@foreach (var modalInfo in ModalInfos)
+{
+    <Modal @ref="modalInfo.Value.Modal" Visible="true" Closed="() => OnModalClosed(modalInfo.Key)">
+        <ModalContent Centered="true" Size="ModalSize.Large">
+            <ModalHeader>
+                <ModalTitle>@modalInfo.Value.Args.Title</ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                @modalInfo.Value.Args.Message
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="() => modalInfo.Value.Modal.Hide()">@Localizer["Ok"]</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}

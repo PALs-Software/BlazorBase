@@ -5,7 +5,7 @@
 @using Microsoft.Extensions.Localization
 
 <div class="base-card">
-    <Modal @ref="Modal" Class="modal-fullscreen">
+    <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
         <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
             <ModalHeader>
                 <ModalTitle>@Title</ModalTitle>
@@ -20,7 +20,7 @@
                             <CardBody Padding="Padding.Is0">
                                 <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
                                     <Items>
-                                        @foreach (var group in Entry.PageActionGroups)
+                                        @foreach (var group in Entry?.PageActionGroups ?? new List<Models.PageActionGroup>())
                                         {
                                             if (group.Visible(GetEventServices()).Result)
                                             {
@@ -33,7 +33,7 @@
                                     </Items>
                                     <Content>
                                         <TabsContent Padding="Padding.Is2">
-                                            @foreach (var group in Entry.PageActionGroups)
+                                            @foreach (var group in Entry?.PageActionGroups ?? new List<Models.PageActionGroup>())
                                             {
                                                 <TabPanel Name="@(group.Caption ?? String.Empty)">
                                                     @foreach (var action in group.PageActions)

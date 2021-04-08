@@ -31,8 +31,9 @@ namespace BlazorBase.CRUD
             .AddSingleton<StringLocalizerFactory>()
             .AddSingleton<BaseParser>()
             .AddTransient<BaseService>()
-            .AddTransient<DbContext, TDbContextImplementation>();
-            
+            .AddTransient<DbContext, TDbContextImplementation>()
+
+            .AddBlazorBaseMessageHandling();
 
             return serviceCollection;
         }
