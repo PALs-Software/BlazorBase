@@ -47,19 +47,10 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Injects
-
-        [Inject]
-        private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
-
-        [Inject]
-        private IStringLocalizer<BaseListPart> Localizer { get; set; }
-
-        [Inject]
-        private IServiceProvider ServiceProvider { get; set; }
-
-        [CascadingParameter]
-        protected IMessageHandler MessageHandler { get; set; }
-
+        [Inject] protected StringLocalizerFactory GenericClassStringLocalizer { get; set; }
+        [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; }
+        [Inject] protected IServiceProvider ServiceProvider { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
         #region Members
@@ -234,13 +225,14 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Other       
-        private EventServices GetEventServices()
+        protected EventServices GetEventServices()
         {
             return new EventServices()
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                BaseService = Service
+                BaseService = Service,
+                MessageHandler = MessageHandler
             };
         }
         #endregion

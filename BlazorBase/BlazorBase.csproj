@@ -11,6 +11,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\de.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\en.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\es.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\fr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\hr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\it.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\nl.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\DataGrid\pt.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3\contentFiles\any\net5.0\Resources\Localization\DataGrid\de.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3\contentFiles\any\net5.0\Resources\Localization\DataGrid\en.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3\contentFiles\any\net5.0\Resources\Localization\DataGrid\es.json" />
@@ -19,6 +27,23 @@
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3\contentFiles\any\net5.0\Resources\Localization\DataGrid\it.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3\contentFiles\any\net5.0\Resources\Localization\DataGrid\nl.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise.datagrid\0.9.3\contentFiles\any\net5.0\Resources\Localization\DataGrid\pt.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\compilerconfig.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\de.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\en.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\es.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\fr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\hr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\it.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\nl.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\Carousel\pt.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\de.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\en.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\es.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\fr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\hr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\it.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\nl.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\pt.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3\contentFiles\any\net5.0\compilerconfig.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3\contentFiles\any\net5.0\Resources\Localization\Carousel\de.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3\contentFiles\any\net5.0\Resources\Localization\Carousel\en.json" />
@@ -55,12 +80,6 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Components\ConfirmDialog.razor.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

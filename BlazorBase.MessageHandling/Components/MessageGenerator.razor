@@ -1,16 +1,26 @@
-﻿@foreach (var modalInfo in ModalInfos)
+﻿@using BlazorBase.Modules;
+@using BlazorBase.MessageHandling.Models;
+
+@foreach (var modalInfo in ModalInfos)
 {
-    <Modal @ref="modalInfo.Value.Modal" Visible="true" Closed="() => OnModalClosed(modalInfo.Key)">
-        <ModalContent Centered="true" Size="ModalSize.Large">
+    <Modal @ref="modalInfo.Value.Modal" Visible="true" Closing="async (args) => await OnModalClosing(modalInfo.Value, args)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
+        <ModalContent Centered="true" Size="modalInfo.Value.Args.ModalSize">
             <ModalHeader>
-                <ModalTitle>@modalInfo.Value.Args.Title</ModalTitle>
+                <ModalTitle>
+                    <BaseIcon IconName="modalInfo.Value.Args.Icon" Style="@modalInfo.Value.Args.IconStyle"></BaseIcon>
+                    @modalInfo.Value.Args.Title
+                </ModalTitle>
                 <CloseButton />
             </ModalHeader>
             <ModalBody>
-                @modalInfo.Value.Args.Message
+                @MarkupStringValidator.GetWhiteListedMarkupString(@modalInfo.Value.Args.Message)
             </ModalBody>
             <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="() => modalInfo.Value.Modal.Hide()">@Localizer["Ok"]</Button>
+                @if (modalInfo.Value.Args is ShowConfirmDialogArgs args)
+                {
+                    <Button Color="args.ConfirmButtonColor" Clicked="() => OnConfirmButtonClicked(modalInfo.Value)">@args.ConfirmButtonText</Button>
+                }
+                <Button Color="modalInfo.Value.Args.CloseButtonColor" Clicked="() => modalInfo.Value.Modal.Hide()">@modalInfo.Value.Args.CloseButtonText</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>

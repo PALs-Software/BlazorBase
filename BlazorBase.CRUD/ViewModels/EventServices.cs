@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Services;
+using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
@@ -13,6 +14,7 @@ namespace BlazorBase.CRUD.ViewModels
     {
         public IServiceProvider ServiceProvider { get; set; }
         public IStringLocalizer Localizer { get; set; }
-        public BaseService BaseService { get; set; }        
+        public BaseService BaseService { get; set; }
+        public IMessageHandler MessageHandler { get; set; }
     }
 }

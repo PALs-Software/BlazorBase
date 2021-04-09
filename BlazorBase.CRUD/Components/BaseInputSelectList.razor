@@ -1,7 +1,10 @@
 ﻿@inherits BaseInput
 
-<SelectList Data="@Data" TItem="KeyValuePair<string,string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="Property.GetValue(Model)?.ToString()" SelectedValueChanged="(x) => OnValueChangedAsync(x)" Class="@InputClass" Attributes="Attributes" />
+@if (Model != null)
+{
+    <SelectList Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="Property.GetValue(Model)?.ToString()" SelectedValueChanged="(x) => OnValueChangedAsync(x)" Class="@InputClass" Attributes="Attributes" />
 
-<div class="@FeedbackClass">
-    @Feedback
-</div>
+    <div class="@FeedbackClass">
+        @Feedback
+    </div>
+}

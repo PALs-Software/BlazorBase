@@ -70,9 +70,3 @@
           OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
           OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
           OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
-
-<ConfirmDialog @ref="ConfirmDialog" Title="@ConfirmDialogDeleteTitle" ConfirmButtonText="@Localizer["ConfirmDelete"]" ConfirmButtonColor="Color.Danger" OnConfirmDialogClosed="OnConfirmDialogClosedAsync">
-    <span>
-        @ConfirmDialogDeleteMessage
-    </span>
-</ConfirmDialog>

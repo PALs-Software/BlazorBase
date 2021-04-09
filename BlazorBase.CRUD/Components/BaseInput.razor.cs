@@ -3,6 +3,7 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +41,7 @@ namespace BlazorBase.CRUD.Components
         #region Injects
         [Inject] protected BaseParser BaseParser { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
         #region Members
@@ -188,13 +190,14 @@ namespace BlazorBase.CRUD.Components
 
         #region Other
 
-        private EventServices GetEventServices()
+        protected EventServices GetEventServices()
         {
             return new EventServices()
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                BaseService = Service
+                BaseService = Service,
+                MessageHandler = MessageHandler
             };
         }
 

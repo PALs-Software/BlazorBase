@@ -1,6 +1,7 @@
 ﻿using BlazorBase.MessageHandling.Components;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Models;
+using Blazorise;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,26 @@ namespace BlazorBase.MessageHandling.Interfaces
     public interface IMessageHandler
     {
         public event ShowMessageEventHandler OnShowMessage;
-        public void ShowMessage(string title, string message, MessageType messageType = MessageType.Information);
+        public void ShowMessage(string title, string message,
+                                MessageType messageType = MessageType.Information,
+                                Func<ModalClosingEventArgs, Task> onClosing = null,
+                                object icon = null,
+                                string closeButtonText = null,
+                                Color closeButtonColor = Color.Secondary,
+                                ModalSize modalSize = ModalSize.Large);
         public void ShowMessage(ShowMessageArgs args);
+
+
+        public event ShowConfirmDialogHandler OnShowConfirmDialog;
+        public void ShowConfirmDialog(string title, string message,
+                                 MessageType messageType = MessageType.Information,
+                                 Func<ModalClosingEventArgs, ConfirmDialogResult, Task> onClosing = null,
+                                 object icon = null,
+                                 string confirmButtonText = null,
+                                 Color confirmButtonColor = Color.Primary,
+                                 string abortButtonText = null,
+                                 Color abortButtonTextColor = Color.Secondary,
+                                 ModalSize modalSize = ModalSize.Large);
+        public void ShowConfirmDialog(ShowConfirmDialogArgs args);
     }
 }

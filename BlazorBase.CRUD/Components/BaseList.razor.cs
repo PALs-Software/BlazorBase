@@ -18,6 +18,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using static BlazorBase.CRUD.Models.IBaseModel;
 using Microsoft.AspNetCore.WebUtilities;
+using BlazorBase.MessageHandling.Enum;
+using Blazorise;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -72,21 +74,17 @@ namespace BlazorBase.CRUD.Components
         private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
         private IStringLocalizer Localizer { get; set; }
         [Inject] private IServiceProvider ServiceProvider { get; set; }
-        [Inject]private NavigationManager NavigationManager { get; set; }
+        [Inject] private NavigationManager NavigationManager { get; set; }
         [Inject] protected BaseParser BaseParser { get; set; }
-        [Inject]protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
 
         #endregion
 
         #region Members
-
-        private string ConfirmDialogDeleteTitle;
-        private string ConfirmDialogDeleteMessage;
         private List<TModel> Entries = new List<TModel>();
         private Type TModelType;
 
         private BaseCard<TModel> BaseCard = default!;
-        private ConfirmDialog ConfirmDialog = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
         #endregion
 
@@ -105,7 +103,7 @@ namespace BlazorBase.CRUD.Components
                     SingleDisplayName = ModelLocalizer[TModelType.Name];
                 if (String.IsNullOrEmpty(PluralDisplayName))
                     PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
-                ConfirmDialogDeleteTitle = Localizer[nameof(ConfirmDialogDeleteTitle), SingleDisplayName];
+
             });
 
             await ProcessQueryParameters();
@@ -188,29 +186,28 @@ namespace BlazorBase.CRUD.Components
             await BaseCard.Show(addingMode: false, entry.GetPrimaryKeys());
         }
 
-
-
-        protected async Task RemoveEntryAsync(TModel entry)
+        protected async Task RemoveEntryAsync(TModel model)
         {
-            if (entry == null)
+            if (model == null)
                 return;
 
-            var primaryKeyString = String.Join(", ", entry.GetPrimaryKeys());
-            ConfirmDialogDeleteMessage = Localizer[nameof(ConfirmDialogDeleteMessage), primaryKeyString];
+            await InvokeAsync(() =>
+            {
+                var primaryKeyString = String.Join(", ", model.GetPrimaryKeys());
 
-            await ConfirmDialog.Show(entry);
+                MessageHandler.ShowConfirmDialog(Localizer["Delete {0}", SingleDisplayName],
+                                                    Localizer["Do you really want to delete the entry {0}?", primaryKeyString],
+                                                    confirmButtonText: Localizer["Delete"],
+                                                    confirmButtonColor: Color.Danger,
+                                                    onClosing: async (args, result) => await OnConfirmDialogClosedAsync(result, model));
+            });
         }
 
-        #endregion
-
-        #region Modal Events
-
-        protected async Task OnConfirmDialogClosedAsync(ConfirmDialogEventArgs args)
+        protected async Task OnConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)
         {
-            if (args.ConfirmDialogResult == ConfirmDialogResult.Aborted || args.Sender == null)
+            if (result == ConfirmDialogResult.Aborted)
                 return;
 
-            var model = (TModel)args.Sender;
             var eventServices = GetEventServices();
 
             var beforeRemoveArgs = new OnBeforeRemoveEntryArgs(model, false, eventServices);
@@ -231,8 +228,10 @@ namespace BlazorBase.CRUD.Components
             }
             catch (Exception e)
             {
-                MessageHandler.ShowMessage(Localizer["Error while deleting"], e.Message);
+                MessageHandler.ShowMessage(Localizer["Error while deleting"], e.Message, MessageType.Error);
             }
+
+            StateHasChanged();
         }
 
         protected async Task OnCardClosedAsync()
@@ -245,13 +244,14 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Other
-        private EventServices GetEventServices()
+        protected EventServices GetEventServices()
         {
             return new EventServices()
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                BaseService = Service
+                BaseService = Service,
+                MessageHandler = MessageHandler
             };
         }
         #endregion

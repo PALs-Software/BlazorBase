@@ -69,7 +69,8 @@
     {
         <TextEdit Text="@((string)Property.GetValue(Model))" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
     }
+
+    <div class="@FeedbackClass">
+        @Feedback
+    </div>
 }
-<div class="@FeedbackClass">
-    @Feedback
-</div>

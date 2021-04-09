@@ -14,7 +14,7 @@ namespace BlazorBase.CRUD
         /// <returns></returns>
         public static IServiceCollection AddBlazorBaseMessageHandling(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddSingleton<IMessageHandler, MessageHandler>();
+            serviceCollection.AddScoped<IMessageHandler, MessageHandler>();
 
             return serviceCollection;
         }

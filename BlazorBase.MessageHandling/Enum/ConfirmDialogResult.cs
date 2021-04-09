@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.Components
+namespace BlazorBase.MessageHandling.Enum
 {
     public enum ConfirmDialogResult
     {

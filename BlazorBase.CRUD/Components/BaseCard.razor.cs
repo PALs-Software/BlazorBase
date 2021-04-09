@@ -4,6 +4,8 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.Modules;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -59,13 +61,10 @@ namespace BlazorBase.CRUD.Components
 
         #region Injects
 
-        [Inject]
-        private IStringLocalizer<TModel> ModelLocalizer { get; set; }
-
-        private IStringLocalizer Localizer { get; set; }
-
-        [Inject]
-        private IServiceProvider ServiceProvider { get; set; }
+        [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
+        protected IStringLocalizer Localizer { get; set; }
+        [Inject] protected IServiceProvider ServiceProvider { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
         #region Member
@@ -236,12 +235,17 @@ namespace BlazorBase.CRUD.Components
 
             try
             {
-                await action.Action(GetEventServices());
+                await action.Action?.Invoke(GetEventServices());
             }
             catch (Exception e)
             {
                 ShowFormattedInvalidFeedback(e.Message);
             }
+
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
         }
 
         #endregion
@@ -260,8 +264,7 @@ namespace BlazorBase.CRUD.Components
 
         private void ShowFormattedInvalidFeedback(string feedback)
         {
-            feedback = feedback.Replace(Environment.NewLine, "<br />");
-            CardSummaryInvalidFeedback = (MarkupString)ConvertWhiteListedHtmlBack(WebUtility.HtmlEncode(feedback));
+            CardSummaryInvalidFeedback = MarkupStringValidator.GetWhiteListedMarkupString(feedback);
             ShowInvalidFeedback = true;
         }
 
@@ -270,26 +273,19 @@ namespace BlazorBase.CRUD.Components
             CardSummaryInvalidFeedback = (MarkupString)String.Empty;
             ShowInvalidFeedback = false;
         }
-
-        private string ConvertWhiteListedHtmlBack(string input)
-        {
-            return input.Replace("&lt;br /&gt;", "<br />");
-        }
         #endregion
 
         #region Other
-        private EventServices GetEventServices()
+        protected EventServices GetEventServices()
         {
             return new EventServices()
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                BaseService = Service
+                BaseService = Service,
+                MessageHandler = MessageHandler
             };
         }
-
-
-
         #endregion
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
+using Blazorise;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,17 +12,33 @@ namespace BlazorBase.MessageHandling.Models
     public class ShowMessageArgs
     {
         public ShowMessageArgs() { }
-        public ShowMessageArgs(string title, string message, MessageType messageType, bool isHandled)
+        public ShowMessageArgs(string title, string message,
+                                MessageType messageType = MessageType.Information,
+                                Func<ModalClosingEventArgs, Task>  onClosing = null,
+                                object icon = null,
+                                string closeButtonText = null,
+                                Color closeButtonColor = Color.Secondary,
+                                ModalSize modalSize = ModalSize.Large)
         {
             Title = title;
             Message = message;
             MessageType = messageType;
-            IsHandled = isHandled;
+            OnClosing = onClosing;
+            Icon = icon;
+            CloseButtonText = closeButtonText;
+            CloseButtonColor = closeButtonColor;
+            ModalSize = modalSize;
         }
 
         public string Title { get; set; }
         public string Message { get; set; }
         public MessageType MessageType { get; set; }
+        public Func<ModalClosingEventArgs, Task> OnClosing { get; set; }
+        public object Icon { get; set; }
+        public string IconStyle { get; set; }
         public bool IsHandled { get; set; }
+        public string CloseButtonText { get; set; }
+        public Color CloseButtonColor { get; set; }
+        public ModalSize ModalSize { get; set; }
     }
 }

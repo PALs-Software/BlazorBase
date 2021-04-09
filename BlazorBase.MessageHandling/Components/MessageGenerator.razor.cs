@@ -2,6 +2,7 @@
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
 using Blazorise;
+using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
@@ -15,7 +16,7 @@ namespace BlazorBase.MessageHandling.Components
     public partial class MessageGenerator
     {
         #region Properties
-     
+
         protected Dictionary<Guid, ModalInfo> ModalInfos { get; set; } = new Dictionary<Guid, ModalInfo>();
         #endregion
 
@@ -33,6 +34,7 @@ namespace BlazorBase.MessageHandling.Components
             await InvokeAsync(() =>
             {
                 MessageHandler.OnShowMessage += MessageHandler_OnShowMessage;
+                MessageHandler.OnShowConfirmDialog += MessageHandler_OnShowConfirmDialog;
             });
         }
         #endregion
@@ -42,13 +44,14 @@ namespace BlazorBase.MessageHandling.Components
         {
             ShowMessage(args);
         }
+
+        private void MessageHandler_OnShowConfirmDialog(ShowConfirmDialogArgs args)
+        {
+            ShowConfirmDialog(args);
+        }
         #endregion
 
         #region Methods
-        public void ShowMessage(string title, string message, MessageType messageType = MessageType.Information)
-        {
-            ShowMessage(new ShowMessageArgs(title, message, messageType, false));
-        }
 
         public void ShowMessage(ShowMessageArgs args)
         {
@@ -58,13 +61,70 @@ namespace BlazorBase.MessageHandling.Components
             InvokeAsync(() =>
             {
                 args.IsHandled = true;
+
+                if (args is ShowConfirmDialogArgs confirmDialogArgs)
+                {
+                    if (confirmDialogArgs.ConfirmButtonText == null)
+                        confirmDialogArgs.ConfirmButtonText = Localizer["Confirm"];
+
+                    if (args.CloseButtonText == null)
+                        args.CloseButtonText = Localizer["Abort"];
+                }
+
+                if (args.CloseButtonText == null)
+                    args.CloseButtonText = Localizer["Ok"];
+
+                if (args.Icon == null)
+                {
+                    switch (args.MessageType)
+                    {
+                        case MessageType.Information:
+                            args.Icon = FontAwesomeIcons.InfoCircle;
+                            break;
+                        case MessageType.Error:
+                            args.Icon = FontAwesomeIcons.ExclamationTriangle;
+                            args.IconStyle = "color: red";
+                            break;
+                        case MessageType.Warning:
+                            args.Icon = FontAwesomeIcons.ExclamationTriangle;
+                            args.IconStyle = "color: yellow";
+                            break;
+                    }
+                }
+
                 ModalInfos.Add(Guid.NewGuid(), new ModalInfo(args));
 
                 StateHasChanged();
             });
         }
 
+        public void ShowMessage(string title, string message,
+                                MessageType messageType = MessageType.Information,
+                                Func<ModalClosingEventArgs, Task> onClosing = null,
+                                object icon = null,
+                                string closeButtonText = null,
+                                Color closeButtonColor = Color.Secondary,
+                                ModalSize modalSize = ModalSize.Large)
+        {
+            ShowMessage(new ShowMessageArgs(title, message, messageType, onClosing, icon, closeButtonText, closeButtonColor, modalSize));
+        }
 
+        public void ShowConfirmDialog(string title, string message,
+                                  MessageType messageType = MessageType.Information,
+                                  Func<ModalClosingEventArgs, ConfirmDialogResult, Task> onClosing = null,
+                                  object icon = null,
+                                  string confirmButtonText = null,
+                                  Color confirmButtonColor = Color.Primary,
+                                  string abortButtonText = null,
+                                  Color abortButtonTextColor = Color.Secondary,
+                                  ModalSize modalSize = ModalSize.Large)
+        {
+            ShowMessage(new ShowConfirmDialogArgs(title, message, messageType, onClosing, icon, confirmButtonText, confirmButtonColor, abortButtonText, abortButtonTextColor, modalSize));
+        }
+        public void ShowConfirmDialog(ShowConfirmDialogArgs args)
+        {
+            ShowMessage(args);
+        }
         #endregion
 
         #region Modal
@@ -73,18 +133,20 @@ namespace BlazorBase.MessageHandling.Components
             ModalInfos.Remove(id);
         }
 
-        #endregion
-
-        #region View Models
-        public class ModalInfo
+        protected async Task OnModalClosing(ModalInfo modalInfo, ModalClosingEventArgs args)
         {
-            public ModalInfo(ShowMessageArgs args)
-            {
-                Args = args;
-            }
-            public ShowMessageArgs Args { get; set; }
-            public Modal Modal { get; set; }
+            if (modalInfo.Args is ShowConfirmDialogArgs confirmDialogArgs)
+                await (confirmDialogArgs.OnClosing?.Invoke(args, modalInfo.ConfirmDialogResult ?? ConfirmDialogResult.Aborted) ?? Task.CompletedTask);
+            else
+                await (modalInfo.Args.OnClosing?.Invoke(args) ?? Task.CompletedTask);
         }
+
+        protected void OnConfirmButtonClicked(ModalInfo modalInfo)
+        {
+            modalInfo.ConfirmDialogResult = ConfirmDialogResult.Confirmed;
+            modalInfo.Modal.Hide();
+        }
+
         #endregion
     }
 
