@@ -9,7 +9,7 @@
         <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
             <ModalHeader>
                 <ModalTitle>@Title</ModalTitle>
-                <CloseButton Clicked="RejectModal" />
+                <CloseButton Clicked="RejectModalAsync" />
             </ModalHeader>
             <ModalBody>
                 @if (Entry != null)
@@ -122,8 +122,8 @@
                 }
             </ModalBody>
             <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="RejectModal">@Localizer["Close"]</Button>
-                <Button Color="Color.Primary" Clicked="SaveModal">@Localizer["Save"]</Button>
+                <Button Color="Color.Secondary" Clicked="RejectModalAsync">@Localizer["Close"]</Button>
+                <Button Color="Color.Primary" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>

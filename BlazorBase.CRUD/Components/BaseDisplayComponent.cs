@@ -112,20 +112,36 @@ namespace BlazorBase.CRUD.Components
                 {
                     new KeyValuePair<string, string>(null, String.Empty)
                 };
-                var displayKeyProperty = foreignKeyType.GetDisplayKeyProperty();
+                var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
 
                 foreach (var entry in entries)
                 {
-                    var primaryKeysAsString = ((IBaseModel)entry).GetPrimaryKeysAsString();
-                    if (displayKeyProperty == null)
+                    var baseEntry = entry as IBaseModel;
+                    var primaryKeysAsString = baseEntry.GetPrimaryKeysAsString();
+
+                    if (displayKeyProperties.Count == 0)
                         primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
                     else
-                        primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, displayKeyProperty.GetValue(entry).ToString()));
+                        primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, GetDisplayKeyKeyValuePair(displayKeyProperties, baseEntry)));
                 }
 
                 CachedForeignKeys.Add(foreignKeyType, primaryKeys);
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
             }
+        }
+
+        protected string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties, IBaseModel entry)
+        {
+            var displayKeyValues = new List<object>();
+            foreach (var displayKeyProperty in displayKeyProperties)
+            {
+                var displayKeyValue = displayKeyProperty.GetValue(entry);
+                if (displayKeyValue is IBaseModel baseModel)
+                    displayKeyValue = GetDisplayKeyKeyValuePair(baseModel.GetType().GetDisplayKeyProperties(), baseModel);
+                displayKeyValues.Add(displayKeyValue);
+            }
+
+            return String.Join(",", displayKeyValues);
         }
 
         protected List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
@@ -155,5 +171,7 @@ namespace BlazorBase.CRUD.Components
 
             return query;
         }
+
+
     }
 }

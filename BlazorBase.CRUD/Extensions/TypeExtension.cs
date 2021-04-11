@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using System;
 using System.Collections.Generic;
@@ -28,9 +29,14 @@ namespace BlazorBase.CRUD.Extensions
             return type.GetProperties().Where(entry => entry.IsVisibleInGUI(guiType)).ToList();
         }
 
-        public static PropertyInfo GetDisplayKeyProperty(this Type type)
+        public static List<PropertyInfo> GetDisplayKeyProperties(this Type type)
         {
-            return type.GetProperties().Where(property => property.IsDisplayKey()).FirstOrDefault();
+            var properties =  type.GetProperties().Where(property => property.IsDisplayKey()).ToList();
+            var orderDictionary = new Dictionary<PropertyInfo, DisplayKeyAttribute>();
+            foreach (var property in properties)
+                orderDictionary.Add(property, property.GetCustomAttributes(typeof(DisplayKeyAttribute)).First() as DisplayKeyAttribute);
+
+            return orderDictionary.OrderBy(entry => entry.Value.DisplayOrder).Select(entry => entry.Key).ToList();
         }
     }
 }

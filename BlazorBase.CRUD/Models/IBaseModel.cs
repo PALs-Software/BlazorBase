@@ -14,6 +14,8 @@ namespace BlazorBase.CRUD.Models
     {
         #region Events
         public event EventHandler<string> OnForcePropertyRepaint;
+
+        public event EventHandler OnReloadEntityFromDatabase;
         #endregion
 
         #region Attribute Methods
@@ -28,6 +30,7 @@ namespace BlazorBase.CRUD.Models
 
         #region CRUD Methods
         public void ForcePropertyRepaint(string propertyName);
+        public void ReloadEntityFromDatabase();
 
         #region Model
         public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
@@ -116,10 +119,13 @@ namespace BlazorBase.CRUD.Models
 
         #region PageActions
         public List<PageActionGroup> PageActionGroups { get; set; }
+        public List<PageActionGroup> InitializePageActions();
         #endregion
 
         #region Other
         public Type GetUnproxiedType();
+
+        public void TransferPropertiesTo(object target);
         #endregion
     }
 }

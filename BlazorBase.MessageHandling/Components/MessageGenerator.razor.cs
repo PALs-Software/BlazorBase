@@ -135,10 +135,17 @@ namespace BlazorBase.MessageHandling.Components
 
         protected async Task OnModalClosing(ModalInfo modalInfo, ModalClosingEventArgs args)
         {
-            if (modalInfo.Args is ShowConfirmDialogArgs confirmDialogArgs)
-                await (confirmDialogArgs.OnClosing?.Invoke(args, modalInfo.ConfirmDialogResult ?? ConfirmDialogResult.Aborted) ?? Task.CompletedTask);
-            else
-                await (modalInfo.Args.OnClosing?.Invoke(args) ?? Task.CompletedTask);
+            try
+            {
+                if (modalInfo.Args is ShowConfirmDialogArgs confirmDialogArgs)
+                    await (confirmDialogArgs.OnClosing?.Invoke(args, modalInfo.ConfirmDialogResult ?? ConfirmDialogResult.Aborted) ?? Task.CompletedTask);
+                else
+                    await (modalInfo.Args.OnClosing?.Invoke(args) ?? Task.CompletedTask);
+            }
+            catch (Exception e)
+            {
+                ShowMessage(Localizer["Error"], e.Message, MessageType.Error);
+            }
         }
 
         protected void OnConfirmButtonClicked(ModalInfo modalInfo)

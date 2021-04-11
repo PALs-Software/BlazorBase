@@ -69,22 +69,22 @@ namespace BlazorBase.CRUD.Components
         #region Injects
 
         [Inject] public BaseService Service { get; set; }
-        [Inject] private IStringLocalizer<TModel> ModelLocalizer { get; set; }
+        [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
         [Inject]
-        private StringLocalizerFactory GenericClassStringLocalizer { get; set; }
-        private IStringLocalizer Localizer { get; set; }
-        [Inject] private IServiceProvider ServiceProvider { get; set; }
-        [Inject] private NavigationManager NavigationManager { get; set; }
+        protected StringLocalizerFactory GenericClassStringLocalizer { get; set; }
+        protected IStringLocalizer Localizer { get; set; }
+        [Inject] protected IServiceProvider ServiceProvider { get; set; }
+        [Inject] protected NavigationManager NavigationManager { get; set; }
         [Inject] protected BaseParser BaseParser { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
 
         #endregion
 
         #region Members
-        private List<TModel> Entries = new List<TModel>();
-        private Type TModelType;
+        protected List<TModel> Entries = new List<TModel>();
+        protected Type TModelType;
 
-        private BaseCard<TModel> BaseCard = default!;
+        protected BaseCard<TModel> BaseCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
         #endregion
 
@@ -176,14 +176,14 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task AddEntryAsync()
         {
-            await BaseCard.Show(addingMode: true);
+            await BaseCard.ShowAsync(addingMode: true);
         }
         protected async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
             if (changeQueryUrl)
                 NavigateToEntry(entry);
 
-            await BaseCard.Show(addingMode: false, entry.GetPrimaryKeys());
+            await BaseCard.ShowAsync(addingMode: false, entry.GetPrimaryKeys());
         }
 
         protected async Task RemoveEntryAsync(TModel model)
@@ -231,7 +231,8 @@ namespace BlazorBase.CRUD.Components
                 MessageHandler.ShowMessage(Localizer["Error while deleting"], e.Message, MessageType.Error);
             }
 
-            StateHasChanged();
+            await VirtualizeList.RefreshDataAsync();
+            await InvokeAsync(() => StateHasChanged());
         }
 
         protected async Task OnCardClosedAsync()

@@ -23,14 +23,16 @@ namespace BlazorBase.CRUD.Models
 {
     public class BaseModel<TModel> : ComponentBase where TModel : class, IBaseModel, new()
     {
+        #region Events
         public event EventHandler<string> OnForcePropertyRepaint;
+
+        public event EventHandler OnReloadEntityFromDatabase;
+        #endregion
 
         public BaseModel()
         {
             CreatedOn = DateTime.Now;
             ModifiedOn = CreatedOn;
-
-            PageActionGroups = InitializePageActions();
         }
 
         #region Additional Properties
@@ -41,32 +43,6 @@ namespace BlazorBase.CRUD.Models
         [Visible(displayOrder: 9999, hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
         public DateTime ModifiedOn { get; set; }
-        #endregion
-
-        #region [] Extension Methods
-        public object this[PropertyInfo property]
-        {
-            get
-            {
-                return property.GetValue(this);
-            }
-            set
-            {
-                property.SetValue(this, value);
-            }
-        }
-
-        public object this[string property]
-        {
-            get
-            {
-                return GetType().GetProperty(property).GetValue(this);
-            }
-            set
-            {
-                GetType().GetProperty(property).SetValue(this, value);
-            }
-        }
         #endregion
 
         #region Attribute Methods
@@ -117,6 +93,11 @@ namespace BlazorBase.CRUD.Models
         public void ForcePropertyRepaint(string propertyName)
         {
             OnForcePropertyRepaint?.Invoke(this, propertyName);
+        }
+
+        public void ReloadEntityFromDatabase()
+        {
+            OnReloadEntityFromDatabase?.Invoke(this, EventArgs.Empty);
         }
 
         #region Events
@@ -280,9 +261,6 @@ namespace BlazorBase.CRUD.Models
         [NotMapped]
         public List<PageActionGroup> PageActionGroups { get; set; }
         public virtual List<PageActionGroup> InitializePageActions() { return null; }
-
-        [NotMapped]
-        public static List<PageActionGroup> ListPageActions { get; set; }
         #endregion
 
         #region Other
@@ -294,6 +272,25 @@ namespace BlazorBase.CRUD.Models
                 return type.BaseType;
 
             return type;
+        }
+
+        public void TransferPropertiesTo(object target)
+        {
+            var sourceProperties = this.GetType().GetProperties();
+            var targetProperties = target.GetType().GetProperties();
+
+            foreach (var sourceProperty in sourceProperties)
+            {
+                var targetProperty = targetProperties.Where(entry => entry.Name == sourceProperty.Name).FirstOrDefault();
+
+                if (targetProperty == null ||
+                 (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
+                 (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
+                 ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0))
+                    continue;
+
+                targetProperty.SetValue(target, sourceProperty.GetValue(this));
+            }
         }
         #endregion
     }

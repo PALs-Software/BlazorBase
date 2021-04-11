@@ -110,13 +110,14 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Modal
-        public async Task Show(bool addingMode = false, params object[] primaryKeys)
+        public async Task ShowAsync(bool addingMode = false, params object[] primaryKeys)
         {
             Service.RefreshDbContext();
-            //Service.DbContext.Database.BeginTransaction();
 
             await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;
+            BaseInputs.Clear();
+            BaseInputSelectLists.Clear();
 
             if (AddingMode)
             {
@@ -132,20 +133,36 @@ namespace BlazorBase.CRUD.Components
             if (Entry == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
-            BaseInputs.Clear();
-            BaseInputSelectLists.Clear();
-
             ValidationContext = new ValidationContext(Entry, ServiceProvider, new Dictionary<object, object>()
             {
                 [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
                 [typeof(DbContext)] = Service.DbContext
             });
+
+            Entry.PageActionGroups = Entry.InitializePageActions();
             SelectedPageActionGroup = Entry.PageActionGroups?.FirstOrDefault()?.Caption;
 
+            Entry.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
             Modal.Show();
         }
+        protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
+        {
+            if (Entry == null)
+                return;
 
-        protected async Task SaveModal()
+            await ShowAsync(false, Entry.GetPrimaryKeys());
+
+            await InvokeAsync(() => {
+                StateHasChanged();
+            });
+        }
+
+        public async Task HideAsync()
+        {
+            await RejectModalAsync();
+        }
+
+        protected async Task SaveModalAsync()
         {
             ResetInvalidFeedback();
 
@@ -190,7 +207,6 @@ namespace BlazorBase.CRUD.Components
                 }
 
                 await Service.SaveChangesAsync();
-                //Service.DbContext.Database.CommitTransaction();
             }
             catch (CRUDException e)
             {
@@ -208,7 +224,7 @@ namespace BlazorBase.CRUD.Components
             Entry = null;
         }
 
-        protected async Task RejectModal()
+        protected async Task RejectModalAsync()
         {
             Modal.Hide();
             Entry = null;
@@ -219,7 +235,7 @@ namespace BlazorBase.CRUD.Components
         protected void OnModalClosing(ModalClosingEventArgs args)
         {
             if (args.CloseReason != CloseReason.UserClosing)
-                Task.Run(async () => await RejectModal());
+                Task.Run(async () => await RejectModalAsync());
         }
         #endregion
 
