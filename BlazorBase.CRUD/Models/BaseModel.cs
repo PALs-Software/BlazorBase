@@ -258,9 +258,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region PageActions
-        [NotMapped]
-        public List<PageActionGroup> PageActionGroups { get; set; }
-        public virtual List<PageActionGroup> InitializePageActions() { return null; }
+        public virtual List<PageActionGroup> GeneratePageActionGroups() { return null; }
         #endregion
 
         #region Other

@@ -118,8 +118,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region PageActions
-        public List<PageActionGroup> PageActionGroups { get; set; }
-        public List<PageActionGroup> InitializePageActions();
+        public List<PageActionGroup> GeneratePageActionGroups();
         #endregion
 
         #region Other

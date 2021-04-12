@@ -79,6 +79,7 @@ namespace BlazorBase.CRUD.Components
 
         protected ValidationContext ValidationContext;
         protected string SelectedPageActionGroup { get; set; }
+        protected List<PageActionGroup> PageActionGroups { get; set; }
         #endregion
 
         #region Property Infos
@@ -139,8 +140,8 @@ namespace BlazorBase.CRUD.Components
                 [typeof(DbContext)] = Service.DbContext
             });
 
-            Entry.PageActionGroups = Entry.InitializePageActions();
-            SelectedPageActionGroup = Entry.PageActionGroups?.FirstOrDefault()?.Caption;
+            PageActionGroups = Entry.GeneratePageActionGroups() ?? new List<PageActionGroup>();
+            SelectedPageActionGroup = PageActionGroups.FirstOrDefault()?.Caption;
 
             Entry.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
             Modal.Show();

@@ -14,13 +14,13 @@
             <ModalBody>
                 @if (Entry != null)
                 {
-                    if (Entry.PageActionGroups != null && Entry.PageActionGroups.Count > 0)
+                    if (PageActionGroups != null && PageActionGroups.Count > 0)
                     {
                         <Card>
                             <CardBody Padding="Padding.Is0">
                                 <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
                                     <Items>
-                                        @foreach (var group in Entry?.PageActionGroups ?? new List<Models.PageActionGroup>())
+                                        @foreach (var group in PageActionGroups)
                                         {
                                             if (group.Visible(GetEventServices()).Result)
                                             {
@@ -33,7 +33,7 @@
                                     </Items>
                                     <Content>
                                         <TabsContent Padding="Padding.Is2">
-                                            @foreach (var group in Entry?.PageActionGroups ?? new List<Models.PageActionGroup>())
+                                            @foreach (var group in PageActionGroups)
                                             {
                                                 <TabPanel Name="@(group.Caption ?? String.Empty)">
                                                     @foreach (var action in group.PageActions)
