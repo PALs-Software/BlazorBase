@@ -21,6 +21,18 @@ namespace BlazorBase.CRUD.Attributes
             Collapsed = collapsed;
         }
 
+        public VisibleAttribute(bool hideInGUI)
+        {
+            if (!hideInGUI)
+                return;
+
+            HideInGUITypes = new List<GUIType>() {
+                GUIType.List,
+                GUIType.ListPart,
+                GUIType.Card
+            };
+        }
+
         public List<GUIType> HideInGUITypes { get; set; } = new List<GUIType>();
 
         public string DisplayGroup { get; set; }
