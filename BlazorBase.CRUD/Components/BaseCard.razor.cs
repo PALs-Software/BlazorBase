@@ -8,7 +8,9 @@ using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Modules;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -49,6 +51,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
         #endregion
+
         #endregion
 
         [Inject]
@@ -72,7 +75,7 @@ namespace BlazorBase.CRUD.Components
         private MarkupString CardSummaryInvalidFeedback;
         private bool ShowInvalidFeedback = false;
         private Modal Modal = default!;
-        private TModel Entry;
+        private TModel Model;
         private Type TModelType;
 
         private bool AddingMode;
@@ -89,6 +92,7 @@ namespace BlazorBase.CRUD.Components
         protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
         protected BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
 
+        protected List<IBaseInput> BaseInputExtensions = new List<IBaseInput>();
         #endregion
 
         #region Init
@@ -103,11 +107,39 @@ namespace BlazorBase.CRUD.Components
                     SingleDisplayName = ModelLocalizer[TModelType.Name];
                 Title = Localizer[nameof(Title), SingleDisplayName];
 
-                SetUpDisplayLists(TModelType, GUIType.Card);
+                BaseInputExtensions = ServiceProvider.GetServices<IBaseInput>().ToList();
+
+                SetUpDisplayLists(TModelType, GUIType.Card);                
             });
         }
 
+        protected async Task<RenderFragment> CheckIfBaseInputExtensionsHandlePropertyAsync(DisplayItem displayItem)
+        {
+            var eventServices = GetEventServices();
 
+            foreach (var baseinput in BaseInputExtensions)
+                if (await baseinput.IsHandlingPropertyAsync(Model, displayItem, eventServices))
+                    return GetBaseInputExtensionAsRenderFragment(displayItem, baseinput.GetType());
+
+            return null;
+        }
+        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType) => builder =>
+        {
+            builder.OpenComponent(0, baseInputExtensionType);
+
+            builder.AddAttribute(1, "Model", Model);
+            builder.AddAttribute(2, "Property", displayItem.Property);
+            builder.AddAttribute(3, "ReadOnly", !AddingMode && displayItem.Property.IsKey());
+            builder.AddAttribute(4, "Service", Service);
+            builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
+
+            builder.AddAttribute(6, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
+            builder.AddAttribute(7, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
+            builder.AddAttribute(8, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
+
+            builder.CloseComponent();
+
+        };
         #endregion
 
         #region Modal
@@ -123,35 +155,35 @@ namespace BlazorBase.CRUD.Components
             if (AddingMode)
             {
                 var eventServices = GetEventServices();
-                Entry = new TModel();
-                var args = new OnCreateNewEntryInstanceArgs(Entry, eventServices);
+                Model = new TModel();
+                var args = new OnCreateNewEntryInstanceArgs(Model, eventServices);
                 await OnCreateNewEntryInstance.InvokeAsync(args);
-                await Entry.OnCreateNewEntryInstance(args);
+                await Model.OnCreateNewEntryInstance(args);
             }
             else
-                Entry = await Service.GetAsync<TModel>(primaryKeys);
+                Model = await Service.GetAsync<TModel>(primaryKeys);
 
-            if (Entry == null)
+            if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
-            ValidationContext = new ValidationContext(Entry, ServiceProvider, new Dictionary<object, object>()
+            ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object>()
             {
                 [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
                 [typeof(DbContext)] = Service.DbContext
             });
 
-            PageActionGroups = Entry.GeneratePageActionGroups() ?? new List<PageActionGroup>();
+            PageActionGroups = Model.GeneratePageActionGroups() ?? new List<PageActionGroup>();
             SelectedPageActionGroup = PageActionGroups.FirstOrDefault()?.Caption;
 
-            Entry.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
+            Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
             Modal.Show();
         }
         protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
         {
-            if (Entry == null)
+            if (Model == null)
                 return;
 
-            await ShowAsync(false, Entry.GetPrimaryKeys());
+            await ShowAsync(false, Model.GetPrimaryKeys());
 
             await InvokeAsync(() => {
                 StateHasChanged();
@@ -176,35 +208,35 @@ namespace BlazorBase.CRUD.Components
             {
                 if (AddingMode)
                 {
-                    var args = new OnBeforeAddEntryArgs(Entry, false, eventServices);
+                    var args = new OnBeforeAddEntryArgs(Model, false, eventServices);
                     await OnBeforeAddEntry.InvokeAsync(args);
-                    await Entry.OnBeforeAddEntry(args);
+                    await Model.OnBeforeAddEntry(args);
                     if (args.AbortAdding)
                         return;
 
-                    if (!await Service.AddEntryAsync(Entry))
+                    if (!await Service.AddEntryAsync(Model))
                     {
-                        ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Entry.GetPrimaryKeysAsString()]);
+                        ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
                         return;
                     }
 
-                    var onAfterArgs = new OnAfterAddEntryArgs(Entry, eventServices);
+                    var onAfterArgs = new OnAfterAddEntryArgs(Model, eventServices);
                     await OnAfterAddEntry.InvokeAsync(onAfterArgs);
-                    await Entry.OnAfterAddEntry(onAfterArgs);
+                    await Model.OnAfterAddEntry(onAfterArgs);
                 }
                 else
                 {
-                    var args = new OnBeforeUpdateEntryArgs(Entry, false, eventServices);
+                    var args = new OnBeforeUpdateEntryArgs(Model, false, eventServices);
                     await OnBeforeUpdateEntry.InvokeAsync(args);
-                    await Entry.OnBeforeUpdateEntry(args);
+                    await Model.OnBeforeUpdateEntry(args);
                     if (args.AbortUpdating)
                         return;
 
-                    Service.UpdateEntry(Entry);
+                    Service.UpdateEntry(Model);
 
-                    var onAfterArgs = new OnAfterUpdateEntryArgs(Entry, eventServices);
+                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, eventServices);
                     await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
-                    await Entry.OnAfterUpdateEntry(onAfterArgs);
+                    await Model.OnAfterUpdateEntry(onAfterArgs);
                 }
 
                 await Service.SaveChangesAsync();
@@ -222,13 +254,13 @@ namespace BlazorBase.CRUD.Components
 
             Modal.Hide();
             await OnCardClosed.InvokeAsync(null);
-            Entry = null;
+            Model = null;
         }
 
         protected async Task RejectModalAsync()
         {
             Modal.Hide();
-            Entry = null;
+            Model = null;
 
             await OnCardClosed.InvokeAsync(null);
         }
@@ -276,7 +308,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var input in BaseInputSelectLists)
                 input.ValidatePropertyValue();
 
-            return Entry.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
+            return Model.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
         }
 
         private void ShowFormattedInvalidFeedback(string feedback)

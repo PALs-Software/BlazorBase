@@ -16,11 +16,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.BaseDisplayComponent;
 using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseInput
+    public partial class BaseInput : IBaseInput
     {
         #region Parameters
         [Parameter] public IBaseModel Model { get; set; }
@@ -38,7 +39,7 @@ namespace BlazorBase.CRUD.Components
 
         #endregion
 
-        #region Injects
+        #region Injects        
         [Inject] protected BaseParser BaseParser { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
@@ -92,6 +93,11 @@ namespace BlazorBase.CRUD.Components
                 ValidatePropertyValue();
             });
         }
+
+        public virtual Task<bool> IsHandlingPropertyAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        {
+            return Task.FromResult(false);
+        }
         #endregion
 
         #region Events
@@ -140,14 +146,14 @@ namespace BlazorBase.CRUD.Components
             var valid = ValidatePropertyValue();
 
             if (valid)
-                await ReLoadForeignProperties(newValue);
+                await ReloadForeignProperties(newValue);
 
             var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
             await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
             await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
-        protected async virtual Task ReLoadForeignProperties(object newValue)
+        protected async virtual Task ReloadForeignProperties(object newValue)
         {
             if (ForeignKeyProperty == null || (!typeof(IBaseModel).IsAssignableFrom(ForeignKeyProperty.PropertyType)))
                 return;
@@ -201,6 +207,9 @@ namespace BlazorBase.CRUD.Components
             };
         }
 
+     
+
         #endregion
+
     }
 }

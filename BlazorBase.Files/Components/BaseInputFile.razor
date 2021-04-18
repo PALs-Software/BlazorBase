@@ -1,12 +1,28 @@
 ﻿@inherits BaseInput
 
-<FileEdit MaxMessageSize="10000" Multiple="false" Filter="@FileFilter" Changed="@OnFileChanged" />
+@if (Model != null)
+{
+    <LoadingIndicator Visible="ShowLoadingIndicator">
+        @Localizer["Uploading file..."]
+        <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight" >
+            <ProgressBar Value="UploadProgress" Animated="true" Striped="true">
+                @UploadProgress %
+            </ProgressBar>
+        </Progress>
+    </LoadingIndicator>
 
-<div class="valid-feedback">
-    @ValidFeedback
-</div>
-
-<div class="invalid-feedback">
-    @InvalidFeedback
-</div>
-
+    <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
+        <Fields>
+            <Field Horizontal="true">
+                <FieldBody ColumnSize="ColumnSize.Is12">
+                    <div class="@InputClass">
+                        <FileEdit Multiple="false" Filter="@FileFilter" Changed="async (args) => await OnValueChangedAsync(args)" Progressed="OnUploadProgressed" Class="@InputClass" />
+                    </div>
+                    <div class="@FeedbackClass">
+                        @Feedback
+                    </div>
+                </FieldBody>
+            </Field>
+        </Fields>
+    </Column>
+}

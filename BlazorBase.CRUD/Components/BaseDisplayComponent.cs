@@ -53,6 +53,8 @@ namespace BlazorBase.CRUD.Components
         protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties;
         protected static Dictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
         protected Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
+
+
         #endregion
 
         protected void SetUpDisplayLists(Type modelType, GUIType guiType)
@@ -84,7 +86,7 @@ namespace BlazorBase.CRUD.Components
             DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        public async Task PrepareForeignKeyProperties(Type modelType, BaseService service)
+        protected async Task PrepareForeignKeyProperties(Type modelType, BaseService service)
         {
             if (ForeignKeyProperties != null)
                 return;
@@ -171,6 +173,9 @@ namespace BlazorBase.CRUD.Components
 
             return query;
         }
+
+
+      
 
 
     }

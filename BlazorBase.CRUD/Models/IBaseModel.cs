@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.ViewModels;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.Models
 {
@@ -110,6 +112,7 @@ namespace BlazorBase.CRUD.Models
         public record OnAfterRemoveListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
         public Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args);
         #endregion
+
         #endregion
 
         #region Validation Methods
