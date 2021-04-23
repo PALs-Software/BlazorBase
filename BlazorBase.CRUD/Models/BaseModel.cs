@@ -89,7 +89,6 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region CRUD Methods
-
         public void ForcePropertyRepaint(string propertyName)
         {
             OnForcePropertyRepaint?.Invoke(this, propertyName);
@@ -101,6 +100,26 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Events
+
+        #region DbContext
+
+        public virtual Task OnDbContextAddEntry(OnDbContextAddEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnDbContextModifyEntry(OnDbContextModifyEntryArgs args)
+        {
+            ModifiedOn = DateTime.Now;
+
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnDbContextDeleteEntry(OnDbContextDeleteEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+        #endregion
         public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args)
         {
             return Task.CompletedTask;
@@ -147,6 +166,11 @@ namespace BlazorBase.CRUD.Models
         }
 
         public virtual Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterSaveChanges(OnAfterSaveChangesArgs args)
         {
             return Task.CompletedTask;
         }
@@ -251,8 +275,8 @@ namespace BlazorBase.CRUD.Models
         }
 
         protected virtual void BuildComponent(RenderTreeBuilder builder)
-        {
-            builder.OpenComponent<BaseList<TModel>>(0);
+        {            
+            builder.OpenComponent(0, typeof(BaseList<>).MakeGenericType(GetType()));
             builder.CloseComponent();
         }
 

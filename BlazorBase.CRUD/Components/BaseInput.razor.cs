@@ -94,7 +94,7 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        public virtual Task<bool> IsHandlingPropertyAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(false);
         }

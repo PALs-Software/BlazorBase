@@ -1,0 +1,26 @@
+﻿@inherits IBasePropertyListDisplay
+
+@if (Model != null && (Property.GetValue(Model) is BaseFile baseFile))
+{
+    if (baseFile.IsImage())
+    {
+        <div>
+            <img src="@baseFile.GetFileLink()" class="figure-img img-fluid rounded blazor-base-file-list-display">
+        </div>
+    }
+    else if (baseFile.IsDocument())
+    {
+        <iframe class="blazor-base-file-list-display" src="@baseFile.GetFileLink()" allowfullscreen="allowfullscreen"></iframe>
+    }
+    else if (baseFile.IsAudio())
+    {
+        <audio controls class="blazor-base-file-list-display">
+            <source src="@baseFile.GetFileLink()" type="@baseFile.MimeFileType">
+        </audio>
+    }
+    <div>
+        <a href="@baseFile.GetFileLink()" target="_blank">@Localizer["View"] <BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.ExternalLinkAlt"></BaseIcon></a>
+        <span>|</span>
+        <a href="@baseFile.GetFileLink()" target="_blank" download>@Localizer["Download"] <BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.Download"></BaseIcon></a>
+    </div>
+}

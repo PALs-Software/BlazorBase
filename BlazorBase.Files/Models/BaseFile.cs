@@ -14,6 +14,9 @@ using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
 using static BlazorBase.CRUD.Models.IBaseModel;
+using System.Web;
+using BlazorBase.Files.Controller;
+using System.Net;
 
 namespace BlazorBase.Files.Models
 {
@@ -21,7 +24,6 @@ namespace BlazorBase.Files.Models
     public class BaseFile : BaseModel<BaseFile>, IBaseModel
     {
         [Key]
-        [Visible(DisplayOrder = 100)]
         public Guid Id { get; set; }
 
         [Required]
@@ -49,61 +51,115 @@ namespace BlazorBase.Files.Models
         /// </summary>
         [NotMapped]
         [Editable(false)]
-        [Visible(DisplayOrder = 700)]
+        [Visible(DisplayOrder = 100)]
         public BaseFile DisplayFile { get { return this; } }
 
         [NotMapped]
-        public byte[] Data { get; set; }
+        public Guid TempFileId { get; set; }
 
         #region CRUD    
-        public override Task OnBeforeAddEntry(OnBeforeAddEntryArgs args)
+
+        public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
         {
             do
             {
                 Id = Guid.NewGuid();
-            } while (args.EventServices.BaseService.GetAsync<BaseFile>(Id) == null);
-
-            return base.OnBeforeAddEntry(args);
+            } while (await args.EventServices.BaseService.GetAsync(GetType(), Id) != null);
         }
 
-        public override async Task OnAfterAddEntry(OnAfterAddEntryArgs args)
+        public override async Task OnAfterSaveChanges(OnAfterSaveChangesArgs args)
         {
-            await SaveBinaryFile(args.EventServices.ServiceProvider);
-            await base.OnAfterAddEntry(args);
+            await CopyTempFileToFileStore(args.EventServices.ServiceProvider);
         }
 
-        public override async Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args)
+        public override async Task OnDbContextDeleteEntry(OnDbContextDeleteEntryArgs args)
         {
-            await SaveBinaryFile(args.EventServices.ServiceProvider);
-            await base.OnAfterUpdateEntry(args);
+            await RemoveFileFromDisk(args.ServiceProvider);
         }
-
         #endregion
 
         #region File Handling
+        public string GetFileLink()
+        {
+            return $"/api/BaseFile/{BaseFileController.EncodeUrl(MimeFileType)}/{Id}";
+        }
 
-        protected async Task SaveBinaryFile(IServiceProvider serviceProvider)
+        protected async Task CopyTempFileToFileStore(IServiceProvider serviceProvider)
         {
             await Task.Run(() =>
             {
-                if (Data == null || FileSize == 0)
+                if (FileSize == 0 || TempFileId == Guid.Empty)
                     return;
 
                 var options = serviceProvider.GetService<BlazorBaseFileOptions>();
                 if (!Directory.Exists(options.FileStorePath))
                     Directory.CreateDirectory(options.FileStorePath);
 
-                File.WriteAllBytes(Path.Join(options.FileStorePath, Id.ToString()), Data);
+                var tempFilePath = Path.Join(options.TempFileStorePath, TempFileId.ToString());
+                if (File.Exists(tempFilePath))
+                    File.Move(tempFilePath, Path.Join(options.FileStorePath, Id.ToString()), true);
+
+                TempFileId = Guid.Empty;
             });
         }
 
-        public void LoadFileFromDisk(IServiceProvider serviceProvider)
+        public async Task RemoveFileFromDisk(IServiceProvider serviceProvider, bool deleteOnlyTemporary = false)
         {
-            var options = serviceProvider.GetService<BlazorBaseFileOptions>();
+            await Task.Run(() =>
+            {
+                if (deleteOnlyTemporary && TempFileId == Guid.Empty)
+                    return;
 
-            Data = File.ReadAllBytes(Path.Join(options.FileStorePath, Id.ToString()));
+                var options = serviceProvider.GetService<BlazorBaseFileOptions>();
+                var filePath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, TempFileId.ToString()) : Path.Join(options.FileStorePath, Id.ToString());
+
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            });
+        }
+        #endregion
+
+        #region File Type
+        public bool IsImage()
+        {
+            return MimeFileType?.StartsWith("image") ?? false;
         }
 
+        public bool IsAudio()
+        {
+            return MimeFileType?.StartsWith("audio") ?? false;
+        }
+
+        public bool IsVideo()
+        {
+            return MimeFileType?.StartsWith("video") ?? false;
+        }
+
+        public static readonly String[] ValidDocumentMimeTypes = new String[] {
+            "text/plain",
+            "text/xml",
+            "application/xml",
+            "application/json",
+            "application/pdf"
+        };
+
+        public bool IsDocument()
+        {
+            return ValidDocumentMimeTypes.Contains(MimeFileType);
+        }
+
+        public static readonly String[] ValidOfficeFileMimeTypes = new String[] {
+            "application/msword",
+            "application/msexcel",
+            "application/mspowerpoint",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        };
+
+        public bool IsOfficeFile()
+        {
+            return ValidOfficeFileMimeTypes.Contains(MimeFileType);
+        }
         #endregion
     }
 

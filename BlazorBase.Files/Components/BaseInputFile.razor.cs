@@ -22,6 +22,7 @@ namespace BlazorBase.Files.Components
         [Parameter] public string FileFilter { get; set; } = "*.";
 
         [Inject] protected IStringLocalizer<BaseInputFile> Localizer { get; set; }
+        [Inject] protected BlazorBaseFileOptions Options { get; set; }
 
         protected bool ShowLoadingIndicator { get; set; } = false;
         protected int UploadProgress { get; set; } = 0;
@@ -31,7 +32,7 @@ namespace BlazorBase.Files.Components
             await base.OnInitializedAsync();
         }
 
-        public override Task<bool> IsHandlingPropertyAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        public override Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(typeof(BaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
         }
@@ -52,34 +53,54 @@ namespace BlazorBase.Files.Components
 
                 foreach (var file in ((FileChangedEventArgs)fileChangedEventArgs).Files)
                 {
-                    using var stream = new MemoryStream();
-                    await file.WriteToStreamAsync(stream);
-
-                    stream.Seek(0, SeekOrigin.Begin);
-
                     new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
-                    var newFile = new BaseFile
-                    {
-                        FileName = Path.GetFileNameWithoutExtension(file.Name),
-                        FileSize = file.Size,
-                        BaseFileType = Path.GetExtension(file.Name),
-                        MimeFileType = mimeFileType,
-                        Data = stream.ToArray()
-                    };
+
+                    var newFile = Activator.CreateInstance(Property.PropertyType) as BaseFile;
+                    newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
+                    newFile.FileSize = file.Size;
+                    newFile.BaseFileType = Path.GetExtension(file.Name);
+                    newFile.MimeFileType = mimeFileType;
 
                     if (Model is BaseFile baseFile)
                     {
+                        baseFile.TempFileId = Guid.NewGuid();
+                        newFile.TempFileId = baseFile.TempFileId;
+
                         baseFile.FileName = newFile.FileName;
                         baseFile.FileSize = newFile.FileSize;
                         baseFile.BaseFileType = newFile.BaseFileType;
                         baseFile.MimeFileType = newFile.MimeFileType;
-                        baseFile.Data = newFile.Data;
+
+                        baseFile.ForcePropertyRepaint(nameof(BaseFile.FileName));
                     }
                     else
                     {
+                        if (Property.GetValue(Model) is BaseFile oldFile)
+                        {
+                            await oldFile.RemoveFileFromDisk(ServiceProvider, deleteOnlyTemporary: true);
+                            Service.DbContext.Entry(oldFile).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+                        }
+
+                        await newFile.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(Model, eventServices));
+                        newFile.TempFileId = Guid.NewGuid();
+
                         await newFile.OnBeforeAddEntry(new OnBeforeAddEntryArgs(newFile, false, eventServices));
                         Property.SetValue(Model, newFile);
                         await newFile.OnAfterAddEntry(new OnAfterAddEntryArgs(newFile, eventServices));
+
+                        Service.DbContext.Entry(newFile).State = Microsoft.EntityFrameworkCore.EntityState.Added;
+                    }
+
+                    if (file.Size != 0)
+                    {
+                        if (newFile.TempFileId == Guid.Empty)
+                            throw new CRUDException(Localizer["The Id can not be empty"]);
+
+                        if (!Directory.Exists(Options.TempFileStorePath))
+                            Directory.CreateDirectory(Options.TempFileStorePath);
+
+                        using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.TempFileId.ToString()));
+                        await file.WriteToStreamAsync(fileStream);
                     }
 
                     SetValidation(showValidation: false);

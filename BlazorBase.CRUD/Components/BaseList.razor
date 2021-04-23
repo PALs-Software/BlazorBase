@@ -39,7 +39,17 @@
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
                         <td>
-                            @displayItem.Property.GetValue(context)
+                            @{
+                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
+                                if (renderFragment != null)
+                                {
+                                    @renderFragment
+                                }
+                                else
+                                {
+                                    @displayItem.Property.GetValue(context)
+                                }
+                            }
                         </td>
                     }
                 }
@@ -60,6 +70,7 @@
           OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
           OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
           OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+          OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
           OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
           OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
           OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"

@@ -39,6 +39,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveEntryArgs> OnBeforeRemoveEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveEntryArgs> OnAfterRemoveEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
         #region List Events
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
@@ -86,6 +87,8 @@ namespace BlazorBase.CRUD.Components
 
         protected BaseCard<TModel> BaseCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
+
+        protected List<IBasePropertyListDisplay> PropertyListDisplays = new List<IBasePropertyListDisplay>();
         #endregion
 
         #region Init
@@ -104,15 +107,40 @@ namespace BlazorBase.CRUD.Components
                 if (String.IsNullOrEmpty(PluralDisplayName))
                     PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
 
+                PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+
             });
 
             await ProcessQueryParameters();
         }
 
+        protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
+        {
+            var eventServices = GetEventServices();
+
+            foreach (var propertyListDisplay in PropertyListDisplays)
+                if (await propertyListDisplay.IsHandlingPropertyRenderingAsync(model, displayItem, eventServices))
+                    return GetPropertyListDisplayExtensionAsRenderFragment(displayItem, propertyListDisplay.GetType(), model);
+
+            return null;
+        }
+
+        protected RenderFragment GetPropertyListDisplayExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, TModel model) => builder =>
+        {
+            builder.OpenComponent(0, baseInputExtensionType);
+
+            builder.AddAttribute(1, "Model", model);
+            builder.AddAttribute(2, "Property", displayItem.Property);
+            builder.AddAttribute(3, "Service", Service);
+            builder.AddAttribute(4, "ModelLocalizer", ModelLocalizer);
+
+            builder.CloseComponent();
+        };
+
         private async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
         {
             var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
-
+            
             int totalEntries;
             if (DataLoadCondition == null)
             {

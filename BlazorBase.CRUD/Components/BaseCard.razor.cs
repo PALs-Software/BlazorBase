@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -38,11 +39,12 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnAfterSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
         #region List Events
+        [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
-        [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeConvertListPropertyTypeArgs> OnBeforeConvertListPropertyType { get; set; }
@@ -109,16 +111,16 @@ namespace BlazorBase.CRUD.Components
 
                 BaseInputExtensions = ServiceProvider.GetServices<IBaseInput>().ToList();
 
-                SetUpDisplayLists(TModelType, GUIType.Card);                
+                SetUpDisplayLists(TModelType, GUIType.Card);
             });
         }
 
-        protected async Task<RenderFragment> CheckIfBaseInputExtensionsHandlePropertyAsync(DisplayItem displayItem)
+        protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem)
         {
             var eventServices = GetEventServices();
 
             foreach (var baseinput in BaseInputExtensions)
-                if (await baseinput.IsHandlingPropertyAsync(Model, displayItem, eventServices))
+                if (await baseinput.IsHandlingPropertyRenderingAsync(Model, displayItem, eventServices))
                     return GetBaseInputExtensionAsRenderFragment(displayItem, baseinput.GetType());
 
             return null;
@@ -185,7 +187,8 @@ namespace BlazorBase.CRUD.Components
 
             await ShowAsync(false, Model.GetPrimaryKeys());
 
-            await InvokeAsync(() => {
+            await InvokeAsync(() =>
+            {
                 StateHasChanged();
             });
         }
@@ -240,21 +243,29 @@ namespace BlazorBase.CRUD.Components
                 }
 
                 await Service.SaveChangesAsync();
+                await InvokeOnAfterSaveChangesEvents(eventServices);
             }
             catch (CRUDException e)
             {
-                ShowFormattedInvalidFeedback(e.Message);
+                ShowFormattedInvalidFeedback(PrepareExceptionErrorMessage(e));
                 return;
             }
             catch (Exception e)
             {
-                ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", e.Message]);
+                ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", PrepareExceptionErrorMessage(e)]);
                 return;
             }
 
             Modal.Hide();
             await OnCardClosed.InvokeAsync(null);
             Model = null;
+        }
+
+        protected string PrepareExceptionErrorMessage(Exception e) {
+            if (e.InnerException == null)
+                return e.Message;
+
+            return e.Message + Environment.NewLine + Environment.NewLine + Localizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
         }
 
         protected async Task RejectModalAsync()
@@ -269,6 +280,32 @@ namespace BlazorBase.CRUD.Components
         {
             if (args.CloseReason != CloseReason.UserClosing)
                 Task.Run(async () => await RejectModalAsync());
+        }
+        #endregion
+
+        #region Events
+        protected async Task InvokeOnAfterSaveChangesEvents(EventServices eventServices)
+        {
+            var onAfterSaveChangesArgs = new OnAfterSaveChangesArgs(Model, false, eventServices);
+            await OnAfterSaveChanges.InvokeAsync(onAfterSaveChangesArgs);
+            await Model.OnAfterSaveChanges(onAfterSaveChangesArgs);
+
+            onAfterSaveChangesArgs = new OnAfterSaveChangesArgs(Model, true, eventServices);
+            foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
+            {
+                if (property.IsListProperty())
+                {
+                    if (property.GetValue(Model) is IList list)
+                        foreach (IBaseModel item in list)
+                            if (item != null)
+                                await item.OnAfterSaveChanges(onAfterSaveChangesArgs);
+                }
+                else
+                {
+                    if (property.GetValue(Model) is IBaseModel value)
+                        await value.OnAfterSaveChanges(onAfterSaveChangesArgs);
+                }
+            }
         }
         #endregion
 

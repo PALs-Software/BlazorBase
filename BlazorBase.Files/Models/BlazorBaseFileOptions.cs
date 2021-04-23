@@ -20,6 +20,7 @@ namespace BlazorBase.Files.Models
 
         #endregion
         public string FileStorePath { get; set; } = @"C:\BlazorBaseFileStore";
+        public string TempFileStorePath { get; set; } = @"C:\BlazorBaseFileStore\Temp";
         #region Constructors
 
         public BlazorBaseFileOptions(IServiceProvider serviceProvider, Action<BlazorBaseFileOptions> configureOptions)

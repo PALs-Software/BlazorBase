@@ -35,6 +35,18 @@ namespace BlazorBase.CRUD.Models
         public void ReloadEntityFromDatabase();
 
         #region Model
+
+        #region DbContext
+        public record OnDbContextAddEntryArgs(DbContext DbContext, IServiceProvider ServiceProvider);
+        public Task OnDbContextAddEntry(OnDbContextAddEntryArgs args);
+
+        public record OnDbContextModifyEntryArgs(DbContext DbContext, IServiceProvider ServiceProvider);
+        public Task OnDbContextModifyEntry(OnDbContextModifyEntryArgs args);
+
+        public record OnDbContextDeleteEntryArgs(DbContext DbContext, IServiceProvider ServiceProvider);
+        public Task OnDbContextDeleteEntry(OnDbContextDeleteEntryArgs args);
+        #endregion
+
         public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args);
 
@@ -72,6 +84,10 @@ namespace BlazorBase.CRUD.Models
 
         public record OnAfterRemoveEntryArgs(IBaseModel Model, EventServices EventServices);
         public Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args);
+
+
+        public record OnAfterSaveChangesArgs(IBaseModel Model, bool NavigationProperty, EventServices EventServices);
+        public Task OnAfterSaveChanges(OnAfterSaveChangesArgs args);
         #endregion
 
         #region ListProperty

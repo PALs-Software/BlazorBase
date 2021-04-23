@@ -73,7 +73,7 @@
                                     <Row>
                                         @foreach (var displayItem in displayGroup.Value.DisplayItems)
                                         {
-                                            var renderFragment = CheckIfBaseInputExtensionsHandlePropertyAsync(displayItem).Result;
+                                            var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem).Result;
                                             if (renderFragment != null)
                                             {
                                                 @renderFragment
