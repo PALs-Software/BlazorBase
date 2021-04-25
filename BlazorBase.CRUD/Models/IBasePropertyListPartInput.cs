@@ -13,7 +13,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Models
 {
-    public interface IBaseInput
+    public interface IBasePropertyListPartInput
     {
         #region Parameters
 

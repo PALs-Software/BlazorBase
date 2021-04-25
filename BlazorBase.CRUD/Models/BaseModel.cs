@@ -103,22 +103,18 @@ namespace BlazorBase.CRUD.Models
 
         #region DbContext
 
-        public virtual Task OnDbContextAddEntry(OnDbContextAddEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
+        public virtual Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args) { return Task.CompletedTask; }
 
-        public virtual Task OnDbContextModifyEntry(OnDbContextModifyEntryArgs args)
+        public virtual Task OnBeforeDbContextModifyEntry(OnBeforeDbContextModifyEntryArgs args)
         {
             ModifiedOn = DateTime.Now;
-
             return Task.CompletedTask;
         }
+        public virtual Task OnAfterDbContextModifiedEntry(OnAfterDbContextModifiedEntryArgs args) { return Task.CompletedTask; }
 
-        public virtual Task OnDbContextDeleteEntry(OnDbContextDeleteEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
+        public virtual Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args) { return Task.CompletedTask; }
         #endregion
         public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args)
         {
@@ -226,7 +222,7 @@ namespace BlazorBase.CRUD.Models
             return Task.CompletedTask;
         }
         #endregion
-      
+
         #endregion
 
         #region Validation Methods
@@ -275,7 +271,7 @@ namespace BlazorBase.CRUD.Models
         }
 
         protected virtual void BuildComponent(RenderTreeBuilder builder)
-        {            
+        {
             builder.OpenComponent(0, typeof(BaseList<>).MakeGenericType(GetType()));
             builder.CloseComponent();
         }

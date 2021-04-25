@@ -1,0 +1,37 @@
+﻿@inherits BaseFileInput
+
+@if (Model != null)
+{
+    <LoadingIndicator Visible="ShowLoadingIndicator">
+        @Localizer["Uploading file..."]
+        <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
+            <ProgressBar Value="UploadProgress" Animated="true" Striped="true">
+                @UploadProgress %
+            </ProgressBar>
+        </Progress>
+    </LoadingIndicator>
+
+
+    <div class="@InputClass">
+        <Row Margin="Margin.Is0">
+            <Column ColumnSize="ColumnSize.Is6" Padding="Padding.Is0.FromLeft">
+                <BaseFileListDisplay Model="Model" Property="Property" Service="Service" ModelLocalizer="ModelLocalizer" />
+            </Column>
+            <Column ColumnSize="ColumnSize.Is6">
+                <Row>
+                    <FileEdit @ref="FileEdit" Multiple="false" Filter="@FileFilter" Changed="async (args) => await OnValueChangedAsync(args)" Progressed="OnUploadProgressed" Class="@InputClass" AutoReset="false" />
+                </Row>
+                @if (Property.CanWrite)
+                {
+                    <Row Float="Float.Right">
+                        <Button Color="Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
+                    </Row>
+                }
+            </Column>
+        </Row>
+    </div>
+    <div class="@FeedbackClass">
+        @Feedback
+    </div>
+
+}

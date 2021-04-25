@@ -5,6 +5,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -43,8 +44,9 @@ namespace BlazorBase.CRUD.Components
         }
 
         #region Injects
-        [Inject]
-        protected StringLocalizerFactory StringLocalizerFactory { get; set; }
+        [Inject] protected StringLocalizerFactory StringLocalizerFactory { get; set; }
+
+        [Inject] protected IStringLocalizer<GeneralCRUDTranslations> GeneralCRUDLocalizer { get; set; }
         #endregion
 
         #region Members
@@ -174,9 +176,12 @@ namespace BlazorBase.CRUD.Components
             return query;
         }
 
+       protected string PrepareExceptionErrorMessage(Exception e)
+        {
+            if (e.InnerException == null)
+                return e.Message;
 
-      
-
-
+            return e.Message + Environment.NewLine + Environment.NewLine + GeneralCRUDLocalizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
+        }
     }
 }

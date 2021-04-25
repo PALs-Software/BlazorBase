@@ -5,11 +5,13 @@ using BlazorBase.Files.Models;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static BlazorBase.CRUD.Components.BaseDisplayComponent;
@@ -17,15 +19,17 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.Files.Components
 {
-    public partial class BaseInputFile : BaseInput
+    public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePropertyListPartInput
     {
         [Parameter] public string FileFilter { get; set; } = "*.";
 
-        [Inject] protected IStringLocalizer<BaseInputFile> Localizer { get; set; }
+        [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; }
         [Inject] protected BlazorBaseFileOptions Options { get; set; }
 
         protected bool ShowLoadingIndicator { get; set; } = false;
         protected int UploadProgress { get; set; } = 0;
+        protected FileEdit FileEdit { get; set; }
+        protected bool FileEditIsResetting = false;
 
         protected override async Task OnInitializedAsync()
         {
@@ -39,6 +43,9 @@ namespace BlazorBase.Files.Components
 
         protected override async Task OnValueChangedAsync(object fileChangedEventArgs)
         {
+            if (FileEditIsResetting)
+                return;
+
             var eventServices = GetEventServices();
 
             var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, eventServices);
@@ -63,50 +70,37 @@ namespace BlazorBase.Files.Components
 
                     if (Model is BaseFile baseFile)
                     {
-                        baseFile.TempFileId = Guid.NewGuid();
-                        newFile.TempFileId = baseFile.TempFileId;
+                        newFile.TempFileId = baseFile.TempFileId == Guid.Empty ? Guid.NewGuid() : baseFile.TempFileId;
+                        baseFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
 
+                        baseFile.TempFileId = newFile.TempFileId;
                         baseFile.FileName = newFile.FileName;
                         baseFile.FileSize = newFile.FileSize;
                         baseFile.BaseFileType = newFile.BaseFileType;
                         baseFile.MimeFileType = newFile.MimeFileType;
 
-                        baseFile.ForcePropertyRepaint(nameof(BaseFile.FileName));
+                        Model.ForcePropertyRepaint(nameof(BaseFile.FileName));
                     }
                     else
                     {
                         if (Property.GetValue(Model) is BaseFile oldFile)
                         {
                             await oldFile.RemoveFileFromDisk(ServiceProvider, deleteOnlyTemporary: true);
-                            Service.DbContext.Entry(oldFile).State = Microsoft.EntityFrameworkCore.EntityState.Deleted;
+                            var entry = Service.DbContext.Entry(oldFile);
+                            entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
                         }
 
                         await newFile.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(Model, eventServices));
                         newFile.TempFileId = Guid.NewGuid();
-
                         await newFile.OnBeforeAddEntry(new OnBeforeAddEntryArgs(newFile, false, eventServices));
+
+                        newFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
                         Property.SetValue(Model, newFile);
                         await newFile.OnAfterAddEntry(new OnAfterAddEntryArgs(newFile, eventServices));
-
-                        Service.DbContext.Entry(newFile).State = Microsoft.EntityFrameworkCore.EntityState.Added;
-                    }
-
-                    if (file.Size != 0)
-                    {
-                        if (newFile.TempFileId == Guid.Empty)
-                            throw new CRUDException(Localizer["The Id can not be empty"]);
-
-                        if (!Directory.Exists(Options.TempFileStorePath))
-                            Directory.CreateDirectory(Options.TempFileStorePath);
-
-                        using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.TempFileId.ToString()));
-                        await file.WriteToStreamAsync(fileStream);
                     }
 
                     SetValidation(showValidation: false);
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -116,6 +110,9 @@ namespace BlazorBase.Files.Components
             finally
             {
                 ShowLoadingIndicator = false;
+                FileEditIsResetting = true;
+                await FileEdit.Reset();
+                FileEditIsResetting = false;
             }
 
             if (valid)
@@ -126,9 +123,54 @@ namespace BlazorBase.Files.Components
             await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
-        void OnUploadProgressed(FileProgressedEventArgs e)
+        protected async Task<string> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
+        {
+            if (file.Size == 0)
+                return null;
+
+            if (newFile.TempFileId == Guid.Empty)
+                throw new CRUDException(Localizer["The Id can not be empty"]);
+
+            if (!Directory.Exists(Options.TempFileStorePath))
+                Directory.CreateDirectory(Options.TempFileStorePath);
+
+            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.TempFileId.ToString()));
+            await file.WriteToStreamAsync(fileStream);
+            fileStream.Position = 0;
+
+            return ComputeSha256Hash(fileStream);
+        }
+
+        protected string ComputeSha256Hash(FileStream fileStream)
+        {
+            using SHA256 sha256Hash = SHA256.Create();
+            byte[] Hashbytes = sha256Hash.ComputeHash(fileStream);
+
+            var hash = String.Empty;
+            foreach (var hashByte in Hashbytes)
+                hash += $"{hashByte:X2}";
+
+            return hash;
+        }
+
+        protected void OnUploadProgressed(FileProgressedEventArgs e)
         {
             UploadProgress = (int)e.Percentage;
         }
+
+        protected async Task DeleteAttachedFilePropertyAsync()
+        {
+            if (!Property.CanWrite)
+                return;
+
+            if (Property.GetValue(Model) is not BaseFile oldFile)
+                return;
+
+            await oldFile.RemoveFileFromDisk(ServiceProvider, deleteOnlyTemporary: true);
+            Service.DbContext.Entry(oldFile).State = Service.DbContext.Entry(oldFile).State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
+
+            Property.SetValue(Model, null);
+        }
+
     }
 }

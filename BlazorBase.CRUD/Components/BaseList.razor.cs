@@ -256,7 +256,7 @@ namespace BlazorBase.CRUD.Components
             }
             catch (Exception e)
             {
-                MessageHandler.ShowMessage(Localizer["Error while deleting"], e.Message, MessageType.Error);
+                MessageHandler.ShowMessage(Localizer["Error while deleting"], PrepareExceptionErrorMessage(e), MessageType.Error);
             }
 
             await VirtualizeList.RefreshDataAsync();

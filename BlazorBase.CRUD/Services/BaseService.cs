@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using Microsoft.Extensions.DependencyInjection;
+using static BlazorBase.CRUD.Models.IBaseModel;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Interfaces;
 
 namespace BlazorBase.CRUD.Services
 {
@@ -14,14 +18,17 @@ namespace BlazorBase.CRUD.Services
     {
         public DbContext DbContext { get; protected set; }
         public IServiceProvider ServiceProvider { get; }
+        protected IMessageHandler MessageHandler { get; set; }
 
-        public BaseService(DbContext context, IServiceProvider provider)
+        public BaseService(DbContext context, IServiceProvider provider, IMessageHandler messageHandler)
         {
             DbContext = context;
             ServiceProvider = provider;
+            MessageHandler = messageHandler;
         }
 
-        public async void RefreshDbContext() {
+        public async void RefreshDbContext()
+        {
             await DbContext.DisposeAsync();
             DbContext = ServiceProvider.GetService<DbContext>();
         }
@@ -113,10 +120,78 @@ namespace BlazorBase.CRUD.Services
             return true;
         }
 
+        #region SaveChanges
 
+      
         public async virtual Task<int> SaveChangesAsync()
         {
-            return await DbContext.SaveChangesAsync();
+            var changedEntries = await HandleOnBeforeDbContextEvents();
+            var result = await DbContext.SaveChangesAsync();
+            await HandleOnAfterDbContextEvents(changedEntries);
+
+            return result;
         }
+
+        protected async Task<(List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted)> HandleOnBeforeDbContextEvents()
+        {
+            DbContext.ChangeTracker.DetectChanges();
+
+            var markedAsAdded = DbContext.ChangeTracker.Entries().Where(x => x.State == EntityState.Added).ToList();
+            var markedAsModified = DbContext.ChangeTracker.Entries().Where(x => x.State == EntityState.Modified).ToList();
+            var markedAsDeleted = DbContext.ChangeTracker.Entries().Where(x => x.State == EntityState.Deleted).ToList();
+
+            var eventServices = GetEventServices();
+
+            var addArgs = new OnBeforeDbContextAddEntryArgs(eventServices);
+            foreach (var item in markedAsAdded)
+                if (item.Entity is IBaseModel model)
+                    await model.OnBeforeDbContextAddEntry(addArgs);
+
+            var modifyArgs = new OnBeforeDbContextModifyEntryArgs(eventServices);
+            foreach (var item in markedAsModified)
+                if (item.Entity is IBaseModel model)
+                    await model.OnBeforeDbContextModifyEntry(modifyArgs);
+
+            var deleteArgs = new OnBeforeDbContextDeleteEntryArgs(eventServices);
+            foreach (var item in markedAsDeleted)
+                if (item.Entity is IBaseModel model)
+                    await model.OnBeforeDbContextDeleteEntry(deleteArgs);
+
+            return (markedAsAdded, markedAsModified, markedAsDeleted);
+        }
+
+        protected async Task HandleOnAfterDbContextEvents((List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted) changedEntries)
+        {
+            var eventServices = GetEventServices();
+
+            var addArgs = new OnAfterDbContextAddedEntryArgs(eventServices);
+            foreach (var item in changedEntries.Added)
+                if (item.Entity is IBaseModel model)
+                    await model.OnAfterDbContextAddedEntry(addArgs);
+
+            var modifyArgs = new OnAfterDbContextModifiedEntryArgs(eventServices);
+            foreach (var item in changedEntries.Modified)
+                if (item.Entity is IBaseModel model)
+                    await model.OnAfterDbContextModifiedEntry(modifyArgs);
+
+            var deleteArgs = new OnAfterDbContextDeletedEntryArgs(eventServices);
+            foreach (var item in changedEntries.Deleted)
+                if (item.Entity is IBaseModel model)
+                    await model.OnAfterDbContextDeletedEntry(deleteArgs);
+        }
+        #endregion
+
+        #region Other
+        protected EventServices GetEventServices()
+        {
+            return new EventServices()
+            {
+                ServiceProvider = ServiceProvider,
+                Localizer = null,
+                BaseService = this,
+                MessageHandler = MessageHandler
+            };
+        }
+        #endregion
     }
 }

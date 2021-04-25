@@ -7,11 +7,14 @@ using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -61,10 +64,13 @@ namespace BlazorBase.CRUD.Components
 
         #region Property Infos
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
-        protected List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
+        protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
+        protected List<IBasePropertyListPartInput> BasePropertyListPartInputs = new List<IBasePropertyListPartInput>();
 
         protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
-        protected BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        protected BaseSelectListInput AddToBaseInputSelectLists { set { BaseSelectListInputs.Add(value); } }
+
+        protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
         #endregion
         #endregion
 
@@ -76,6 +82,7 @@ namespace BlazorBase.CRUD.Components
             {
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
 
+                IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 ModelLocalizer = GenericClassStringLocalizer.GetLocalizer(ModelListEntryType);
 
                 SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
@@ -87,11 +94,44 @@ namespace BlazorBase.CRUD.Components
 
                 if (Property.GetValue(Model) == null)
                     Property.SetValue(Model, CreateGenericListInstance());
+
+                BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyListPartInput>().ToList();
+
                 Entries = (IList)Property.GetValue(Model);
             });
 
             await PrepareForeignKeyProperties(ModelListEntryType, Service);
         }
+
+        protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, IBaseModel model)
+        {
+            var eventServices = GetEventServices();
+
+            foreach (var baseinput in BaseInputExtensions)
+                if (await baseinput.IsHandlingPropertyRenderingAsync(model, displayItem, eventServices))
+                    return GetBaseInputExtensionAsRenderFragment(displayItem, baseinput.GetType(), model);
+
+            return null;
+        }
+
+        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, IBaseModel model) => builder =>
+        {
+            builder.OpenComponent(0, baseInputExtensionType);
+
+            builder.AddAttribute(1, "Model", model);
+            builder.AddAttribute(2, "Property", displayItem.Property);
+            builder.AddAttribute(3, "ReadOnly", displayItem.Property.IsKey());
+            builder.AddAttribute(4, "Service", Service);
+            builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
+
+            builder.AddAttribute(6, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))));
+            builder.AddAttribute(7, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))));
+            builder.AddAttribute(8, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))));
+
+            builder.AddComponentReferenceCapture(9, (input) => BasePropertyListPartInputs.Add((IBasePropertyListPartInput)input));
+
+            builder.CloseComponent();
+        };
         #endregion
 
         #region CRUD
@@ -224,6 +264,41 @@ namespace BlazorBase.CRUD.Components
 
         #endregion
 
+        #region Validation
+        public virtual bool ListPartIsValid()
+        {
+            var valid = true;
+
+            foreach (var input in BaseInputs)
+                if (!input.ValidatePropertyValue())
+                    valid = false;
+
+            foreach (var input in BaseSelectListInputs)
+                if (!input.ValidatePropertyValue())
+                    valid = false;
+
+            foreach (var basePropertyListPartInput in BasePropertyListPartInputs)
+                if (!basePropertyListPartInput.ValidatePropertyValue())
+                    valid = false;
+
+            foreach (var item in Entries)
+            {
+                if (item is IBaseModel baseModel)
+                {
+                    var validationContext = new ValidationContext(item, ServiceProvider, new Dictionary<object, object>()
+                    {
+                        [IStringModelLocalizerType] = ModelLocalizer,
+                        [typeof(DbContext)] = Service.DbContext
+                    });
+
+                    if (!baseModel.TryValidate(out List<ValidationResult> validationResults, validationContext))
+                        valid = false;
+                }
+            }
+
+            return valid;
+        }
+        #endregion
         #region Other       
         protected EventServices GetEventServices()
         {

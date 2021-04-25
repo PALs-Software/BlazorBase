@@ -21,7 +21,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseInput : IBaseInput
+    public partial class BaseInput
     {
         #region Parameters
         [Parameter] public IBaseModel Model { get; set; }

@@ -37,14 +37,21 @@ namespace BlazorBase.CRUD.Models
         #region Model
 
         #region DbContext
-        public record OnDbContextAddEntryArgs(DbContext DbContext, IServiceProvider ServiceProvider);
-        public Task OnDbContextAddEntry(OnDbContextAddEntryArgs args);
+        public record OnBeforeDbContextAddEntryArgs(EventServices EventServices);
+        public Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args);
+        public record OnAfterDbContextAddedEntryArgs(EventServices EventServices);
+        public Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args);
 
-        public record OnDbContextModifyEntryArgs(DbContext DbContext, IServiceProvider ServiceProvider);
-        public Task OnDbContextModifyEntry(OnDbContextModifyEntryArgs args);
+        public record OnBeforeDbContextModifyEntryArgs(EventServices EventServices);
+        public Task OnBeforeDbContextModifyEntry(OnBeforeDbContextModifyEntryArgs args);
+        public record OnAfterDbContextModifiedEntryArgs(EventServices EventServices);
+        public Task OnAfterDbContextModifiedEntry(OnAfterDbContextModifiedEntryArgs args);
 
-        public record OnDbContextDeleteEntryArgs(DbContext DbContext, IServiceProvider ServiceProvider);
-        public Task OnDbContextDeleteEntry(OnDbContextDeleteEntryArgs args);
+
+        public record OnBeforeDbContextDeleteEntryArgs(EventServices EventServices);
+        public Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args);
+        public record OnAfterDbContextDeletedEntryArgs(EventServices EventServices);
+        public Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args);
         #endregion
 
         public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);

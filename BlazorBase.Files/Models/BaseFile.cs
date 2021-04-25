@@ -17,6 +17,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 using System.Web;
 using BlazorBase.Files.Controller;
 using System.Net;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlazorBase.Files.Models
 {
@@ -46,6 +47,10 @@ namespace BlazorBase.Files.Models
         [Visible(DisplayOrder = 600)]
         public long FileSize { get; set; }
 
+        [Editable(false)]
+        [Visible(DisplayOrder = 700)]
+        public string Hash { get; set; }
+
         /// <summary>
         /// This property is only needed to show the file in the general base file list and card.
         /// </summary>
@@ -57,7 +62,7 @@ namespace BlazorBase.Files.Models
         [NotMapped]
         public Guid TempFileId { get; set; }
 
-        #region CRUD    
+        #region CRUD
 
         public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
         {
@@ -65,6 +70,16 @@ namespace BlazorBase.Files.Models
             {
                 Id = Guid.NewGuid();
             } while (await args.EventServices.BaseService.GetAsync(GetType(), Id) != null);
+
+            args.EventServices.BaseService.DbContext.Entry(this).State = EntityState.Added;
+        }
+
+        public override Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
+        {
+            var entry = args.EventServices.BaseService.DbContext.Entry(this);
+            entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
+
+            return base.OnAfterRemoveEntry(args);
         }
 
         public override async Task OnAfterSaveChanges(OnAfterSaveChangesArgs args)
@@ -72,16 +87,22 @@ namespace BlazorBase.Files.Models
             await CopyTempFileToFileStore(args.EventServices.ServiceProvider);
         }
 
-        public override async Task OnDbContextDeleteEntry(OnDbContextDeleteEntryArgs args)
+        public override async Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args)
         {
-            await RemoveFileFromDisk(args.ServiceProvider);
+            await RemoveFileFromDisk(args.EventServices.ServiceProvider);
         }
         #endregion
 
         #region File Handling
         public string GetFileLink()
         {
-            return $"/api/BaseFile/{BaseFileController.EncodeUrl(MimeFileType)}/{Id}";
+            if (String.IsNullOrEmpty(MimeFileType))
+                return null;
+
+            if (TempFileId == Guid.Empty)
+                return $"/api/BaseFile/GetFile/{BaseFileController.EncodeUrl(MimeFileType)}/{Id}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
+            else
+                return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}"; 
         }
 
         protected async Task CopyTempFileToFileStore(IServiceProvider serviceProvider)

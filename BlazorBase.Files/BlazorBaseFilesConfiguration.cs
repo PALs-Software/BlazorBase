@@ -31,7 +31,8 @@ namespace BlazorBase.CRUD
             serviceCollection.AddSingleton(configureOptions)
             .AddSingleton<BlazorBaseFileOptions>()
 
-            .AddTransient<IBaseInput, BaseInputFile>()
+            .AddTransient<IBasePropertyCardInput, BaseFileInput>()
+            .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
             .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>();
 
             return serviceCollection;

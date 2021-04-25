@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseInputSelectList : BaseInput
+    public partial class BaseSelectListInput : BaseInput
     {
         [Parameter] public List<KeyValuePair<string, string>> Data { get; set; }
 

@@ -37,13 +37,18 @@
                         <td>
                             @if (entry is IBaseModel baseEntry)
                             {
-                                @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, baseEntry).Result;
+                                if (renderFragment != null)
                                 {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" Data="ForeignKeyProperties[displayItem.Property]" ModelLocalizer="ModelLocalizer" Service="Service" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new IBaseModel.OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                    @renderFragment
+                                }
+                                else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                {
+                                    <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" Data="ForeignKeyProperties[displayItem.Property]" ModelLocalizer="ModelLocalizer" Service="Service" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new IBaseModel.OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
                                 }
                                 else if (displayItem.Property.PropertyType.IsEnum)
                                 {
-                                    <BaseInputSelectList @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" Data="GetEnumValues(displayItem.Property.PropertyType)" ModelLocalizer="ModelLocalizer" Service="Service" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new IBaseModel.OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
+                                    <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" Data="GetEnumValues(displayItem.Property.PropertyType)" ModelLocalizer="ModelLocalizer" Service="Service" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new IBaseModel.OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new IBaseModel.OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new IBaseModel.OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.IsValid, args.EventServices))" />
                                 }
                                 else
                                 {

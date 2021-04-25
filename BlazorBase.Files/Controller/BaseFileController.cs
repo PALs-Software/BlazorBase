@@ -9,7 +9,7 @@ using System.Web;
 namespace BlazorBase.Files.Controller
 {
     [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class BaseFileController : ControllerBase
     {
@@ -27,12 +27,21 @@ namespace BlazorBase.Files.Controller
         }
 
         [HttpGet("{contentType}/{id}")]
-        public IActionResult Get(string contentType, string id)
+        public IActionResult GetFile(string contentType, string id)
         {
             if (!Guid.TryParse(id, out Guid result))
                 return BadRequest("Id is not valid");
 
             return PhysicalFile(Path.Join(Options.FileStorePath, result.ToString()), DecodeUrl(contentType));
+        }
+
+        [HttpGet("{contentType}/{temporaryFileId}")]
+        public IActionResult GetTemporaryFile(string contentType, string temporaryFileId)
+        {
+            if (!Guid.TryParse(temporaryFileId, out Guid result))
+                return BadRequest("Id is not valid");
+
+            return PhysicalFile(Path.Join(Options.TempFileStorePath, result.ToString()), DecodeUrl(contentType));
         }
 
         public static string EncodeUrl(string input)

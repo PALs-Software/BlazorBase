@@ -89,12 +89,15 @@ namespace BlazorBase.CRUD.Components
 
         #region Property Infos
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
-        protected List<BaseInputSelectList> BaseInputSelectLists = new List<BaseInputSelectList>();
+        protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
+        protected List<BaseListPart> BaseListParts = new List<BaseListPart>();
+        protected List<IBasePropertyCardInput> BasePropertyCardInputs = new List<IBasePropertyCardInput>();
 
         protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
-        protected BaseInputSelectList AddToBaseInputSelectLists { set { BaseInputSelectLists.Add(value); } }
+        protected BaseSelectListInput AddToBaseSelectListInputs { set { BaseSelectListInputs.Add(value); } }
+        protected BaseListPart AddToBaseListParts { set { BaseListParts.Add(value); } }
 
-        protected List<IBaseInput> BaseInputExtensions = new List<IBaseInput>();
+        protected List<IBasePropertyCardInput> BaseInputExtensions = new List<IBasePropertyCardInput>();
         #endregion
 
         #region Init
@@ -109,7 +112,7 @@ namespace BlazorBase.CRUD.Components
                     SingleDisplayName = ModelLocalizer[TModelType.Name];
                 Title = Localizer[nameof(Title), SingleDisplayName];
 
-                BaseInputExtensions = ServiceProvider.GetServices<IBaseInput>().ToList();
+                BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyCardInput>().ToList();
 
                 SetUpDisplayLists(TModelType, GUIType.Card);
             });
@@ -139,8 +142,9 @@ namespace BlazorBase.CRUD.Components
             builder.AddAttribute(7, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
             builder.AddAttribute(8, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
 
-            builder.CloseComponent();
+            builder.AddComponentReferenceCapture(9, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
 
+            builder.CloseComponent();
         };
         #endregion
 
@@ -152,7 +156,9 @@ namespace BlazorBase.CRUD.Components
             await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;
             BaseInputs.Clear();
-            BaseInputSelectLists.Clear();
+            BaseSelectListInputs.Clear();
+            BaseListParts.Clear();
+            BasePropertyCardInputs.Clear();
 
             if (AddingMode)
             {
@@ -261,12 +267,7 @@ namespace BlazorBase.CRUD.Components
             Model = null;
         }
 
-        protected string PrepareExceptionErrorMessage(Exception e) {
-            if (e.InnerException == null)
-                return e.Message;
 
-            return e.Message + Environment.NewLine + Environment.NewLine + Localizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
-        }
 
         protected async Task RejectModalAsync()
         {
@@ -339,13 +340,28 @@ namespace BlazorBase.CRUD.Components
         #region Validation
         protected virtual bool CardIsValid()
         {
+            var valid = true;
+
             foreach (var input in BaseInputs)
-                input.ValidatePropertyValue();
+                if (!input.ValidatePropertyValue())
+                    valid = false;
 
-            foreach (var input in BaseInputSelectLists)
-                input.ValidatePropertyValue();
+            foreach (var input in BaseSelectListInputs)
+                if (!input.ValidatePropertyValue())
+                    valid = false;
 
-            return Model.TryValidate(out List<ValidationResult> validationResults, ValidationContext);
+            foreach (var listPart in BaseListParts)
+                if (!listPart.ListPartIsValid())
+                    valid = false;
+
+            foreach (var basePropertyCardInput in BasePropertyCardInputs)
+                if (!basePropertyCardInput.ValidatePropertyValue())
+                    valid = false;
+
+            if (!Model.TryValidate(out List<ValidationResult> validationResults, ValidationContext))
+                valid = false;
+
+            return valid;
         }
 
         private void ShowFormattedInvalidFeedback(string feedback)
