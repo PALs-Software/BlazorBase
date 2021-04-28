@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
 using BlazorBase.CRUD.ViewModels;
+using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
@@ -36,12 +37,14 @@ namespace BlazorBase.CRUD.Models
         }
 
         #region Additional Properties
-        [Visible(displayOrder: 9999, hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
+        [DateDisplayMode(DateInputMode = DateInputMode.DateTime)]
+        [Visible(DisplayGroup = "Information", DisplayGroupOrder = 9999, DisplayOrder = 100, Collapsed = true)]
         public DateTime CreatedOn { get; set; }
 
-        [Visible(displayOrder: 9999, hideInGUITypes: GUIType.ListPart)]
         [Editable(false)]
+        [DateDisplayMode(DateInputMode = DateInputMode.DateTime)]
+        [Visible(DisplayGroup = "Information", DisplayOrder = 200)]
         public DateTime ModifiedOn { get; set; }
         #endregion
 

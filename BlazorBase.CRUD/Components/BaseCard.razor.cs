@@ -159,6 +159,7 @@ namespace BlazorBase.CRUD.Components
             BaseSelectListInputs.Clear();
             BaseListParts.Clear();
             BasePropertyCardInputs.Clear();
+            ResetInvalidFeedback();
 
             if (AddingMode)
             {
@@ -223,7 +224,8 @@ namespace BlazorBase.CRUD.Components
                     if (args.AbortAdding)
                         return;
 
-                    if (!await Service.AddEntryAsync(Model))
+                    var dbEntry = Service.DbContext.Entry(Model);
+                    if (dbEntry.State != EntityState.Added && !await Service.AddEntryAsync(Model))
                     {
                         ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
                         return;

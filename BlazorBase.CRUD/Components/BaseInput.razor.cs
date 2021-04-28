@@ -52,6 +52,7 @@ namespace BlazorBase.CRUD.Components
         protected string PlaceHolder;
         protected bool IsReadOnly;
         protected Type RenderType;
+        protected DateInputMode DateInputMode;
 
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
         protected ValidationContext PropertyValidationContext;
@@ -73,7 +74,8 @@ namespace BlazorBase.CRUD.Components
                 if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                     PlaceHolder = placeholderAttribute.Placeholder;
                 RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
-
+                DateInputMode = Property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+                
                 var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
                 {

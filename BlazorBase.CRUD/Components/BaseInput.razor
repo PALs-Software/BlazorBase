@@ -51,19 +51,19 @@
     }
     else if (RenderType == typeof(DateTime))
     {
-        <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+        <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DateInputMode" />
     }
     else if (RenderType == typeof(DateTime?))
     {
-        <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+        <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DateInputMode" />
     }
     else if (RenderType == typeof(DateTimeOffset))
     {
-        <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+        <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DateInputMode" />
     }
     else if (RenderType == typeof(DateTimeOffset?))
     {
-        <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+        <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DateInputMode" />
     }
     else if (RenderType == typeof(Guid))
     {

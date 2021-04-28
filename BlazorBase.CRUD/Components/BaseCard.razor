@@ -80,7 +80,9 @@
                                             }
                                             else if (displayItem.IsListProperty)
                                             {
-                                                <BaseListPart Model="Model"
+                                                <BaseListPart 
+                                                              @ref="AddToBaseListParts"
+                                                              Model="Model"
                                                               Property="displayItem.Property"
                                                               Service="Service"
                                                               OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"

@@ -71,13 +71,14 @@ namespace BlazorBase.Files.Models
                 Id = Guid.NewGuid();
             } while (await args.EventServices.BaseService.GetAsync(GetType(), Id) != null);
 
-            args.EventServices.BaseService.DbContext.Entry(this).State = EntityState.Added;
+            args.EventServices.BaseService.DbContext.Entry(this).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a basefile is a navigation property and is newly added, it must add the base file before it add or update the entity itself
         }
 
         public override Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
         {
             var entry = args.EventServices.BaseService.DbContext.Entry(this);
-            entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
+            if (entry.State != EntityState.Detached) // Only relevant if removed from another entity as list property
+                entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
 
             return base.OnAfterRemoveEntry(args);
         }
@@ -102,7 +103,7 @@ namespace BlazorBase.Files.Models
             if (TempFileId == Guid.Empty)
                 return $"/api/BaseFile/GetFile/{BaseFileController.EncodeUrl(MimeFileType)}/{Id}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
             else
-                return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}"; 
+                return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}";
         }
 
         protected async Task CopyTempFileToFileStore(IServiceProvider serviceProvider)
