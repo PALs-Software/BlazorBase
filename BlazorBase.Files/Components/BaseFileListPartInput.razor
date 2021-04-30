@@ -11,19 +11,18 @@
         </Progress>
     </LoadingIndicator>
 
-
     <div class="@InputClass">
         <Row Margin="Margin.Is0">
-            <Row>
+            <Row Margin="Margin.Is0">
                 <FileEdit @ref="FileEdit" Multiple="false" Filter="@FileFilter" Changed="async (args) => await OnValueChangedAsync(args)" Progressed="OnUploadProgressed" Class="@InputClass" AutoReset="false" />
             </Row>
             @if (Property.CanWrite)
             {
-                <Row Float="Float.Right">
+                <Row Float="Float.Right" Margin="Margin.Is0">
                     <Button Color="Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
                 </Row>
             }
-            <Row Margin="Margin.Is3.FromTop">
+            <Row Margin="Margin.Is0.OnAll.Is3.FromTop">
                 <BaseFileListDisplay Model="Model" Property="Property" Service="Service" ModelLocalizer="ModelLocalizer" />
             </Row>
         </Row>
@@ -31,5 +30,4 @@
     <div class="@FeedbackClass">
         @Feedback
     </div>
-
 }

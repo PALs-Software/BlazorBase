@@ -116,7 +116,7 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
         {
-            var eventServices = GetEventServices();
+            var eventServices = GetEventServices(Service);
 
             foreach (var propertyListDisplay in PropertyListDisplays)
                 if (await propertyListDisplay.IsHandlingPropertyRenderingAsync(model, displayItem, eventServices))
@@ -236,23 +236,26 @@ namespace BlazorBase.CRUD.Components
             if (result == ConfirmDialogResult.Aborted)
                 return;
 
-            var eventServices = GetEventServices();
+            var baseService = ServiceProvider.GetService<BaseService>();
+            var scopedModel = await baseService.GetAsync<TModel>(model.GetPrimaryKeys());
 
-            var beforeRemoveArgs = new OnBeforeRemoveEntryArgs(model, false, eventServices);
+            var eventServices = GetEventServices(baseService);
+
+            var beforeRemoveArgs = new OnBeforeRemoveEntryArgs(scopedModel, false, eventServices);
             await OnBeforeRemoveEntry.InvokeAsync(beforeRemoveArgs);
-            await model.OnBeforeRemoveEntry(beforeRemoveArgs);
+            await scopedModel.OnBeforeRemoveEntry(beforeRemoveArgs);
             if (beforeRemoveArgs.AbortRemoving)
                 return;
 
             try
             {
-                await Service.RemoveEntryAsync(model);
-                await Service.SaveChangesAsync();
-                Entries.Remove(model);
+                await baseService.RemoveEntryAsync(scopedModel);                
+                await baseService.SaveChangesAsync();
+                Entries.Remove(scopedModel);
 
-                var afterRemoveArgs = new OnAfterRemoveEntryArgs(model, eventServices);
+                var afterRemoveArgs = new OnAfterRemoveEntryArgs(scopedModel, eventServices);
                 await OnAfterRemoveEntry.InvokeAsync(afterRemoveArgs);
-                await model.OnAfterRemoveEntry(afterRemoveArgs);
+                await scopedModel.OnAfterRemoveEntry(afterRemoveArgs);
             }
             catch (Exception e)
             {
@@ -273,13 +276,13 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Other
-        protected EventServices GetEventServices()
+        protected EventServices GetEventServices(BaseService baseService)
         {
             return new EventServices()
             {
                 ServiceProvider = ServiceProvider,
                 Localizer = ModelLocalizer,
-                BaseService = Service,
+                BaseService = baseService,
                 MessageHandler = MessageHandler
             };
         }

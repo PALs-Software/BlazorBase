@@ -3,7 +3,7 @@
 {
     @if (RenderType == typeof(decimal))
     {
-        <NumericEdit TValue="decimal" Value="(decimal)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" />
+        <NumericEdit TValue="decimal" Value="(decimal)Property.GetValue(Model)" ValueChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass"/>
     }
     else if (RenderType == typeof(decimal?))
     {

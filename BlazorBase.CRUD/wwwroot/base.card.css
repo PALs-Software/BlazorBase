@@ -12,6 +12,11 @@
         margin-bottom: 0rem;
     }
 
+table input, table select {
+    min-width: 125px;
+}
+
+
 @media (min-width: 1600px) {
     .base-card .modal-xl {
         max-width: 1500px;
