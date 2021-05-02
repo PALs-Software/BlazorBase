@@ -18,12 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <ProjectReference Include="..\BlazorBase.CRUD\BlazorBase.CRUD.csproj" />
+    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorBase.CRUD\BlazorBase.CRUD.csproj" />
-    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>

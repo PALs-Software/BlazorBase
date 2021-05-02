@@ -9,8 +9,6 @@ namespace BlazorBase.CRUD.Components
     public partial class BaseSelectListInput : BaseInput
     {
         [Parameter] public List<KeyValuePair<string, string>> Data { get; set; }
-
-        protected Dictionary<string, object> Attributes { get; set; } = new Dictionary<string, object>();
            
         protected override async Task OnInitializedAsync()
         {
@@ -19,7 +17,7 @@ namespace BlazorBase.CRUD.Components
             await InvokeAsync(() =>
             {
                 if (IsReadOnly)
-                    Attributes.Add("disabled", "disabled");
+                    InputAttributes.Add("disabled", "disabled");
             });
         }
 

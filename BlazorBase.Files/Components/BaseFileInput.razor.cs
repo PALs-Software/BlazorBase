@@ -85,7 +85,7 @@ namespace BlazorBase.Files.Components
                     {
                         if (Property.GetValue(Model) is BaseFile oldFile)
                         {
-                            await oldFile.RemoveFileFromDisk(ServiceProvider, deleteOnlyTemporary: true);
+                            await oldFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
                             var entry = Service.DbContext.Entry(oldFile);
                             entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
                         }
@@ -138,19 +138,7 @@ namespace BlazorBase.Files.Components
             await file.WriteToStreamAsync(fileStream);
             fileStream.Position = 0;
 
-            return ComputeSha256Hash(fileStream);
-        }
-
-        protected string ComputeSha256Hash(FileStream fileStream)
-        {
-            using SHA256 sha256Hash = SHA256.Create();
-            byte[] Hashbytes = sha256Hash.ComputeHash(fileStream);
-
-            var hash = String.Empty;
-            foreach (var hashByte in Hashbytes)
-                hash += $"{hashByte:X2}";
-
-            return hash;
+            return BaseFile.ComputeSha256Hash(fileStream);
         }
 
         protected void OnUploadProgressed(FileProgressedEventArgs e)
@@ -166,7 +154,7 @@ namespace BlazorBase.Files.Components
             if (Property.GetValue(Model) is not BaseFile oldFile)
                 return;
 
-            await oldFile.RemoveFileFromDisk(ServiceProvider, deleteOnlyTemporary: true);
+            await oldFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
             Service.DbContext.Entry(oldFile).State = Service.DbContext.Entry(oldFile).State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
 
             Property.SetValue(Model, null);

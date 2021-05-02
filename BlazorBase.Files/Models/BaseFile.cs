@@ -18,6 +18,8 @@ using System.Web;
 using BlazorBase.Files.Controller;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using BlazorBase.CRUD.ViewModels;
+using System.Security.Cryptography;
 
 namespace BlazorBase.Files.Models
 {
@@ -85,12 +87,12 @@ namespace BlazorBase.Files.Models
 
         public override async Task OnAfterSaveChanges(OnAfterSaveChangesArgs args)
         {
-            await CopyTempFileToFileStore(args.EventServices.ServiceProvider);
+            await CopyTempFileToFileStoreAsync();
         }
 
         public override async Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args)
         {
-            await RemoveFileFromDisk(args.EventServices.ServiceProvider);
+            await RemoveFileFromDiskAsync();
         }
         #endregion
 
@@ -106,14 +108,32 @@ namespace BlazorBase.Files.Models
                 return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}";
         }
 
-        protected async Task CopyTempFileToFileStore(IServiceProvider serviceProvider)
+        public async Task<byte[]> GetFileContentAsync()
+        {
+            if (String.IsNullOrEmpty(MimeFileType) || FileSize == 0 || String.IsNullOrEmpty(Hash))
+                return null;
+
+            var options = BlazorBaseFileOptions.Instance;
+            string path;
+            if (TempFileId == Guid.Empty)
+                path = Path.Join(options.FileStorePath, Id.ToString());
+            else
+                path = Path.Join(options.TempFileStorePath, TempFileId.ToString());
+
+            if (!File.Exists(path))
+                return null;
+
+            return await File.ReadAllBytesAsync(path);
+        }
+
+        protected async Task CopyTempFileToFileStoreAsync()
         {
             await Task.Run(() =>
             {
                 if (FileSize == 0 || TempFileId == Guid.Empty)
                     return;
 
-                var options = serviceProvider.GetService<BlazorBaseFileOptions>();
+                var options = BlazorBaseFileOptions.Instance;
                 if (!Directory.Exists(options.FileStorePath))
                     Directory.CreateDirectory(options.FileStorePath);
 
@@ -125,19 +145,63 @@ namespace BlazorBase.Files.Models
             });
         }
 
-        public async Task RemoveFileFromDisk(IServiceProvider serviceProvider, bool deleteOnlyTemporary = false)
+        public async Task RemoveFileFromDiskAsync(bool deleteOnlyTemporary = false)
         {
             await Task.Run(() =>
             {
                 if (deleteOnlyTemporary && TempFileId == Guid.Empty)
                     return;
 
-                var options = serviceProvider.GetService<BlazorBaseFileOptions>();
+                var options = BlazorBaseFileOptions.Instance;
                 var filePath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, TempFileId.ToString()) : Path.Join(options.FileStorePath, Id.ToString());
 
                 if (File.Exists(filePath))
                     File.Delete(filePath);
             });
+        }
+
+        public static async Task<TBaseFile> CreateFileAsync<TBaseFile>(EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent) where TBaseFile : BaseFile, new()
+        {
+            var file = new TBaseFile()
+            {
+                FileName = fileName,
+                FileSize = fileContent.Length,
+                BaseFileType = baseFileType,
+                MimeFileType = mimeFileType,
+                TempFileId = Guid.NewGuid(),
+                Hash = ComputeSha256Hash(fileContent)
+            };
+            await file.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(file, eventServices));
+
+            var options = BlazorBaseFileOptions.Instance;
+            if (!Directory.Exists(options.TempFileStorePath))
+                Directory.CreateDirectory(options.TempFileStorePath);
+
+            await File.WriteAllBytesAsync(Path.Join(options.TempFileStorePath, file.TempFileId.ToString()), fileContent);
+
+            return file;
+        }
+
+        public static string ComputeSha256Hash(Func<SHA256, byte[]> computeHash)
+        {
+            using SHA256 sha256Hash = SHA256.Create();
+            byte[] Hashbytes = computeHash(sha256Hash);
+
+            var hash = String.Empty;
+            foreach (var hashByte in Hashbytes)
+                hash += $"{hashByte:X2}";
+
+            return hash;
+        }
+
+        public static string ComputeSha256Hash(FileStream fileStream)
+        {
+            return ComputeSha256Hash((hasher) => hasher.ComputeHash(fileStream));
+        }
+
+        public static string ComputeSha256Hash(byte[] buffer)
+        {
+            return ComputeSha256Hash((hasher) => hasher.ComputeHash(buffer));
         }
         #endregion
 

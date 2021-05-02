@@ -8,6 +8,7 @@ namespace BlazorBase.Files.Models
 {
     public class BlazorBaseFileOptions
     {
+        public static BlazorBaseFileOptions Instance { get; private set; }
         #region Members
 
         protected readonly IServiceProvider ServiceProvider;
@@ -29,6 +30,12 @@ namespace BlazorBase.Files.Models
             ConfigureOptions = configureOptions;
 
             ConfigureOptions?.Invoke(this);
+
+            SetInstance();
+        }
+
+        public void SetInstance() {
+            Instance = this;
         }
 
         #endregion
