@@ -72,6 +72,19 @@ namespace BlazorBase.CRUD.Services
         {
             return await DbContext.Set(type).ToListAsync();
         }
+
+        /// <summary>
+        /// Super Slow -> use only if neccessary!
+        /// </summary>
+        public virtual IQueryable<object> Set(Type type)
+        {
+            return DbContext.Set(type);
+        }
+
+        public virtual IQueryable<T> Set<T>() where T : class
+        {
+            return DbContext.Set<T>();
+        }
         #endregion
 
         #region Count Data

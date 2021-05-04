@@ -24,7 +24,7 @@ using System.Security.Cryptography;
 namespace BlazorBase.Files.Models
 {
     [Route("/BaseFiles")]
-    public class BaseFile : BaseModel<BaseFile>, IBaseModel
+    public class BaseFile : BaseModel
     {
         [Key]
         public Guid Id { get; set; }

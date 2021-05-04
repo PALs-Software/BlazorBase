@@ -147,6 +147,11 @@ namespace BlazorBase.CRUD.Models
         public List<PageActionGroup> GeneratePageActionGroups();
         #endregion
 
+        #region ComponentBase
+        bool ShowOnlySingleEntry { get; }
+        Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
+        #endregion
+
         #region Other
         public Type GetUnproxiedType();
 

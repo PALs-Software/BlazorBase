@@ -13,7 +13,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 namespace BlazorBase.CRUD.NumberSeries
 {
     [Route("/NoSeries")]
-    public class NoSeries : BaseModel<NoSeries>, IBaseModel
+    public class NoSeries : BaseModel
     {
         [Key]
         [Required]

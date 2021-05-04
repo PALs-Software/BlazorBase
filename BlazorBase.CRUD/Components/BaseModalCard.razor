@@ -1,0 +1,50 @@
+﻿@typeparam TModel
+
+@using BlazorBase.CRUD.Models;
+@using BlazorBase.CRUD.ViewModels;
+
+<div class="base-card">
+    <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
+        <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+            <ModalHeader>
+                <ModalTitle>
+                    @Localizer["Edit {0}", SingleDisplayName]
+                    <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
+                </ModalTitle>
+                <CloseButton Clicked="RejectModalAsync" />
+            </ModalHeader>
+            <ModalBody>
+                <BaseCard @ref="BaseCard"
+                          TModel="TModel"
+                          SingleDisplayName="@SingleDisplayName"
+                          Embedded="true"
+                          ShowEntryByStart="ShowEntryByStart"
+                          EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"
+                          OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
+                          OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
+                          OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
+                          OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
+                          OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
+                          OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
+                          OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
+                          OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+                          OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
+                          OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                          OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                          OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                          OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
+                          OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
+                          OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                          OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                          OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                          OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                          OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="RejectModalAsync">@Localizer["Close"]</Button>
+                <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
+                <Button Color="Color.Primary" Clicked="SaveAndCloseModalAsync">@Localizer["Save & Close"]</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+</div>

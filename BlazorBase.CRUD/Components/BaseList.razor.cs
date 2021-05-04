@@ -64,7 +64,6 @@ namespace BlazorBase.CRUD.Components
         [Parameter]
         public Func<TModel, bool> DataLoadCondition { get; set; }
 
-
         #endregion
 
         #region Injects
@@ -85,7 +84,7 @@ namespace BlazorBase.CRUD.Components
         protected List<TModel> Entries = new List<TModel>();
         protected Type TModelType;
 
-        protected BaseCard<TModel> BaseCard = default!;
+        protected BaseModalCard<TModel> BaseModalCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
 
         protected List<IBasePropertyListDisplay> PropertyListDisplays = new List<IBasePropertyListDisplay>();
@@ -204,14 +203,14 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task AddEntryAsync()
         {
-            await BaseCard.ShowAsync(addingMode: true);
+            await BaseModalCard.ShowModalAsync(addingMode: true);
         }
         protected async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
             if (changeQueryUrl)
                 NavigateToEntry(entry);
 
-            await BaseCard.ShowAsync(addingMode: false, entry.GetPrimaryKeys());
+            await BaseModalCard.ShowModalAsync(addingMode: false, entry.GetPrimaryKeys());
         }
 
         protected async Task RemoveEntryAsync(TModel model)

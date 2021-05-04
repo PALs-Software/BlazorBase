@@ -5,133 +5,143 @@
 @using Microsoft.Extensions.Localization
 
 <div class="base-card">
-    <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
-        <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
-            <ModalHeader>
-                <ModalTitle>@Title</ModalTitle>
-                <CloseButton Clicked="RejectModalAsync" />
-            </ModalHeader>
-            <ModalBody>
-                @if (Model != null)
-                {
-                    if (PageActionGroups != null && PageActionGroups.Count > 0)
-                    {
-                        <Card>
-                            <CardBody Padding="Padding.Is0">
-                                <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
-                                    <Items>
-                                        @foreach (var group in PageActionGroups)
+
+    @if (!Embedded)
+    {
+        <Heading Margin="Margin.Is2.FromTop">
+            @Localizer["Edit {0}", SingleDisplayName]
+            <Button Color="Color.Success" Clicked="SaveCardAsync">@Localizer["Save"]</Button>
+        </Heading>
+    }
+
+    @if (Model != null)
+    {
+        if (PageActionGroups != null && PageActionGroups.Count > 0)
+        {
+            <Card>
+                <CardBody Padding="Padding.Is0">
+                    <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
+                        <Items>
+                            @foreach (var group in PageActionGroups)
+                            {
+                                if (group.Visible(GetEventServices()).Result)
+                                {
+                                    <Tab Name="@(group.Caption ?? String.Empty)" title="@Localizer[group.ToolTip ?? String.Empty]">
+                                        <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
+                                        @Localizer[group.Caption ?? String.Empty]
+                                    </Tab>
+                                }
+                            }
+                        </Items>
+                        <Content>
+                            <TabsContent Padding="Padding.Is2">
+                                @foreach (var group in PageActionGroups)
+                                {
+                                    <TabPanel Name="@(group.Caption ?? String.Empty)">
+                                        @foreach (var action in group.PageActions)
                                         {
-                                            if (group.Visible(GetEventServices()).Result)
+                                            if (action.Visible(GetEventServices()).Result)
                                             {
-                                                <Tab Name="@(group.Caption ?? String.Empty)" title="@Localizer[group.ToolTip ?? String.Empty]">
-                                                    <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
-                                                    @Localizer[group.Caption ?? String.Empty]
-                                                </Tab>
+                                                <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@Localizer[action.ToolTip ?? String.Empty]">
+                                                    <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
+
+                                                    @Localizer[action.Caption ?? String.Empty]
+                                                </Button>
                                             }
                                         }
-                                    </Items>
-                                    <Content>
-                                        <TabsContent Padding="Padding.Is2">
-                                            @foreach (var group in PageActionGroups)
-                                            {
-                                                <TabPanel Name="@(group.Caption ?? String.Empty)">
-                                                    @foreach (var action in group.PageActions)
+                                    </TabPanel>
+                                }
+                            </TabsContent>
+                        </Content>
+                    </Tabs>
+                </CardBody>
+            </Card>
+        }
+
+        <Alert Class="card-summary-invalid-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+            @CardSummaryInvalidFeedback
+        </Alert>
+
+        <Accordion>
+            @foreach (var displayGroup in DisplayGroups)
+            {
+                <Collapse Visible="!displayGroup.Value.GroupAttribute.Collapsed">
+                    <CollapseHeader>
+                        <Heading Size="HeadingSize.Is4">
+                            <Button Clicked="@(() => displayGroup.Value.GroupAttribute.Collapsed = !displayGroup.Value.GroupAttribute.Collapsed)">@ModelLocalizer[displayGroup.Key]</Button>
+                        </Heading>
+                    </CollapseHeader>
+                    <CollapseBody>
+                        <Row>
+                            @foreach (var displayItem in displayGroup.Value.DisplayItems)
+                            {
+                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem).Result;
+                                if (renderFragment != null)
+                                {
+                                    @renderFragment
+                                }
+                                else if (displayItem.IsListProperty)
+                                {
+                                    <BaseListPart @ref="AddToBaseListParts"
+                                                  Model="Model"
+                                                  Property="displayItem.Property"
+                                                  Service="Service"
+                                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                                                  OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
+                                                  OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
+                                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
+                                }
+                                else
+                                {
+                                    <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
+                                        <Fields>
+                                            <Field Horizontal="true">
+                                                <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[displayItem.Property.Name]</FieldLabel>
+                                                <FieldBody ColumnSize="ColumnSize.Is8">
+                                                    @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {
-                                                        if (action.Visible(GetEventServices()).Result)
-                                                        {
-                                                            <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@Localizer[action.ToolTip ?? String.Empty]">
-                                                                <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
-
-                                                                @Localizer[action.Caption ?? String.Empty]
-                                                            </Button>
-                                                        }
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
-                                                </TabPanel>
-                                            }
-                                        </TabsContent>
-                                    </Content>
-                                </Tabs>
-                            </CardBody>
-                        </Card>
-                    }
+                                                    else if (displayItem.Property.PropertyType.IsEnum)
+                                                    {
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                    }
+                                                    else
+                                                    {
+                                                        <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="!AddingMode && displayItem.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                    }
+                                                </FieldBody>
+                                            </Field>
+                                        </Fields>
+                                    </Column>
+                                }
+                            }
+                        </Row>
+                    </CollapseBody>
+                </Collapse>
+            }
+        </Accordion>
 
-                    <Alert Class="card-summary-invalid-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
-                        @CardSummaryInvalidFeedback
-                    </Alert>
 
-                    <Accordion>
-                        @foreach (var displayGroup in DisplayGroups)
-                        {
-                            <Collapse Visible="!displayGroup.Value.GroupAttribute.Collapsed">
-                                <CollapseHeader>
-                                    <Heading Size="HeadingSize.Is4">
-                                        <Button Clicked="@(() => displayGroup.Value.GroupAttribute.Collapsed = !displayGroup.Value.GroupAttribute.Collapsed)">@ModelLocalizer[displayGroup.Key]</Button>
-                                    </Heading>
-                                </CollapseHeader>
-                                <CollapseBody>
-                                    <Row>
-                                        @foreach (var displayItem in displayGroup.Value.DisplayItems)
-                                        {
-                                            var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem).Result;
-                                            if (renderFragment != null)
-                                            {
-                                                @renderFragment
-                                            }
-                                            else if (displayItem.IsListProperty)
-                                            {
-                                                <BaseListPart 
-                                                              @ref="AddToBaseListParts"
-                                                              Model="Model"
-                                                              Property="displayItem.Property"
-                                                              Service="Service"
-                                                              OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                                                              OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                                                              OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                                                              OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
-                                                              OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
-                                                              OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                                                              OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                                                              OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                                                              OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                                              OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
-                                            }
-                                            else
-                                            {
-                                                <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
-                                                    <Fields>
-                                                        <Field Horizontal="true">
-                                                            <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[displayItem.Property.Name]</FieldLabel>
-                                                            <FieldBody ColumnSize="ColumnSize.Is8">
-                                                                @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
-                                                                {
-                                                                    <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                                                }
-                                                                else if (displayItem.Property.PropertyType.IsEnum)
-                                                                {
-                                                                    <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                                                }
-                                                                else
-                                                                {
-                                                                    <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="!AddingMode && displayItem.Property.IsKey()" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
-                                                                }
-                                                            </FieldBody>
-                                                        </Field>
-                                                    </Fields>
-                                                </Column>
-                                            }
-                                        }
-                                    </Row>
-                                </CollapseBody>
-                            </Collapse>
-                        }
-                    </Accordion>
-                }
-            </ModalBody>
-            <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="RejectModalAsync">@Localizer["Close"]</Button>
-                <Button Color="Color.Primary" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
-            </ModalFooter>
-        </ModalContent>
-    </Modal>
+    }
 </div>
+
+<Snackbar @ref="Snackbar"          
+          Color="ShowInvalidFeedback ? SnackbarColor.Danger : SnackbarColor.Success">
+    <SnackbarBody>
+        @if (ShowInvalidFeedback)
+        {
+            @CardSummaryInvalidFeedback
+        }
+        else
+        {
+            @Localizer["Information was saved successfully"]
+        }
+    </SnackbarBody>
+</Snackbar>

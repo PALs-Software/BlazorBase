@@ -22,7 +22,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Models
 {
-    public class BaseModel<TModel> : ComponentBase where TModel : class, IBaseModel, new()
+    public class BaseModel : ComponentBase, IBaseModel
     {
         #region Events
         public event EventHandler<string> OnForcePropertyRepaint;
@@ -270,15 +270,33 @@ namespace BlazorBase.CRUD.Models
         {
             base.BuildRenderTree(builder);
 
-            BuildComponent(builder);
+            if (ShowOnlySingleEntry)
+                BuildCardComponent(builder);
+            else
+                BuildListComponent(builder);
         }
 
-        protected virtual void BuildComponent(RenderTreeBuilder builder)
+        protected virtual void BuildListComponent(RenderTreeBuilder builder)
         {
             builder.OpenComponent(0, typeof(BaseList<>).MakeGenericType(GetType()));
             builder.CloseComponent();
         }
 
+        public virtual bool ShowOnlySingleEntry { get; }
+        protected virtual void BuildCardComponent(RenderTreeBuilder builder)
+        {
+            builder.OpenComponent(0, typeof(BaseCard<>).MakeGenericType(GetType()));
+            builder.AddAttribute(1, "ShowEntryByStart", ShowOnlySingleEntry);
+            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<EventServices, Task<IBaseModel>>(GetShowOnlySingleEntryInstance));
+            builder.CloseComponent();
+        }
+        public virtual async Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices)
+        {
+            return await Task.Run(() =>
+            {
+                return (IBaseModel)eventServices.BaseService.Set(GetType()).FirstOrDefault();
+            });
+        }
         #endregion
 
         #region PageActions

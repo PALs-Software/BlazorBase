@@ -3,9 +3,9 @@
 
 @using BlazorBase.Components
 
-<h3>
+<Heading Margin="Margin.Is2.FromTop">
     @PluralDisplayName
-</h3>
+</Heading>
 
 <table class="table table-hover">
     <thead>
@@ -58,26 +58,26 @@
     </tbody>
 </table>
 
-<BaseCard @ref="BaseCard"
-          TModel="TModel"
-          SingleDisplayName="@SingleDisplayName"
-          OnCardClosed="OnCardClosedAsync"
-          OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
-          OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
-          OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
-          OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
-          OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
-          OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
-          OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
-          OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
-          OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
-          OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-          OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-          OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-          OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
-          OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
-          OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-          OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-          OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-          OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-          OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
+<BaseModalCard @ref="BaseModalCard"
+               TModel="TModel"
+               SingleDisplayName="@SingleDisplayName"
+               OnCardClosed="OnCardClosedAsync"
+               OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
+               OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
+               OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
+               OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
+               OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
+               OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
+               OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
+               OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+               OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
+               OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+               OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+               OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+               OnBeforeUpdateListEntry="(args) => OnBeforeUpdateListEntry.InvokeAsync(args)"
+               OnAfterUpdateListEntry="(args) => OnAfterUpdateListEntry.InvokeAsync(args)"
+               OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+               OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+               OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+               OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+               OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />

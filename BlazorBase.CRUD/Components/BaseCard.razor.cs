@@ -7,6 +7,7 @@ using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Modules;
 using Blazorise;
+using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.CompilerServices;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,6 @@ namespace BlazorBase.CRUD.Components
         #region Parameter
 
         #region Events
-        [Parameter] public EventCallback OnCardClosed { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
@@ -56,16 +56,15 @@ namespace BlazorBase.CRUD.Components
 
         #endregion
 
-        [Inject]
-        public BaseService Service { get; set; }
-
-        [Parameter]
-        public string SingleDisplayName { get; set; }
+        [Parameter] public string SingleDisplayName { get; set; }
+        [Parameter] public bool Embedded { get; set; }
+        [Parameter] public bool ShowEntryByStart { get; set; }
+        [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
 
         #endregion
 
         #region Injects
-
+        [Inject] public BaseService Service { get; set; }
         [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
         protected IStringLocalizer Localizer { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
@@ -73,14 +72,14 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Member
-        private string Title;
-        private MarkupString CardSummaryInvalidFeedback;
-        private bool ShowInvalidFeedback = false;
-        private Modal Modal = default!;
-        private TModel Model;
-        private Type TModelType;
+        protected Snackbar Snackbar;
+        protected MarkupString CardSummaryInvalidFeedback;
+        protected bool ShowInvalidFeedback = false;
 
-        private bool AddingMode;
+        protected TModel Model;
+        protected Type TModelType;
+
+        protected bool AddingMode;
 
         protected ValidationContext ValidationContext;
         protected string SelectedPageActionGroup { get; set; }
@@ -110,12 +109,17 @@ namespace BlazorBase.CRUD.Components
 
                 if (String.IsNullOrEmpty(SingleDisplayName))
                     SingleDisplayName = ModelLocalizer[TModelType.Name];
-                Title = Localizer[nameof(Title), SingleDisplayName];
 
                 BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyCardInput>().ToList();
 
                 SetUpDisplayLists(TModelType, GUIType.Card);
             });
+
+            if (ShowEntryByStart)
+            {
+                var entry = await EntryToBeShownByStart?.Invoke(GetEventServices());
+                await ShowAsync(entry == null, entry?.GetPrimaryKeys());
+            }
         }
 
         protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem)
@@ -148,7 +152,7 @@ namespace BlazorBase.CRUD.Components
         };
         #endregion
 
-        #region Modal
+        #region Actions
         public async Task ShowAsync(bool addingMode = false, params object[] primaryKeys)
         {
             Service.RefreshDbContext();
@@ -185,7 +189,11 @@ namespace BlazorBase.CRUD.Components
             SelectedPageActionGroup = PageActionGroups.FirstOrDefault()?.Caption;
 
             Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
-            Modal.Show();
+
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
         }
         protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
         {
@@ -200,12 +208,7 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        public async Task HideAsync()
-        {
-            await RejectModalAsync();
-        }
-
-        protected async Task SaveModalAsync()
+        public async Task SaveCardAsync()
         {
             ResetInvalidFeedback();
 
@@ -264,25 +267,14 @@ namespace BlazorBase.CRUD.Components
                 return;
             }
 
-            Modal.Hide();
-            await OnCardClosed.InvokeAsync(null);
-            Model = null;
+            AddingMode = false;
+
+            Snackbar.Show();
         }
 
-
-
-        protected async Task RejectModalAsync()
+        public void ResetCard()
         {
-            Modal.Hide();
             Model = null;
-
-            await OnCardClosed.InvokeAsync(null);
-        }
-
-        protected void OnModalClosing(ModalClosingEventArgs args)
-        {
-            if (args.CloseReason != CloseReason.UserClosing)
-                Task.Run(async () => await RejectModalAsync());
         }
         #endregion
 
@@ -362,6 +354,12 @@ namespace BlazorBase.CRUD.Components
 
             if (!Model.TryValidate(out List<ValidationResult> validationResults, ValidationContext))
                 valid = false;
+
+            if (!valid)
+            {
+                ShowFormattedInvalidFeedback(Localizer["Some properties are not valid"]);
+                Snackbar.Show();
+            }
 
             return valid;
         }
