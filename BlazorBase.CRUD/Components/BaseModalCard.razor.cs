@@ -51,21 +51,12 @@ namespace BlazorBase.CRUD.Components
 
         #endregion
 
+        #region Injects
+        [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
+        #endregion
         #region Member
         protected Modal Modal = default!;
         protected BaseCard<TModel> BaseCard = default!;
-        protected IStringLocalizer Localizer { get; set; }
-        [Inject] protected StringLocalizerFactory StringLocalizerFactory { get; set; }
-        #endregion
-
-        #region Init
-        protected override async Task OnInitializedAsync()
-        {
-            await InvokeAsync(() =>
-            {
-                Localizer = StringLocalizerFactory.GetLocalizer(typeof(BaseCard<TModel>));
-            });
-        }
         #endregion
 
         public async Task ShowModalAsync(bool addingMode = false, params object[] primaryKeys)

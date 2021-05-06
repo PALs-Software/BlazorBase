@@ -50,7 +50,6 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Injects
-        [Inject] protected StringLocalizerFactory GenericClassStringLocalizer { get; set; }
         [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
@@ -83,7 +82,7 @@ namespace BlazorBase.CRUD.Components
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
 
                 IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
-                ModelLocalizer = GenericClassStringLocalizer.GetLocalizer(ModelListEntryType);
+                ModelLocalizer = StringLocalizerFactory.Create(ModelListEntryType);
 
                 SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
 
@@ -98,9 +97,18 @@ namespace BlazorBase.CRUD.Components
                 BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyListPartInput>().ToList();
 
                 Entries = (IList)Property.GetValue(Model);
+                Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
             });
 
             await PrepareForeignKeyProperties(ModelListEntryType, Service);
+        }
+
+        private void Model_OnForcePropertyRepaint(object sender, string propertyName)
+        {
+            if (propertyName != Property.Name)
+                return;
+            
+            InvokeAsync(() => StateHasChanged());
         }
 
         protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, IBaseModel model)

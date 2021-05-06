@@ -66,7 +66,7 @@ namespace BlazorBase.CRUD.Components
         #region Injects
         [Inject] public BaseService Service { get; set; }
         [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
-        protected IStringLocalizer Localizer { get; set; }
+        [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
@@ -104,7 +104,6 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
-                Localizer = StringLocalizerFactory.GetLocalizer(typeof(BaseCard<TModel>));
                 TModelType = typeof(TModel);
 
                 if (String.IsNullOrEmpty(SingleDisplayName))

@@ -70,9 +70,7 @@ namespace BlazorBase.CRUD.Components
 
         [Inject] public BaseService Service { get; set; }
         [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
-        [Inject]
-        protected StringLocalizerFactory GenericClassStringLocalizer { get; set; }
-        protected IStringLocalizer Localizer { get; set; }
+        [Inject] protected IStringLocalizer<BaseList<TModel>> Localizer { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected NavigationManager NavigationManager { get; set; }
         [Inject] protected BaseParser BaseParser { get; set; }
@@ -96,7 +94,6 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
-                Localizer = GenericClassStringLocalizer.GetLocalizer(typeof(BaseList<TModel>));
                 TModelType = typeof(TModel);
 
                 SetUpDisplayLists(TModelType, GUIType.List);
@@ -107,7 +104,6 @@ namespace BlazorBase.CRUD.Components
                     PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
 
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
-
             });
 
             await ProcessQueryParameters();
@@ -139,7 +135,7 @@ namespace BlazorBase.CRUD.Components
         private async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
         {
             var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
-            
+
             int totalEntries;
             if (DataLoadCondition == null)
             {
@@ -248,7 +244,7 @@ namespace BlazorBase.CRUD.Components
 
             try
             {
-                await baseService.RemoveEntryAsync(scopedModel);                
+                await baseService.RemoveEntryAsync(scopedModel);
                 await baseService.SaveChangesAsync();
                 Entries.Remove(scopedModel);
 

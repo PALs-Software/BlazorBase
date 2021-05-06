@@ -95,7 +95,7 @@ namespace BlazorBase.CRUD.Components
                 DateInputMode = Property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 MultilineText = RenderType == typeof(string) && Property.GetCustomAttribute<TextDisplayModeAttribute>()?.Mode == TextDisplayMode.Multiline;
-                
+
                 var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
                 {
@@ -111,7 +111,7 @@ namespace BlazorBase.CRUD.Components
                 var foreignKey = Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
                 if (foreignKey != null)
                     ForeignKeyProperty = Model.GetType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
-                                
+
                 SetInputType();
                 SetInputAttributes();
                 SetCurrentValueAsString(Property.GetValue(Model));
@@ -120,21 +120,29 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
+        public override async Task SetParametersAsync(ParameterView parameters)
+        {
+            await base.SetParametersAsync(parameters);
+            if (Property == null || Model == null)
+                return;
+
+            SetCurrentValueAsString(Property.GetValue(Model));
+        }
+
         public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(false);
         }
         #endregion
 
-        #region Events
-
+        #region Events        
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)
         {
             if (propertyName != Property.Name)
                 return;
 
             ValidatePropertyValue();
-            StateHasChanged();
+            InvokeAsync(() => StateHasChanged());
         }
 
         protected bool ConvertValueIfNeeded(ref object newValue)

@@ -1,7 +1,9 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.Translation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -28,13 +30,14 @@ namespace BlazorBase.CRUD
 
             serviceCollection.AddSingleton(configureOptions)
             .AddSingleton<BlazorBaseCRUDOptions>()
-            .AddSingleton<StringLocalizerFactory>()
             .AddSingleton<BaseParser>()
             .AddTransient<BaseService>()
             .AddTransient<DbContext, TDbContextImplementation>()
 
-            .AddBlazorBaseMessageHandling();
+            .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
 
+            .AddBlazorBaseMessageHandling();
+            
             return serviceCollection;
         }
     }

@@ -44,9 +44,8 @@ namespace BlazorBase.CRUD.Components
         }
 
         #region Injects
-        [Inject] protected StringLocalizerFactory StringLocalizerFactory { get; set; }
-
-        [Inject] protected IStringLocalizer<GeneralCRUDTranslations> GeneralCRUDLocalizer { get; set; }
+        [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }
+        [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; }
         #endregion
 
         #region Members
@@ -55,8 +54,6 @@ namespace BlazorBase.CRUD.Components
         protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties;
         protected static Dictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
         protected Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
-
-
         #endregion
 
         protected void SetUpDisplayLists(Type modelType, GUIType guiType)
@@ -155,7 +152,7 @@ namespace BlazorBase.CRUD.Components
 
             var result = new List<KeyValuePair<string, string>>();
             var values = Enum.GetNames(enumType);
-            var localizer = StringLocalizerFactory.GetLocalizer(enumType);
+            var localizer = StringLocalizerFactory.Create(enumType);
             foreach (var value in values)
                 result.Add(new KeyValuePair<string, string>(value, localizer[value]));
 
@@ -181,7 +178,7 @@ namespace BlazorBase.CRUD.Components
             if (e.InnerException == null)
                 return e.Message;
 
-            return e.Message + Environment.NewLine + Environment.NewLine + GeneralCRUDLocalizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
+            return e.Message + Environment.NewLine + Environment.NewLine + BaseDisplayComponentLocalizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
         }
     }
 }

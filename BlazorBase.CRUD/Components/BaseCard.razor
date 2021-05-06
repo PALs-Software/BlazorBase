@@ -26,9 +26,9 @@
                             {
                                 if (group.Visible(GetEventServices()).Result)
                                 {
-                                    <Tab Name="@(group.Caption ?? String.Empty)" title="@Localizer[group.ToolTip ?? String.Empty]">
+                                    <Tab Name="@ModelLocalizer[group.Caption ?? String.Empty]" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
                                         <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
-                                        @Localizer[group.Caption ?? String.Empty]
+                                        @ModelLocalizer[group.Caption ?? String.Empty]
                                     </Tab>
                                 }
                             }
@@ -37,15 +37,15 @@
                             <TabsContent Padding="Padding.Is2">
                                 @foreach (var group in PageActionGroups)
                                 {
-                                    <TabPanel Name="@(group.Caption ?? String.Empty)">
+                                    <TabPanel Name="@ModelLocalizer[group.Caption ?? String.Empty]">
                                         @foreach (var action in group.PageActions)
                                         {
                                             if (action.Visible(GetEventServices()).Result)
                                             {
-                                                <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@Localizer[action.ToolTip ?? String.Empty]">
+                                                <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
                                                     <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
 
-                                                    @Localizer[action.Caption ?? String.Empty]
+                                                    @ModelLocalizer[action.Caption ?? String.Empty]
                                                 </Button>
                                             }
                                         }
