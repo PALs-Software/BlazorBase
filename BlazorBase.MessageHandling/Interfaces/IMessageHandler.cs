@@ -32,7 +32,7 @@ namespace BlazorBase.MessageHandling.Interfaces
                                  string confirmButtonText = null,
                                  Color confirmButtonColor = Color.Primary,
                                  string abortButtonText = null,
-                                 Color abortButtonTextColor = Color.Secondary,
+                                 Color abortButtonColor = Color.Secondary,
                                  ModalSize modalSize = ModalSize.Large);
         public void ShowConfirmDialog(ShowConfirmDialogArgs args);
     }

@@ -43,10 +43,10 @@ namespace BlazorBase.MessageHandling.Services
                                  string confirmButtonText = null,
                                  Color confirmButtonColor = Color.Primary,
                                  string abortButtonText = null,
-                                 Color abortButtonTextColor = Color.Secondary,
+                                 Color abortButtonColor = Color.Secondary,
                                  ModalSize modalSize = ModalSize.Large)
         {
-            ShowConfirmDialog(new ShowConfirmDialogArgs(title, message, messageType, onClosing, icon, confirmButtonText, confirmButtonColor, abortButtonText, abortButtonTextColor, modalSize));
+            ShowConfirmDialog(new ShowConfirmDialogArgs(title, message, messageType, onClosing, icon, confirmButtonText, confirmButtonColor, abortButtonText, abortButtonColor, modalSize));
         }
 
         public void ShowConfirmDialog(ShowConfirmDialogArgs args)

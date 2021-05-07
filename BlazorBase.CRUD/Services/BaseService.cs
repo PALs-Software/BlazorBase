@@ -192,6 +192,11 @@ namespace BlazorBase.CRUD.Services
                 if (item.Entity is IBaseModel model)
                     await model.OnAfterDbContextDeletedEntry(deleteArgs);
         }
+
+        public bool HasUnsavedChanges()
+        {
+            return DbContext.ChangeTracker.HasChanges();
+        }
         #endregion
 
         #region Other

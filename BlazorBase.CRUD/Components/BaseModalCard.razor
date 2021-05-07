@@ -11,7 +11,7 @@
                     @Localizer["Edit {0}", SingleDisplayName]
                     <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
                 </ModalTitle>
-                <CloseButton Clicked="RejectModalAsync" />
+                <CloseButton/>
             </ModalHeader>
             <ModalBody>
                 <BaseCard @ref="BaseCard"
@@ -41,7 +41,7 @@
                           OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
             </ModalBody>
             <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="RejectModalAsync">@Localizer["Close"]</Button>
+                <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Close"]</Button>
                 <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
                 <Button Color="Color.Primary" Clicked="SaveAndCloseModalAsync">@Localizer["Save & Close"]</Button>
             </ModalFooter>

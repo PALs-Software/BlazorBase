@@ -331,6 +331,10 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Validation
+        public bool HasUnsavedChanges() {
+            return Service.HasUnsavedChanges();
+        }
+
         protected virtual bool CardIsValid()
         {
             var valid = true;

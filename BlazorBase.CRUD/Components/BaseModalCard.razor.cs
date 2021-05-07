@@ -1,6 +1,8 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Enum;
+using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -53,14 +55,19 @@ namespace BlazorBase.CRUD.Components
 
         #region Injects
         [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
+
         #region Member
         protected Modal Modal = default!;
         protected BaseCard<TModel> BaseCard = default!;
+        protected bool ContinueByUnsavedChanges = false;
         #endregion
 
         public async Task ShowModalAsync(bool addingMode = false, params object[] primaryKeys)
         {
+            ContinueByUnsavedChanges = false;
+
             await BaseCard.ShowAsync(addingMode, primaryKeys);
             Modal.Show();
         }
@@ -73,26 +80,52 @@ namespace BlazorBase.CRUD.Components
         public async Task SaveAndCloseModalAsync()
         {
             await SaveModalAsync();
-            await HideAsync();
+            HideModal();
         }
 
-        public async Task HideAsync()
-        {
-            await RejectModalAsync();
-        }
-
-        public async Task RejectModalAsync()
+        public void HideModal()
         {
             Modal.Hide();
-            BaseCard.ResetCard();
-
-            await OnCardClosed.InvokeAsync(null);
         }
 
         public void OnModalClosing(ModalClosingEventArgs args)
         {
-            if (args.CloseReason != CloseReason.UserClosing)
-                Task.Run(async () => await RejectModalAsync());
+            if (!ContinueByUnsavedChanges && HasUnsavedChanges())
+            {
+                args.Cancel = true;
+                return;
+            }
+
+            BaseCard.ResetCard();
+            InvokeAsync(async () => await OnCardClosed.InvokeAsync(null));
+        }
+
+        protected bool HasUnsavedChanges()
+        {
+            if (!BaseCard.HasUnsavedChanges())
+                return false;
+
+            MessageHandler.ShowConfirmDialog(
+                Localizer["Unsaved changes"],
+                Localizer["There are currently unsaved changes, these will be lost when you leave the card, continue anyway?"],
+                confirmButtonText: Localizer["Leave Card"],
+                confirmButtonColor: Color.Secondary,
+                abortButtonText: Localizer["Abort"],
+                abortButtonColor: Color.Primary,
+                onClosing: (closingArgs, result) => UserHandleUnsavedChangesConfirmDialog(result));
+
+            return true;
+        }
+
+        protected virtual Task UserHandleUnsavedChangesConfirmDialog(ConfirmDialogResult result)
+        {
+            if (result == ConfirmDialogResult.Aborted)
+                return Task.CompletedTask;
+
+            ContinueByUnsavedChanges = true;
+            HideModal();
+
+            return Task.CompletedTask;
         }
     }
 }

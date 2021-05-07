@@ -19,8 +19,8 @@ namespace BlazorBase.MessageHandling.Models
                                     string confirmButtonText = null,
                                     Color confirmButtonColor = Color.Primary,
                                     string abortButtonText = null,
-                                    Color abortButtonTextColor = Color.Secondary,
-                                    ModalSize modalSize = ModalSize.Large) : base(title, message, messageType, null, icon, abortButtonText, abortButtonTextColor, modalSize)
+                                    Color abortButtonColor = Color.Secondary,
+                                    ModalSize modalSize = ModalSize.Large) : base(title, message, messageType, null, icon, abortButtonText, abortButtonColor, modalSize)
         {
             ConfirmButtonText = confirmButtonText;
             ConfirmButtonColor = confirmButtonColor;
