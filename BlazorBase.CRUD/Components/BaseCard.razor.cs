@@ -253,6 +253,7 @@ namespace BlazorBase.CRUD.Components
                 }
 
                 await Service.SaveChangesAsync();
+                AddingMode = false;
                 await InvokeOnAfterSaveChangesEvents(eventServices);
             }
             catch (CRUDException e)
@@ -265,8 +266,6 @@ namespace BlazorBase.CRUD.Components
                 ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", PrepareExceptionErrorMessage(e)]);
                 return;
             }
-
-            AddingMode = false;
 
             Snackbar.Show();
         }

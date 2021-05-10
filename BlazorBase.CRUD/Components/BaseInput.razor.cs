@@ -126,6 +126,8 @@ namespace BlazorBase.CRUD.Components
             if (Property == null || Model == null)
                 return;
 
+            IsReadOnly = ReadOnly || Property.IsReadOnlyInGUI();
+            SetInputAttributes();
             SetCurrentValueAsString(Property.GetValue(Model));
         }
 
@@ -262,13 +264,15 @@ namespace BlazorBase.CRUD.Components
 
         private void SetInputAttributes()
         {
+            InputAttributes.Clear();
+
             if (!String.IsNullOrEmpty(CustomPropertyCssStyle))
                 InputAttributes.Add("style", CustomPropertyCssStyle);
 
             if (RenderType != typeof(string) && !DecimalTypes.Contains(RenderType))
                 return;
 
-            if (ReadOnly || Property.IsReadOnlyInGUI())
+            if (IsReadOnly)
                 InputAttributes.Add("disabled", "");
 
             if (Property.TryGetAttribute(out RangeAttribute rangeAttribute))

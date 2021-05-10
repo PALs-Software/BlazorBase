@@ -173,6 +173,9 @@ namespace BlazorBase.CRUD.Components
                 return;
 
             Entries.Remove(entry);
+            BaseInputs.RemoveAll(input => input.Model == entry);
+            BaseSelectListInputs.RemoveAll(input => input.Model == entry);
+            BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
 
             await OnAfterRemoveEntryAsync(entry);
         }
@@ -307,6 +310,7 @@ namespace BlazorBase.CRUD.Components
             return valid;
         }
         #endregion
+
         #region Other       
         protected EventServices GetEventServices()
         {

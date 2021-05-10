@@ -20,6 +20,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 using Microsoft.AspNetCore.WebUtilities;
 using BlazorBase.MessageHandling.Enum;
 using Blazorise;
+using System.Linq.Expressions;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -55,14 +56,13 @@ namespace BlazorBase.CRUD.Components
         #endregion
         #endregion
 
-        [Parameter]
-        public string SingleDisplayName { get; set; }
-
-        [Parameter]
-        public string PluralDisplayName { get; set; }
-
-        [Parameter]
-        public Func<TModel, bool> DataLoadCondition { get; set; }
+        [Parameter] public string SingleDisplayName { get; set; }
+        [Parameter] public string PluralDisplayName { get; set; }
+        [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+        [Parameter] public bool UserCanAddEntries { get; set; } = true;
+        [Parameter] public bool UserCanEditEntries { get; set; } = true;
+        [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
+        [Parameter] public bool ShowEntryByStart { get; set; }
 
         #endregion
 
@@ -97,16 +97,32 @@ namespace BlazorBase.CRUD.Components
                 TModelType = typeof(TModel);
 
                 SetUpDisplayLists(TModelType, GUIType.List);
-
-                if (String.IsNullOrEmpty(SingleDisplayName))
-                    SingleDisplayName = ModelLocalizer[TModelType.Name];
-                if (String.IsNullOrEmpty(PluralDisplayName))
-                    PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
-
+                SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
             });
 
             await ProcessQueryParameters();
+        }
+
+        public override async Task SetParametersAsync(ParameterView parameters)
+        {
+            await base.SetParametersAsync(parameters);
+
+            SetDisplayNames();
+            if (VirtualizeList != null)
+                await VirtualizeList.RefreshDataAsync();
+        }
+
+        protected virtual void SetDisplayNames() {
+            if (String.IsNullOrEmpty(SingleDisplayName))
+                SingleDisplayName = ModelLocalizer[TModelType.Name];
+            else
+                SingleDisplayName = ModelLocalizer[SingleDisplayName];
+
+            if (String.IsNullOrEmpty(PluralDisplayName))
+                PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
+            else
+                PluralDisplayName = ModelLocalizer[PluralDisplayName];
         }
 
         protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
@@ -144,8 +160,8 @@ namespace BlazorBase.CRUD.Components
             }
             else
             {
-                Entries = await baseService.GetDataAsync(DataLoadCondition, request.StartIndex, request.Count);
-                totalEntries = await baseService.CountDataAsync(DataLoadCondition);
+                Entries = await baseService.GetDataAsync<TModel>(DataLoadCondition, request.StartIndex, request.Count);
+                totalEntries = await baseService.CountDataAsync<TModel>(DataLoadCondition);
             }
 
             return new ItemsProviderResult<TModel>(Entries, totalEntries);

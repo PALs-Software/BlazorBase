@@ -11,7 +11,10 @@
     <thead>
         <tr>
             <th class="th-actions">
-                <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
+                @if (UserCanAddEntries)
+                {
+                    <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
+                }
             </th>
             @foreach (var displayGroup in DisplayGroups)
             {
@@ -29,8 +32,14 @@
             <tr>
                 <td>
                     <Buttons>
-                        <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)"><Icon Name="IconName.Edit" /></Button>
-                        <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)"><Icon Name=" IconName.Delete" /></Button>
+                        @if (UserCanEditEntries)
+                        {
+                            <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)"><Icon Name="IconName.Edit" /></Button>
+                        }
+                        @if (UserCanDeleteEntries)
+                        {
+                            <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)"><Icon Name=" IconName.Delete" /></Button>
+                        }
                     </Buttons>
                 </td>
 

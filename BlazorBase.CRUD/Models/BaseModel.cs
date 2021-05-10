@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,6 +47,14 @@ namespace BlazorBase.CRUD.Models
         [DateDisplayMode(DateInputMode = DateInputMode.DateTime)]
         [Visible(DisplayGroup = "Information", DisplayOrder = 200)]
         public DateTime ModifiedOn { get; set; }
+        #endregion
+
+        #region Configuration Properties
+        public virtual bool UserCanAddEntries { get; } = true;
+        public virtual bool UserCanEditEntries { get; } = true;
+        public virtual bool UserCanDeleteEntries { get; } = true;
+        public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
+        public virtual bool ShowOnlySingleEntry { get; }
         #endregion
 
         #region Attribute Methods
@@ -279,10 +288,13 @@ namespace BlazorBase.CRUD.Models
         protected virtual void BuildListComponent(RenderTreeBuilder builder)
         {
             builder.OpenComponent(0, typeof(BaseList<>).MakeGenericType(GetType()));
+            builder.AddAttribute(1, "UserCanAddEntries", UserCanAddEntries);
+            builder.AddAttribute(2, "UserCanEditEntries", UserCanEditEntries);
+            builder.AddAttribute(3, "UserCanDeleteEntries", UserCanDeleteEntries);
+            builder.AddAttribute(4, "DataLoadCondition", DataLoadCondition);
             builder.CloseComponent();
         }
 
-        public virtual bool ShowOnlySingleEntry { get; }
         protected virtual void BuildCardComponent(RenderTreeBuilder builder)
         {
             builder.OpenComponent(0, typeof(BaseCard<>).MakeGenericType(GetType()));

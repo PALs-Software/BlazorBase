@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -148,6 +149,10 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region ComponentBase
+        bool UserCanAddEntries { get; }
+        bool UserCanEditEntries { get; }
+        bool UserCanDeleteEntries { get; }
+        Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
         bool ShowOnlySingleEntry { get; }
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
         #endregion

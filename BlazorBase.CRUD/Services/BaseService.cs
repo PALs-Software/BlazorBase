@@ -11,6 +11,7 @@ using static BlazorBase.CRUD.Models.IBaseModel;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
+using System.Linq.Expressions;
 
 namespace BlazorBase.CRUD.Services
 {
@@ -56,13 +57,24 @@ namespace BlazorBase.CRUD.Services
             return await DbContext.Set<T>().Skip(index).Take(count).ToListAsync();
         }
 
-        public virtual Task<List<T>> GetDataAsync<T>(Func<T, bool> dataLoadCondition) where T : class
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition) where T : class
         {
             return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).ToList());
         }
-        public virtual Task<List<T>> GetDataAsync<T>(Func<T, bool> dataLoadCondition, int index, int count) where T : class
+
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, int index, int count) where T : class
         {
             return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count).ToList());
+        }
+
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition) where T : class, IBaseModel
+        {
+            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Cast<T>().ToList());
+        }
+
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition, int index, int count) where T : class, IBaseModel
+        {
+            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count).Cast<T>().ToList());
         }
 
         /// <summary>
@@ -92,7 +104,13 @@ namespace BlazorBase.CRUD.Services
         {
             return await DbContext.Set<T>().CountAsync();
         }
-        public virtual Task<int> CountDataAsync<T>(Func<T, bool> dataLoadCondition) where T : class
+
+        public virtual Task<int> CountDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition) where T : class
+        {
+            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Count());
+        }
+
+        public virtual Task<int> CountDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition) where T : class, IBaseModel
         {
             return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Count());
         }
