@@ -45,10 +45,6 @@ namespace BlazorBase.CRUD.Components
             public bool IsListProperty { get; set; }
         }
 
-        #region Events
-        [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
-        #endregion
-
         #region Injects
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; }
@@ -187,12 +183,11 @@ namespace BlazorBase.CRUD.Components
             return e.Message + Environment.NewLine + Environment.NewLine + BaseDisplayComponentLocalizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
         }
 
-        protected async Task<string> GetPropertyCaptionAsync(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        protected string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
         {
-            var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
-            await OnGetPropertyCaption.InvokeAsync(args);
-            await model.OnGetPropertyCaption(args);
-
+            var args = new OnGetPropertyCaptionArgs(model, displayItem, eventServices) {  Caption = modelLocalizer[displayItem.Property.Name] };
+            model.OnGetPropertyCaption(args);         
+            
             return args.Caption;
         }
     }

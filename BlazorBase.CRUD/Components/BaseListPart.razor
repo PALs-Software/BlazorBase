@@ -14,7 +14,7 @@
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
                     <td>
-                        @GetPropertyCaptionAsync(GetEventServices(), Model, ModelLocalizer, displayItem).Result
+                        @GetPropertyCaption(GetEventServices(), Model, ModelLocalizer, displayItem)
                     </td>
                 }
             }

@@ -128,6 +128,8 @@ namespace BlazorBase.CRUD.Models
         public virtual Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args) { return Task.CompletedTask; }
         #endregion
+
+        public virtual void OnGetPropertyCaption(OnGetPropertyCaptionArgs args) { }
         public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args)
         {
             return Task.CompletedTask;

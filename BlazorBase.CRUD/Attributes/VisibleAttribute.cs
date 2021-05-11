@@ -43,7 +43,5 @@ namespace BlazorBase.CRUD.Attributes
         public int DisplayOrder { get; set; }
 
         public bool Collapsed { get; set; }
-
-        public Func<DisplayItem, string> DynamicCaption { get; set; }
     }
 }

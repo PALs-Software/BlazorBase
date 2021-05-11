@@ -56,8 +56,8 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
 
-        public record OnGetPropertyCaptionArgs(IBaseModel Model, DisplayItem DisplayItem, string Caption, EventServices EventServices);
-        public Task OnGetPropertyCaption(OnGetPropertyCaptionArgs args);
+        public record OnGetPropertyCaptionArgs(IBaseModel Model, DisplayItem DisplayItem, EventServices EventServices) { public string Caption { get; set; } };
+        public void OnGetPropertyCaption(OnGetPropertyCaptionArgs args);
 
         public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args);

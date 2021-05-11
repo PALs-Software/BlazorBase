@@ -21,7 +21,7 @@
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
                     <td>
-                        @ModelLocalizer[displayItem.Property.Name]
+                        @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
                     </td>
                 }
             }
@@ -70,8 +70,7 @@
 <BaseModalCard @ref="BaseModalCard"
                TModel="TModel"
                SingleDisplayName="@SingleDisplayName"
-               OnCardClosed="OnCardClosedAsync"
-               OnGetPropertyCaption="(args) => OnGetPropertyCaption.InvokeAsync(args)"
+               OnCardClosed="OnCardClosedAsync"             
                OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
                OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
                OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"

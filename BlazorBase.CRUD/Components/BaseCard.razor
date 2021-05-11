@@ -85,7 +85,7 @@
                                     <BaseListPart @ref="AddToBaseListParts"
                                                   Model="Model"
                                                   Property="displayItem.Property"
-                                                  Service="Service"
+                                                  Service="Service"                                              
                                                   OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
                                                   OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
                                                   OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
@@ -97,15 +97,14 @@
                                                   OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
                                                   OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
                                                   OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
-                                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)"
-                                                  />
+                                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
                                 }
                                 else
                                 {
                                     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
                                         <Fields>
                                             <Field Horizontal="true">
-                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaptionAsync(GetEventServices(), Model, ModelLocalizer, displayItem).Result</FieldLabel>
+                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaption(GetEventServices(), Model, ModelLocalizer, displayItem)</FieldLabel>
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {
