@@ -182,6 +182,16 @@ namespace BlazorBase.CRUD.Models
         {
             return Task.CompletedTask;
         }
+
+        public virtual Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args)
+        {
+            return Task.CompletedTask;
+        }
         #endregion
 
         #region List Events 
@@ -230,6 +240,16 @@ namespace BlazorBase.CRUD.Models
         }
 
         public virtual Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args)
+        {
+            return Task.CompletedTask;
+        }
+
+        public virtual Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args)
         {
             return Task.CompletedTask;
         }

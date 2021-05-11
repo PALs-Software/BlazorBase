@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Components;
@@ -39,6 +40,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryUpArgs> OnAfterMoveListEntryUp { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
 
         [Parameter] public IBaseModel Model { get; set; }
@@ -61,6 +64,9 @@ namespace BlazorBase.CRUD.Components
         protected IList Entries { get; set; }
         protected Type ModelListEntryType { get; set; }
 
+        protected bool ModelImplementedISortableItem { get; set; }
+        protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
+
         #region Property Infos
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
         protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
@@ -74,12 +80,12 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Init
-
         protected override async Task OnInitializedAsync()
         {
             await InvokeAsync(() =>
             {
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
+                ModelImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
 
                 IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 ModelLocalizer = StringLocalizerFactory.Create(ModelListEntryType);
@@ -96,7 +102,11 @@ namespace BlazorBase.CRUD.Components
 
                 BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyListPartInput>().ToList();
 
-                Entries = (IList)Property.GetValue(Model);
+                dynamic entries = Property.GetValue(Model);
+                if (ModelImplementedISortableItem)
+                    entries.Sort(SortableItemComparer);
+                Entries = (IList)entries;
+
                 Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
             });
 
@@ -107,7 +117,7 @@ namespace BlazorBase.CRUD.Components
         {
             if (propertyName != Property.Name)
                 return;
-            
+
             InvokeAsync(() => StateHasChanged());
         }
 
@@ -150,7 +160,7 @@ namespace BlazorBase.CRUD.Components
             return Activator.CreateInstance(constructedListType);
         }
 
-        protected async Task AddEntryAsync()
+        protected async Task AddEntryAsync(object aboveEntry = null)
         {
             var newEntry = Activator.CreateInstance(ModelListEntryType);
             await OnCreateNewListEntryInstanceAsync(newEntry);
@@ -160,7 +170,12 @@ namespace BlazorBase.CRUD.Components
             if (args.Handled)
                 return;
 
-            Entries.Add(newEntry);
+            if (ModelImplementedISortableItem && aboveEntry != null)
+                Entries.Insert(Entries.IndexOf(aboveEntry), newEntry);
+            else
+                Entries.Add(newEntry);
+
+            SetSortIndex();
 
             await OnAfterAddEntryAsync(newEntry);
         }
@@ -178,6 +193,51 @@ namespace BlazorBase.CRUD.Components
             BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
 
             await OnAfterRemoveEntryAsync(entry);
+        }
+
+        protected async Task MoveEntryUpAsync(object entry)
+        {
+            if (!ModelImplementedISortableItem)
+                return;
+
+            var index = Entries.IndexOf(entry);
+            if (index == 0)
+                return;
+
+            SwapEntries(entry, index, index - 1);
+            SetSortIndex();
+
+            await OnAfterMoveListEntryUpAsync(entry);
+        }
+        protected async Task MoveEntryDownAsync(object entry)
+        {
+            if (!ModelImplementedISortableItem)
+                return;
+
+            var index = Entries.IndexOf(entry);
+            if (index == Entries.Count - 1)
+                return;
+
+            SwapEntries(entry, index, index + 1);
+            SetSortIndex();
+
+            await OnAfterMoveListEntryDownAsync(entry);
+        }
+
+        protected void SwapEntries(object entry, int currentIndex, int targetIndex)
+        {
+            var tempEntry = Entries[targetIndex];
+            Entries[targetIndex] = entry;
+            Entries[currentIndex] = tempEntry;
+        }
+
+        protected void SetSortIndex()
+        {
+            if (!ModelImplementedISortableItem)
+                return;
+
+            for (int index = 0; index < Entries.Count; index++)
+                (Entries[index] as ISortableItem).SortIndex = index;
         }
         #endregion
 
@@ -271,6 +331,30 @@ namespace BlazorBase.CRUD.Components
 
             if (entry is IBaseModel RemovedBaseEntry)
                 await RemovedBaseEntry.OnAfterRemoveEntry(new OnAfterRemoveEntryArgs(Model, eventServices));
+        }
+
+        protected async Task OnAfterMoveListEntryUpAsync(object entry)
+        {
+            var eventServices = GetEventServices();
+
+            var args = new OnAfterMoveListEntryUpArgs(Model, entry, eventServices);
+            await OnAfterMoveListEntryUp.InvokeAsync(args);
+            await Model.OnAfterMoveListEntryUp(args);
+
+            if (entry is IBaseModel baseModel)
+                await baseModel.OnAfterMoveEntryUp(new OnAfterMoveEntryUpArgs(Model, eventServices));
+        }
+
+        protected async Task OnAfterMoveListEntryDownAsync(object entry)
+        {
+            var eventServices = GetEventServices();
+
+            var args = new OnAfterMoveListEntryDownArgs(Model, entry, eventServices);
+            await OnAfterMoveListEntryDown.InvokeAsync(args);
+            await Model.OnAfterMoveListEntryDown(args);
+
+            if (entry is IBaseModel baseModel)
+                await baseModel.OnAfterMoveEntryDown(new OnAfterMoveEntryDownArgs(Model, eventServices));
         }
 
         #endregion

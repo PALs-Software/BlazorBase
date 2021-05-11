@@ -55,6 +55,10 @@ namespace BlazorBase.CRUD.Models
         public Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args);
         #endregion
 
+
+        public record OnGetPropertyCaptionArgs(IBaseModel Model, DisplayItem DisplayItem, string Caption, EventServices EventServices);
+        public Task OnGetPropertyCaption(OnGetPropertyCaptionArgs args);
+
         public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object NewValue, EventServices EventServices);
         public Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args);
 
@@ -96,6 +100,12 @@ namespace BlazorBase.CRUD.Models
 
         public record OnAfterSaveChangesArgs(IBaseModel Model, bool NavigationProperty, EventServices EventServices);
         public Task OnAfterSaveChanges(OnAfterSaveChangesArgs args);
+
+        public record OnAfterMoveEntryUpArgs(IBaseModel Model, EventServices EventServices);
+        public Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args);
+
+        public record OnAfterMoveEntryDownArgs(IBaseModel Model, EventServices EventServices);
+        public Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args);
         #endregion
 
         #region ListProperty
@@ -135,6 +145,12 @@ namespace BlazorBase.CRUD.Models
 
         public record OnAfterRemoveListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
         public Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args);
+
+        public record OnAfterMoveListEntryUpArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
+        public Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args);
+
+        public record OnAfterMoveListEntryDownArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
+        public Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args);
         #endregion
 
         #endregion

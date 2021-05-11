@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.SortableItem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -45,6 +46,11 @@ namespace BlazorBase.CRUD.Extensions
                 typeof(IBaseModel).IsAssignableFrom(property.PropertyType) ||
                  (property.PropertyType.IsGenericType && typeof(IBaseModel).IsAssignableFrom(property.PropertyType.GenericTypeArguments[0]))
             ).ToList();
+        }
+
+        public static bool ImplementedISortableItem(this Type type)
+        {
+            return typeof(ISortableItem).IsAssignableFrom(type);
         }
     }
 }

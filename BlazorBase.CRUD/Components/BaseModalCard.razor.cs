@@ -20,6 +20,7 @@ namespace BlazorBase.CRUD.Components
         #region Parameter
 
         #region Events
+        [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
         [Parameter] public EventCallback OnCardClosed { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
@@ -42,6 +43,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryUpArgs> OnAfterMoveListEntryUp { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
 
         #endregion
@@ -72,15 +75,15 @@ namespace BlazorBase.CRUD.Components
             Modal.Show();
         }
 
-        public async Task SaveModalAsync()
+        public async Task<bool> SaveModalAsync()
         {
-            await BaseCard.SaveCardAsync();
+            return await BaseCard.SaveCardAsync();
         }
 
         public async Task SaveAndCloseModalAsync()
         {
-            await SaveModalAsync();
-            HideModal();
+            if (await SaveModalAsync())
+                HideModal();
         }
 
         public void HideModal()

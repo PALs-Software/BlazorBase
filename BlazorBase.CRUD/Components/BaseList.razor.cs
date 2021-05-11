@@ -30,6 +30,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Events
         [Parameter] public EventCallback OnCardClosed { get; set; }
+        [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
@@ -53,6 +54,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryUpArgs> OnAfterMoveListEntryUp { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
         #endregion
 
@@ -113,7 +116,8 @@ namespace BlazorBase.CRUD.Components
                 await VirtualizeList.RefreshDataAsync();
         }
 
-        protected virtual void SetDisplayNames() {
+        protected virtual void SetDisplayNames()
+        {
             if (String.IsNullOrEmpty(SingleDisplayName))
                 SingleDisplayName = ModelLocalizer[TModelType.Name];
             else

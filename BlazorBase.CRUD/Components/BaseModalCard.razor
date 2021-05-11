@@ -11,7 +11,7 @@
                     @Localizer["Edit {0}", SingleDisplayName]
                     <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
                 </ModalTitle>
-                <CloseButton/>
+                <CloseButton />
             </ModalHeader>
             <ModalBody>
                 <BaseCard @ref="BaseCard"
@@ -20,6 +20,7 @@
                           Embedded="true"
                           ShowEntryByStart="ShowEntryByStart"
                           EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"
+                          OnGetPropertyCaption="(args) => OnGetPropertyCaption.InvokeAsync(args)"
                           OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
                           OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
                           OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
@@ -38,7 +39,9 @@
                           OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
                           OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
                           OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                          OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
+                          OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+                          OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+                          OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
             </ModalBody>
             <ModalFooter>
                 <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Close"]</Button>

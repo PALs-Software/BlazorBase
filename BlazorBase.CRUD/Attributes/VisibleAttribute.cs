@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.Attributes
 {
@@ -42,5 +43,7 @@ namespace BlazorBase.CRUD.Attributes
         public int DisplayOrder { get; set; }
 
         public bool Collapsed { get; set; }
+
+        public Func<DisplayItem, string> DynamicCaption { get; set; }
     }
 }

@@ -31,6 +31,7 @@ namespace BlazorBase.CRUD.Components
         #region Parameter
 
         #region Events
+        [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
@@ -52,6 +53,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveListEntryArgs> OnBeforeRemoveListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveListEntryArgs> OnAfterRemoveListEntry { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryUpArgs> OnAfterMoveListEntryUp { get; set; }
+        [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
 
         #endregion
@@ -149,6 +152,7 @@ namespace BlazorBase.CRUD.Components
 
             builder.CloseComponent();
         };
+
         #endregion
 
         #region Actions
@@ -207,12 +211,12 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        public async Task SaveCardAsync()
+        public async Task<bool> SaveCardAsync()
         {
             ResetInvalidFeedback();
 
             if (!CardIsValid())
-                return;
+                return false;
 
             var eventServices = GetEventServices();
 
@@ -224,13 +228,13 @@ namespace BlazorBase.CRUD.Components
                     await OnBeforeAddEntry.InvokeAsync(args);
                     await Model.OnBeforeAddEntry(args);
                     if (args.AbortAdding)
-                        return;
+                        return false;
 
                     var dbEntry = Service.DbContext.Entry(Model);
                     if (dbEntry.State != EntityState.Added && !await Service.AddEntryAsync(Model))
                     {
                         ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
-                        return;
+                        return false;
                     }
 
                     var onAfterArgs = new OnAfterAddEntryArgs(Model, eventServices);
@@ -243,7 +247,7 @@ namespace BlazorBase.CRUD.Components
                     await OnBeforeUpdateEntry.InvokeAsync(args);
                     await Model.OnBeforeUpdateEntry(args);
                     if (args.AbortUpdating)
-                        return;
+                        return false;
 
                     Service.UpdateEntry(Model);
 
@@ -259,15 +263,16 @@ namespace BlazorBase.CRUD.Components
             catch (CRUDException e)
             {
                 ShowFormattedInvalidFeedback(PrepareExceptionErrorMessage(e));
-                return;
+                return false;
             }
             catch (Exception e)
             {
                 ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", PrepareExceptionErrorMessage(e)]);
-                return;
+                return false;
             }
 
             Snackbar.Show();
+            return true;
         }
 
         public void ResetCard()
@@ -330,7 +335,8 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Validation
-        public bool HasUnsavedChanges() {
+        public bool HasUnsavedChanges()
+        {
             return Service.HasUnsavedChanges();
         }
 

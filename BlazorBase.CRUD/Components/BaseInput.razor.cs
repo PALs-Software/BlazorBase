@@ -108,9 +108,8 @@ namespace BlazorBase.CRUD.Components
                     MemberName = Property.Name
                 };
 
-                var foreignKey = Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                if (foreignKey != null)
-                    ForeignKeyProperty = Model.GetType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                if (Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) is ForeignKeyAttribute foreignKey)
+                    ForeignKeyProperty = Model.GetUnproxiedType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
 
                 SetInputType();
                 SetInputAttributes();

@@ -95,14 +95,17 @@
                                                   OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
                                                   OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
                                                   OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)" />
+                                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+                                                  OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+                                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)"
+                                                  />
                                 }
                                 else
                                 {
                                     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
                                         <Fields>
                                             <Field Horizontal="true">
-                                                <FieldLabel ColumnSize="ColumnSize.Is4">@ModelLocalizer[displayItem.Property.Name]</FieldLabel>
+                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaptionAsync(GetEventServices(), Model, ModelLocalizer, displayItem).Result</FieldLabel>
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {
@@ -132,7 +135,7 @@
     }
 </div>
 
-<Snackbar @ref="Snackbar"          
+<Snackbar @ref="Snackbar"
           Color="ShowInvalidFeedback ? SnackbarColor.Danger : SnackbarColor.Success">
     <SnackbarBody>
         @if (ShowInvalidFeedback)

@@ -3,6 +3,7 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
+using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
@@ -13,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -42,6 +44,10 @@ namespace BlazorBase.CRUD.Components
             public VisibleAttribute Attribute { get; set; }
             public bool IsListProperty { get; set; }
         }
+
+        #region Events
+        [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
+        #endregion
 
         #region Injects
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }
@@ -108,7 +114,7 @@ namespace BlazorBase.CRUD.Components
                     continue;
                 }
 
-                var entries = (await service.GetDataAsync(foreignKeyType));
+                var entries = await service.GetDataAsync(foreignKeyType);
                 var primaryKeys = new List<KeyValuePair<string, string>>()
                 {
                     new KeyValuePair<string, string>(null, String.Empty)
@@ -173,12 +179,21 @@ namespace BlazorBase.CRUD.Components
             return query;
         }
 
-       protected string PrepareExceptionErrorMessage(Exception e)
+        protected string PrepareExceptionErrorMessage(Exception e)
         {
             if (e.InnerException == null)
                 return e.Message;
 
             return e.Message + Environment.NewLine + Environment.NewLine + BaseDisplayComponentLocalizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
+        }
+
+        protected async Task<string> GetPropertyCaptionAsync(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        {
+            var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
+            await OnGetPropertyCaption.InvokeAsync(args);
+            await model.OnGetPropertyCaption(args);
+
+            return args.Caption;
         }
     }
 }
