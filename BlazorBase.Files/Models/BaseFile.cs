@@ -20,12 +20,15 @@ using System.Net;
 using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.ViewModels;
 using System.Security.Cryptography;
+using BlazorBase.CRUD.SortableItem;
 
 namespace BlazorBase.Files.Models
 {
     [Route("/BaseFiles")]
-    public class BaseFile : BaseModel
+    public class BaseFile : BaseModel, ISortableItem
     {
+        public int SortIndex { get; set; }
+
         [Key]
         public Guid Id { get; set; }
 
@@ -62,7 +65,7 @@ namespace BlazorBase.Files.Models
         public BaseFile DisplayFile { get { return this; } }
 
         [NotMapped]
-        public Guid TempFileId { get; set; }
+        public Guid TempFileId { get; set; }        
 
         #region CRUD
 

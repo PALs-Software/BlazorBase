@@ -153,6 +153,9 @@ namespace BlazorBase.CRUD.Components
 
         private async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
         {
+            if (request.Count == 0)
+                return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
+
             var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
 
             int totalEntries;

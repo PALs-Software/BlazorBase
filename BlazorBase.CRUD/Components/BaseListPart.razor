@@ -28,10 +28,13 @@
                     <Buttons>
                         <Button Color="Color.Success" Clicked="() => AddEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Add" /></Button>
                         <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
-                        <Buttons Orientation="Orientation.Vertical">
-                            <Button Color="Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
-                            <Button Color="Color.Secondary" Clicked="() => MoveEntryDownAsync(entry)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
-                        </Buttons>
+                        @if (ModelImplementedISortableItem)
+                        {
+                            <Buttons Orientation="Orientation.Vertical">
+                                <Button Color="Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
+                                <Button Color="Color.Secondary" Clicked="() => MoveEntryDownAsync(entry)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
+                            </Buttons>
+                        }
                     </Buttons>
                 </td>
 
