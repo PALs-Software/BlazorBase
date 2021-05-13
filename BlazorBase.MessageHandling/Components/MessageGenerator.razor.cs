@@ -3,13 +3,10 @@ using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
 using BlazorBase.Modules;
 using Blazorise;
-using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 
 namespace BlazorBase.MessageHandling.Components
@@ -18,7 +15,7 @@ namespace BlazorBase.MessageHandling.Components
     {
         #region Properties
 
-        protected Dictionary<Guid, ModalInfo> ModalInfos { get; set; } = new Dictionary<Guid, ModalInfo>();
+        protected ConcurrentDictionary<Guid, ModalInfo> ModalInfos { get; set; } = new ConcurrentDictionary<Guid, ModalInfo>();
         #endregion
 
         #region Injects
@@ -74,24 +71,9 @@ namespace BlazorBase.MessageHandling.Components
                     args.CloseButtonText = Localizer["Ok"];
 
                 if (args.Icon == null)
-                {
-                    switch (args.MessageType)
-                    {
-                        case MessageType.Information:
-                            args.Icon = FontAwesomeIcons.InfoCircle;
-                            break;
-                        case MessageType.Error:
-                            args.Icon = FontAwesomeIcons.ExclamationTriangle;
-                            args.IconStyle = "color: red";
-                            break;
-                        case MessageType.Warning:
-                            args.Icon = FontAwesomeIcons.ExclamationTriangle;
-                            args.IconStyle = "color: yellow";
-                            break;
-                    }
-                }
+                    args.SetIconByMessageType();
 
-                ModalInfos.Add(Guid.NewGuid(), new ModalInfo(args));
+                while (!ModalInfos.TryAdd(Guid.NewGuid(), new ModalInfo(args))) ;
 
                 StateHasChanged();
             });
@@ -129,7 +111,7 @@ namespace BlazorBase.MessageHandling.Components
         #region Modal
         protected void OnModalClosed(Guid id)
         {
-            ModalInfos.Remove(id);
+            ModalInfos.TryRemove(id, out ModalInfo _);
         }
 
         protected async Task OnModalClosing(ModalInfo modalInfo, ModalClosingEventArgs args)
@@ -149,7 +131,6 @@ namespace BlazorBase.MessageHandling.Components
             }
         }
 
-
         protected void OnConfirmButtonClicked(ModalInfo modalInfo)
         {
             modalInfo.ConfirmDialogResult = ConfirmDialogResult.Confirmed;
@@ -162,9 +143,6 @@ namespace BlazorBase.MessageHandling.Components
             modalInfo.Modal.Hide();
         }
 
-
         #endregion
     }
-
-
 }

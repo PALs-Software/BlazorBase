@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -56,7 +57,7 @@ namespace BlazorBase.CRUD.Components
         protected List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
         protected Dictionary<string, DisplayGroup> DisplayGroups = new Dictionary<string, DisplayGroup>();
         protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties;
-        protected static Dictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
+        protected static ConcurrentDictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new ConcurrentDictionary<Type, List<KeyValuePair<string, string>>>();
         protected Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
         #endregion
 
@@ -67,7 +68,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var property in VisibleProperties)
             {
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
-                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? "General" : attribute.DisplayGroup;
+                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? BaseDisplayComponentLocalizer["General"] : attribute.DisplayGroup;
 
                 if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
                     DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
@@ -160,7 +161,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var value in values)
                 result.Add(new KeyValuePair<string, string>(value, localizer[value]));
 
-            CachedEnumValueDictionary.Add(enumType, result);
+            CachedEnumValueDictionary.TryAdd(enumType, result);
             return result;
         }
 

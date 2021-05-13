@@ -183,8 +183,7 @@ namespace BlazorBase.Files.Models
                 FileName = fileName,
                 FileSize = fileContent.Length,
                 BaseFileType = baseFileType,
-                MimeFileType = mimeFileType,
-                TempFileId = Guid.NewGuid(),
+                MimeFileType = mimeFileType,                
                 Hash = ComputeSha256Hash(fileContent)
             };
             await file.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(file, eventServices));
@@ -193,7 +192,14 @@ namespace BlazorBase.Files.Models
             if (!Directory.Exists(options.TempFileStorePath))
                 Directory.CreateDirectory(options.TempFileStorePath);
 
-            await File.WriteAllBytesAsync(Path.Join(options.TempFileStorePath, file.TempFileId.ToString()), fileContent);
+            string tempFilePath;
+            do
+            {
+                file.TempFileId = Guid.NewGuid();
+                tempFilePath = Path.Join(options.TempFileStorePath, file.TempFileId.ToString());
+            } while (File.Exists(tempFilePath));
+
+            await File.WriteAllBytesAsync(tempFilePath, fileContent);
 
             return file;
         }

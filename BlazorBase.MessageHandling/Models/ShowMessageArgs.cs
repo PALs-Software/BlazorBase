@@ -1,6 +1,7 @@
 ﻿using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
+using Blazorise.Icons.FontAwesome;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace BlazorBase.MessageHandling.Models
         public ShowMessageArgs() { }
         public ShowMessageArgs(string title, string message,
                                 MessageType messageType = MessageType.Information,
-                                Func<ModalClosingEventArgs, Task>  onClosing = null,
+                                Func<ModalClosingEventArgs, Task> onClosing = null,
                                 object icon = null,
                                 string closeButtonText = null,
                                 Color closeButtonColor = Color.Secondary,
@@ -40,5 +41,23 @@ namespace BlazorBase.MessageHandling.Models
         public string CloseButtonText { get; set; }
         public Color CloseButtonColor { get; set; }
         public ModalSize ModalSize { get; set; }
+
+        public virtual void SetIconByMessageType()
+        {
+            switch (MessageType)
+            {
+                case MessageType.Information:
+                    Icon = FontAwesomeIcons.InfoCircle;
+                    break;
+                case MessageType.Error:
+                    Icon = FontAwesomeIcons.ExclamationTriangle;
+                    IconStyle = "color: red";
+                    break;
+                case MessageType.Warning:
+                    Icon = FontAwesomeIcons.ExclamationTriangle;
+                    IconStyle = "color: yellow";
+                    break;
+            }
+        }
     }
 }

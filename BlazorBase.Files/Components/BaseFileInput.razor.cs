@@ -70,9 +70,20 @@ namespace BlazorBase.Files.Components
 
                     if (Model is BaseFile baseFile)
                     {
-                        newFile.TempFileId = baseFile.TempFileId == Guid.Empty ? Guid.NewGuid() : baseFile.TempFileId;
-                        baseFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
+                        if (baseFile.TempFileId == Guid.Empty)
+                        {
+                            var tempFileStorePath = BlazorBaseFileOptions.Instance.TempFileStorePath;
+                            string tempFilePath;
+                            do
+                            {
+                                newFile.TempFileId = Guid.NewGuid();
+                                tempFilePath = Path.Join(tempFileStorePath, newFile.TempFileId.ToString());
+                            } while (File.Exists(tempFilePath));
+                        }
+                        else
+                            newFile.TempFileId = baseFile.TempFileId;
 
+                        baseFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
                         baseFile.TempFileId = newFile.TempFileId;
                         baseFile.FileName = newFile.FileName;
                         baseFile.FileSize = newFile.FileSize;

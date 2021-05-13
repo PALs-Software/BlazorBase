@@ -57,12 +57,10 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #endregion
-
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public bool Embedded { get; set; }
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
-
         #endregion
 
         #region Injects
@@ -78,7 +76,7 @@ namespace BlazorBase.CRUD.Components
         protected MarkupString CardSummaryInvalidFeedback;
         protected bool ShowInvalidFeedback = false;
 
-        protected TModel Model;
+        protected TModel Model = null;
         protected Type TModelType;
 
         protected bool AddingMode;
