@@ -37,6 +37,8 @@ namespace BlazorBase.CRUD.Services
                     outputValue = Convert.ChangeType(Guid.Parse(inputValue), conversionType);
                 else if (conversionType == typeof(DateTimeOffset))
                     outputValue = Convert.ChangeType(DateTimeOffset.Parse(inputValue), conversionType);
+                else if (conversionType == typeof(DateTime))
+                    outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.CurrentCulture);
                 else
                     outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.InvariantCulture);
                 

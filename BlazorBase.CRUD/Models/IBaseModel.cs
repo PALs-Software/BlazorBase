@@ -98,8 +98,8 @@ namespace BlazorBase.CRUD.Models
         public Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args);
 
 
-        public record OnAfterSaveChangesArgs(IBaseModel Model, bool NavigationProperty, EventServices EventServices);
-        public Task OnAfterSaveChanges(OnAfterSaveChangesArgs args);
+        public record OnAfterCardSaveChangesArgs(IBaseModel Model, bool NavigationProperty, EventServices EventServices);
+        public Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
 
         public record OnAfterMoveEntryUpArgs(IBaseModel Model, EventServices EventServices);
         public Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args);

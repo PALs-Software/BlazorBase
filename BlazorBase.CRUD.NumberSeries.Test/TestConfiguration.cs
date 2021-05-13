@@ -1,5 +1,7 @@
 ﻿using BlazorBase.CRUD.NumberSeries.Test.Mocks;
 using BlazorBase.CRUD.Services;
+using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.MessageHandling.Services;
 using Bunit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +35,8 @@ namespace BlazorBase.CRUD.NumberSeries.Test
 
             services.AddTransient<BaseService>();
             services.AddSingleton<NoSeriesService>();
-            
+
+            services.AddBlazorBaseMessageHandling();
         }
     }
 }

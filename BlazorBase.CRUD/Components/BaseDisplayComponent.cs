@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Modules;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
@@ -46,7 +47,8 @@ namespace BlazorBase.CRUD.Components
         }
 
         #region Injects
-        [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }
+        [Inject] protected ErrorHandler ErrorHandler { get; set; }
+        [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }        
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; }
         #endregion
 
@@ -175,13 +177,7 @@ namespace BlazorBase.CRUD.Components
             return query;
         }
 
-        protected string PrepareExceptionErrorMessage(Exception e)
-        {
-            if (e.InnerException == null)
-                return e.Message;
-
-            return e.Message + Environment.NewLine + Environment.NewLine + BaseDisplayComponentLocalizer["Inner Exception:"] + PrepareExceptionErrorMessage(e.InnerException);
-        }
+ 
 
         protected string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
         {

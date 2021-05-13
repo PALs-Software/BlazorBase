@@ -88,7 +88,12 @@ namespace BlazorBase.Files.Models
             return base.OnAfterRemoveEntry(args);
         }
 
-        public override async Task OnAfterSaveChanges(OnAfterSaveChangesArgs args)
+        public override async Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args)
+        {
+            await CopyTempFileToFileStoreAsync();
+        }
+
+        public override async Task OnAfterDbContextModifiedEntry(OnAfterDbContextModifiedEntryArgs args)
         {
             await CopyTempFileToFileStoreAsync();
         }
@@ -109,6 +114,14 @@ namespace BlazorBase.Files.Models
                 return $"/api/BaseFile/GetFile/{BaseFileController.EncodeUrl(MimeFileType)}/{Id}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
             else
                 return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}";
+        }
+
+        public string GetPhysicalFilePath() {
+            var options = BlazorBaseFileOptions.Instance;
+            if (TempFileId == Guid.Empty)
+                return Path.Join(options.FileStorePath, Id.ToString());
+            else
+                return Path.Join(options.FileStorePath, TempFileId.ToString());
         }
 
         public async Task<byte[]> GetFileContentAsync()

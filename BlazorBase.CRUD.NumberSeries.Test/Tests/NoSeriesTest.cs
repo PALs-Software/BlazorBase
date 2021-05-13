@@ -2,6 +2,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.NumberSeries.Test.Libraries;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Interfaces;
 using Bunit;
 using Microsoft.Extensions.Localization;
 using System;
@@ -16,6 +17,7 @@ namespace BlazorBase.CRUD.NumberSeries.Test.Tests
     {
         protected BaseService BaseService { get; set; }
         protected NoSeriesService NoSeriesService { get; set; }
+        protected IMessageHandler MessageHandler { get; set; }
         protected EventServices EventServices { get; set; }
 
 
@@ -25,12 +27,14 @@ namespace BlazorBase.CRUD.NumberSeries.Test.Tests
 
             BaseService = Services.GetService<BaseService>();
             NoSeriesService = Services.GetService<NoSeriesService>();
+            MessageHandler = Services.GetService<IMessageHandler>();
 
             EventServices = new EventServices()
             {
                 ServiceProvider = Services,
                 Localizer = Services.GetService<IStringLocalizer>(),
-                BaseService = BaseService
+                BaseService = BaseService,
+                MessageHandler = MessageHandler
             };
         }
 

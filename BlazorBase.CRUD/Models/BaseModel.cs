@@ -180,7 +180,7 @@ namespace BlazorBase.CRUD.Models
             return Task.CompletedTask;
         }
 
-        public virtual Task OnAfterSaveChanges(OnAfterSaveChangesArgs args)
+        public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args)
         {
             return Task.CompletedTask;
         }

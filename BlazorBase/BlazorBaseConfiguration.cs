@@ -1,4 +1,5 @@
 ﻿using BlazorBase.Models;
+using BlazorBase.Modules;
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
@@ -28,6 +29,7 @@ namespace BlazorBase
 
             serviceCollection.AddSingleton(configureOptions)
             .AddSingleton<BlazorBaseOptions>()
+            .AddSingleton<ErrorHandler>()
             .AddLocalization();
 
             //.AddLocalization(opts => { opts.ResourcesPath = "Resources"; });           

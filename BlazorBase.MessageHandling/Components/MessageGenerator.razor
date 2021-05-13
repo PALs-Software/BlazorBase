@@ -20,7 +20,7 @@
                 {
                     <Button Color="args.ConfirmButtonColor" Clicked="() => OnConfirmButtonClicked(modalInfo.Value)">@args.ConfirmButtonText</Button>
                 }
-                <Button Color="modalInfo.Value.Args.CloseButtonColor" Clicked="() => modalInfo.Value.Modal.Hide()">@modalInfo.Value.Args.CloseButtonText</Button>
+                <Button Color="modalInfo.Value.Args.CloseButtonColor" Clicked="() => OnAbortButtonClicked(modalInfo.Value)">@modalInfo.Value.Args.CloseButtonText</Button>
             </ModalFooter>
         </ModalContent>
     </Modal>

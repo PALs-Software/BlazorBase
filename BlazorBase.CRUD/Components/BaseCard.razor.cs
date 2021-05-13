@@ -39,7 +39,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
-        [Parameter] public EventCallback<OnAfterSaveChangesArgs> OnAfterSaveChanges { get; set; }
+        [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
         #region List Events
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
@@ -261,12 +261,12 @@ namespace BlazorBase.CRUD.Components
             }
             catch (CRUDException e)
             {
-                ShowFormattedInvalidFeedback(PrepareExceptionErrorMessage(e));
+                ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
                 return false;
             }
             catch (Exception e)
             {
-                ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", PrepareExceptionErrorMessage(e)]);
+                ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", ErrorHandler.PrepareExceptionErrorMessage(e)]);
                 return false;
             }
 
@@ -283,11 +283,11 @@ namespace BlazorBase.CRUD.Components
         #region Events
         protected async Task InvokeOnAfterSaveChangesEvents(EventServices eventServices)
         {
-            var onAfterSaveChangesArgs = new OnAfterSaveChangesArgs(Model, false, eventServices);
+            var onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, false, eventServices);
             await OnAfterSaveChanges.InvokeAsync(onAfterSaveChangesArgs);
-            await Model.OnAfterSaveChanges(onAfterSaveChangesArgs);
+            await Model.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
 
-            onAfterSaveChangesArgs = new OnAfterSaveChangesArgs(Model, true, eventServices);
+            onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, true, eventServices);
             foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
             {
                 if (property.IsListProperty())
@@ -295,12 +295,12 @@ namespace BlazorBase.CRUD.Components
                     if (property.GetValue(Model) is IList list)
                         foreach (IBaseModel item in list)
                             if (item != null)
-                                await item.OnAfterSaveChanges(onAfterSaveChangesArgs);
+                                await item.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
                 }
                 else
                 {
                     if (property.GetValue(Model) is IBaseModel value)
-                        await value.OnAfterSaveChanges(onAfterSaveChangesArgs);
+                        await value.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
                 }
             }
         }
@@ -322,7 +322,7 @@ namespace BlazorBase.CRUD.Components
             }
             catch (Exception e)
             {
-                ShowFormattedInvalidFeedback(e.Message);
+                ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
             }
 
             await InvokeAsync(() =>

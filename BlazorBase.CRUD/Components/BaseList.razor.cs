@@ -40,7 +40,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnBeforeRemoveEntryArgs> OnBeforeRemoveEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveEntryArgs> OnAfterRemoveEntry { get; set; }
-        [Parameter] public EventCallback<OnAfterSaveChangesArgs> OnAfterSaveChanges { get; set; }
+        [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
         #region List Events
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
@@ -276,7 +276,7 @@ namespace BlazorBase.CRUD.Components
             }
             catch (Exception e)
             {
-                MessageHandler.ShowMessage(Localizer["Error while deleting"], PrepareExceptionErrorMessage(e), MessageType.Error);
+                MessageHandler.ShowMessage(Localizer["Error while deleting"], ErrorHandler.PrepareExceptionErrorMessage(e), MessageType.Error);
             }
 
             await VirtualizeList.RefreshDataAsync();

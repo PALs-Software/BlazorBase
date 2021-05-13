@@ -1,6 +1,7 @@
 ﻿using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
+using BlazorBase.Modules;
 using Blazorise;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Components;
@@ -21,11 +22,9 @@ namespace BlazorBase.MessageHandling.Components
         #endregion
 
         #region Injects
-        [Inject]
-        private IMessageHandler MessageHandler { get; set; }
-
-        [Inject]
-        private IStringLocalizer<MessageGenerator> Localizer { get; set; }
+        [Inject] protected ErrorHandler ErrorHandler { get; set; }
+        [Inject]private IMessageHandler MessageHandler { get; set; }
+        [Inject]private IStringLocalizer<MessageGenerator> Localizer { get; set; }
         #endregion
 
         #region Init
@@ -144,15 +143,25 @@ namespace BlazorBase.MessageHandling.Components
             }
             catch (Exception e)
             {
-                ShowMessage(Localizer["Error"], e.Message, MessageType.Error);
+                _ = Task.Run(() => {
+                    ShowMessage(Localizer["Error"], ErrorHandler.PrepareExceptionErrorMessage(e), MessageType.Error);
+                });
             }
         }
+
 
         protected void OnConfirmButtonClicked(ModalInfo modalInfo)
         {
             modalInfo.ConfirmDialogResult = ConfirmDialogResult.Confirmed;
             modalInfo.Modal.Hide();
         }
+
+        protected void OnAbortButtonClicked(ModalInfo modalInfo)
+        {
+            modalInfo.ConfirmDialogResult = ConfirmDialogResult.Aborted;
+            modalInfo.Modal.Hide();
+        }
+
 
         #endregion
     }
