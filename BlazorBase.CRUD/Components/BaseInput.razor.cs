@@ -284,7 +284,7 @@ namespace BlazorBase.CRUD.Components
                 InputAttributes.Add("placeholder", placeholderAttribute.Placeholder);
 
             if (RenderType != typeof(string))
-                InputAttributes.Add("lang", CultureInfo.CurrentCulture.Name);
+                InputAttributes.Add("lang", CultureInfo.CurrentUICulture.Name);
 
             if (RenderType == typeof(decimal) || RenderType == typeof(decimal?) ||
                 RenderType == typeof(double) || RenderType == typeof(double?) ||
