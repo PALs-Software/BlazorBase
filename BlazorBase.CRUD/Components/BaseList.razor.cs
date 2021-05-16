@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using BlazorBase.MessageHandling.Enum;
 using Blazorise;
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -88,6 +89,8 @@ namespace BlazorBase.CRUD.Components
         protected Virtualize<TModel> VirtualizeList = default!;
 
         protected List<IBasePropertyListDisplay> PropertyListDisplays = new List<IBasePropertyListDisplay>();
+
+        protected bool IsSelfNavigating = false;
         #endregion
 
         #region Init
@@ -101,7 +104,19 @@ namespace BlazorBase.CRUD.Components
                 SetUpDisplayLists(TModelType, GUIType.List);
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+
+                NavigationManager.LocationChanged += async (sender, args) => await NavigationManager_LocationChanged(sender, args);
             });
+
+            await ProcessQueryParameters();
+        }
+
+        private async Task NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
+        {
+            if (IsSelfNavigating) {
+                IsSelfNavigating = false;
+                return;
+            }
 
             await ProcessQueryParameters();
         }
@@ -200,6 +215,7 @@ namespace BlazorBase.CRUD.Components
 
         protected void NavigateToEntry(TModel entry)
         {
+            IsSelfNavigating = true;
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             var query = entry.GetNavigationQuery(uri.Query);
 
@@ -209,6 +225,7 @@ namespace BlazorBase.CRUD.Components
 
         protected void NavigateToList()
         {
+            IsSelfNavigating = true;
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
             var query = RemoveNavigationQueryByType(TModelType, uri.Query);
 
