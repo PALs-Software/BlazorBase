@@ -21,5 +21,8 @@ namespace BlazorBase.CRUD.Components
         public List<NavigationEntry> NavigationEntries { get; set; } = new List<NavigationEntry>();
 
         public record NavigationEntry(string Name, string Link, string Icon);
+
+        [Parameter(CaptureUnmatchedValues = true)]
+        public IDictionary<string, object> AdditionalAttributes { get; set; }
     }
 }
