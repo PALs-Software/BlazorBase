@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Components.Routing;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseList<TModel> : BaseDisplayComponent where TModel : class, IBaseModel, new()
+    public partial class BaseList<TModel> : BaseDisplayComponent, IDisposable where TModel : class, IBaseModel, new()
     {
         #region Parameters
 
@@ -91,6 +91,8 @@ namespace BlazorBase.CRUD.Components
         protected List<IBasePropertyListDisplay> PropertyListDisplays = new List<IBasePropertyListDisplay>();
 
         protected bool IsSelfNavigating = false;
+        protected string ListNavigationBasePath;
+        protected EventHandler<LocationChangedEventArgs> LocationEventHandler;
         #endregion
 
         #region Init
@@ -105,15 +107,23 @@ namespace BlazorBase.CRUD.Components
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
 
-                NavigationManager.LocationChanged += async (sender, args) => await NavigationManager_LocationChanged(sender, args);
+                ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;
+                LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
+                NavigationManager.LocationChanged += LocationEventHandler;
             });
 
             await ProcessQueryParameters();
         }
 
-        private async Task NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
+        public void Dispose()
         {
-            if (IsSelfNavigating) {
+            NavigationManager.LocationChanged -= LocationEventHandler;
+        }
+
+        protected virtual async Task NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
+        {
+            if (IsSelfNavigating)
+            {
                 IsSelfNavigating = false;
                 return;
             }
@@ -191,6 +201,10 @@ namespace BlazorBase.CRUD.Components
         private async Task ProcessQueryParameters()
         {
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+
+            if (uri.AbsolutePath != ListNavigationBasePath)
+                return;
+
             var query = QueryHelpers.ParseQuery(uri.Query);
             if (query.Count == 0)
                 return;
@@ -320,6 +334,7 @@ namespace BlazorBase.CRUD.Components
                 MessageHandler = MessageHandler
             };
         }
+
         #endregion
     }
 }
