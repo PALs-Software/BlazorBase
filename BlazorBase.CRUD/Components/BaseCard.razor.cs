@@ -174,7 +174,7 @@ namespace BlazorBase.CRUD.Components
                 await Model.OnCreateNewEntryInstance(args);
             }
             else
-                Model = await Service.GetAsync<TModel>(primaryKeys);
+                Model = await Service.GetWithAllNavigationPropertiesAsync<TModel>(primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);

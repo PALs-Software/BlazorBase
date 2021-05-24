@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace BlazorBase.CRUD.Services
 {
@@ -46,6 +47,27 @@ namespace BlazorBase.CRUD.Services
         public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
         {
             return await DbContext.FindAsync(type, keyValues);
+        }
+
+        public async virtual Task<T> GetWithAllNavigationPropertiesAsync<T>(params object[] keyValues) where T : class
+        {
+            var entry = await GetAsync<T>(keyValues);
+            if (entry == null)
+                return null;
+
+            IEnumerable<INavigation> navigationProperties = DbContext.Model.FindEntityType(typeof(T)).GetNavigations();
+            if (navigationProperties == null)
+                return entry;
+
+            foreach (var navigationProperty in navigationProperties)
+            {
+                if (navigationProperty.IsCollection)
+                    await DbContext.Entry(entry).Collection(navigationProperty.Name).LoadAsync();
+                else
+                    await DbContext.Entry(entry).Reference(navigationProperty.Name).LoadAsync();
+            }
+
+            return entry;
         }
 
         public async virtual Task<List<T>> GetDataAsync<T>() where T : class
@@ -153,7 +175,7 @@ namespace BlazorBase.CRUD.Services
 
         #region SaveChanges
 
-      
+
         public async virtual Task<int> SaveChangesAsync()
         {
             var changedEntries = await HandleOnBeforeDbContextEvents();

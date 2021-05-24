@@ -15,7 +15,7 @@ namespace BlazorBase.CRUD.Attributes
 
         public VisibleAttribute(string displaygroup = "", int displayGroupOrder = 0, int displayOrder = 0, bool collapsed = false, params GUIType[] hideInGUITypes)
         {
-            HideInGUITypes = hideInGUITypes.ToList();
+            HideInGUITypes = hideInGUITypes;
             DisplayGroupOrder = displayGroupOrder;
             DisplayGroup = displaygroup;
             DisplayOrder = displayOrder;
@@ -27,14 +27,14 @@ namespace BlazorBase.CRUD.Attributes
             if (!hideInGUI)
                 return;
 
-            HideInGUITypes = new List<GUIType>() {
+            HideInGUITypes = new GUIType[] {
                 GUIType.List,
                 GUIType.ListPart,
                 GUIType.Card
             };
         }
 
-        public List<GUIType> HideInGUITypes { get; set; } = new List<GUIType>();
+        public GUIType[] HideInGUITypes { get; set; } = Array.Empty<GUIType>();
 
         public string DisplayGroup { get; set; }
 

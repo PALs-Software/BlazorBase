@@ -5,9 +5,7 @@
     {
         if (MultilineText)
         {
-            <textarea @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass">
-                @CurrentValueAsString
-            </textarea>
+            <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
         }
         else
         {
