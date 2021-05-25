@@ -102,8 +102,8 @@ namespace BlazorBase.CRUD.Components
             await InvokeAsync(() =>
             {
                 TModelType = typeof(TModel);
-
                 SetUpDisplayLists(TModelType, GUIType.List);
+
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
 
@@ -112,6 +112,7 @@ namespace BlazorBase.CRUD.Components
                 NavigationManager.LocationChanged += LocationEventHandler;
             });
 
+            await PrepareForeignKeyProperties(TModelType, Service);
             await ProcessQueryParameters();
         }
 
@@ -248,6 +249,26 @@ namespace BlazorBase.CRUD.Components
         }
         #endregion
 
+        #region Display
+        public string DisplayForeignKey(DisplayItem displayItem, TModel model)
+        {
+            var key = displayItem.Property.GetValue(model)?.ToString();
+            var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == key);
+
+            if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
+                return key;
+            else
+                return foreignKeyPair.Value;
+        }
+
+        public string DisplayEnum(DisplayItem displayItem, TModel model)
+        {
+            var value = displayItem.Property.GetValue(model).ToString();
+            var localizer = StringLocalizerFactory.Create(displayItem.Property.PropertyType);
+            return localizer[value];
+        }
+        #endregion
+
         #region CRUD
 
         protected async Task AddEntryAsync()
@@ -269,10 +290,8 @@ namespace BlazorBase.CRUD.Components
 
             await InvokeAsync(() =>
             {
-                var primaryKeyString = String.Join(", ", model.GetPrimaryKeys());
-
                 MessageHandler.ShowConfirmDialog(Localizer["Delete {0}", SingleDisplayName],
-                                                    Localizer["Do you really want to delete the entry {0}?", primaryKeyString],
+                                                    Localizer["Do you really want to delete the entry {0}?", model.GetDisplayKey()],
                                                     confirmButtonText: Localizer["Delete"],
                                                     confirmButtonColor: Color.Danger,
                                                     onClosing: async (args, result) => await OnConfirmDialogClosedAsync(result, model));

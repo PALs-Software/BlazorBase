@@ -98,6 +98,29 @@ namespace BlazorBase.CRUD.Models
 
             return query;
         }
+
+        public string GetDisplayKey()
+        {
+            var displayKeyProperties = GetType().GetDisplayKeyProperties();
+            if (displayKeyProperties.Count == 0)
+                return String.Join(", ", GetPrimaryKeys());
+            else
+                return GetDisplayKeyKeyValuePair(displayKeyProperties);
+        }
+
+        public string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties)
+        {
+            var displayKeyValues = new List<object>();
+            foreach (var displayKeyProperty in displayKeyProperties)
+            {
+                var displayKeyValue = displayKeyProperty.GetValue(this);
+                if (displayKeyValue is IBaseModel baseModel)
+                    displayKeyValue = baseModel.GetDisplayKeyKeyValuePair(baseModel.GetType().GetDisplayKeyProperties());
+                displayKeyValues.Add(displayKeyValue);
+            }
+
+            return String.Join(",", displayKeyValues);
+        }
         #endregion
 
         #region CRUD Methods

@@ -56,7 +56,18 @@
                                 }
                                 else
                                 {
-                                    @displayItem.Property.GetValue(context)
+                                    @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                    {
+                                        @DisplayForeignKey(displayItem, context)
+                                    }
+                                    else if (displayItem.Property.PropertyType.IsEnum)
+                                    {
+                                        @DisplayEnum(displayItem, context)
+                                    }
+                                    else
+                                    {
+                                        @displayItem.Property.GetValue(context)
+                                    }
                                 }
                             }
                         </td>
@@ -70,7 +81,7 @@
 <BaseModalCard @ref="BaseModalCard"
                TModel="TModel"
                SingleDisplayName="@SingleDisplayName"
-               OnCardClosed="OnCardClosedAsync"             
+               OnCardClosed="OnCardClosedAsync"
                OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
                OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
                OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"

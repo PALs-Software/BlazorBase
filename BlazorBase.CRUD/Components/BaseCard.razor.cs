@@ -195,6 +195,7 @@ namespace BlazorBase.CRUD.Components
                 StateHasChanged();
             });
         }
+
         protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
         {
             if (Model == null)
@@ -275,6 +276,15 @@ namespace BlazorBase.CRUD.Components
         public void ResetCard()
         {
             Model = null;
+        }
+
+        public TModel GetCurrentModel()
+        {
+            return Model;
+        }
+
+        public async Task StateHasChangedAsync() {
+            await InvokeAsync(() => StateHasChanged());
         }
         #endregion
 

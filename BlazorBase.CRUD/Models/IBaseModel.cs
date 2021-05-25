@@ -29,6 +29,10 @@ namespace BlazorBase.CRUD.Models
         public string GetPrimaryKeysAsString();
 
         public Dictionary<string, string> GetNavigationQuery(string baseQuery = null);
+
+        public string GetDisplayKey();
+
+        public string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties);
         #endregion
 
         #region CRUD Methods

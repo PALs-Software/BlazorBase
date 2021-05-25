@@ -128,26 +128,12 @@ namespace BlazorBase.CRUD.Components
                     if (displayKeyProperties.Count == 0)
                         primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
                     else
-                        primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, GetDisplayKeyKeyValuePair(displayKeyProperties, baseEntry)));
+                        primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, baseEntry?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
                 }
 
                 CachedForeignKeys.Add(foreignKeyType, primaryKeys);
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
             }
-        }
-
-        protected string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties, IBaseModel entry)
-        {
-            var displayKeyValues = new List<object>();
-            foreach (var displayKeyProperty in displayKeyProperties)
-            {
-                var displayKeyValue = displayKeyProperty.GetValue(entry);
-                if (displayKeyValue is IBaseModel baseModel)
-                    displayKeyValue = GetDisplayKeyKeyValuePair(baseModel.GetType().GetDisplayKeyProperties(), baseModel);
-                displayKeyValues.Add(displayKeyValue);
-            }
-
-            return String.Join(",", displayKeyValues);
         }
 
         protected List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
