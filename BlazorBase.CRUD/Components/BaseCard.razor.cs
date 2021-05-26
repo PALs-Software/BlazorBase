@@ -153,7 +153,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Actions
-        public async Task ShowAsync(bool addingMode = false, params object[] primaryKeys)
+        public async Task ShowAsync(bool addingMode, params object[] primaryKeys)
         {
             Service.RefreshDbContext();
 
@@ -275,6 +275,8 @@ namespace BlazorBase.CRUD.Components
 
         public void ResetCard()
         {
+            ForeignKeyProperties = null;
+            CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string, string>>>();
             Model = null;
         }
 
