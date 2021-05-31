@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components;
 using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
 using BlazorBase.CRUD.ViewModels;
@@ -19,7 +20,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Models
 {
@@ -133,11 +133,11 @@ namespace BlazorBase.CRUD.Models
         {
             OnReloadEntityFromDatabase?.Invoke(this, EventArgs.Empty);
         }
+        #endregion
 
         #region Events
 
-        #region DbContext
-
+        #region DbContext Events
         public virtual Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args) { return Task.CompletedTask; }
 
@@ -152,135 +152,37 @@ namespace BlazorBase.CRUD.Models
         public virtual Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args) { return Task.CompletedTask; }
         #endregion
 
+        #region Entry Events
         public virtual void OnGetPropertyCaption(OnGetPropertyCaptionArgs args) { }
-        public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforeAddEntry(OnBeforeAddEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterAddEntry(OnAfterAddEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args)
-        {
-            return Task.CompletedTask;
-        }
+        public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args) { return Task.CompletedTask; }
+        public virtual Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeAddEntry(OnBeforeAddEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterAddEntry(OnAfterAddEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args) { return Task.CompletedTask; }
         #endregion
 
         #region List Events 
-        public virtual Task OnBeforeConvertListPropertyType(OnBeforeConvertListPropertyTypeArgs args)
-        {
-            return Task.CompletedTask;
-        }
-        public virtual Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnCreateNewListEntryInstance(OnCreateNewListEntryInstanceArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforeAddListEntry(OnBeforeAddListEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterAddListEntry(OnAfterAddListEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforeUpdateListEntry(OnBeforeUpdateListEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterUpdateListEntry(OnAfterUpdateListEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnBeforeRemoveListEntry(OnBeforeRemoveListEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args)
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args)
-        {
-            return Task.CompletedTask;
-        }
+        public virtual Task OnBeforeConvertListPropertyType(OnBeforeConvertListPropertyTypeArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args) { return Task.CompletedTask; }
+        public virtual Task OnCreateNewListEntryInstance(OnCreateNewListEntryInstanceArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeAddListEntry(OnBeforeAddListEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterAddListEntry(OnAfterAddListEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeRemoveListEntry(OnBeforeRemoveListEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args) { return Task.CompletedTask; }
+        #endregion
         #endregion
 
-        #endregion
 
         #region Validation Methods
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext)

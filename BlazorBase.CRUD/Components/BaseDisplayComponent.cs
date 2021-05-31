@@ -1,5 +1,6 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
@@ -14,9 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -168,8 +167,8 @@ namespace BlazorBase.CRUD.Components
 
         protected string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
         {
-            var args = new OnGetPropertyCaptionArgs(model, displayItem, eventServices) {  Caption = modelLocalizer[displayItem.Property.Name] };
-            model.OnGetPropertyCaption(args);         
+            var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
+            model.OnGetPropertyCaption(args);
             
             return args.Caption;
         }

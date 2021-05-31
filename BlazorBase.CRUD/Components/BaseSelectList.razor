@@ -1,0 +1,81 @@
+﻿@typeparam TModel
+@inherits BaseList<TModel>
+
+@using BlazorBase.Components
+
+<Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
+    <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+        <ModalHeader>
+            <ModalTitle>
+                @PluralDisplayName
+            </ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+
+            <table class="table table-hover table-responsive">
+                <thead>
+                    <tr>
+                        <th class="th-actions">
+                          
+                        </th>
+                        @foreach (var displayGroup in DisplayGroups)
+                        {
+                            @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                            {
+                                <td>
+                                    @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
+                                </td>
+                            }
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList">
+                        <tr>
+                            <td>
+                                <Buttons>
+                                    <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@SelectListLocalizer["Select"]</Button>
+                                </Buttons>
+                            </td>
+
+                            @foreach (var displayGroup in DisplayGroups)
+                            {
+                                @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                                {
+                                    <td>
+                                        @{
+                                            var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
+                                            if (renderFragment != null)
+                                            {
+                                                @renderFragment
+                                            }
+                                            else
+                                            {
+                                                @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                                {
+                                                    @DisplayForeignKey(displayItem, context)
+                                                }
+                                                else if (displayItem.Property.PropertyType.IsEnum)
+                                                {
+                                                    @DisplayEnum(displayItem, context)
+                                                }
+                                                else
+                                                {
+                                                    @displayItem.Property.GetValue(context)
+                                                }
+                                            }
+                                        }
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
+                </tbody>
+            </table>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Abort"]</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>

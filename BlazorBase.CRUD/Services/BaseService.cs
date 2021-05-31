@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using Microsoft.Extensions.DependencyInjection;
-using static BlazorBase.CRUD.Models.IBaseModel;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Metadata;
+using BlazorBase.CRUD.EventArguments;
 
 namespace BlazorBase.CRUD.Services
 {

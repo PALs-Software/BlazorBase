@@ -2,7 +2,14 @@
 
 @if (Model != null)
 {
-    <SelectList Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="Property.GetValue(Model)?.ToString()" SelectedValueChanged="(x) => OnValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
+    @if (IsReadOnly)
+    {
+        <input type="text" value="@(Data.Where(entry => entry.Key == @Property.GetValue(Model)?.ToString()).FirstOrDefault().Value?.ToString() ?? String.Empty)" disabled class="form-control @InputClass" />
+    }
+    else
+    {
+        <SelectList Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="Property.GetValue(Model)?.ToString()" SelectedValueChanged="(x) => OnValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
+    }
 
     <div class="@FeedbackClass">
         @Feedback

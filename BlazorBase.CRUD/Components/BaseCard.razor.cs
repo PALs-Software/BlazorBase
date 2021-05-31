@@ -1,15 +1,13 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Modules;
-using Blazorise;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.CompilerServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -17,12 +15,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -45,8 +40,6 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
-        [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
-        [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeConvertListPropertyTypeArgs> OnBeforeConvertListPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
@@ -249,7 +242,7 @@ namespace BlazorBase.CRUD.Components
 
                     Service.UpdateEntry(Model);
 
-                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, eventServices);
+                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, eventServices);                    
                     await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
                     await Model.OnAfterUpdateEntry(onAfterArgs);
                 }

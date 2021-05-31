@@ -9,17 +9,5 @@ namespace BlazorBase.CRUD.Components
     public partial class BaseSelectListInput : BaseInput
     {
         [Parameter] public List<KeyValuePair<string, string>> Data { get; set; }
-           
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
-
-            await InvokeAsync(() =>
-            {
-                if (IsReadOnly)
-                    InputAttributes.Add("disabled", "disabled");
-            });
-        }
-
     }
 }

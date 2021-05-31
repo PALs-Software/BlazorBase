@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Components;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Models;
@@ -8,14 +9,9 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading.Tasks;
 using static BlazorBase.CRUD.Components.BaseDisplayComponent;
-using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.Files.Components
 {

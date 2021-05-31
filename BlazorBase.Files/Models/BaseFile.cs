@@ -1,25 +1,18 @@
 ﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.StaticFiles;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using static BlazorBase.CRUD.Models.IBaseModel;
-using System.Web;
 using BlazorBase.Files.Controller;
-using System.Net;
 using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.ViewModels;
 using System.Security.Cryptography;
 using BlazorBase.CRUD.SortableItem;
+using BlazorBase.CRUD.EventArguments;
 
 namespace BlazorBase.Files.Models
 {

@@ -23,17 +23,20 @@
                             <Column ColumnSize="ColumnSize.Is6" Padding="Padding.Is0.FromLeft">
                                 <BaseFileListDisplay Model="Model" Property="Property" Service="Service" ModelLocalizer="ModelLocalizer" />
                             </Column>
-                            <Column ColumnSize="ColumnSize.Is6">
-                                <Row>
-                                    <FileEdit @ref="FileEdit" Multiple="false" Filter="@FileFilter" Changed="async (args) => await OnValueChangedAsync(args)" Progressed="OnUploadProgressed" Class="@InputClass" AutoReset="false" />
-                                </Row>
-                                @if (Property.CanWrite)
-                                {
-                                    <Row Float="Float.Right">
-                                        <Button Color="Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
+                            @if (!IsReadOnly)
+                            {
+                                <Column ColumnSize="ColumnSize.Is6">
+                                    <Row>
+                                        <FileEdit @ref="FileEdit" Multiple="false" Filter="@FileFilter" Changed="async (args) => await OnValueChangedAsync(args)" Progressed="OnUploadProgressed" Class="@InputClass" AutoReset="false" />
                                     </Row>
-                                }
-                            </Column>
+                                    @if (Property.CanWrite)
+                                    {
+                                        <Row Float="Float.Right">
+                                            <Button Color="Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
+                                        </Row>
+                                    }
+                                </Column>
+                            }
                         </Row>
                     </div>
                     <div class="@FeedbackClass">

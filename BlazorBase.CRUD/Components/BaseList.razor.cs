@@ -16,7 +16,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using static BlazorBase.CRUD.Models.IBaseModel;
+using BlazorBase.CRUD.EventArguments;
 using Microsoft.AspNetCore.WebUtilities;
 using BlazorBase.MessageHandling.Enum;
 using Blazorise;
@@ -30,6 +30,8 @@ namespace BlazorBase.CRUD.Components
         #region Parameters
 
         #region Events
+
+        #region Model
         [Parameter] public EventCallback OnCardClosed { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
@@ -42,13 +44,12 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnBeforeRemoveEntryArgs> OnBeforeRemoveEntry { get; set; }
         [Parameter] public EventCallback<OnAfterRemoveEntryArgs> OnAfterRemoveEntry { get; set; }
         [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
+        #endregion
 
         #region List Events
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
-        [Parameter] public EventCallback<OnBeforeUpdateListEntryArgs> OnBeforeUpdateListEntry { get; set; }
-        [Parameter] public EventCallback<OnAfterUpdateListEntryArgs> OnAfterUpdateListEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeConvertListPropertyTypeArgs> OnBeforeConvertListPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforeListPropertyChangedArgs> OnBeforeListPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterListPropertyChangedArgs> OnAfterListPropertyChanged { get; set; }
@@ -57,8 +58,12 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterMoveListEntryUpArgs> OnAfterMoveListEntryUp { get; set; }
         [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
+
+        #region BaseList        
+        [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }        
         #endregion
 
+        #endregion
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
@@ -177,7 +182,7 @@ namespace BlazorBase.CRUD.Components
             builder.CloseComponent();
         };
 
-        private async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
+        protected async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
         {
             if (request.Count == 0)
                 return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
@@ -250,7 +255,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Display
-        public string DisplayForeignKey(DisplayItem displayItem, TModel model)
+        protected string DisplayForeignKey(DisplayItem displayItem, TModel model)
         {
             var key = displayItem.Property.GetValue(model)?.ToString();
             var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == key);
@@ -261,7 +266,7 @@ namespace BlazorBase.CRUD.Components
                 return foreignKeyPair.Value;
         }
 
-        public string DisplayEnum(DisplayItem displayItem, TModel model)
+        protected string DisplayEnum(DisplayItem displayItem, TModel model)
         {
             var value = displayItem.Property.GetValue(model).ToString();
             var localizer = StringLocalizerFactory.Create(displayItem.Property.PropertyType);
@@ -273,6 +278,11 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task AddEntryAsync()
         {
+            var args = new OnBeforeOpenAddModalArgs(false, GetEventServices(Service));
+            await OnBeforeOpenAddModal.InvokeAsync(args);
+            if (args.IsHandled)
+                return;
+
             await BaseModalCard.ShowModalAsync(addingMode: true);
         }
         protected async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
