@@ -1,9 +1,12 @@
 ﻿@typeparam TModel
 @inherits BaseDisplayComponent
 
-<Heading Margin="Margin.Is2.FromTop">
-    @PluralDisplayName
-</Heading>
+@if (!HideTitle)
+{
+    <Heading Margin="Margin.Is2.FromTop">
+        @PluralDisplayName
+    </Heading>
+}
 
 <table class="table table-hover">
     <thead>
@@ -18,9 +21,9 @@
             {
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
-                    <td>
+                    <th>
                         @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
-                    </td>
+                    </th>
                 }
             }
         </tr>

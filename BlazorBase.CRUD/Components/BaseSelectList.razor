@@ -6,9 +6,12 @@
 <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
     <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
         <ModalHeader>
-            <ModalTitle>
-                @PluralDisplayName
-            </ModalTitle>
+            @if (!HideTitle)
+            {
+                <ModalTitle>
+                    @Title
+                </ModalTitle>
+            }
             <CloseButton />
         </ModalHeader>
         <ModalBody>
@@ -17,15 +20,15 @@
                 <thead>
                     <tr>
                         <th class="th-actions">
-                          
+
                         </th>
                         @foreach (var displayGroup in DisplayGroups)
                         {
                             @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                             {
-                                <td>
+                                <th>
                                     @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
-                                </td>
+                                </th>
                             }
                         }
                     </tr>
@@ -34,9 +37,22 @@
                     <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList">
                         <tr>
                             <td>
-                                <Buttons>
-                                    <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@SelectListLocalizer["Select"]</Button>
-                                </Buttons>
+                                @if (!HideSelectButton)
+                                {
+                                    <Buttons>
+                                        <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@SelectButtonText</Button>
+
+                                        @if (AdditionalActions != null && !RenderAdditionalActionsOutsideOfButtonGroup)
+                                        {
+                                            @AdditionalActions(context)
+                                        }
+                                    </Buttons>
+                                }
+
+                                @if (AdditionalActions != null && RenderAdditionalActionsOutsideOfButtonGroup)
+                                {
+                                    @AdditionalActions(context)
+                                }
                             </td>
 
                             @foreach (var displayGroup in DisplayGroups)

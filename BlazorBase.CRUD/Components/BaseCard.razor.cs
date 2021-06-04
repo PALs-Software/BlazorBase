@@ -148,7 +148,7 @@ namespace BlazorBase.CRUD.Components
         #region Actions
         public async Task ShowAsync(bool addingMode, params object[] primaryKeys)
         {
-            Service.RefreshDbContext();
+            await Service.RefreshDbContextAsync();
 
             await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;

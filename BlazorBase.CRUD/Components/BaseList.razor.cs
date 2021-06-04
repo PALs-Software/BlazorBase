@@ -60,10 +60,11 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region BaseList        
-        [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }        
+        [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }
         #endregion
 
         #endregion
+        [Parameter] public bool HideTitle { get; set; } = false;
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
@@ -276,7 +277,7 @@ namespace BlazorBase.CRUD.Components
 
         #region CRUD
 
-        protected async Task AddEntryAsync()
+        public async Task AddEntryAsync()
         {
             var args = new OnBeforeOpenAddModalArgs(false, GetEventServices(Service));
             await OnBeforeOpenAddModal.InvokeAsync(args);
@@ -285,7 +286,7 @@ namespace BlazorBase.CRUD.Components
 
             await BaseModalCard.ShowModalAsync(addingMode: true);
         }
-        protected async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
+        public async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
             if (changeQueryUrl)
                 NavigateToEntry(entry);
@@ -293,7 +294,7 @@ namespace BlazorBase.CRUD.Components
             await BaseModalCard.ShowModalAsync(addingMode: false, entry.GetPrimaryKeys());
         }
 
-        protected async Task RemoveEntryAsync(TModel model)
+        public async Task RemoveEntryAsync(TModel model)
         {
             if (model == null)
                 return;
@@ -351,7 +352,11 @@ namespace BlazorBase.CRUD.Components
             await OnCardClosed.InvokeAsync();
         }
         #endregion
-
+        #region Actions
+        public async Task RefreshDataAsync() {
+            await VirtualizeList.RefreshDataAsync();
+        }
+        #endregion
         #region Other
         protected EventServices GetEventServices(BaseService baseService)
         {

@@ -6,11 +6,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Blazorise;
+using System;
 
 namespace BlazorBase.CRUD.Components
 {
     public partial class BaseSelectList<TModel> : BaseList<TModel> where TModel : class, IBaseModel, new()
     {
+        #region Parameters
+        [Parameter] public string Title { get; set; }
+        [Parameter] public string SelectButtonText { get; set; }
+        [Parameter] public bool HideSelectButton { get; set; } = false;
+        [Parameter] public bool RenderAdditionalActionsOutsideOfButtonGroup { get; set; } = false;
+        [Parameter] public RenderFragment<TModel> AdditionalActions { get; set; } = null;
+        #endregion
+
         #region Injects
         [Inject] protected IStringLocalizer<BaseSelectList<TModel>> SelectListLocalizer { get; set; }
         #endregion
@@ -30,6 +39,15 @@ namespace BlazorBase.CRUD.Components
 
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+
+                if (String.IsNullOrEmpty(SelectButtonText))
+                    SelectButtonText = @SelectListLocalizer["Select"];
+
+                if (String.IsNullOrEmpty(Title))
+                    Title = ModelLocalizer[$"{TModelType.Name}_Plural"];
+
+                if (HideSelectButton)
+                    RenderAdditionalActionsOutsideOfButtonGroup = true;
             });
 
             await PrepareForeignKeyProperties(TModelType, Service);

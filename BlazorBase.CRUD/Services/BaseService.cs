@@ -29,7 +29,7 @@ namespace BlazorBase.CRUD.Services
             MessageHandler = messageHandler;
         }
 
-        public async void RefreshDbContext()
+        public async Task RefreshDbContextAsync()
         {
             await DbContext.DisposeAsync();
             DbContext = ServiceProvider.GetService<DbContext>();
@@ -160,6 +160,17 @@ namespace BlazorBase.CRUD.Services
         public virtual void UpdateEntry<T>(T entry) where T : class
         {
             DbContext.Set<T>().Update(entry);
+        }
+
+        public async virtual Task<bool> RemoveEntryAsync<T>(params object[] keyValues) where T : class, IBaseModel
+        {
+            var entryToDelete = await DbContext.Set<T>().FindAsync(keyValues);
+            if (entryToDelete == null)
+                return false;
+
+            DbContext.Set<T>().Remove(entryToDelete);
+
+            return true;
         }
 
         public async virtual Task<bool> RemoveEntryAsync<T>(T entry) where T : class, IBaseModel
