@@ -95,10 +95,9 @@ namespace BlazorBase.CRUD.Components
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 MultilineText = RenderType == typeof(string) && Property.GetCustomAttribute<TextDisplayModeAttribute>()?.Mode == TextDisplayMode.Multiline;
 
-                var iStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
                 var dict = new Dictionary<object, object>()
                 {
-                    [iStringModelLocalizerType] = ModelLocalizer,
+                    [typeof(IStringLocalizer)] = ModelLocalizer,
                     [typeof(BaseService)] = Service
                 };
 

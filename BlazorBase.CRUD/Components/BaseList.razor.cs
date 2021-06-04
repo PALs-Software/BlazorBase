@@ -231,7 +231,12 @@ namespace BlazorBase.CRUD.Components
 
             var entry = await Service.GetAsync<TModel>(primaryKeys.ToArray());
             if (entry != null)
-                await EditEntryAsync(entry, false);
+                if (DataLoadCondition == null)
+                    await EditEntryAsync(entry, false);
+                else if (DataLoadCondition.Compile()(entry)) //Check if user is allowed to see this entry
+                    await EditEntryAsync(entry, false);
+                else
+                    NavigateToList();
         }
 
         protected void NavigateToEntry(TModel entry)
@@ -353,7 +358,8 @@ namespace BlazorBase.CRUD.Components
         }
         #endregion
         #region Actions
-        public async Task RefreshDataAsync() {
+        public async Task RefreshDataAsync()
+        {
             await VirtualizeList.RefreshDataAsync();
         }
         #endregion

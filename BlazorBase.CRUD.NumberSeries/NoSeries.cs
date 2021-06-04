@@ -76,7 +76,7 @@ namespace BlazorBase.CRUD.NumberSeries
 
             protected override ValidationResult IsValid(object value, ValidationContext validationContext)
             {
-                var localizer = (IStringLocalizer<NoSeries>)validationContext.Items[typeof(IStringLocalizer<NoSeries>)];
+                var localizer = (IStringLocalizer)validationContext.Items[typeof(IStringLocalizer)];
 
                 var newValue = value as string;
                 var model = (NoSeries)validationContext.ObjectInstance;

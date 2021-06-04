@@ -45,7 +45,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
-        {
+        {            
             return await DbContext.FindAsync(type, keyValues);
         }
 
@@ -246,7 +246,14 @@ namespace BlazorBase.CRUD.Services
 
         public bool HasUnsavedChanges()
         {
-            return DbContext.ChangeTracker.HasChanges();
+            try
+            {
+                return DbContext.ChangeTracker.HasChanges();
+            }
+            catch (Exception) //Prevent Primary Key Null Error Issue
+            {
+                return true;
+            }            
         }
         #endregion
 

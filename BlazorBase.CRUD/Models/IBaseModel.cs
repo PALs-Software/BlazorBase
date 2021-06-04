@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.EventArguments;
+using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,7 @@ namespace BlazorBase.CRUD.Models
         #region Validation Methods
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
+        public bool CheckIfModelIsInAddingMode(BaseService baseService);
         #endregion
 
         #region PageActions

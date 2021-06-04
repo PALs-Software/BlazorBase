@@ -85,8 +85,8 @@ namespace BlazorBase.CRUD.Components
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
                 ModelImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
 
-                IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Model.GetUnproxiedType());
-                ModelLocalizer = StringLocalizerFactory.Create(ModelListEntryType);
+                IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
+                ModelLocalizer = StringLocalizerFactory.Create(Property.PropertyType.GenericTypeArguments[0]);
 
                 SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
 
@@ -109,6 +109,7 @@ namespace BlazorBase.CRUD.Components
             });
 
             await PrepareForeignKeyProperties(ModelListEntryType, Service);
+            await PrepareCustomLookupData(ModelListEntryType, Model, GetEventServices());
         }
 
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)
@@ -148,6 +149,7 @@ namespace BlazorBase.CRUD.Components
 
             builder.CloseComponent();
         };
+              
         #endregion
 
         #region CRUD
@@ -207,6 +209,7 @@ namespace BlazorBase.CRUD.Components
 
             await OnAfterMoveListEntryUpAsync(entry);
         }
+
         protected async Task MoveEntryDownAsync(object entry)
         {
             if (!ModelImplementedISortableItem)
@@ -246,6 +249,7 @@ namespace BlazorBase.CRUD.Components
 
             var onCreateNewListEntryInstanceArgs = new OnCreateNewListEntryInstanceArgs(Model, newEntry, eventServices);
             await OnCreateNewListEntryInstance.InvokeAsync(onCreateNewListEntryInstanceArgs);
+            await Model.OnCreateNewListEntryInstance(onCreateNewListEntryInstanceArgs);
 
             if (newEntry is not IBaseModel newBaseEntry)
                 return;
@@ -253,7 +257,6 @@ namespace BlazorBase.CRUD.Components
             var onCreateNewEntryInstanceArgs = new OnCreateNewEntryInstanceArgs(Model, eventServices);
             await newBaseEntry.OnCreateNewEntryInstance(onCreateNewEntryInstanceArgs);
         }
-
 
         protected async Task OnBeforeAddEntryAsync(object newEntry, HandledEventArgs args)
         {
@@ -278,7 +281,6 @@ namespace BlazorBase.CRUD.Components
                     return;
                 }
             }
-
         }
 
         protected async Task OnAfterAddEntryAsync(object newEntry)
@@ -316,7 +318,6 @@ namespace BlazorBase.CRUD.Components
                     return;
                 }
             }
-
         }
 
         protected async Task OnAfterRemoveEntryAsync(object entry)
@@ -380,8 +381,8 @@ namespace BlazorBase.CRUD.Components
                 {
                     var validationContext = new ValidationContext(item, ServiceProvider, new Dictionary<object, object>()
                     {
-                        [IStringModelLocalizerType] = ModelLocalizer,
-                        [typeof(DbContext)] = Service.DbContext
+                        [typeof(IStringLocalizer)] = ModelLocalizer,
+                        [typeof(BaseService)] = Service
                     });
 
                     if (!baseModel.TryValidate(out List<ValidationResult> validationResults, validationContext))

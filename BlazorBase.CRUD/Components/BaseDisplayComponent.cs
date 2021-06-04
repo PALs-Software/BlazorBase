@@ -48,7 +48,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Injects
         [Inject] protected ErrorHandler ErrorHandler { get; set; }
-        [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }        
+        [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; }
         #endregion
 
@@ -58,6 +58,8 @@ namespace BlazorBase.CRUD.Components
         protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties;
         protected static ConcurrentDictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new ConcurrentDictionary<Type, List<KeyValuePair<string, string>>>();
         protected Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
+
+        protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties = new Dictionary<PropertyInfo, List<KeyValuePair<string, string>>>();
         #endregion
 
         protected void SetUpDisplayLists(Type modelType, GUIType guiType)
@@ -100,8 +102,11 @@ namespace BlazorBase.CRUD.Components
             foreach (var foreignKeyProperty in foreignKeyProperties)
             {
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                var foreignProperty = modelType.GetProperties().Where(entry => entry.Name == foreignKey.Name).First();
-                var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty.PropertyType;
+                var foreignProperty = modelType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
+
+                if (foreignKeyType == null)
+                    throw new CRUDException(BaseDisplayComponentLocalizer["Can not find the foreign key property type in the class {0}, on the property {1}. This is a development error, maybe the foreign property name is spelled  wrong in the property attribute.", foreignKeyProperty.DeclaringType, foreignKeyProperty.Name]);
 
                 if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                     continue;
@@ -135,6 +140,34 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
+        protected async Task PrepareCustomLookupData(Type modelType, IBaseModel cardModel, EventServices eventServices)
+        {
+            UsesCustomLookupDataProperties.Clear();
+
+            var properties = VisibleProperties.Where(entry => entry.UsesCustomLookupData());
+            foreach (var property in properties)
+            {
+                var useCustomLookupData = property.GetCustomAttribute(typeof(UseCustomLookupData)) as UseCustomLookupData;
+                var lookupDataSourceMethod = modelType.GetMethod(useCustomLookupData.LookupDataSourceMethodName);
+                var parameters = lookupDataSourceMethod?.GetParameters();
+
+                if (lookupDataSourceMethod == null ||
+                    parameters.Length != 4 ||
+                    parameters[0].ParameterType != typeof(PropertyInfo) ||
+                    parameters[1].ParameterType != typeof(IBaseModel) ||
+                    parameters[2].ParameterType != typeof(List<KeyValuePair<string, string>>) ||
+                    parameters[3].ParameterType != typeof(EventServices) ||
+                    lookupDataSourceMethod.ReturnType != typeof(Task) ||
+                    !lookupDataSourceMethod.IsStatic)
+                    throw new CRUDException(BaseDisplayComponentLocalizer["The signature of the custom lookup data source method {0} in the class {1}, does not match the following signature: public static [async] Task TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, List<KeyValuePair<string, string>> lookupData, EventServices eventServices)", useCustomLookupData.LookupDataSourceMethodName, modelType.Name]);
+
+                var lookupData = new List<KeyValuePair<string, string>>();
+                await (lookupDataSourceMethod.Invoke(null, new object[] { property, cardModel, lookupData, eventServices }) as Task);
+                UsesCustomLookupDataProperties.Add(property, lookupData);
+            }
+        }
+
+
         protected List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
         {
             if (CachedEnumValueDictionary.ContainsKey(enumType))
@@ -163,13 +196,11 @@ namespace BlazorBase.CRUD.Components
             return query;
         }
 
- 
-
         protected string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
         {
             var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
             model.OnGetPropertyCaption(args);
-            
+
             return args.Caption;
         }
     }

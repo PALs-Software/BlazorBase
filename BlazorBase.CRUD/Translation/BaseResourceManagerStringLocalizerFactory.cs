@@ -33,16 +33,6 @@ namespace BlazorBase.CRUD.Translation
                 LoggerFactory.CreateLogger<ResourceManagerStringLocalizer>(),
                 this
                 );
-        }
-        /*
-        protected virtual void RemoveGenericType(string baseName) {
-            string assemblyName = type.GetTypeInfo().Assembly.GetName().Name;
-            string typeName = type.Name;
-            if (typeName.Contains('`'))
-                typeName = typeName.Remove(typeName.IndexOf('`'));
-
-            string baseName = (type.Namespace + "." + typeName).Substring(assemblyName.Length).Trim('.');
-        }
-        */
+        }       
     }
 }

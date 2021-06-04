@@ -149,8 +149,8 @@ namespace BlazorBase.CRUD.Components
         public async Task ShowAsync(bool addingMode, params object[] primaryKeys)
         {
             await Service.RefreshDbContextAsync();
+            await PrepareForeignKeyProperties(TModelType, Service);            
 
-            await PrepareForeignKeyProperties(TModelType, Service);
             AddingMode = addingMode;
             BaseInputs.Clear();
             BaseSelectListInputs.Clear();
@@ -172,10 +172,11 @@ namespace BlazorBase.CRUD.Components
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
+            await PrepareCustomLookupData(TModelType, Model, GetEventServices());
             ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object>()
             {
-                [typeof(IStringLocalizer<TModel>)] = ModelLocalizer,
-                [typeof(DbContext)] = Service.DbContext
+                [typeof(IStringLocalizer)] = ModelLocalizer,
+                [typeof(BaseService)] = Service
             });
 
             PageActionGroups = Model.GeneratePageActionGroups() ?? new List<PageActionGroup>();

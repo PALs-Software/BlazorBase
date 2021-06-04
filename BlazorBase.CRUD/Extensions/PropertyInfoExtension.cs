@@ -49,6 +49,12 @@ namespace BlazorBase.CRUD.Extensions
             return propertyInfo.HasAttribute(typeof(ForeignKeyAttribute));
         }
 
+        public static bool UsesCustomLookupData(this PropertyInfo propertyInfo)
+        {
+            return propertyInfo.HasAttribute(typeof(UseCustomLookupData));
+        }
+
+
         public static bool IsDisplayKey(this PropertyInfo propertyInfo)
         {
             return propertyInfo.HasAttribute(typeof(DisplayKeyAttribute));

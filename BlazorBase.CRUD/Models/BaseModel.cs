@@ -4,12 +4,14 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
+using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,12 +43,12 @@ namespace BlazorBase.CRUD.Models
         [Editable(false)]
         [DateDisplayMode(DateInputMode = DateInputMode.DateTime)]
         [Visible(DisplayGroup = "Information", DisplayGroupOrder = 9999, DisplayOrder = 100, Collapsed = true)]
-        public DateTime CreatedOn { get; set; }
+        public virtual DateTime CreatedOn { get; set; }
 
         [Editable(false)]
         [DateDisplayMode(DateInputMode = DateInputMode.DateTime)]
         [Visible(DisplayGroup = "Information", DisplayOrder = 200)]
-        public DateTime ModifiedOn { get; set; }
+        public virtual DateTime ModifiedOn { get; set; }
         #endregion
 
         #region Configuration Properties
@@ -119,7 +121,7 @@ namespace BlazorBase.CRUD.Models
                 displayKeyValues.Add(displayKeyValue);
             }
 
-            return String.Join(",", displayKeyValues);
+            return String.Join(", ", displayKeyValues);
         }
         #endregion
 
@@ -183,7 +185,6 @@ namespace BlazorBase.CRUD.Models
         #endregion
         #endregion
 
-
         #region Validation Methods
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext)
         {
@@ -212,13 +213,16 @@ namespace BlazorBase.CRUD.Models
         {
             var validationContext = new ValidationContext(this, eventServices.ServiceProvider, new Dictionary<object, object>()
             {
-                [eventServices.Localizer.GetType()] = eventServices.Localizer,
-                [typeof(DbContext)] = eventServices.BaseService.DbContext
+                [typeof(IStringLocalizer)] = eventServices.Localizer,
+                [typeof(BaseService)] = eventServices.BaseService
             });
 
             return TryValidate(out validationResults, validationContext);
         }
 
+        public bool CheckIfModelIsInAddingMode(BaseService baseService) {
+            return baseService.DbContext.Find(GetUnproxiedType(), GetPrimaryKeys()) != this;
+        }
         #endregion
 
         #region ComponentBase
