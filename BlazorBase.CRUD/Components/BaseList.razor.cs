@@ -61,6 +61,7 @@ namespace BlazorBase.CRUD.Components
 
         #region BaseList        
         [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }
+        [Parameter] public EventCallback<OnBeforeOpenEditModalArgs> OnBeforeOpenEditModal { get; set; }
         #endregion
 
         #endregion
@@ -293,8 +294,14 @@ namespace BlazorBase.CRUD.Components
         }
         public async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
-            if (changeQueryUrl)
+            var args = new OnBeforeOpenEditModalArgs(false, entry, changeQueryUrl, GetEventServices(Service));
+            await OnBeforeOpenEditModal.InvokeAsync(args);
+
+            if (args.ChangeQueryUrl)
                 NavigateToEntry(entry);
+
+            if (args.IsHandled)
+                return;
 
             await BaseModalCard.ShowModalAsync(addingMode: false, entry.GetPrimaryKeys());
         }

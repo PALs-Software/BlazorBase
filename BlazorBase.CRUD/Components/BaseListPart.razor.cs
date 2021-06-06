@@ -131,7 +131,7 @@ namespace BlazorBase.CRUD.Components
             return null;
         }
 
-        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, IBaseModel model) => builder =>
+        protected virtual RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, IBaseModel model) => builder =>
         {
             builder.OpenComponent(0, baseInputExtensionType);
 

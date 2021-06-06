@@ -62,7 +62,7 @@ namespace BlazorBase.CRUD.Components
         protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties = new Dictionary<PropertyInfo, List<KeyValuePair<string, string>>>();
         #endregion
 
-        protected void SetUpDisplayLists(Type modelType, GUIType guiType)
+        protected virtual void SetUpDisplayLists(Type modelType, GUIType guiType)
         {
             VisibleProperties = modelType.GetVisibleProperties(guiType);
 
@@ -80,7 +80,7 @@ namespace BlazorBase.CRUD.Components
             SortDisplayLists();
         }
 
-        protected void SortDisplayLists()
+        protected virtual void SortDisplayLists()
         {
             foreach (var displayGroup in DisplayGroups)
             {
@@ -91,7 +91,7 @@ namespace BlazorBase.CRUD.Components
             DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        protected async Task PrepareForeignKeyProperties(Type modelType, BaseService service)
+        protected virtual async Task PrepareForeignKeyProperties(Type modelType, BaseService service)
         {
             if (ForeignKeyProperties != null)
                 return;
@@ -140,7 +140,7 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        protected async Task PrepareCustomLookupData(Type modelType, IBaseModel cardModel, EventServices eventServices)
+        protected virtual async Task PrepareCustomLookupData(Type modelType, IBaseModel cardModel, EventServices eventServices)
         {
             UsesCustomLookupDataProperties.Clear();
 
@@ -168,7 +168,7 @@ namespace BlazorBase.CRUD.Components
         }
 
 
-        protected List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
+        protected virtual List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
         {
             if (CachedEnumValueDictionary.ContainsKey(enumType))
                 return CachedEnumValueDictionary[enumType];
@@ -183,7 +183,7 @@ namespace BlazorBase.CRUD.Components
             return result;
         }
 
-        protected Dictionary<string, string> RemoveNavigationQueryByType(Type type, string baseQuery)
+        protected virtual Dictionary<string, string> RemoveNavigationQueryByType(Type type, string baseQuery)
         {
             var query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => val.Value.ToString());
 
@@ -196,7 +196,7 @@ namespace BlazorBase.CRUD.Components
             return query;
         }
 
-        protected string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        protected virtual string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
         {
             var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
             model.OnGetPropertyCaption(args);

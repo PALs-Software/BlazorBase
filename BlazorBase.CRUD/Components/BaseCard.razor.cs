@@ -114,21 +114,21 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem)
+        protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem)
         {
             var eventServices = GetEventServices();
 
             foreach (var baseinput in BaseInputExtensions)
                 if (await baseinput.IsHandlingPropertyRenderingAsync(Model, displayItem, eventServices))
-                    return GetBaseInputExtensionAsRenderFragment(displayItem, baseinput.GetType());
+                    return GetBaseInputExtensionAsRenderFragment(displayItem, baseinput.GetType(), Model);
 
             return null;
         }
-        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType) => builder =>
+        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, IBaseModel model) => builder =>
         {
             builder.OpenComponent(0, baseInputExtensionType);
 
-            builder.AddAttribute(1, "Model", Model);
+            builder.AddAttribute(1, "Model", model);
             builder.AddAttribute(2, "Property", displayItem.Property);
             builder.AddAttribute(3, "ReadOnly", !AddingMode && displayItem.Property.IsKey());
             builder.AddAttribute(4, "Service", Service);
