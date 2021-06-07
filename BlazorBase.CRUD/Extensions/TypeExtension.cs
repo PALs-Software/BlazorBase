@@ -5,6 +5,7 @@ using BlazorBase.CRUD.SortableItem;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 
@@ -12,12 +13,20 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class TypeExtension
     {
+        public static Type GetUnproxiedType(this Type type)
+        {
+            if (type.Namespace == "Castle.Proxies")
+                return type.BaseType;
+
+            return type;
+        }
+
         public static List<PropertyInfo> GetKeyProperties(this Type type)
         {
             return type.GetProperties().Where(property =>
                         (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
                         property.IsKey()
-                    ).ToList();
+                    ).OrderBy(entry => entry.GetAttribute<ColumnAttribute>()?.Order ?? 0).ToList();
         }
 
         public static List<PropertyInfo> GetVisibleProperties(this Type type)

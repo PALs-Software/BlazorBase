@@ -130,7 +130,7 @@ namespace BlazorBase.CRUD.Components
 
             builder.AddAttribute(1, "Model", model);
             builder.AddAttribute(2, "Property", displayItem.Property);
-            builder.AddAttribute(3, "ReadOnly", !AddingMode && displayItem.Property.IsKey());
+            builder.AddAttribute(3, "ReadOnly", displayItem.IsReadOnly || !AddingMode && displayItem.IsKey);
             builder.AddAttribute(4, "Service", Service);
             builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
 

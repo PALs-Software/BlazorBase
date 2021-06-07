@@ -25,6 +25,11 @@ namespace BlazorBase.CRUD.Extensions
             return Attribute.IsDefined(propertyInfo, type);
         }
 
+        public static T GetAttribute<T>(this PropertyInfo propertyInfo) where T : class
+        {
+            return propertyInfo.GetCustomAttribute(typeof(T)) as T;
+        }
+
         public static bool TryGetAttribute<T>(this PropertyInfo propertyInfo, out T attribute) where T : class
         {
             if (propertyInfo.HasAttribute(typeof(T)))

@@ -27,10 +27,12 @@ namespace BlazorBase.CRUD.Components
         #region Parameters
         [Parameter] public IBaseModel Model { get; set; }
         [Parameter] public PropertyInfo Property { get; set; }
-        [Parameter] public bool ReadOnly { get; set; }
+        [Parameter] public bool? ReadOnly { get; set; }
         [Parameter] public BaseService Service { get; set; }
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
 
+        [Parameter(CaptureUnmatchedValues = true)]
+        public Dictionary<string, object> AdditionalInputAttributes { get; set; }
         #region Events
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
@@ -86,7 +88,10 @@ namespace BlazorBase.CRUD.Components
             {
                 Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
 
-                IsReadOnly = ReadOnly || Property.IsReadOnlyInGUI();
+                if (ReadOnly == null)
+                    IsReadOnly = Property.IsReadOnlyInGUI();
+                else
+                    IsReadOnly = ReadOnly.Value;
 
                 if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                     PlaceHolder = placeholderAttribute.Placeholder;
@@ -123,7 +128,11 @@ namespace BlazorBase.CRUD.Components
             if (Property == null || Model == null)
                 return;
 
-            IsReadOnly = ReadOnly || Property.IsReadOnlyInGUI();
+            if (ReadOnly == null)
+                IsReadOnly = Property.IsReadOnlyInGUI();
+            else
+                IsReadOnly = ReadOnly.Value;
+
             SetInputAttributes();
             SetCurrentValueAsString(Property.GetValue(Model));
         }
@@ -288,6 +297,20 @@ namespace BlazorBase.CRUD.Components
                 RenderType == typeof(double) || RenderType == typeof(double?) ||
                 RenderType == typeof(float) || RenderType == typeof(float?))
                 InputAttributes.Add("step", "any");
+
+            if (AdditionalInputAttributes != null)
+                foreach (var item in AdditionalInputAttributes)
+                {
+                    if (InputAttributes.ContainsKey(item.Key.ToLower()))
+                    {
+                        if (item.Key.ToLower() == "style")
+                            InputAttributes["style"] = $"{InputAttributes["style"]}; {item.Value}";
+                        else if(item.Key.ToLower() == "class")
+                            InputAttributes["class"] = $"{InputAttributes["class"]} {item.Value}";
+                    }
+                    else
+                        InputAttributes.Add(item.Key, item.Value);
+                }
         }
 
         protected void SetCurrentValueAsString(object input)

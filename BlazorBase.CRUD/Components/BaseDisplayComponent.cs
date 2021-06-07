@@ -34,15 +34,19 @@ namespace BlazorBase.CRUD.Components
 
         public class DisplayItem
         {
-            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isListProperty)
+            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty)
             {
                 Property = property;
                 Attribute = attribute;
+                IsReadOnly = isReadonly;
+                IsKey = isKey;
                 IsListProperty = isListProperty;
             }
 
             public PropertyInfo Property { get; set; }
             public VisibleAttribute Attribute { get; set; }
+            public bool IsReadOnly { get; set; }
+            public bool IsKey { get; set; }
             public bool IsListProperty { get; set; }
         }
 
@@ -74,7 +78,7 @@ namespace BlazorBase.CRUD.Components
                 if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
                     DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
 
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsListProperty()));
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty()));
             }
 
             SortDisplayLists();
