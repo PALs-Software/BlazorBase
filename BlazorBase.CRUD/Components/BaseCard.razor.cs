@@ -149,7 +149,7 @@ namespace BlazorBase.CRUD.Components
         public async Task ShowAsync(bool addingMode, params object[] primaryKeys)
         {
             await Service.RefreshDbContextAsync();
-            await PrepareForeignKeyProperties(TModelType, Service);            
+            await PrepareForeignKeyProperties(Service);
 
             AddingMode = addingMode;
             BaseInputs.Clear();
@@ -172,7 +172,7 @@ namespace BlazorBase.CRUD.Components
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
-            await PrepareCustomLookupData(TModelType, Model, GetEventServices());
+            await PrepareCustomLookupData(Model, GetEventServices());
             ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object>()
             {
                 [typeof(IStringLocalizer)] = ModelLocalizer,
@@ -183,11 +183,6 @@ namespace BlazorBase.CRUD.Components
             SelectedPageActionGroup = PageActionGroups.FirstOrDefault()?.Caption;
 
             Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
-
-            await InvokeAsync(() =>
-            {
-                StateHasChanged();
-            });
         }
 
         protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
@@ -243,7 +238,7 @@ namespace BlazorBase.CRUD.Components
 
                     Service.UpdateEntry(Model);
 
-                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, eventServices);                    
+                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, eventServices);
                     await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
                     await Model.OnAfterUpdateEntry(onAfterArgs);
                 }
@@ -269,9 +264,12 @@ namespace BlazorBase.CRUD.Components
 
         public void ResetCard()
         {
+            BaseInputs?.Clear();
+            BaseSelectListInputs?.Clear();
+            BaseListParts?.Clear();
             ForeignKeyProperties = null;
             CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string, string>>>();
-            Model = null;
+            Model = null;            
         }
 
         public TModel GetCurrentModel()
@@ -279,7 +277,8 @@ namespace BlazorBase.CRUD.Components
             return Model;
         }
 
-        public async Task StateHasChangedAsync() {
+        public async Task StateHasChangedAsync()
+        {
             await InvokeAsync(() => StateHasChanged());
         }
         #endregion

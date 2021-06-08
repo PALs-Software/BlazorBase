@@ -16,7 +16,7 @@ using BlazorBase.CRUD.EventArguments;
 
 namespace BlazorBase.CRUD.Services
 {
-    public class BaseService
+    public class BaseService: IDisposable
     {
         public DbContext DbContext { get; protected set; }
         public IServiceProvider ServiceProvider { get; }
@@ -35,7 +35,21 @@ namespace BlazorBase.CRUD.Services
             DbContext = ServiceProvider.GetService<DbContext>();
         }
 
+        #region IDisposable
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing)
+                return;
+
+            DbContext?.Dispose();
+        }
+        #endregion
 
         #region GetData
 

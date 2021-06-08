@@ -95,7 +95,7 @@ namespace BlazorBase.CRUD.Components
             DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        protected virtual async Task PrepareForeignKeyProperties(Type modelType, BaseService service)
+        protected virtual async Task PrepareForeignKeyProperties(BaseService service)
         {
             if (ForeignKeyProperties != null)
                 return;
@@ -106,7 +106,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var foreignKeyProperty in foreignKeyProperties)
             {
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                var foreignProperty = modelType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                var foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
                 var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
 
                 if (foreignKeyType == null)
@@ -144,7 +144,7 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        protected virtual async Task PrepareCustomLookupData(Type modelType, IBaseModel cardModel, EventServices eventServices)
+        protected virtual async Task PrepareCustomLookupData(IBaseModel cardModel, EventServices eventServices)
         {
             UsesCustomLookupDataProperties.Clear();
 
@@ -152,7 +152,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var property in properties)
             {
                 var useCustomLookupData = property.GetCustomAttribute(typeof(UseCustomLookupData)) as UseCustomLookupData;
-                var lookupDataSourceMethod = modelType.GetMethod(useCustomLookupData.LookupDataSourceMethodName);
+                var lookupDataSourceMethod = property.ReflectedType.GetMethod(useCustomLookupData.LookupDataSourceMethodName, BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public);
                 var parameters = lookupDataSourceMethod?.GetParameters();
 
                 if (lookupDataSourceMethod == null ||
@@ -163,14 +163,13 @@ namespace BlazorBase.CRUD.Components
                     parameters[3].ParameterType != typeof(EventServices) ||
                     lookupDataSourceMethod.ReturnType != typeof(Task) ||
                     !lookupDataSourceMethod.IsStatic)
-                    throw new CRUDException(BaseDisplayComponentLocalizer["The signature of the custom lookup data source method {0} in the class {1}, does not match the following signature: public static [async] Task TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, List<KeyValuePair<string, string>> lookupData, EventServices eventServices)", useCustomLookupData.LookupDataSourceMethodName, modelType.Name]);
+                    throw new CRUDException(BaseDisplayComponentLocalizer["The signature of the custom lookup data source method {0} in the class {1}, does not match the following signature: public static [async] Task TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, List<KeyValuePair<string, string>> lookupData, EventServices eventServices)", useCustomLookupData.LookupDataSourceMethodName, property.ReflectedType.Name]);
 
                 var lookupData = new List<KeyValuePair<string, string>>();
                 await (lookupDataSourceMethod.Invoke(null, new object[] { property, cardModel, lookupData, eventServices }) as Task);
                 UsesCustomLookupDataProperties.Add(property, lookupData);
             }
         }
-
 
         protected virtual List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
         {
@@ -207,5 +206,7 @@ namespace BlazorBase.CRUD.Components
 
             return args.Caption;
         }
+
+
     }
 }

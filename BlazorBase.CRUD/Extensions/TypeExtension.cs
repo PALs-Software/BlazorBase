@@ -24,9 +24,16 @@ namespace BlazorBase.CRUD.Extensions
         public static List<PropertyInfo> GetKeyProperties(this Type type)
         {
             return type.GetProperties().Where(property =>
-                        (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
+                        (!typeof(IBaseModel).IsAssignableFrom(property.PropertyType)) &&
                         property.IsKey()
                     ).OrderBy(entry => entry.GetAttribute<ColumnAttribute>()?.Order ?? 0).ToList();
+        }
+
+        public static List<PropertyInfo> GetPropertiesExceptKeys(this Type type)
+        {
+            return type.GetProperties().Where(property =>
+                        !property.IsKey()
+                    ).ToList();
         }
 
         public static List<PropertyInfo> GetVisibleProperties(this Type type)

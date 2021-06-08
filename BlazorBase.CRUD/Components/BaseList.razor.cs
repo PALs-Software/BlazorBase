@@ -119,7 +119,7 @@ namespace BlazorBase.CRUD.Components
                 NavigationManager.LocationChanged += LocationEventHandler;
             });
 
-            await PrepareForeignKeyProperties(TModelType, Service);
+            await PrepareForeignKeyProperties(Service);
             await ProcessQueryParameters();
         }
 

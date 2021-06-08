@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -220,7 +221,8 @@ namespace BlazorBase.CRUD.Models
             return TryValidate(out validationResults, validationContext);
         }
 
-        public bool CheckIfModelIsInAddingMode(BaseService baseService) {
+        public bool CheckIfModelIsInAddingMode(BaseService baseService)
+        {
             return baseService.DbContext.Find(GetUnproxiedType(), GetPrimaryKeys()) != this;
         }
         #endregion
@@ -277,9 +279,16 @@ namespace BlazorBase.CRUD.Models
             return type;
         }
 
-        public void TransferPropertiesTo(object target)
+        public void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames)
         {
-            var sourceProperties = this.GetType().GetProperties();
+            var sourceProperties = this.GetType().GetPropertiesExceptKeys().Where(property => !exceptPropertyNames.Contains(property.Name));
+            TransferPropertiesTo(target, sourceProperties.ToArray());
+        }
+
+        public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null)
+        {
+            if (sourceProperties == null)
+                sourceProperties = this.GetType().GetProperties();
             var targetProperties = target.GetType().GetProperties();
 
             foreach (var sourceProperty in sourceProperties)
@@ -289,7 +298,8 @@ namespace BlazorBase.CRUD.Models
                 if (targetProperty == null ||
                  (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
                  (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
-                 ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0))
+                 ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0) ||
+                 typeof(ILazyLoader).IsAssignableFrom(sourceProperty.PropertyType))
                     continue;
 
                 targetProperty.SetValue(target, sourceProperty.GetValue(this));

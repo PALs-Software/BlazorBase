@@ -106,8 +106,8 @@ namespace BlazorBase.CRUD.Models
 
         #region Other
         public Type GetUnproxiedType();
-
-        public void TransferPropertiesTo(object target);
+        public void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames);
+        public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null);
         #endregion
     }
 }

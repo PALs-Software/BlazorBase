@@ -58,6 +58,7 @@ namespace BlazorBase.CRUD.Components
         protected Type RenderType;
         protected DateInputMode DateInputMode;
         protected string CustomPropertyCssStyle;
+        protected bool LastValueConversionFailed = false;
 
         protected ValidationContext PropertyValidationContext;
         protected PropertyInfo ForeignKeyProperty { get; set; }
@@ -142,7 +143,7 @@ namespace BlazorBase.CRUD.Components
             return Task.FromResult(false);
         }
         #endregion
-
+             
         #region Events        
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)
         {
@@ -180,7 +181,8 @@ namespace BlazorBase.CRUD.Components
             await Model.OnBeforeConvertPropertyType(convertArgs);
             newValue = convertArgs.NewValue;
 
-            if (!ConvertValueIfNeeded(ref newValue))
+            LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue);
+            if (LastValueConversionFailed)
                 return;
 
             var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
@@ -217,6 +219,9 @@ namespace BlazorBase.CRUD.Components
 
         public bool ValidatePropertyValue()
         {
+            if (LastValueConversionFailed)
+                return false;
+
             if (Model.TryValidateProperty(out List<ValidationResult> validationResults, PropertyValidationContext, Property))
             {
                 SetValidation(showValidation: false);

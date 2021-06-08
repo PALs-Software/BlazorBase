@@ -50,7 +50,7 @@ namespace BlazorBase.CRUD.Components
                     RenderAdditionalActionsOutsideOfButtonGroup = true;
             });
 
-            await PrepareForeignKeyProperties(TModelType, Service);
+            await PrepareForeignKeyProperties(Service);
         }
         #endregion
 

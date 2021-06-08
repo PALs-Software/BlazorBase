@@ -108,8 +108,8 @@ namespace BlazorBase.CRUD.Components
                 Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
             });
 
-            await PrepareForeignKeyProperties(ModelListEntryType, Service);
-            await PrepareCustomLookupData(ModelListEntryType, Model, GetEventServices());
+            await PrepareForeignKeyProperties(Service);
+            await PrepareCustomLookupData(Model, GetEventServices());
         }
 
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)
