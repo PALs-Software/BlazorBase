@@ -45,7 +45,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public IBaseModel Model { get; set; }
         [Parameter] public PropertyInfo Property { get; set; }
         [Parameter] public BaseService Service { get; set; }
-
+        [Parameter] public bool? ReadOnly { get; set; }
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         #endregion
@@ -66,13 +66,13 @@ namespace BlazorBase.CRUD.Components
         protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
 
         #region Property Infos
+        protected bool IsReadOnly;
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
         protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
         protected List<IBasePropertyListPartInput> BasePropertyListPartInputs = new List<IBasePropertyListPartInput>();
 
         protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
         protected BaseSelectListInput AddToBaseInputSelectLists { set { BaseSelectListInputs.Add(value); } }
-
         protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
         #endregion
         #endregion
@@ -87,6 +87,11 @@ namespace BlazorBase.CRUD.Components
 
                 IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
                 ModelLocalizer = StringLocalizerFactory.Create(Property.PropertyType.GenericTypeArguments[0]);
+
+                if (ReadOnly == null)
+                    IsReadOnly = Property.IsReadOnlyInGUI();
+                else
+                    IsReadOnly = ReadOnly.Value;
 
                 SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
 
@@ -110,6 +115,14 @@ namespace BlazorBase.CRUD.Components
 
             await PrepareForeignKeyProperties(Service);
             await PrepareCustomLookupData(Model, GetEventServices());
+        }
+
+        protected override void OnParametersSet()
+        {
+            if (ReadOnly == null)
+                IsReadOnly = Property.IsReadOnlyInGUI();
+            else
+                IsReadOnly = ReadOnly.Value;
         }
 
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)

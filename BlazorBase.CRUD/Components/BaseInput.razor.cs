@@ -5,6 +5,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.Modules;
 using Blazorise;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
@@ -46,6 +47,7 @@ namespace BlazorBase.CRUD.Components
         [Inject] protected BaseParser BaseParser { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected ErrorHandler ErrorHandler { get; set; }
         #endregion
 
         #region Members
@@ -143,7 +145,7 @@ namespace BlazorBase.CRUD.Components
             return Task.FromResult(false);
         }
         #endregion
-             
+
         #region Events        
         private void Model_OnForcePropertyRepaint(object sender, string propertyName)
         {
@@ -172,35 +174,43 @@ namespace BlazorBase.CRUD.Components
 
         protected async virtual Task OnValueChangedAsync(object newValue)
         {
-            if (newValue is ChangeEventArgs changeEventArgs)
-                newValue = changeEventArgs.Value;
+            try
+            {
+                if (newValue is ChangeEventArgs changeEventArgs)
+                    newValue = changeEventArgs.Value;
 
-            var eventServices = GetEventServices();
-            var convertArgs = new OnBeforeConvertPropertyTypeArgs(Model, Property.Name, newValue, eventServices);
-            await OnBeforeConvertPropertyType.InvokeAsync(convertArgs);
-            await Model.OnBeforeConvertPropertyType(convertArgs);
-            newValue = convertArgs.NewValue;
+                var eventServices = GetEventServices();
+                var convertArgs = new OnBeforeConvertPropertyTypeArgs(Model, Property.Name, newValue, eventServices);
+                await OnBeforeConvertPropertyType.InvokeAsync(convertArgs);
+                await Model.OnBeforeConvertPropertyType(convertArgs);
+                newValue = convertArgs.NewValue;
 
-            LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue);
-            if (LastValueConversionFailed)
-                return;
+                LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue);
+                if (LastValueConversionFailed)
+                    return;
 
-            var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
-            await OnBeforePropertyChanged.InvokeAsync(args);
-            await Model.OnBeforePropertyChanged(args);
-            newValue = args.NewValue;
+                var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
+                await OnBeforePropertyChanged.InvokeAsync(args);
+                await Model.OnBeforePropertyChanged(args);
+                newValue = args.NewValue;
 
-            Property.SetValue(Model, newValue);
-            var valid = ValidatePropertyValue();
+                Property.SetValue(Model, newValue);
+                var valid = ValidatePropertyValue();
 
-            if (valid)
-                await ReloadForeignProperties(newValue);
+                if (valid)
+                    await ReloadForeignProperties(newValue);
 
-            var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
-            await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
-            await Model.OnAfterPropertyChanged(onAfterArgs);
+                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
+                await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
+                await Model.OnAfterPropertyChanged(onAfterArgs);
 
-            SetCurrentValueAsString(newValue);
+                SetCurrentValueAsString(newValue);
+            }
+            catch (Exception e)
+            {
+                LastValueConversionFailed = true;
+                SetValidation(feedback: ErrorHandler.PrepareExceptionErrorMessage(e));
+            }
         }
 
         protected async virtual Task ReloadForeignProperties(object newValue)
@@ -310,7 +320,7 @@ namespace BlazorBase.CRUD.Components
                     {
                         if (item.Key.ToLower() == "style")
                             InputAttributes["style"] = $"{InputAttributes["style"]}; {item.Value}";
-                        else if(item.Key.ToLower() == "class")
+                        else if (item.Key.ToLower() == "class")
                             InputAttributes["class"] = $"{InputAttributes["class"]} {item.Value}";
                     }
                     else

@@ -95,7 +95,7 @@ namespace BlazorBase.CRUD.Components
             DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        protected virtual async Task PrepareForeignKeyProperties(BaseService service)
+        protected virtual async Task PrepareForeignKeyProperties(BaseService service, IBaseModel instance = null)
         {
             if (ForeignKeyProperties != null)
                 return;
@@ -105,6 +105,7 @@ namespace BlazorBase.CRUD.Components
             var foreignKeyProperties = VisibleProperties.Where(entry => entry.IsForeignKey());
             foreach (var foreignKeyProperty in foreignKeyProperties)
             {
+                var isReadonly = foreignKeyProperty.IsReadOnlyInGUI();
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
                 var foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
                 var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
@@ -121,27 +122,42 @@ namespace BlazorBase.CRUD.Components
                     continue;
                 }
 
-                var entries = await service.GetDataAsync(foreignKeyType);
+                var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
                 var primaryKeys = new List<KeyValuePair<string, string>>()
                 {
                     new KeyValuePair<string, string>(null, String.Empty)
                 };
-                var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
 
-                foreach (var entry in entries)
+                if (isReadonly && instance != null)
                 {
-                    var baseEntry = entry as IBaseModel;
-                    var primaryKeysAsString = baseEntry.GetPrimaryKeysAsString();
+                    var foreignKeyValue = foreignKeyProperty.GetValue(instance);
+                    if (foreignKeyValue != null)
+                    {
+                        var entry = await service.GetAsync(foreignKeyType, foreignKeyValue);
+                        AddEntryToForeignKeyList(entry as IBaseModel, primaryKeys, displayKeyProperties);
+                    }
 
-                    if (displayKeyProperties.Count == 0)
-                        primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
-                    else
-                        primaryKeys.Add(new KeyValuePair<string, string>(primaryKeysAsString, baseEntry?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
+                    ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
+                    continue;
                 }
+
+                var entries = await service.GetDataAsync(foreignKeyType);
+                foreach (var entry in entries)
+                    AddEntryToForeignKeyList(entry as IBaseModel, primaryKeys, displayKeyProperties);
 
                 CachedForeignKeys.Add(foreignKeyType, primaryKeys);
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
             }
+        }
+
+        protected void AddEntryToForeignKeyList(IBaseModel model, List<KeyValuePair<string, string>> foreignKeyList, List<PropertyInfo> displayKeyProperties)
+        {
+            var primaryKeysAsString = model.GetPrimaryKeysAsString();
+
+            if (displayKeyProperties.Count == 0)
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
+            else
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
         }
 
         protected virtual async Task PrepareCustomLookupData(IBaseModel cardModel, EventServices eventServices)

@@ -73,7 +73,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
         [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
         [Parameter] public bool ShowEntryByStart { get; set; }
-
+        [Parameter] public bool DontRenderCard { get; set; }
         #endregion
 
         #region Injects
@@ -120,6 +120,13 @@ namespace BlazorBase.CRUD.Components
             });
 
             await PrepareForeignKeyProperties(Service);
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (!firstRender)
+                return;
+
             await ProcessQueryParameters();
         }
 
@@ -161,7 +168,7 @@ namespace BlazorBase.CRUD.Components
                 PluralDisplayName = ModelLocalizer[PluralDisplayName];
         }
 
-        protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
+        protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
         {
             var eventServices = GetEventServices(Service);
 
@@ -172,7 +179,7 @@ namespace BlazorBase.CRUD.Components
             return null;
         }
 
-        protected RenderFragment GetPropertyListDisplayExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, TModel model) => builder =>
+        protected virtual RenderFragment GetPropertyListDisplayExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, TModel model) => builder =>
         {
             builder.OpenComponent(0, baseInputExtensionType);
 
@@ -184,7 +191,7 @@ namespace BlazorBase.CRUD.Components
             builder.CloseComponent();
         };
 
-        protected async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
+        protected virtual async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
         {
             if (request.Count == 0)
                 return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
@@ -206,7 +213,7 @@ namespace BlazorBase.CRUD.Components
             return new ItemsProviderResult<TModel>(Entries, totalEntries);
         }
 
-        private async Task ProcessQueryParameters()
+        protected virtual async Task ProcessQueryParameters()
         {
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
 
@@ -217,30 +224,29 @@ namespace BlazorBase.CRUD.Components
             if (query.Count == 0)
                 return;
 
-            var keyProperties = TModelType.GetProperties().Where(property =>
-               (!property.PropertyType.IsSubclassOf(typeof(IBaseModel))) &&
-               property.IsKey()
-           ).ToList();
-
             var primaryKeys = new List<object>();
-            foreach (var keyProperty in keyProperties)
-                if (query.TryGetValue(keyProperty.Name, out var keyValue))
-                    if (BaseParser.TryParseValueFromString(keyProperty.PropertyType, keyValue.ToString(), out object parsedValue, out string errorMessage))
-                        primaryKeys.Add(parsedValue);
-                    else
-                        return;
-
-            var entry = await Service.GetAsync<TModel>(primaryKeys.ToArray());
-            if (entry != null)
-                if (DataLoadCondition == null)
-                    await EditEntryAsync(entry, false);
-                else if (DataLoadCondition.Compile()(entry)) //Check if user is allowed to see this entry
-                    await EditEntryAsync(entry, false);
+            foreach (var keyProperty in TModelType.GetKeyProperties())
+                if (query.TryGetValue(keyProperty.Name, out var keyValue) && BaseParser.TryParseValueFromString(keyProperty.PropertyType, keyValue.ToString(), out object parsedValue, out string errorMessage))
+                    primaryKeys.Add(parsedValue);
                 else
-                    NavigateToList();
+                {
+                    ChangeUrlToList();
+                    return;
+                }
+
+            await NavigateToEntryAsync(primaryKeys.ToArray());
         }
 
-        protected void NavigateToEntry(TModel entry)
+        protected virtual async Task NavigateToEntryAsync(params object[] primaryKeys)
+        {
+            var entry = await Service.GetAsync<TModel>(primaryKeys);
+            if (entry != null && (DataLoadCondition == null || DataLoadCondition.Compile()(entry))) //Check if user is allowed to see this entry
+                await EditEntryAsync(entry, false);
+            else
+                ChangeUrlToList();
+        }
+
+        protected virtual void ChangeUrlToEntry(TModel entry)
         {
             IsSelfNavigating = true;
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
@@ -250,7 +256,7 @@ namespace BlazorBase.CRUD.Components
             NavigationManager.NavigateTo(newUrl);
         }
 
-        protected void NavigateToList()
+        protected virtual void ChangeUrlToList()
         {
             IsSelfNavigating = true;
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
@@ -262,7 +268,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Display
-        protected string DisplayForeignKey(DisplayItem displayItem, TModel model)
+        protected virtual string DisplayForeignKey(DisplayItem displayItem, TModel model)
         {
             var key = displayItem.Property.GetValue(model)?.ToString();
             var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == key);
@@ -273,7 +279,7 @@ namespace BlazorBase.CRUD.Components
                 return foreignKeyPair.Value;
         }
 
-        protected string DisplayEnum(DisplayItem displayItem, TModel model)
+        protected virtual string DisplayEnum(DisplayItem displayItem, TModel model)
         {
             var value = displayItem.Property.GetValue(model).ToString();
             var localizer = StringLocalizerFactory.Create(displayItem.Property.PropertyType);
@@ -283,7 +289,7 @@ namespace BlazorBase.CRUD.Components
 
         #region CRUD
 
-        public async Task AddEntryAsync()
+        public virtual async Task AddEntryAsync()
         {
             var args = new OnBeforeOpenAddModalArgs(false, GetEventServices(Service));
             await OnBeforeOpenAddModal.InvokeAsync(args);
@@ -292,13 +298,13 @@ namespace BlazorBase.CRUD.Components
 
             await BaseModalCard.ShowModalAsync(addingMode: true);
         }
-        public async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
+        public virtual async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
             var args = new OnBeforeOpenEditModalArgs(false, entry, changeQueryUrl, GetEventServices(Service));
             await OnBeforeOpenEditModal.InvokeAsync(args);
 
             if (args.ChangeQueryUrl)
-                NavigateToEntry(entry);
+                ChangeUrlToEntry(entry);
 
             if (args.IsHandled)
                 return;
@@ -306,7 +312,7 @@ namespace BlazorBase.CRUD.Components
             await BaseModalCard.ShowModalAsync(addingMode: false, entry.GetPrimaryKeys());
         }
 
-        public async Task RemoveEntryAsync(TModel model)
+        public virtual async Task RemoveEntryAsync(TModel model)
         {
             if (model == null)
                 return;
@@ -321,7 +327,7 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        protected async Task OnConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)
+        protected virtual async Task OnConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)
         {
             if (result == ConfirmDialogResult.Aborted)
                 return;
@@ -356,22 +362,22 @@ namespace BlazorBase.CRUD.Components
             await InvokeAsync(() => StateHasChanged());
         }
 
-        protected async Task OnCardClosedAsync()
+        protected virtual async Task OnCardClosedAsync()
         {
             await VirtualizeList.RefreshDataAsync();
-            NavigateToList();
+            ChangeUrlToList();
 
             await OnCardClosed.InvokeAsync();
         }
         #endregion
         #region Actions
-        public async Task RefreshDataAsync()
+        public virtual async Task RefreshDataAsync()
         {
             await VirtualizeList.RefreshDataAsync();
         }
         #endregion
         #region Other
-        protected EventServices GetEventServices(BaseService baseService)
+        protected virtual EventServices GetEventServices(BaseService baseService)
         {
             return new EventServices()
             {

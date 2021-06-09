@@ -2,6 +2,7 @@
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
@@ -10,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using static BlazorBase.CRUD.Components.BaseDisplayComponent;
 
@@ -17,19 +20,29 @@ namespace BlazorBase.Files.Components
 {
     public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePropertyListPartInput
     {
-        [Parameter] public string FileFilter { get; set; } = "*.";
+        #region Parameters
+        [Parameter] public string FileFilter { get; set; } = null;
+        #endregion
 
+        #region Inject
         [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; }
         [Inject] protected BlazorBaseFileOptions Options { get; set; }
+        #endregion
 
-        protected bool ShowLoadingIndicator { get; set; } = false;
-        protected int UploadProgress { get; set; } = 0;
-        protected FileEdit FileEdit { get; set; }
+        #region Member
+        protected bool ShowLoadingIndicator = false;
+        protected int UploadProgress = 0;
+        protected FileEdit FileEdit = default;
         protected bool FileEditIsResetting = false;
+        #endregion
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
+
+            var filterAttribute = Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) as FileInputFilterAttribute;
+            if (FileFilter == null)
+                FileFilter = filterAttribute?.Filter ?? "*.";
         }
 
         public override Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
@@ -43,15 +56,14 @@ namespace BlazorBase.Files.Components
                 return;
 
             var eventServices = GetEventServices();
-
-            var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, eventServices);
-            await OnBeforePropertyChanged.InvokeAsync(args);
-            await Model.OnBeforePropertyChanged(args);
-            fileChangedEventArgs = args.NewValue;
-
             bool valid = true;
             try
             {
+                var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, eventServices);
+                await OnBeforePropertyChanged.InvokeAsync(args);
+                await Model.OnBeforePropertyChanged(args);
+                fileChangedEventArgs = args.NewValue;
+
                 ShowLoadingIndicator = true;
 
                 foreach (var file in ((FileChangedEventArgs)fileChangedEventArgs).Files)
@@ -109,10 +121,10 @@ namespace BlazorBase.Files.Components
                     SetValidation(showValidation: false);
                 }
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
                 valid = false;
-                SetValidation(feedback: ex.Message);
+                SetValidation(feedback: ErrorHandler.PrepareExceptionErrorMessage(e));
             }
             finally
             {
@@ -122,12 +134,21 @@ namespace BlazorBase.Files.Components
                 FileEditIsResetting = false;
             }
 
-            if (valid)
-                await ReloadForeignProperties(fileChangedEventArgs);
+            try
+            {
+                LastValueConversionFailed = !valid;
+                if (valid)
+                    await ReloadForeignProperties(fileChangedEventArgs);
 
-            var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, valid, eventServices);
-            await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
-            await Model.OnAfterPropertyChanged(onAfterArgs);
+                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, valid, eventServices);
+                await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
+                await Model.OnAfterPropertyChanged(onAfterArgs);
+            }
+            catch (Exception e)
+            {
+                LastValueConversionFailed = true;
+                SetValidation(feedback: ErrorHandler.PrepareExceptionErrorMessage(e));
+            }           
         }
 
         protected async Task<string> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
@@ -155,16 +176,10 @@ namespace BlazorBase.Files.Components
 
         protected async Task DeleteAttachedFilePropertyAsync()
         {
-            if (!Property.CanWrite)
-                return;
-
             if (Property.GetValue(Model) is not BaseFile oldFile)
                 return;
 
-            await oldFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
-            Service.DbContext.Entry(oldFile).State = Service.DbContext.Entry(oldFile).State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
-
-            Property.SetValue(Model, null);
+            await oldFile.ClearFileFromPropertyAsync(Model, Property, Service);
         }
 
     }

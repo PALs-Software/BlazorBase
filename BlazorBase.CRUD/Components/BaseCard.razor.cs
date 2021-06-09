@@ -114,34 +114,34 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem)
+        protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly)
         {
             var eventServices = GetEventServices();
 
             foreach (var baseinput in BaseInputExtensions)
                 if (await baseinput.IsHandlingPropertyRenderingAsync(Model, displayItem, eventServices))
-                    return GetBaseInputExtensionAsRenderFragment(displayItem, baseinput.GetType(), Model);
+                    return GetBaseInputExtensionAsRenderFragment(displayItem, isReadonly, baseinput.GetType(), Model);
 
             return null;
         }
-        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, IBaseModel model) => builder =>
-        {
-            builder.OpenComponent(0, baseInputExtensionType);
+        protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
+         {
+             builder.OpenComponent(0, baseInputExtensionType);
 
-            builder.AddAttribute(1, "Model", model);
-            builder.AddAttribute(2, "Property", displayItem.Property);
-            builder.AddAttribute(3, "ReadOnly", displayItem.IsReadOnly || !AddingMode && displayItem.IsKey);
-            builder.AddAttribute(4, "Service", Service);
-            builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
+             builder.AddAttribute(1, "Model", model);
+             builder.AddAttribute(2, "Property", displayItem.Property);
+             builder.AddAttribute(3, "ReadOnly", isReadonly);
+             builder.AddAttribute(4, "Service", Service);
+             builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
 
-            builder.AddAttribute(6, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
-            builder.AddAttribute(7, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
-            builder.AddAttribute(8, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
+             builder.AddAttribute(6, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
+             builder.AddAttribute(7, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
+             builder.AddAttribute(8, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
 
-            builder.AddComponentReferenceCapture(9, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
+             builder.AddComponentReferenceCapture(9, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
 
-            builder.CloseComponent();
-        };
+             builder.CloseComponent();
+         };
 
         #endregion
 
@@ -149,7 +149,6 @@ namespace BlazorBase.CRUD.Components
         public async Task ShowAsync(bool addingMode, params object[] primaryKeys)
         {
             await Service.RefreshDbContextAsync();
-            await PrepareForeignKeyProperties(Service);
 
             AddingMode = addingMode;
             BaseInputs.Clear();
@@ -172,7 +171,9 @@ namespace BlazorBase.CRUD.Components
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
+            await PrepareForeignKeyProperties(Service, Model);
             await PrepareCustomLookupData(Model, GetEventServices());
+
             ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object>()
             {
                 [typeof(IStringLocalizer)] = ModelLocalizer,
@@ -269,7 +270,7 @@ namespace BlazorBase.CRUD.Components
             BaseListParts?.Clear();
             ForeignKeyProperties = null;
             CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string, string>>>();
-            Model = null;            
+            Model = null;
         }
 
         public TModel GetCurrentModel()

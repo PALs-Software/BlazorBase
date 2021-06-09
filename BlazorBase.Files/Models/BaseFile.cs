@@ -13,6 +13,8 @@ using BlazorBase.CRUD.ViewModels;
 using System.Security.Cryptography;
 using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.EventArguments;
+using BlazorBase.CRUD.Services;
+using System.Reflection;
 
 namespace BlazorBase.Files.Models
 {
@@ -57,7 +59,7 @@ namespace BlazorBase.Files.Models
         public BaseFile DisplayFile { get { return this; } }
 
         [NotMapped]
-        public Guid TempFileId { get; set; }        
+        public Guid TempFileId { get; set; }
 
         #region CRUD
 
@@ -108,12 +110,13 @@ namespace BlazorBase.Files.Models
                 return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}";
         }
 
-        public string GetPhysicalFilePath() {
+        public string GetPhysicalFilePath()
+        {
             var options = BlazorBaseFileOptions.Instance;
             if (TempFileId == Guid.Empty)
                 return Path.Join(options.FileStorePath, Id.ToString());
             else
-                return Path.Join(options.FileStorePath, TempFileId.ToString());
+                return Path.Join(options.TempFileStorePath, TempFileId.ToString());
         }
 
         public async Task<byte[]> GetFileContentAsync()
@@ -168,6 +171,23 @@ namespace BlazorBase.Files.Models
             });
         }
 
+        public async Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, BaseService service)
+        {
+            var property = model.GetType().GetProperty(propertyName);
+            await ClearFileFromPropertyAsync(model, property, service);
+        }
+
+        public async Task ClearFileFromPropertyAsync(IBaseModel model, PropertyInfo property, BaseService service)
+        {
+            if (!property.CanWrite || property.GetValue(model) != this)
+                return;
+
+            await RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
+            service.DbContext.Entry(this).State = service.DbContext.Entry(this).State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
+
+            property.SetValue(model, null);
+        }
+
         public static async Task<TBaseFile> CreateFileAsync<TBaseFile>(EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent) where TBaseFile : BaseFile, new()
         {
             var file = new TBaseFile()
@@ -175,7 +195,7 @@ namespace BlazorBase.Files.Models
                 FileName = fileName,
                 FileSize = fileContent.Length,
                 BaseFileType = baseFileType,
-                MimeFileType = mimeFileType,                
+                MimeFileType = mimeFileType,
                 Hash = ComputeSha256Hash(fileContent)
             };
             await file.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(file, eventServices));
@@ -216,6 +236,21 @@ namespace BlazorBase.Files.Models
         public static string ComputeSha256Hash(byte[] buffer)
         {
             return ComputeSha256Hash((hasher) => hasher.ComputeHash(buffer));
+        }
+
+        public void RecalculateHashAndSize()
+        {
+            var path = GetPhysicalFilePath();
+            if (!File.Exists(path))
+            {
+                Hash = null;
+                FileSize = 0;
+                return;
+            }
+
+            var bytes = File.ReadAllBytes(path);
+            Hash = ComputeSha256Hash(bytes);
+            FileSize = bytes.Length;
         }
         #endregion
 

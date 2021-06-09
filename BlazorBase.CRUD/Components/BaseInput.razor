@@ -14,11 +14,11 @@
     }
     else if (RenderType == typeof(bool))
     {
-        <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
     }
     else if (RenderType == typeof(bool?))
     {
-        <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
     }
     else if (RenderType == typeof(DateTime))
     {
