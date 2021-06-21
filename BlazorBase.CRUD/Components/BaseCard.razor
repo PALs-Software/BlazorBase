@@ -9,7 +9,7 @@
     {
         <Heading Margin="Margin.Is2.FromTop">
             @Localizer["Edit {0}", SingleDisplayName]
-            <Button Color="Color.Success" Clicked="SaveCardAsync">@Localizer["Save"]</Button>
+            <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
         </Heading>
     }
 
@@ -136,7 +136,9 @@
 </div>
 
 <Snackbar @ref="Snackbar"
-          Color="ShowInvalidFeedback ? SnackbarColor.Danger : SnackbarColor.Success">
+          Color="ShowInvalidFeedback ? SnackbarColor.Danger : SnackbarColor.Success"
+          Multiline="true"
+          >
     <SnackbarBody>
         @if (ShowInvalidFeedback)
         {

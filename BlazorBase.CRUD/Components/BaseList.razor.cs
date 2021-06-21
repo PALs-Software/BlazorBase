@@ -22,6 +22,7 @@ using BlazorBase.MessageHandling.Enum;
 using Blazorise;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.EntityFrameworkCore;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -74,6 +75,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public bool DontRenderCard { get; set; }
+        [Parameter] public bool Sortable { get; set; } = true;
         #endregion
 
         #region Injects
@@ -100,6 +102,7 @@ namespace BlazorBase.CRUD.Components
         protected bool IsSelfNavigating = false;
         protected string ListNavigationBasePath;
         protected EventHandler<LocationChangedEventArgs> LocationEventHandler;
+        protected List<DisplayItem> SortedColumns = new List<DisplayItem>();
         #endregion
 
         #region Init
@@ -198,17 +201,20 @@ namespace BlazorBase.CRUD.Components
 
             var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
 
-            int totalEntries;
-            if (DataLoadCondition == null)
+            var query = baseService.Set<TModel>();
+            if (DataLoadCondition != null)
+                query = query.Where(DataLoadCondition).Cast<TModel>();
+
+            foreach (var sortedColumn in SortedColumns)
             {
-                Entries = await baseService.GetDataAsync<TModel>(request.StartIndex, request.Count);
-                totalEntries = await baseService.CountDataAsync<TModel>();
+                if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
+                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(sortedColumn.Property.Name) : query.OrderBy(sortedColumn.Property.Name);
+                else
+                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(sortedColumn.Property.Name) : query.OrderByDescending(sortedColumn.Property.Name);
             }
-            else
-            {
-                Entries = await baseService.GetDataAsync<TModel>(DataLoadCondition, request.StartIndex, request.Count);
-                totalEntries = await baseService.CountDataAsync<TModel>(DataLoadCondition);
-            }
+
+            var totalEntries = await query.CountAsync();
+            Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
 
             return new ItemsProviderResult<TModel>(Entries, totalEntries);
         }
@@ -284,6 +290,25 @@ namespace BlazorBase.CRUD.Components
             var value = displayItem.Property.GetValue(model).ToString();
             var localizer = StringLocalizerFactory.Create(displayItem.Property.PropertyType);
             return localizer[value];
+        }
+        #endregion
+
+        #region Sorting
+        protected async Task OnSortClicked(DisplayItem displayItem)
+        {
+            displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
+
+            switch (displayItem.SortDirection)
+            {
+                case Enums.SortDirection.None:
+                    SortedColumns.Remove(displayItem);
+                    break;
+                case Enums.SortDirection.Ascending:
+                    SortedColumns.Add(displayItem);
+                    break;
+            }
+
+            await VirtualizeList.RefreshDataAsync();
         }
         #endregion
 
@@ -370,12 +395,14 @@ namespace BlazorBase.CRUD.Components
             await OnCardClosed.InvokeAsync();
         }
         #endregion
+
         #region Actions
         public virtual async Task RefreshDataAsync()
         {
             await VirtualizeList.RefreshDataAsync();
         }
         #endregion
+
         #region Other
         protected virtual EventServices GetEventServices(BaseService baseService)
         {

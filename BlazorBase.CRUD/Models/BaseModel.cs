@@ -157,6 +157,7 @@ namespace BlazorBase.CRUD.Models
 
         #region Entry Events
         public virtual void OnGetPropertyCaption(OnGetPropertyCaptionArgs args) { }
+        public virtual Task OnFormatProperty(OnFormatPropertyArgs args) { return Task.CompletedTask; }
         public virtual Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args) { return Task.CompletedTask; }
         public virtual Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args) { return Task.CompletedTask; }
@@ -268,20 +269,31 @@ namespace BlazorBase.CRUD.Models
         public virtual List<PageActionGroup> GeneratePageActionGroups() { return null; }
         #endregion
 
-        #region Other
-        public Type GetUnproxiedType()
+        #region Helper Methods
+        public void ClearPropertyValues()
         {
-            var type = GetType();
+            var properties = GetType().GetPropertiesExceptKeys().Where(property =>
+                !typeof(IBaseModel).IsAssignableFrom(property.PropertyType) &&
+                !typeof(ILazyLoader).IsAssignableFrom(property.PropertyType) &&
+                property.CanWrite &&
+                (property.GetSetMethod().Attributes & MethodAttributes.Static) == 0 &&
+                property.Name != nameof(CreatedOn) &&
+                property.Name != nameof(ModifiedOn)
+            ).ToList();
 
-            if (type.Namespace == "Castle.Proxies")
-                return type.BaseType;
-
-            return type;
+            foreach (var property in properties)
+                property.SetValue(this, default);
         }
 
         public void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames)
         {
             var sourceProperties = this.GetType().GetPropertiesExceptKeys().Where(property => !exceptPropertyNames.Contains(property.Name));
+            TransferPropertiesTo(target, sourceProperties.ToArray());
+        }
+
+        public void TransferPropertiesTo(object target, params string[] exceptPropertyNames)
+        {
+            var sourceProperties = this.GetType().GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
             TransferPropertiesTo(target, sourceProperties.ToArray());
         }
 
@@ -305,6 +317,17 @@ namespace BlazorBase.CRUD.Models
                 targetProperty.SetValue(target, sourceProperty.GetValue(this));
             }
         }
+
+        public Type GetUnproxiedType()
+        {
+            var type = GetType();
+
+            if (type.Namespace == "Castle.Proxies")
+                return type.BaseType;
+
+            return type;
+        }
+
         #endregion
     }
 }

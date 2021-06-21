@@ -16,7 +16,7 @@ using BlazorBase.CRUD.EventArguments;
 
 namespace BlazorBase.CRUD.Services
 {
-    public class BaseService: IDisposable
+    public class BaseService : IDisposable
     {
         public DbContext DbContext { get; protected set; }
         public IServiceProvider ServiceProvider { get; }
@@ -59,7 +59,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
-        {            
+        {
             return await DbContext.FindAsync(type, keyValues);
         }
 
@@ -84,41 +84,77 @@ namespace BlazorBase.CRUD.Services
             return entry;
         }
 
-        public async virtual Task<List<T>> GetDataAsync<T>() where T : class
+        public virtual Task<List<T>> GetDataAsync<T>(bool asNoTracking = false) where T : class
         {
-            return await DbContext.Set<T>().ToListAsync();
+            var query = DbContext.Set<T>().AsQueryable();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
+
         }
-        public async virtual Task<List<T>> GetDataAsync<T>(int index, int count) where T : class
+        public virtual Task<List<T>> GetDataAsync<T>(int index, int count, bool asNoTracking = false) where T : class
         {
-            return await DbContext.Set<T>().Skip(index).Take(count).ToListAsync();
+            var query = DbContext.Set<T>().Skip(index).Take(count);
+            
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
         }
 
-        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition) where T : class
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false) where T : class
         {
-            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).ToList());
+            var query = DbContext.Set<T>().Where(dataLoadCondition);
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
         }
 
-        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, int index, int count) where T : class
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, int index, int count, bool asNoTracking = false) where T : class
         {
-            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count).ToList());
+            var query = DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count);
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
         }
 
-        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition) where T : class, IBaseModel
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition, bool asNoTracking = false) where T : class, IBaseModel
         {
-            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Cast<T>().ToList());
+            var query = DbContext.Set<T>().Where(dataLoadCondition);
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.Cast<T>().ToList());
         }
 
-        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition, int index, int count) where T : class, IBaseModel
+        public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition, int index, int count, bool asNoTracking = false) where T : class, IBaseModel
         {
-            return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count).Cast<T>().ToList());
+            var query = DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count);
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.Cast<T>().ToList());
         }
 
         /// <summary>
         /// Super Slow -> use only if neccessary!
         /// </summary>
-        public async virtual Task<List<object>> GetDataAsync(Type type)
+        public virtual Task<List<object>> GetDataAsync(Type type, bool asNoTracking = false)
         {
-            return await DbContext.Set(type).ToListAsync();
+            var query = DbContext.Set(type).AsQueryable();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
         }
 
         /// <summary>
@@ -267,7 +303,7 @@ namespace BlazorBase.CRUD.Services
             catch (Exception) //Prevent Primary Key Null Error Issue
             {
                 return true;
-            }            
+            }
         }
         #endregion
 

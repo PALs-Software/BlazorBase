@@ -21,6 +21,7 @@ namespace BlazorBase.Files.Components
     public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePropertyListPartInput
     {
         #region Parameters
+        [Parameter] public ulong? MaxFileSize { get; set; } = null;
         [Parameter] public string FileFilter { get; set; } = null;
         #endregion
 
@@ -40,8 +41,10 @@ namespace BlazorBase.Files.Components
         {
             await base.OnInitializedAsync();
 
-            var filterAttribute = Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) as FileInputFilterAttribute;
-            if (FileFilter == null)
+            if (MaxFileSize == null && Property.GetCustomAttribute(typeof(MaxFileSizeAttribute)) is MaxFileSizeAttribute maxFileSizeAttribute)
+                MaxFileSize = maxFileSizeAttribute.MaxFileSize;
+
+            if (FileFilter == null && Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) is FileInputFilterAttribute filterAttribute)
                 FileFilter = filterAttribute?.Filter ?? "*.";
         }
 
@@ -68,6 +71,9 @@ namespace BlazorBase.Files.Components
 
                 foreach (var file in ((FileChangedEventArgs)fileChangedEventArgs).Files)
                 {
+                    if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
+                        throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
+
                     new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
 
                     var newFile = Activator.CreateInstance(Property.PropertyType) as BaseFile;
@@ -148,7 +154,7 @@ namespace BlazorBase.Files.Components
             {
                 LastValueConversionFailed = true;
                 SetValidation(feedback: ErrorHandler.PrepareExceptionErrorMessage(e));
-            }           
+            }
         }
 
         protected async Task<string> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)

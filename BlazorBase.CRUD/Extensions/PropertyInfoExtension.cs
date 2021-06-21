@@ -1,5 +1,6 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,7 +12,7 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class PropertyInfoExtension
     {
-       
+
         public static string GetPlaceholderText(this PropertyInfo propertyInfo)
         {
             if (Attribute.IsDefined(propertyInfo, typeof(PlaceholderTextAttribute)))
@@ -67,12 +68,34 @@ namespace BlazorBase.CRUD.Extensions
 
         public static bool IsVisibleInGUI(this PropertyInfo propertyInfo)
         {
-            return !propertyInfo.HasAttribute(typeof(VisibleAttribute));
+            var isVisible = !propertyInfo.HasAttribute(typeof(VisibleAttribute));
+            if (isVisible && IsBaseModelDateProperty(propertyInfo))
+                return HideBaseModelDateProperties(propertyInfo);
+            else
+                return isVisible;
         }
 
         public static bool IsVisibleInGUI(this PropertyInfo propertyInfo, GUIType guiType)
         {
-            return propertyInfo.GetCustomAttribute(typeof(VisibleAttribute)) is VisibleAttribute visible && !visible.HideInGUITypes.Contains(guiType);
+            var isVisible = propertyInfo.GetCustomAttribute(typeof(VisibleAttribute)) is VisibleAttribute visible && !visible.HideInGUITypes.Contains(guiType);
+            if (isVisible && IsBaseModelDateProperty(propertyInfo))
+                return HideBaseModelDateProperties(propertyInfo, guiType);
+            else
+                return isVisible;
+        }
+
+        public static bool IsBaseModelDateProperty(this PropertyInfo propertyInfo)
+        {
+            return typeof(BaseModel).IsAssignableFrom(propertyInfo.ReflectedType) && (propertyInfo.Name == nameof(BaseModel.CreatedOn) || propertyInfo.Name == nameof(BaseModel.ModifiedOn));
+        }
+
+        public static bool HideBaseModelDateProperties(this PropertyInfo propertyInfo, GUIType? guiType = null)
+        {
+            return propertyInfo.ReflectedType.GetCustomAttribute(typeof(HideBaseModelDatePropertiesInGUIAttribute)) is HideBaseModelDatePropertiesInGUIAttribute hideProperty &&
+                (
+                    hideProperty.HideCreatedOn && propertyInfo.Name == nameof(BaseModel.CreatedOn) ||
+                    hideProperty.HideModifiedOn && propertyInfo.Name == nameof(BaseModel.ModifiedOn)
+                ) && (guiType == null || !hideProperty.HideInGUITypes.Contains(guiType.GetValueOrDefault()));
         }
 
         public static bool IsReadOnlyInGUI(this PropertyInfo propertyInfo)

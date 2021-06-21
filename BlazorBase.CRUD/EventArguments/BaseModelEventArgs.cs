@@ -23,12 +23,25 @@ namespace BlazorBase.CRUD.EventArguments
     {
         public OnGetPropertyCaptionArgs(IBaseModel model, DisplayItem displayItem, string caption, EventServices eventServices) : this(model, displayItem, eventServices) => Caption = caption;
         public string Caption { get; set; }
-    };
+    }
+    public record OnFormatPropertyArgs(IBaseModel Model, string PropertyName, Dictionary<string, object> InputAttributes, EventServices EventServices)
+    {
+        public OnFormatPropertyArgs(IBaseModel model, string propertyName, Dictionary<string, object> inputAttributes, string feedbackClass, string inputClass, string feedback, EventServices eventServices) : this(model, propertyName, inputAttributes, eventServices)
+        {
+            FeedbackClass = feedbackClass;
+            InputClass = inputClass;
+            Feedback = feedback;
+        }
+
+        public string FeedbackClass { get; set; }
+        public string InputClass { get; set; }
+        public string Feedback { get; set; }
+    }
     public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, EventServices EventServices)
     {
         public OnBeforeConvertPropertyTypeArgs(IBaseModel model, string propertyName, object newValue, EventServices eventServices) : this(model, propertyName, eventServices) => NewValue = newValue;
         public object NewValue { get; set; }
-    };
+    }
     public record OnBeforePropertyChangedArgs(IBaseModel Model, string PropertyName, EventServices EventServices)
     {
         public OnBeforePropertyChangedArgs(IBaseModel model, string propertyName, object newValue, EventServices eventServices) : this(model, propertyName, eventServices) => NewValue = newValue;
@@ -77,7 +90,7 @@ namespace BlazorBase.CRUD.EventArguments
         public OnBeforeAddListEntryArgs(IBaseModel model, object listEntry, bool abortAdding, EventServices eventServices) : this(model, listEntry, eventServices) => AbortAdding = abortAdding;
         public bool AbortAdding { get; set; }
     }
-    public record OnAfterAddListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices);   
+    public record OnAfterAddListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
     public record OnBeforeRemoveListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices)
     {
         public OnBeforeRemoveListEntryArgs(IBaseModel model, object listEntry, bool abortRemoving, EventServices eventServices) : this(model, listEntry, eventServices) => AbortRemoving = abortRemoving;

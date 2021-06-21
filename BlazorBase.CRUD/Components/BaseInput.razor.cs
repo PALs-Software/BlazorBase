@@ -35,6 +35,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalInputAttributes { get; set; }
         #region Events
+        [Parameter] public EventCallback<OnFormatPropertyArgs> OnFormatProperty { get; set; }
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
@@ -123,6 +124,8 @@ namespace BlazorBase.CRUD.Components
 
                 ValidatePropertyValue();
             });
+
+            await RaiseOnFormatPropertyEventsAsync();
         }
 
         public override async Task SetParametersAsync(ParameterView parameters)
@@ -138,6 +141,7 @@ namespace BlazorBase.CRUD.Components
 
             SetInputAttributes();
             SetCurrentValueAsString(Property.GetValue(Model));
+            await RaiseOnFormatPropertyEventsAsync();
         }
 
         public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
@@ -187,7 +191,10 @@ namespace BlazorBase.CRUD.Components
 
                 LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue);
                 if (LastValueConversionFailed)
+                {
+                    await RaiseOnFormatPropertyEventsAsync();
                     return;
+                }
 
                 var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
                 await OnBeforePropertyChanged.InvokeAsync(args);
@@ -210,7 +217,8 @@ namespace BlazorBase.CRUD.Components
             {
                 LastValueConversionFailed = true;
                 SetValidation(feedback: ErrorHandler.PrepareExceptionErrorMessage(e));
-            }
+                await RaiseOnFormatPropertyEventsAsync();
+            }            
         }
 
         protected async virtual Task ReloadForeignProperties(object newValue)
@@ -270,7 +278,20 @@ namespace BlazorBase.CRUD.Components
             };
         }
 
+        protected async Task RaiseOnFormatPropertyEventsAsync()
+        {
+            try
+            {
+                var formatArgs = new OnFormatPropertyArgs(Model, Property.Name, InputAttributes, FeedbackClass, InputClass, Feedback, GetEventServices());
+                await OnFormatProperty.InvokeAsync(formatArgs);
+                await Model.OnFormatProperty(formatArgs);
 
+                FeedbackClass = formatArgs.FeedbackClass;
+                InputClass = formatArgs.InputClass;
+                Feedback = formatArgs.Feedback;
+            }
+            catch (Exception) { }
+        }
 
         #endregion
 

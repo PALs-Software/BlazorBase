@@ -21,8 +21,13 @@
             {
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
-                    <th>
+                    <th @onclick="async () => await OnSortClicked(displayItem)" Style="@(Sortable ? "cursor: pointer;" : String.Empty)">
                         @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
+
+                        @if (Sortable && displayItem.SortDirection != Enums.SortDirection.None)
+                        {
+                            <Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
+                        }
                     </th>
                 }
             }

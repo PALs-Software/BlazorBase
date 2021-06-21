@@ -147,4 +147,7 @@
   <data name="MimeFileType" xml:space="preserve">
     <value>MIME-Typ</value>
   </data>
+  <data name="The file exceed the maximum allowed file size of {0} bytes" xml:space="preserve">
+    <value>Die Datei überschreitet die maximal zulässige Dateigröße von {0} Bytes</value>
+  </data>
 </root>

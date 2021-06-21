@@ -6,7 +6,7 @@
         @if (baseFile.IsImage())
         {
             <div>
-                <img src="@baseFile.GetFileLink()" class="figure-img img-fluid rounded blazor-base-file-list-display">
+                <img src="@baseFile.GetFileLink()" class="figure-img img-fluid rounded blazor-base-file-list-display" style="margin-bottom:0px;">
             </div>
         }
         else if (baseFile.IsDocument())

@@ -199,7 +199,7 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        public async Task<bool> SaveCardAsync()
+        public virtual async Task<bool> SaveCardAsync(bool showSnackBar = true)
         {
             ResetInvalidFeedback();
 
@@ -208,6 +208,7 @@ namespace BlazorBase.CRUD.Components
 
             var eventServices = GetEventServices();
 
+            var success = true;
             try
             {
                 if (AddingMode)
@@ -222,6 +223,8 @@ namespace BlazorBase.CRUD.Components
                     if (dbEntry.State != EntityState.Added && !await Service.AddEntryAsync(Model))
                     {
                         ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
+                        if (showSnackBar)
+                            Snackbar.Show();
                         return false;
                     }
 
@@ -251,16 +254,17 @@ namespace BlazorBase.CRUD.Components
             catch (CRUDException e)
             {
                 ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
-                return false;
+                success = false;
             }
             catch (Exception e)
             {
                 ShowFormattedInvalidFeedback(Localizer["UnknownSavingError", ErrorHandler.PrepareExceptionErrorMessage(e)]);
-                return false;
+                success = false;
             }
 
-            Snackbar.Show();
-            return true;
+            if (showSnackBar)
+                Snackbar.Show();
+            return success;
         }
 
         public void ResetCard()
@@ -285,7 +289,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Events
-        protected async Task InvokeOnAfterSaveChangesEvents(EventServices eventServices)
+        protected virtual async Task InvokeOnAfterSaveChangesEvents(EventServices eventServices)
         {
             var onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, false, eventServices);
             await OnAfterSaveChanges.InvokeAsync(onAfterSaveChangesArgs);
@@ -375,13 +379,13 @@ namespace BlazorBase.CRUD.Components
             return valid;
         }
 
-        private void ShowFormattedInvalidFeedback(string feedback)
+        protected virtual void ShowFormattedInvalidFeedback(string feedback)
         {
             CardSummaryInvalidFeedback = MarkupStringValidator.GetWhiteListedMarkupString(feedback);
             ShowInvalidFeedback = true;
         }
 
-        private void ResetInvalidFeedback()
+        protected virtual void ResetInvalidFeedback()
         {
             CardSummaryInvalidFeedback = (MarkupString)String.Empty;
             ShowInvalidFeedback = false;

@@ -18,81 +18,82 @@ namespace BlazorBase.CRUD.Models
     public interface IBaseModel
     {
         #region Events
-        public event EventHandler<string> OnForcePropertyRepaint;
+        event EventHandler<string> OnForcePropertyRepaint;
 
-        public event EventHandler OnReloadEntityFromDatabase;
+        event EventHandler OnReloadEntityFromDatabase;
         #endregion
 
         #region Attribute Methods
-        public List<PropertyInfo> GetVisibleProperties();
+        List<PropertyInfo> GetVisibleProperties();
 
-        public object[] GetPrimaryKeys();
+        object[] GetPrimaryKeys();
 
-        public string GetPrimaryKeysAsString();
+        string GetPrimaryKeysAsString();
 
-        public Dictionary<string, string> GetNavigationQuery(string baseQuery = null);
+        Dictionary<string, string> GetNavigationQuery(string baseQuery = null);
 
-        public string GetDisplayKey();
+        string GetDisplayKey();
 
-        public string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties);
+        string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties);
         #endregion
 
         #region CRUD Methods
-        public void ForcePropertyRepaint(string propertyName);
-        public void ReloadEntityFromDatabase();
+        void ForcePropertyRepaint(string propertyName);
+        void ReloadEntityFromDatabase();
         #endregion
 
         #region Base Model Events
 
         #region DbContext Events
-        public Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args);
-        public Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args);
-        public Task OnBeforeDbContextModifyEntry(OnBeforeDbContextModifyEntryArgs args);
-        public Task OnAfterDbContextModifiedEntry(OnAfterDbContextModifiedEntryArgs args);
-        public Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args);
-        public Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args);
+        Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args);
+        Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args);
+        Task OnBeforeDbContextModifyEntry(OnBeforeDbContextModifyEntryArgs args);
+        Task OnAfterDbContextModifiedEntry(OnAfterDbContextModifiedEntryArgs args);
+        Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args);
+        Task OnAfterDbContextDeletedEntry(OnAfterDbContextDeletedEntryArgs args);
         #endregion
 
         #region Entry Events
-        public void OnGetPropertyCaption(OnGetPropertyCaptionArgs args);
-        public Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args);
-        public Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args);
-        public Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args);
-        public Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args);
-        public Task OnBeforeAddEntry(OnBeforeAddEntryArgs args);
-        public Task OnAfterAddEntry(OnAfterAddEntryArgs args);
-        public Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args);
-        public Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args);
-        public Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args);
-        public Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args);
-        public Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
-        public Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args);
-        public Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args);
+        void OnGetPropertyCaption(OnGetPropertyCaptionArgs args);
+        Task OnFormatProperty(OnFormatPropertyArgs args);
+        Task OnBeforeConvertPropertyType(OnBeforeConvertPropertyTypeArgs args);
+        Task OnBeforePropertyChanged(OnBeforePropertyChangedArgs args);
+        Task OnAfterPropertyChanged(OnAfterPropertyChangedArgs args);
+        Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args);
+        Task OnBeforeAddEntry(OnBeforeAddEntryArgs args);
+        Task OnAfterAddEntry(OnAfterAddEntryArgs args);
+        Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args);
+        Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args);
+        Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args);
+        Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args);
+        Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
+        Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args);
+        Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args);
         #endregion
 
         #region List Property Events
-        public Task OnBeforeConvertListPropertyType(OnBeforeConvertListPropertyTypeArgs args);
-        public Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args);
-        public Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args);
-        public Task OnCreateNewListEntryInstance(OnCreateNewListEntryInstanceArgs args);
-        public Task OnBeforeAddListEntry(OnBeforeAddListEntryArgs args);
-        public Task OnAfterAddListEntry(OnAfterAddListEntryArgs args);
-        public Task OnBeforeRemoveListEntry(OnBeforeRemoveListEntryArgs args);
-        public Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args);
-        public Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args);
-        public Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args);
+        Task OnBeforeConvertListPropertyType(OnBeforeConvertListPropertyTypeArgs args);
+        Task OnBeforeListPropertyChanged(OnBeforeListPropertyChangedArgs args);
+        Task OnAfterListPropertyChanged(OnAfterListPropertyChangedArgs args);
+        Task OnCreateNewListEntryInstance(OnCreateNewListEntryInstanceArgs args);
+        Task OnBeforeAddListEntry(OnBeforeAddListEntryArgs args);
+        Task OnAfterAddListEntry(OnAfterAddListEntryArgs args);
+        Task OnBeforeRemoveListEntry(OnBeforeRemoveListEntryArgs args);
+        Task OnAfterRemoveListEntry(OnAfterRemoveListEntryArgs args);
+        Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args);
+        Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args);
         #endregion
 
         #endregion
 
         #region Validation Methods
-        public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
-        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
-        public bool CheckIfModelIsInAddingMode(BaseService baseService);
+        bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
+        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
+        bool CheckIfModelIsInAddingMode(BaseService baseService);
         #endregion
 
         #region PageActions
-        public List<PageActionGroup> GeneratePageActionGroups();
+        List<PageActionGroup> GeneratePageActionGroups();
         #endregion
 
         #region ComponentBase
@@ -104,10 +105,11 @@ namespace BlazorBase.CRUD.Models
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
         #endregion
 
-        #region Other
-        public Type GetUnproxiedType();
-        public void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames);
-        public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null);
+        #region Helper Methods
+        void ClearPropertyValues();
+        Type GetUnproxiedType();
+        void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames);
+        void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null);
         #endregion
     }
 }

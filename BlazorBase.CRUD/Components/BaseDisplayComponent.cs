@@ -48,6 +48,7 @@ namespace BlazorBase.CRUD.Components
             public bool IsReadOnly { get; set; }
             public bool IsKey { get; set; }
             public bool IsListProperty { get; set; }
+            public SortDirection SortDirection { get; set; }
         }
 
         #region Injects

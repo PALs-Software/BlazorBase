@@ -137,6 +137,20 @@ namespace BlazorBase.Files.Models
             return await File.ReadAllBytesAsync(path);
         }
 
+        public async Task<string> GetFileAsBase64StringAsync()
+        {
+            var content = await GetFileContentAsync();
+            if (content == null)
+                return null;
+
+            return Convert.ToBase64String(content);
+        }
+
+        public async Task<T> CreateCopyAsync<T>(EventServices service) where T : BaseFile, new()
+        {
+            return await CreateFileAsync<T>(service, FileName, BaseFileType, MimeFileType, await GetFileContentAsync());
+        }
+
         protected async Task CopyTempFileToFileStoreAsync()
         {
             await Task.Run(() =>

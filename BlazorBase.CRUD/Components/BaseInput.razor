@@ -42,7 +42,7 @@
     }
     else if (RenderType == typeof(Guid?))
     {
-        <TextEdit Text="@(Property.GetValue(Model).ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" Attributes="InputAttributes" />
+        <TextEdit Text="@(Property.GetValue(Model)?.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" Attributes="InputAttributes" />
     }
 
     <div class="@FeedbackClass">
