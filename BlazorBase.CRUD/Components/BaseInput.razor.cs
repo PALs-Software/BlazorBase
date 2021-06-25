@@ -31,6 +31,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool? ReadOnly { get; set; }
         [Parameter] public BaseService Service { get; set; }
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
+        [Parameter] public DisplayItem DisplayItem { get; set; }
 
         [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalInputAttributes { get; set; }
@@ -59,7 +60,6 @@ namespace BlazorBase.CRUD.Components
         protected bool MultilineText;
         protected bool IsReadOnly;
         protected Type RenderType;
-        protected DateInputMode DateInputMode;
         protected string CustomPropertyCssStyle;
         protected bool LastValueConversionFailed = false;
 
@@ -100,7 +100,6 @@ namespace BlazorBase.CRUD.Components
                 if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                     PlaceHolder = placeholderAttribute.Placeholder;
                 RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
-                DateInputMode = Property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 MultilineText = RenderType == typeof(string) && Property.GetCustomAttribute<TextDisplayModeAttribute>()?.Mode == TextDisplayMode.Multiline;
 

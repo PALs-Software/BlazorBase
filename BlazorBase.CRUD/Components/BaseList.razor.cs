@@ -76,6 +76,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public bool DontRenderCard { get; set; }
         [Parameter] public bool Sortable { get; set; } = true;
+        [Parameter] public bool Filterable { get; set; } = true;
         #endregion
 
         #region Injects
@@ -106,6 +107,8 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Init
+
+        #region Component Creation
 
         protected override async Task OnInitializedAsync()
         {
@@ -193,31 +196,9 @@ namespace BlazorBase.CRUD.Components
 
             builder.CloseComponent();
         };
+        #endregion
 
-        protected virtual async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
-        {
-            if (request.Count == 0)
-                return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
-
-            var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
-
-            var query = baseService.Set<TModel>();
-            if (DataLoadCondition != null)
-                query = query.Where(DataLoadCondition).Cast<TModel>();
-
-            foreach (var sortedColumn in SortedColumns)
-            {
-                if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
-                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(sortedColumn.Property.Name) : query.OrderBy(sortedColumn.Property.Name);
-                else
-                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(sortedColumn.Property.Name) : query.OrderByDescending(sortedColumn.Property.Name);
-            }
-
-            var totalEntries = await query.CountAsync();
-            Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
-
-            return new ItemsProviderResult<TModel>(Entries, totalEntries);
-        }
+        #region Navigation
 
         protected virtual async Task ProcessQueryParameters()
         {
@@ -273,6 +254,40 @@ namespace BlazorBase.CRUD.Components
         }
         #endregion
 
+        #endregion
+
+        #region Data Loading
+        protected virtual async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
+        {
+            if (request.Count == 0)
+                return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
+
+            var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
+
+            var query = baseService.Set<TModel>();
+            foreach (var sortedColumn in SortedColumns)
+            {
+                if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
+                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(sortedColumn.Property.Name) : query.OrderBy(sortedColumn.Property.Name);
+                else
+                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(sortedColumn.Property.Name) : query.OrderByDescending(sortedColumn.Property.Name);
+            }
+
+            if (DataLoadCondition != null)
+                query = query.Where(DataLoadCondition).Cast<TModel>();
+
+            foreach (var group in DisplayGroups)
+                foreach (var displayItem in group.Value.DisplayItems)
+                    query = query.Where(displayItem);
+
+            var totalEntries = await query.CountAsync();
+            Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
+
+            return new ItemsProviderResult<TModel>(Entries, totalEntries);
+        }
+
+        #endregion
+
         #region Display
         protected virtual string DisplayForeignKey(DisplayItem displayItem, TModel model)
         {
@@ -308,6 +323,13 @@ namespace BlazorBase.CRUD.Components
                     break;
             }
 
+            await VirtualizeList.RefreshDataAsync();
+        }
+        #endregion
+
+        #region Filtering
+        protected virtual async Task OnFilterChangedAsync()
+        {
             await VirtualizeList.RefreshDataAsync();
         }
         #endregion

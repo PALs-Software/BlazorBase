@@ -117,7 +117,7 @@
                                                     }
                                                     else
                                                     {
-                                                        <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                 </FieldBody>
                                             </Field>

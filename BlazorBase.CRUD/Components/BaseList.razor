@@ -32,6 +32,12 @@
                 }
             }
         </tr>
+        @if (Filterable)
+        {
+            <BaseListFilter DisplayGroups="DisplayGroups"
+                            OnFilterChanged="OnFilterChangedAsync"
+                            />
+        }
     </thead>
     <tbody>
         <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList">
@@ -53,30 +59,44 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <td>
-                            @{
-                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
-                                if (renderFragment != null)
+            <td>
+                @{
+                    var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
+                    if (renderFragment != null)
+                    {
+                        @renderFragment
+                    }
+                    else
+                    {
+                        @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                        {
+                            @DisplayForeignKey(displayItem, context)
+                        }
+                        else if (displayItem.Property.PropertyType.IsEnum)
+                        {
+                            @DisplayEnum(displayItem, context)
+                        }
+                        else
+                        {
+                            if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                            {
+                                if (displayItem.DateInputMode == DateInputMode.Date)
                                 {
-                                    @renderFragment
+                                    @(((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString())
                                 }
                                 else
                                 {
-                                    @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
-                                    {
-                                        @DisplayForeignKey(displayItem, context)
-                                    }
-                                    else if (displayItem.Property.PropertyType.IsEnum)
-                                    {
-                                        @DisplayEnum(displayItem, context)
-                                    }
-                                    else
-                                    {
-                                        @displayItem.Property.GetValue(context)
-                                    }
+                                    @(((DateTime?)displayItem.Property.GetValue(context))?.ToString())
                                 }
                             }
-                        </td>
+                            else
+                            {
+                                @displayItem.Property.GetValue(context)
+                            }
+                        }
+                    }
+                }
+            </td>
                     }
                 }
             </tr>

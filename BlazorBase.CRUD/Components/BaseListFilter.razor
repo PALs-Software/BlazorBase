@@ -1,0 +1,82 @@
+﻿@using BlazorBase.CRUD.Models
+@using System.Globalization
+@using BlazorBase.CRUD.Helper
+
+<tr>
+    <th class="th-actions">
+        <Button Color="Color.Success"><Icon Name="IconName.Clear" /></Button>
+    </th>
+    @foreach (var displayGroup in DisplayGroups)
+    {
+        @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+        {
+<th>
+
+    @if (AllowedFilterTypes.Contains(displayItem.Property.PropertyType))
+    {
+        if (displayItem.Property.PropertyType == typeof(string) ||
+            displayItem.Property.PropertyType == typeof(Guid) ||
+            displayItem.Property.PropertyType == typeof(Guid?))
+        {
+            if (displayItem.Property.PropertyType == typeof(Guid))
+            {
+                <SelectList Data="@TextFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+            else
+            {
+                <SelectList Data="@NullableTextFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+
+            <TextEdit TextChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" />
+        }
+        else if (TypeHelper.NumericTypes.Contains(displayItem.Property.PropertyType))
+        {
+            @if (Nullable.GetUnderlyingType(displayItem.Property.PropertyType) != null)
+            {
+                <SelectList Data="@NullableNumberFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+            else
+            {
+                <SelectList Data="@NumberFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+
+            @if (TypeHelper.DecimalTypes.Contains(displayItem.Property.PropertyType))
+            {
+                <input type="number" @oninput="async (v) => await FilterChangedAsync(displayItem, v.Value)" class="form-control" lang="@CultureInfo.CurrentUICulture.Name" step="any" />
+            }
+            else
+            {
+                <input type="number" @oninput="async (v) => await FilterChangedAsync(displayItem, v.Value)" class="form-control" lang="@CultureInfo.CurrentUICulture.Name" />
+            }
+        }
+        else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
+        {
+            if (displayItem.Property.PropertyType == typeof(bool))
+            {
+                <SelectList Data="@BoolFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+            else
+            {
+                <SelectList Data="@NullableBoolFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+
+            <Check TValue="bool?" CheckedChanged="async (v) => await FilterChangedAsync(displayItem, v)" />
+        }
+        else if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+        {
+            if (displayItem.Property.PropertyType == typeof(DateTime))
+            {
+                <SelectList Data="@DateTimeFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+            else
+            {
+                <SelectList Data="@NullableDateTimeFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+            }
+
+            <DateEdit TValue="DateTime?" DateChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" InputMode="displayItem.DateInputMode" />
+        }
+    }
+</th>
+        }
+    }
+</tr>

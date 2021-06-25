@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Modules;
+using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
@@ -34,13 +35,14 @@ namespace BlazorBase.CRUD.Components
 
         public class DisplayItem
         {
-            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty)
+            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty, DateInputMode dateInputMode)
             {
                 Property = property;
                 Attribute = attribute;
                 IsReadOnly = isReadonly;
                 IsKey = isKey;
                 IsListProperty = isListProperty;
+                DateInputMode = dateInputMode;
             }
 
             public PropertyInfo Property { get; set; }
@@ -48,7 +50,10 @@ namespace BlazorBase.CRUD.Components
             public bool IsReadOnly { get; set; }
             public bool IsKey { get; set; }
             public bool IsListProperty { get; set; }
-            public SortDirection SortDirection { get; set; }
+            public DateInputMode DateInputMode { get; set; }
+            public Enums.SortDirection SortDirection { get; set; }
+            public FilterType FilterType { get; set; }
+            public object FilterValue { get; set; }
         }
 
         #region Injects
@@ -75,11 +80,12 @@ namespace BlazorBase.CRUD.Components
             {
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
                 attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? BaseDisplayComponentLocalizer["General"] : attribute.DisplayGroup;
+                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
 
                 if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
                     DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
 
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty()));
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode));
             }
 
             SortDisplayLists();
