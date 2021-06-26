@@ -35,8 +35,7 @@
         @if (Filterable)
         {
             <BaseListFilter DisplayGroups="DisplayGroups"
-                            OnFilterChanged="OnFilterChangedAsync"
-                            />
+                            OnFilterChanged="OnFilterChangedAsync" />
         }
     </thead>
     <tbody>
@@ -87,6 +86,13 @@
                                 else
                                 {
                                     @(((DateTime?)displayItem.Property.GetValue(context))?.ToString())
+                                }
+                            }
+                            else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
+                            {
+                                if (displayItem.Property.GetValue(context) != null)
+                                {
+                                    <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
                                 }
                             }
                             else

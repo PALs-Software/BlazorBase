@@ -23,26 +23,33 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback OnFilterChanged { get; set; }
         #endregion
 
-        [Parameter] public Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new Dictionary<string, DisplayGroup>();
+        [Parameter] public Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new();
         #endregion
 
         #region Injects
+        [Inject] protected IStringLocalizer<BaseListFilter> BaseListFilterLocalizer { get; set; }
         [Inject] protected IStringLocalizer<FilterType> FilterTypeLocalizer { get; set; }
+        [Inject] protected IStringLocalizer<BooleanValue> BooleanValueLocalizer { get; set; }
         [Inject] protected BaseParser BaseParser { get; set; }
         #endregion
 
         #region Member  
-        protected Dictionary<FilterType, KeyValuePair<string, string>> FilterTypes = new Dictionary<FilterType, KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> TextFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> NullableTextFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> NumberFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> NullableNumberFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> DateTimeFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> NullableDateTimeFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> BoolFilterTypes = new List<KeyValuePair<string, string>>();
-        protected List<KeyValuePair<string, string>> NullableBoolFilterTypes = new List<KeyValuePair<string, string>>();
+        protected Dictionary<FilterType, KeyValuePair<string, string>> FilterTypes = new();
+        protected List<KeyValuePair<string, string>> TextFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NullableTextFilterTypes = new();
+        protected List<KeyValuePair<string, string>> GuidFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NullableGuidFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NumberFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NullableNumberFilterTypes = new();
+        protected List<KeyValuePair<string, string>> DateTimeFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NullableDateTimeFilterTypes = new();
+        protected List<KeyValuePair<string, string>> BoolFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NullableBoolFilterTypes = new();
 
-        public List<Type> AllowedFilterTypes = new List<Type>() {
+        protected List<KeyValuePair<string, string>> BoolSelectListData = new();
+
+        public List<Type> AllowedFilterTypes = new()
+        {
             typeof(string),
             typeof(decimal),
             typeof(decimal?),
@@ -61,7 +68,16 @@ namespace BlazorBase.CRUD.Components
             typeof(Guid),
             typeof(Guid?)
         };
-        protected List<DisplayItem> SortedColumns = new List<DisplayItem>();
+        protected List<DisplayItem> SortedColumns = new();
+
+        protected SelectList<KeyValuePair<string, string>, string> AddToSelectLists { set { SelectLists.Add(value); } }
+        protected List<SelectList<KeyValuePair<string, string>, string>> SelectLists = new();
+        protected TextEdit AddToTextEdits { set { TextEdits.Add(value); } }
+        protected List<TextEdit> TextEdits = new();
+
+        protected ComponentBase AddToComponents { set { Components.Add(value); } }
+        protected List<ComponentBase> Components = new();
+
         #endregion
 
         #region Init
@@ -71,14 +87,20 @@ namespace BlazorBase.CRUD.Components
             foreach (FilterType filter in filterTypes)
                 FilterTypes.Add(filter, new KeyValuePair<string, string>(filter.ToString(), FilterTypeLocalizer[filter.ToString()]));
 
-            SetAllowedFilterTypes(NumberFilterTypes, FilterType.Like, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual);
-            SetAllowedFilterTypes(NullableNumberFilterTypes, FilterType.Like, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual, FilterType.IsNull);
             SetAllowedFilterTypes(TextFilterTypes, FilterType.Like, FilterType.Equal, FilterType.IsEmpty);
             SetAllowedFilterTypes(NullableTextFilterTypes, FilterType.Like, FilterType.Equal, FilterType.IsEmpty, FilterType.IsNull);
+            SetAllowedFilterTypes(GuidFilterTypes, FilterType.Like, FilterType.IsEmpty);
+            SetAllowedFilterTypes(NullableGuidFilterTypes, FilterType.Like, FilterType.IsEmpty, FilterType.IsNull);
+            SetAllowedFilterTypes(NumberFilterTypes, FilterType.Like, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual);
+            SetAllowedFilterTypes(NullableNumberFilterTypes, FilterType.Like, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual, FilterType.IsNull);
             SetAllowedFilterTypes(BoolFilterTypes, FilterType.Equal);
             SetAllowedFilterTypes(NullableBoolFilterTypes, FilterType.Equal, FilterType.IsNull);
             SetAllowedFilterTypes(DateTimeFilterTypes, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual);
             SetAllowedFilterTypes(NullableDateTimeFilterTypes, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual, FilterType.IsNull);
+
+            BoolSelectListData.Add(new KeyValuePair<string, string>(BooleanValue.NotSet.ToString(), BooleanValueLocalizer[BooleanValue.NotSet.ToString()]));
+            BoolSelectListData.Add(new KeyValuePair<string, string>(BooleanValue.True.ToString(), BooleanValueLocalizer[BooleanValue.True.ToString()]));
+            BoolSelectListData.Add(new KeyValuePair<string, string>(BooleanValue.False.ToString(), BooleanValueLocalizer[BooleanValue.False.ToString()]));
 
             foreach (var displayGroup in DisplayGroups)
                 foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
@@ -117,7 +139,54 @@ namespace BlazorBase.CRUD.Components
             await OnFilterChanged.InvokeAsync();
         }
 
-        protected void ConvertValueIfNeeded(ref object newValue, Type targetType)
+        protected async virtual Task BooleanFilterChangedAsync(DisplayItem displayItem, string newValue)
+        {
+            if (!Enum.TryParse(typeof(BooleanValue), newValue, out object filterType))
+                return;
+
+            switch ((BooleanValue)filterType)
+            {
+                case BooleanValue.Null:
+                case BooleanValue.NotSet:
+                    displayItem.FilterValue = null;
+                    break;
+                case BooleanValue.True:
+                    displayItem.FilterValue = true;
+                    break;
+                case BooleanValue.False:
+                    displayItem.FilterValue = false;
+                    break;
+            }
+
+            await OnFilterChanged.InvokeAsync();
+        }
+
+        protected async virtual Task ResetAllFiltersAsync()
+        {
+            foreach (var displayGroup in DisplayGroups)
+                foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                {
+                    if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?) || displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                        displayItem.FilterType = FilterType.Equal;
+                    else
+                        displayItem.FilterType = FilterType.Like;
+
+                    displayItem.FilterValue = null;
+                }
+#pragma warning disable BL0005 // Component parameter should not be set outside of its component.
+            foreach (var component in Components)
+                if (component is SelectList<KeyValuePair<string, string>, string> selectList)
+                    selectList.SelectedValue = selectList.Data.First().Key;
+                else if (component is TextEdit textEdit)
+                    textEdit.Text = String.Empty;
+                else if (component is DateEdit<DateTime?> dateEdit)
+                    dateEdit.Date = null;
+#pragma warning restore BL0005 // Component parameter should not be set outside of its component.
+
+            await OnFilterChanged.InvokeAsync();
+        }
+
+        protected virtual void ConvertValueIfNeeded(ref object newValue, Type targetType)
         {
             if (newValue == null || newValue.GetType() == targetType)
                 return;

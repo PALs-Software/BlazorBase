@@ -21,7 +21,8 @@ namespace BlazorBase.CRUD.Extensions
         static Expression EFFunctionsConstant = Expression.Constant(EF.Functions);
         static Expression EmptyStringConstant = Expression.Constant(String.Empty);
         static Expression NullConstant = Expression.Constant(null);
-        static Expression EmptyGuid = Expression.Constant(Guid.Empty);
+        static Expression EmptyGuid = Expression.Constant(Guid.Empty, typeof(Guid));
+        static Expression EmptyNullableGuid = Expression.Constant(Guid.Empty, typeof(Guid?));
 
         public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyName)
         {
@@ -63,29 +64,44 @@ namespace BlazorBase.CRUD.Extensions
         {
             var propertyName = displayItem.Property.Name;
             var filterValue = displayItem.FilterValue;
+            var filterType = displayItem.FilterType;
             if (filterValue != null)
             {
-                if (filterValue is DateTime dateTime && (displayItem.FilterType == FilterType.Like || displayItem.FilterType == FilterType.Equal))
+                if (filterValue is DateTime dateTime)
                 {
-                    if (displayItem.DateInputMode == DateInputMode.Date)
-                        filterValue = dateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
-                    else
-                        filterValue = dateTime.ToString("yyyy-MM-dd hh:mm", CultureInfo.InvariantCulture);
+                    if (filterType == FilterType.Equal)
+                    {
+                        filterType = FilterType.Like;
+                        if (displayItem.DateInputMode == DateInputMode.Date)
+                            filterValue = dateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+                        else
+                            filterValue = dateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
+                    }
+                    else if (filterType == FilterType.Greater || filterType == FilterType.LessOrEqual)
+                    {
+                        if (displayItem.DateInputMode == DateInputMode.Date)
+                            filterValue = dateTime.Date + new TimeSpan(0, 23, 59, 59, 999);
+                        else
+                            filterValue = dateTime.Date + new TimeSpan(0, dateTime.Hour, dateTime.Minute, dateTime.Second, 999);
+                    }
+
                 }
-                else if (filterValue is string || filterValue is Guid || filterValue is Guid?)
+                else if ((filterType == FilterType.Like) && (filterValue is string || filterValue is Guid || filterValue is Guid?))
                     filterValue = filterValue?.ToString()?.Replace(" ", "%");
             }
 
+            ConstantExpression constant = null;
+            Expression body;
             var parameter = Expression.Parameter(typeof(TModel));
             var property = Expression.Property(parameter, propertyName);
-            ConstantExpression constant;
-            if (filterValue is string || displayItem.Property.PropertyType == typeof(Guid) || displayItem.Property.PropertyType == typeof(Guid?))
+
+            if ((filterType == FilterType.Like) && (filterValue is string || displayItem.Property.PropertyType == typeof(Guid) || displayItem.Property.PropertyType == typeof(Guid?)))
                 constant = Expression.Constant(filterValue);
-            else
+            else if (displayItem.Property.PropertyType != typeof(Guid) && displayItem.Property.PropertyType != typeof(Guid?))
                 constant = Expression.Constant(filterValue, displayItem.Property.PropertyType);
 
-            Expression body;
-            switch (displayItem.FilterType)
+
+            switch (filterType)
             {
                 case FilterType.Like:
                     if (TypeHelper.NumericTypes.Contains(displayItem.Property.PropertyType))
@@ -117,8 +133,10 @@ namespace BlazorBase.CRUD.Extensions
                     body = Expression.LessThanOrEqual(property, constant);
                     break;
                 case FilterType.IsEmpty:
-                    if (displayItem.Property.PropertyType == typeof(Guid) || displayItem.Property.PropertyType == typeof(Guid?))
+                    if (displayItem.Property.PropertyType == typeof(Guid))
                         body = Expression.Equal(property, EmptyGuid);
+                    else if (displayItem.Property.PropertyType == typeof(Guid?))
+                        body = Expression.Equal(property, EmptyNullableGuid);
                     else
                         body = Expression.Equal(property, EmptyStringConstant);
                     break;
