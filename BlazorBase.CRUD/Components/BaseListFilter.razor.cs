@@ -107,9 +107,9 @@ namespace BlazorBase.CRUD.Components
 
             foreach (var displayGroup in ListDisplayGroups)
                 foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
-                    if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?) ||
-                        displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?) ||
-                        displayItem.Property.PropertyType.IsEnum
+                    if (displayItem.DisplayPropertyType == typeof(bool) || displayItem.DisplayPropertyType == typeof(bool?) ||
+                        displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?) ||
+                        displayItem.DisplayPropertyType.IsEnum
                         )
                         displayItem.FilterType = FilterType.Equal;
         }
@@ -148,8 +148,8 @@ namespace BlazorBase.CRUD.Components
 
         protected async virtual Task FilterChangedAsync(DisplayItem displayItem, object newValue)
         {
-            if (displayItem.Property.PropertyType != typeof(Guid) && displayItem.Property.PropertyType != typeof(Guid?))
-                ConvertValueIfNeeded(ref newValue, displayItem.Property.PropertyType);
+            if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?))
+                ConvertValueIfNeeded(ref newValue, displayItem.DisplayPropertyType);
             displayItem.FilterValue = newValue;
 
             await OnFilterChanged.InvokeAsync();
@@ -182,7 +182,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var displayGroup in ListDisplayGroups)
                 foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
-                    if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?) || displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                    if (displayItem.DisplayPropertyType == typeof(bool) || displayItem.DisplayPropertyType == typeof(bool?) || displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))
                         displayItem.FilterType = FilterType.Equal;
                     else
                         displayItem.FilterType = FilterType.Like;

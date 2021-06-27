@@ -35,7 +35,8 @@ namespace BlazorBase.CRUD.Components
 
         public class DisplayItem
         {
-            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty, DateInputMode dateInputMode)
+            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
+                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType)
             {
                 Property = property;
                 Attribute = attribute;
@@ -43,6 +44,8 @@ namespace BlazorBase.CRUD.Components
                 IsKey = isKey;
                 IsListProperty = isListProperty;
                 DateInputMode = dateInputMode;
+                DisplayPropertyPath = displayPropertyPath;
+                DisplayPropertyType = displayPropertyType;
             }
 
             public PropertyInfo Property { get; set; }
@@ -54,6 +57,8 @@ namespace BlazorBase.CRUD.Components
             public Enums.SortDirection SortDirection { get; set; }
             public FilterType FilterType { get; set; }
             public object FilterValue { get; set; }
+            public string DisplayPropertyPath { get; set; }
+            public Type DisplayPropertyType { get; set; }
         }
 
         #region Injects
@@ -84,10 +89,36 @@ namespace BlazorBase.CRUD.Components
                 if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
                     DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
 
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode));
+                var displayPathAndType = GetDisplayPropertyPathAndType(property);
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType));
             }
 
             SortDisplayLists();
+        }
+
+        protected virtual (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(PropertyInfo property)
+        {
+            if (!property.IsForeignKey() || property.IsListProperty())
+                return (property.Name, property.PropertyType);
+
+            var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+            var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+            var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
+
+            if (foreignKeyType == null)
+                return (property.Name, property.PropertyType);
+            if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
+                return (property.Name, property.PropertyType);
+
+            var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
+            if (displayKeyProperties.Count == 0)
+                displayKeyProperties = foreignKeyType.GetKeyProperties();
+
+            List<string> displayPropertyPaths = new();
+            foreach (var displayKeyProperty in displayKeyProperties)
+                displayPropertyPaths.Add($"{foreignKey.Name}.{displayKeyProperty.Name}");
+
+            return (String.Join("|", displayPropertyPaths), displayKeyProperties[0].PropertyType);
         }
 
         protected virtual void SortDisplayLists()

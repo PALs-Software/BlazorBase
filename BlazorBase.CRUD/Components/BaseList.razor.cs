@@ -266,12 +266,13 @@ namespace BlazorBase.CRUD.Components
 
             var query = baseService.Set<TModel>();
             foreach (var sortedColumn in SortedColumns)
-            {
-                if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
-                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(sortedColumn.Property.Name) : query.OrderBy(sortedColumn.Property.Name);
-                else
-                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(sortedColumn.Property.Name) : query.OrderByDescending(sortedColumn.Property.Name);
-            }
+                foreach (var displayProperty in sortedColumn.DisplayPropertyPath.Split("|"))
+                {
+                    if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
+                        query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(displayProperty) : query.OrderBy(displayProperty);
+                    else
+                        query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
+                }
 
             if (DataLoadCondition != null)
                 query = query.Where(DataLoadCondition).Cast<TModel>();
@@ -306,7 +307,7 @@ namespace BlazorBase.CRUD.Components
             if (value == null)
                 return String.Empty;
 
-            var localizer = StringLocalizerFactory.Create(displayItem.Property.PropertyType);
+            var localizer = StringLocalizerFactory.Create(displayItem.DisplayPropertyType);
             return localizer[value];
         }
         #endregion

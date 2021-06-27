@@ -24,33 +24,24 @@ namespace BlazorBase.CRUD.Extensions
         static Expression EmptyGuid = Expression.Constant(Guid.Empty, typeof(Guid));
         static Expression EmptyNullableGuid = Expression.Constant(Guid.Empty, typeof(Guid?));
 
-        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyName)
+        public static IOrderedQueryable<T> OrderBy<T>(this IQueryable<T> source, string propertyPath)
         {
-            return source.OrderBy(ToLambda<T>(propertyName));
+            return source.OrderBy(CreateKeySelectExpression<T>(propertyPath));
         }
 
-        public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyName)
+        public static IOrderedQueryable<T> OrderByDescending<T>(this IQueryable<T> source, string propertyPath)
         {
-            return source.OrderByDescending(ToLambda<T>(propertyName));
+            return source.OrderByDescending(CreateKeySelectExpression<T>(propertyPath));
         }
 
-        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string propertyName)
+        public static IOrderedQueryable<T> ThenBy<T>(this IOrderedQueryable<T> source, string propertyPath)
         {
-            return source.ThenBy(ToLambda<T>(propertyName));
+            return source.ThenBy(CreateKeySelectExpression<T>(propertyPath));
         }
 
-        public static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> source, string propertyName)
+        public static IOrderedQueryable<T> ThenByDescending<T>(this IOrderedQueryable<T> source, string propertyPath)
         {
-            return source.ThenByDescending(ToLambda<T>(propertyName));
-        }
-
-        private static Expression<Func<T, object>> ToLambda<T>(string propertyName)
-        {
-            var parameter = Expression.Parameter(typeof(T));
-            var property = Expression.Property(parameter, propertyName);
-            var propAsObject = Expression.Convert(property, typeof(object));
-
-            return Expression.Lambda<Func<T, object>>(propAsObject, parameter);
+            return source.ThenByDescending(CreateKeySelectExpression<T>(propertyPath));
         }
 
         public static IQueryable<T> Where<T>(this IQueryable<T> source, DisplayItem displayItem)
@@ -60,9 +51,28 @@ namespace BlazorBase.CRUD.Extensions
             return source.Where(CreateFilterExpression<T>(displayItem));
         }
 
+        private static Expression<Func<T, object>> CreateKeySelectExpression<T>(string propertyPath)
+        {
+            var parameter = Expression.Parameter(typeof(T));
+            var property = ResolvePropertyPath<T>(propertyPath, parameter);
+            var propAsObject = Expression.Convert(property, typeof(object));
+
+            return Expression.Lambda<Func<T, object>>(propAsObject, parameter);
+        }
+
+        private static MemberExpression ResolvePropertyPath<T>(string propertyPath, ParameterExpression parameter)
+        {
+            var subProperties = propertyPath.Split(".");
+            var property = Expression.Property(parameter, subProperties[0]);
+            for (int i = 1; i < subProperties.Length; i++)
+                property = Expression.Property(property, subProperties[i]);
+
+            return property;
+        }
+
+
         private static Expression<Func<TModel, bool>> CreateFilterExpression<TModel>(DisplayItem displayItem)
         {
-            var propertyName = displayItem.Property.Name;
             var filterValue = displayItem.FilterValue;
             var filterType = displayItem.FilterType;
             if (filterValue != null)
@@ -84,7 +94,6 @@ namespace BlazorBase.CRUD.Extensions
                         else
                             filterValue = dateTime.Date + new TimeSpan(0, dateTime.Hour, dateTime.Minute, dateTime.Second, 999);
                     }
-
                 }
                 else if ((filterType == FilterType.Like) && (filterValue is string || filterValue is Guid || filterValue is Guid?))
                     filterValue = filterValue?.ToString()?.Replace(" ", "%");
@@ -93,17 +102,15 @@ namespace BlazorBase.CRUD.Extensions
             ConstantExpression constant = null;
             Expression body;
             var parameter = Expression.Parameter(typeof(TModel));
-            var property = Expression.Property(parameter, propertyName);
+            var property = ResolvePropertyPath<TModel>(displayItem.DisplayPropertyPath, parameter);
 
-            if ((filterType == FilterType.Like) && (filterValue is string || displayItem.Property.PropertyType == typeof(Guid) || displayItem.Property.PropertyType == typeof(Guid?)))
-                constant = Expression.Constant(filterValue);
-            else if (displayItem.Property.PropertyType != typeof(Guid) && displayItem.Property.PropertyType != typeof(Guid?))
-                constant = Expression.Constant(filterValue, displayItem.Property.PropertyType);
+            if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?))
+                constant = Expression.Constant(filterValue, displayItem.DisplayPropertyType);
 
             switch (filterType)
             {
                 case FilterType.Like:
-                    if (TypeHelper.NumericTypes.Contains(displayItem.Property.PropertyType))
+                    if (TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
                     {
                         var savedCulture = Thread.CurrentThread.CurrentCulture;
                         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
@@ -132,9 +139,9 @@ namespace BlazorBase.CRUD.Extensions
                     body = Expression.LessThanOrEqual(property, constant);
                     break;
                 case FilterType.IsEmpty:
-                    if (displayItem.Property.PropertyType == typeof(Guid))
+                    if (displayItem.DisplayPropertyType == typeof(Guid))
                         body = Expression.Equal(property, EmptyGuid);
-                    else if (displayItem.Property.PropertyType == typeof(Guid?))
+                    else if (displayItem.DisplayPropertyType == typeof(Guid?))
                         body = Expression.Equal(property, EmptyNullableGuid);
                     else
                         body = Expression.Equal(property, EmptyStringConstant);
