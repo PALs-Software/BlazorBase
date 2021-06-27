@@ -302,7 +302,10 @@ namespace BlazorBase.CRUD.Components
 
         protected virtual string DisplayEnum(DisplayItem displayItem, TModel model)
         {
-            var value = displayItem.Property.GetValue(model).ToString();
+            var value = displayItem.Property.GetValue(model)?.ToString();
+            if (value == null)
+                return String.Empty;
+
             var localizer = StringLocalizerFactory.Create(displayItem.Property.PropertyType);
             return localizer[value];
         }

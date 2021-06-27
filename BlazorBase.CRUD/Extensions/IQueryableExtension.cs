@@ -100,7 +100,6 @@ namespace BlazorBase.CRUD.Extensions
             else if (displayItem.Property.PropertyType != typeof(Guid) && displayItem.Property.PropertyType != typeof(Guid?))
                 constant = Expression.Constant(filterValue, displayItem.Property.PropertyType);
 
-
             switch (filterType)
             {
                 case FilterType.Like:

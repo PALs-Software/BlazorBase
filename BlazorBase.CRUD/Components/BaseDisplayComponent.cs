@@ -62,14 +62,13 @@ namespace BlazorBase.CRUD.Components
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; }
         #endregion
 
-        #region Members
-        protected List<PropertyInfo> VisibleProperties = new List<PropertyInfo>();
-        protected Dictionary<string, DisplayGroup> DisplayGroups = new Dictionary<string, DisplayGroup>();
-        protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties;
+        #region Protected Properties
+        protected virtual List<PropertyInfo> VisibleProperties { get; set; } = new List<PropertyInfo>();
+        protected virtual Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new Dictionary<string, DisplayGroup>();
+        protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties { get; set; }
         protected static ConcurrentDictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new ConcurrentDictionary<Type, List<KeyValuePair<string, string>>>();
-        protected Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
-
-        protected Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties = new Dictionary<PropertyInfo, List<KeyValuePair<string, string>>>();
+        protected virtual Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
+        protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties { get; set; } = new Dictionary<PropertyInfo, List<KeyValuePair<string, string>>>();
         #endregion
 
         protected virtual void SetUpDisplayLists(Type modelType, GUIType guiType)

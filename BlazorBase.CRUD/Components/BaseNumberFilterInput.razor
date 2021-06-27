@@ -1,2 +1,2 @@
 ﻿
-<input type="number" @oninput="OnInput" class="form-control" lang="@CultureInfo.CurrentUICulture.Name" />
+<input type="number" @oninput="OnInput" @bind-value="Value" class="form-control" lang="@CultureName" @attributes="AdditionalInputAttributes" />

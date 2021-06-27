@@ -11,6 +11,14 @@
     <None Remove="Modules\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Components\BaseListFilter.razor.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\BaseListFilter.razor.css" />
+  </ItemGroup>
+
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />

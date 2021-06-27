@@ -12,18 +12,17 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.Components
 {
-    public partial class BaseListFilter
+    public partial class BaseListFilter : BaseDisplayComponent
     {
         #region Parameters
         #region Events
         [Parameter] public EventCallback OnFilterChanged { get; set; }
         #endregion
 
-        [Parameter] public Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new();
+        [Parameter] public Dictionary<string, DisplayGroup> ListDisplayGroups { get; set; } = new();
         #endregion
 
         #region Injects
@@ -45,6 +44,8 @@ namespace BlazorBase.CRUD.Components
         protected List<KeyValuePair<string, string>> NullableDateTimeFilterTypes = new();
         protected List<KeyValuePair<string, string>> BoolFilterTypes = new();
         protected List<KeyValuePair<string, string>> NullableBoolFilterTypes = new();
+        protected List<KeyValuePair<string, string>> EnumFilterTypes = new();
+        protected List<KeyValuePair<string, string>> NullableEnumFilterTypes = new();
 
         protected List<KeyValuePair<string, string>> BoolSelectListData = new();
 
@@ -97,14 +98,19 @@ namespace BlazorBase.CRUD.Components
             SetAllowedFilterTypes(NullableBoolFilterTypes, FilterType.Equal, FilterType.IsNull);
             SetAllowedFilterTypes(DateTimeFilterTypes, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual);
             SetAllowedFilterTypes(NullableDateTimeFilterTypes, FilterType.Equal, FilterType.Greater, FilterType.GreaterOrEqual, FilterType.Less, FilterType.LessOrEqual, FilterType.IsNull);
+            SetAllowedFilterTypes(EnumFilterTypes, FilterType.Equal);
+            SetAllowedFilterTypes(NullableEnumFilterTypes, FilterType.Equal, FilterType.IsNull);
 
             BoolSelectListData.Add(new KeyValuePair<string, string>(BooleanValue.NotSet.ToString(), BooleanValueLocalizer[BooleanValue.NotSet.ToString()]));
             BoolSelectListData.Add(new KeyValuePair<string, string>(BooleanValue.True.ToString(), BooleanValueLocalizer[BooleanValue.True.ToString()]));
             BoolSelectListData.Add(new KeyValuePair<string, string>(BooleanValue.False.ToString(), BooleanValueLocalizer[BooleanValue.False.ToString()]));
 
-            foreach (var displayGroup in DisplayGroups)
+            foreach (var displayGroup in ListDisplayGroups)
                 foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
-                    if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?) || displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                    if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?) ||
+                        displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?) ||
+                        displayItem.Property.PropertyType.IsEnum
+                        )
                         displayItem.FilterType = FilterType.Equal;
         }
 
@@ -117,6 +123,16 @@ namespace BlazorBase.CRUD.Components
         protected virtual DateInputMode GetDateInputMode(DisplayItem displayItem)
         {
             return displayItem.Property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+        }
+
+        protected override List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
+        {
+            if (CachedEnumValueDictionary.ContainsKey(enumType))
+                return CachedEnumValueDictionary[enumType];
+
+            var enumValues = base.GetEnumValues(enumType);
+            enumValues.Insert(0, new KeyValuePair<string, string>(null, String.Empty));
+            return enumValues;
         }
         #endregion
 
@@ -163,7 +179,7 @@ namespace BlazorBase.CRUD.Components
 
         protected async virtual Task ResetAllFiltersAsync()
         {
-            foreach (var displayGroup in DisplayGroups)
+            foreach (var displayGroup in ListDisplayGroups)
                 foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
                     if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?) || displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
@@ -181,6 +197,8 @@ namespace BlazorBase.CRUD.Components
                     textEdit.Text = String.Empty;
                 else if (component is DateEdit<DateTime?> dateEdit)
                     dateEdit.Date = null;
+                else if (component is BaseNumberFilterInput numberFilterInput)
+                    numberFilterInput.Value = null;
 #pragma warning restore BL0005 // Component parameter should not be set outside of its component.
 
             await OnFilterChanged.InvokeAsync();
