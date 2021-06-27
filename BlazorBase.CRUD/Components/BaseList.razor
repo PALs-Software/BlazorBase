@@ -21,7 +21,11 @@
             {
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
-                    <th @onclick="async () => await OnSortClicked(displayItem)" Style="@(Sortable ? "cursor: pointer;" : String.Empty)">
+                    <th @onclick="async () => await OnSortClicked(displayItem, false)"
+                        @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
+                        @oncontextmenu:preventDefault="true"
+                        Style="@(Sortable ? "cursor: pointer;" : String.Empty)">
+
                         @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
 
                         @if (Sortable && displayItem.SortDirection != Enums.SortDirection.None)
@@ -58,51 +62,51 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-            <td>
-                @{
-                    var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
-                    if (renderFragment != null)
-                    {
-                        @renderFragment
-                    }
-                    else
-                    {
-                        @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
-                        {
-                            @DisplayForeignKey(displayItem, context)
-                        }
-                        else if (displayItem.Property.PropertyType.IsEnum)
-                        {
-                            @DisplayEnum(displayItem, context)
-                        }
-                        else
-                        {
-                            if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
-                            {
-                                if (displayItem.DateInputMode == DateInputMode.Date)
+                        <td>
+                            @{
+                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
+                                if (renderFragment != null)
                                 {
-                                    @(((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString())
+                                    @renderFragment
                                 }
                                 else
                                 {
-                                    @(((DateTime?)displayItem.Property.GetValue(context))?.ToString())
+                                    @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                    {
+                                        @DisplayForeignKey(displayItem, context)
+                                    }
+                                    else if (displayItem.Property.PropertyType.IsEnum)
+                                    {
+                                        @DisplayEnum(displayItem, context)
+                                    }
+                                    else
+                                    {
+                                        if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                                        {
+                                            if (displayItem.DateInputMode == DateInputMode.Date)
+                                            {
+                                                @(((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString())
+                                            }
+                                            else
+                                            {
+                                                @(((DateTime?)displayItem.Property.GetValue(context))?.ToString())
+                                            }
+                                        }
+                                        else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
+                                        {
+                                            if (displayItem.Property.GetValue(context) != null)
+                                            {
+                                                <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
+                                            }
+                                        }
+                                        else
+                                        {
+                                            @displayItem.Property.GetValue(context)
+                                        }
+                                    }
                                 }
                             }
-                            else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
-                            {
-                                if (displayItem.Property.GetValue(context) != null)
-                                {
-                                    <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
-                                }
-                            }
-                            else
-                            {
-                                @displayItem.Property.GetValue(context)
-                            }
-                        }
-                    }
-                }
-            </td>
+                        </td>
                     }
                 }
             </tr>

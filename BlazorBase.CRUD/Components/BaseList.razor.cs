@@ -312,9 +312,19 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Sorting
-        protected async Task OnSortClicked(DisplayItem displayItem)
+        protected async Task OnSortClicked(DisplayItem displayItem, bool fromRightClicked)
         {
-            displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
+            if (fromRightClicked)
+            {
+                foreach (var displayGroup in DisplayGroups)
+                    foreach (var item in displayGroup.Value.DisplayItems)
+                        item.SortDirection = Enums.SortDirection.None;
+
+                displayItem.SortDirection = Enums.SortDirection.Ascending;
+                SortedColumns.Clear();
+            }
+            else
+                displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
 
             switch (displayItem.SortDirection)
             {
