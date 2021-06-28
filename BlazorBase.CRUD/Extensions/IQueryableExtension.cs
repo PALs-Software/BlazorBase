@@ -104,7 +104,8 @@ namespace BlazorBase.CRUD.Extensions
             var parameter = Expression.Parameter(typeof(TModel));
             var property = ResolvePropertyPath<TModel>(displayItem.DisplayPropertyPath, parameter);
 
-            if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?))
+            if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?) &&
+                !(filterType == FilterType.Like && (displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))))
                 constant = Expression.Constant(filterValue, displayItem.DisplayPropertyType);
 
             switch (filterType)

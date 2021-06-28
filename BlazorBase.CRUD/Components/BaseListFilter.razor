@@ -12,9 +12,9 @@
         @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
         {
             <th>
-                @if (AllowedFilterTypes.Contains(displayItem.DisplayPropertyType) || displayItem.DisplayPropertyType.IsEnum)
+                @if (displayItem.IsFilterable && (AllowedFilterTypes.Contains(displayItem.DisplayPropertyType) || displayItem.DisplayPropertyType.IsEnum))
                 {
-                    <Addons>
+                    <Addons Class="flex-nowrap">
                         @if (displayItem.DisplayPropertyType == typeof(string))
                         {
                             <Addon AddonType="AddonType.Start">
@@ -60,7 +60,7 @@
                                     <SelectList @ref="AddToComponents" Data="@NullableBoolFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
                                 </Addon>
                             }
-                            <SelectList @ref="AddToComponents" Data="@BoolSelectListData" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await BooleanFilterChangedAsync(displayItem, v)" />
+                            <SelectList @ref="AddToComponents" Data="@BoolSelectListData" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await BooleanFilterChangedAsync(displayItem, v)" Class="form-control"/>
                         }
                         else if (displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))
                         {
@@ -110,7 +110,7 @@
                                     <SelectList @ref="AddToComponents" Data="@NullableEnumFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
                                 </Addon>
                             }
-                            <SelectList @ref="AddToComponents" Data="@GetEnumValues(displayItem.DisplayPropertyType)" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterChangedAsync(displayItem, v)" />
+                            <SelectList @ref="AddToComponents" Data="@GetEnumValues(displayItem.DisplayPropertyType)" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterChangedAsync(displayItem, v)" Class="form-control" />
 
                         }
                     </Addons>

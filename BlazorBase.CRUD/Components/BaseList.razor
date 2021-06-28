@@ -24,14 +24,16 @@
                     <th @onclick="async () => await OnSortClicked(displayItem, false)"
                         @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                         @oncontextmenu:preventDefault="true"
-                        Style="@(Sortable ? "cursor: pointer;" : String.Empty)">
+                        Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)">
 
-                        @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
+                        <div class="sortable-table-header">
+                            @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
 
-                        @if (Sortable && displayItem.SortDirection != Enums.SortDirection.None)
-                        {
-                            <Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
-                        }
+                            @if (displayItem.SortDirection != Enums.SortDirection.None)
+                            {
+                                <Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
+                            }
+                        </div>
                     </th>
                 }
             }

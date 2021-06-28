@@ -262,6 +262,15 @@ namespace BlazorBase.CRUD.Components
             if (request.Count == 0)
                 return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
 
+            var query = CreateLoadDataQuery();
+
+            var totalEntries = await query.CountAsync();
+            Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
+
+            return new ItemsProviderResult<TModel>(Entries, totalEntries);
+        }
+
+        protected virtual IQueryable<TModel> CreateLoadDataQuery() {
             var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
 
             var query = baseService.Set<TModel>();
@@ -281,10 +290,7 @@ namespace BlazorBase.CRUD.Components
                 foreach (var displayItem in group.Value.DisplayItems)
                     query = query.Where(displayItem);
 
-            var totalEntries = await query.CountAsync();
-            Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
-
-            return new ItemsProviderResult<TModel>(Entries, totalEntries);
+            return query;
         }
 
         #endregion
@@ -315,6 +321,9 @@ namespace BlazorBase.CRUD.Components
         #region Sorting
         protected async Task OnSortClicked(DisplayItem displayItem, bool fromRightClicked)
         {
+            if (!Sortable || !displayItem.IsSortable)
+                return;
+
             if (fromRightClicked)
             {
                 foreach (var displayGroup in DisplayGroups)

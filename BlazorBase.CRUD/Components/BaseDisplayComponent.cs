@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
@@ -36,7 +37,7 @@ namespace BlazorBase.CRUD.Components
         public class DisplayItem
         {
             public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
-                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType)
+                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, bool isFilterable)
             {
                 Property = property;
                 Attribute = attribute;
@@ -46,6 +47,8 @@ namespace BlazorBase.CRUD.Components
                 DateInputMode = dateInputMode;
                 DisplayPropertyPath = displayPropertyPath;
                 DisplayPropertyType = displayPropertyType;
+                IsSortable = isSortable;
+                IsFilterable = isFilterable;
             }
 
             public PropertyInfo Property { get; set; }
@@ -59,6 +62,8 @@ namespace BlazorBase.CRUD.Components
             public object FilterValue { get; set; }
             public string DisplayPropertyPath { get; set; }
             public Type DisplayPropertyType { get; set; }
+            public bool IsSortable { get; set; }
+            public bool IsFilterable { get; set; }
         }
 
         #region Injects
@@ -85,12 +90,25 @@ namespace BlazorBase.CRUD.Components
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
                 attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? BaseDisplayComponentLocalizer["General"] : attribute.DisplayGroup;
                 var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
 
                 if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
                     DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
 
-                var displayPathAndType = GetDisplayPropertyPathAndType(property);
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType));
+                (string DisplayPath, Type DisplayType) displayPathAndType;
+                bool sortAndFilterable;
+                if (customPropertyPath == null)
+                {
+                    displayPathAndType = GetDisplayPropertyPathAndType(property);
+                    sortAndFilterable = GetPropertyIsSortAndFilterable(property);
+                }
+                else
+                {
+                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
+                    sortAndFilterable = true;
+                }
+
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType, sortAndFilterable, sortAndFilterable));
             }
 
             SortDisplayLists();
@@ -119,6 +137,20 @@ namespace BlazorBase.CRUD.Components
                 displayPropertyPaths.Add($"{foreignKey.Name}.{displayKeyProperty.Name}");
 
             return (String.Join("|", displayPropertyPaths), displayKeyProperties[0].PropertyType);
+        }
+
+        protected virtual bool GetPropertyIsSortAndFilterable(PropertyInfo property)
+        {
+            if (property.HasAttribute(typeof(NotMappedAttribute)))
+                return false;
+
+            var getMethod = property.GetGetMethod();
+            var setMethod = property.GetSetMethod();
+            if (getMethod == null || setMethod == null)
+                return false;
+
+            //Check if get and set method are not overridden with custom logic and are just normal property get and set methods
+            return Attribute.IsDefined(getMethod, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(setMethod, typeof(CompilerGeneratedAttribute));
         }
 
         protected virtual void SortDisplayLists()

@@ -150,6 +150,7 @@ namespace BlazorBase.CRUD.Components
         {
             if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?))
                 ConvertValueIfNeeded(ref newValue, displayItem.DisplayPropertyType);
+
             displayItem.FilterValue = newValue;
 
             await OnFilterChanged.InvokeAsync();
