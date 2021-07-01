@@ -188,18 +188,18 @@ namespace BlazorBase.CRUD.Services
         }
         #endregion
 
-
+        #region Change Data
         public async virtual Task ReloadAsync<T>(T entry) where T : class
         {
             await DbContext.Entry(entry).ReloadAsync();
         }
 
-        public async virtual Task<bool> AddEntryAsync<T>(T entry) where T : class, IBaseModel
+        public async virtual Task<bool> AddEntryAsync<T>(T entry, bool skipEntryAlreadyExistCheck = false) where T : class, IBaseModel
         {
             if (entry == null)
                 return false;
 
-            if (await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) != null)
+            if (skipEntryAlreadyExistCheck && await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) != null)
                 return false;
 
             DbContext.Set<T>().Add(entry);
@@ -211,7 +211,9 @@ namespace BlazorBase.CRUD.Services
         {
             DbContext.Set<T>().Update(entry);
         }
+        #endregion
 
+        #region Remove Data
         public async virtual Task<bool> RemoveEntryAsync<T>(params object[] keyValues) where T : class, IBaseModel
         {
             var entryToDelete = await DbContext.Set<T>().FindAsync(keyValues);
@@ -233,6 +235,18 @@ namespace BlazorBase.CRUD.Services
 
             return true;
         }
+
+        public virtual void RemoveRange(params object[] entriesToRemove)
+        {
+            DbContext.RemoveRange(entriesToRemove);
+        }
+
+        public virtual void RemoveRange(IEnumerable<object> entriesToRemove)
+        {
+            DbContext.RemoveRange(entriesToRemove);
+        }
+        #endregion
+
 
         #region SaveChanges
 

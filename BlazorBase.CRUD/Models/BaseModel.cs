@@ -53,17 +53,17 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Configuration Properties
-        public virtual bool UserCanAddEntries { get; } = true;
-        public virtual bool UserCanEditEntries { get; } = true;
-        public virtual bool UserCanDeleteEntries { get; } = true;
-        public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
-        public virtual bool ShowOnlySingleEntry { get; }
+        [NotMapped] public virtual bool UserCanAddEntries { get; protected set; } = true;
+        [NotMapped] public virtual bool UserCanEditEntries { get; protected set; } = true;
+        [NotMapped] public virtual bool UserCanDeleteEntries { get; protected set; } = true;
+        [NotMapped] public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; protected set; }
+        [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
         #endregion
 
         #region Attribute Methods
-        public List<PropertyInfo> GetVisibleProperties()
+        public virtual List<PropertyInfo> GetVisibleProperties(GUIType? guiType = null)
         {
-            return GetType().GetVisibleProperties();
+            return GetType().GetVisibleProperties(guiType);
         }
 
         public object[] GetPrimaryKeys()
@@ -246,6 +246,7 @@ namespace BlazorBase.CRUD.Models
             builder.AddAttribute(2, "UserCanEditEntries", UserCanEditEntries);
             builder.AddAttribute(3, "UserCanDeleteEntries", UserCanDeleteEntries);
             builder.AddAttribute(4, "DataLoadCondition", DataLoadCondition);
+            builder.AddAttribute(5, "ComponentModelInstance", this);
             builder.CloseComponent();
         }
 
@@ -256,6 +257,7 @@ namespace BlazorBase.CRUD.Models
             builder.AddAttribute(2, "EntryToBeShownByStart", new Func<EventServices, Task<IBaseModel>>(GetShowOnlySingleEntryInstance));
             builder.CloseComponent();
         }
+
         public virtual async Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices)
         {
             return await Task.Run(() =>
@@ -276,6 +278,7 @@ namespace BlazorBase.CRUD.Models
                 !typeof(IBaseModel).IsAssignableFrom(property.PropertyType) &&
                 !typeof(ILazyLoader).IsAssignableFrom(property.PropertyType) &&
                 property.CanWrite &&
+                property.GetSetMethod() != null &&
                 (property.GetSetMethod().Attributes & MethodAttributes.Static) == 0 &&
                 property.Name != nameof(CreatedOn) &&
                 property.Name != nameof(ModifiedOn)
@@ -310,6 +313,7 @@ namespace BlazorBase.CRUD.Models
                 if (targetProperty == null ||
                  (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
                  (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
+                 (targetProperty.GetSetMethod() == null) ||
                  ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0) ||
                  typeof(ILazyLoader).IsAssignableFrom(sourceProperty.PropertyType))
                     continue;

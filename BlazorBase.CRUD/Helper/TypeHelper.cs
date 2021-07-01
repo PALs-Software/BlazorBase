@@ -17,8 +17,12 @@ namespace BlazorBase.CRUD.Helper
             typeof(float?),
             typeof(int),
             typeof(int?),
+            typeof(uint),
+            typeof(uint?),
             typeof(long),
-            typeof(long?)
+            typeof(long?),
+            typeof(ulong),
+            typeof(ulong?)
         };
 
         public static List<Type> DecimalTypes { get; } = new List<Type>(){

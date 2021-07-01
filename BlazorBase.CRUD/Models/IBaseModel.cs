@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
@@ -6,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -24,7 +26,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Attribute Methods
-        List<PropertyInfo> GetVisibleProperties();
+        List<PropertyInfo> GetVisibleProperties(GUIType? guiType = null);
 
         object[] GetPrimaryKeys();
 
@@ -96,7 +98,7 @@ namespace BlazorBase.CRUD.Models
         List<PageActionGroup> GeneratePageActionGroups();
         #endregion
 
-        #region ComponentBase
+        #region ComponentBase        
         bool UserCanAddEntries { get; }
         bool UserCanEditEntries { get; }
         bool UserCanDeleteEntries { get; }

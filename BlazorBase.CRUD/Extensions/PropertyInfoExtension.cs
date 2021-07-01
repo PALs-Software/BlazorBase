@@ -66,20 +66,16 @@ namespace BlazorBase.CRUD.Extensions
             return propertyInfo.HasAttribute(typeof(DisplayKeyAttribute));
         }
 
-        public static bool IsVisibleInGUI(this PropertyInfo propertyInfo)
+        public static bool IsVisibleInGUI(this PropertyInfo propertyInfo, GUIType? guiType = null)
         {
-            var isVisible = !propertyInfo.HasAttribute(typeof(VisibleAttribute));
-            if (isVisible && IsBaseModelDateProperty(propertyInfo))
-                return HideBaseModelDateProperties(propertyInfo);
+            bool isVisible;
+            if (guiType == null)
+                isVisible = propertyInfo.HasAttribute(typeof(VisibleAttribute));
             else
-                return isVisible;
-        }
+                isVisible = propertyInfo.GetCustomAttribute(typeof(VisibleAttribute)) is VisibleAttribute visible && !visible.HideInGUITypes.Contains(guiType.Value);
 
-        public static bool IsVisibleInGUI(this PropertyInfo propertyInfo, GUIType guiType)
-        {
-            var isVisible = propertyInfo.GetCustomAttribute(typeof(VisibleAttribute)) is VisibleAttribute visible && !visible.HideInGUITypes.Contains(guiType);
             if (isVisible && IsBaseModelDateProperty(propertyInfo))
-                return HideBaseModelDateProperties(propertyInfo, guiType);
+                return !HideBaseModelDateProperties(propertyInfo, guiType);
             else
                 return isVisible;
         }
@@ -95,7 +91,7 @@ namespace BlazorBase.CRUD.Extensions
                 (
                     hideProperty.HideCreatedOn && propertyInfo.Name == nameof(BaseModel.CreatedOn) ||
                     hideProperty.HideModifiedOn && propertyInfo.Name == nameof(BaseModel.ModifiedOn)
-                ) && (guiType == null || !hideProperty.HideInGUITypes.Contains(guiType.GetValueOrDefault()));
+                ) && (guiType == null || hideProperty.HideInGUITypes.Contains(guiType.Value));
         }
 
         public static bool IsReadOnlyInGUI(this PropertyInfo propertyInfo)

@@ -81,9 +81,22 @@ namespace BlazorBase.CRUD.Components
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties { get; set; } = new Dictionary<PropertyInfo, List<KeyValuePair<string, string>>>();
         #endregion
 
-        protected virtual void SetUpDisplayLists(Type modelType, GUIType guiType)
+        #region Member
+        protected MarkupString InvalidSummaryFeedback;
+        protected bool ShowInvalidFeedback = false;
+        #endregion
+
+        protected virtual List<PropertyInfo> GetVisibleProperties(Type modelType, GUIType guiType, IBaseModel componentModelInstance = null)
         {
-            VisibleProperties = modelType.GetVisibleProperties(guiType);
+            if (componentModelInstance == null)
+                return modelType.GetVisibleProperties(guiType);
+
+            return componentModelInstance.GetVisibleProperties(guiType);
+        }
+
+        protected virtual void SetUpDisplayLists(Type modelType, GUIType guiType, IBaseModel componentModelInstance = null)
+        {
+            VisibleProperties = GetVisibleProperties(modelType, guiType, componentModelInstance);
 
             foreach (var property in VisibleProperties)
             {
@@ -292,6 +305,31 @@ namespace BlazorBase.CRUD.Components
             return args.Caption;
         }
 
+        #region Feedback
 
+        protected virtual void ShowFormattedInvalidFeedback(string feedback)
+        {
+            InvalidSummaryFeedback = MarkupStringValidator.GetWhiteListedMarkupString(feedback);
+            ShowInvalidFeedback = true;
+        }
+
+        protected virtual void ResetInvalidFeedback()
+        {
+            InvalidSummaryFeedback = (MarkupString)String.Empty;
+            ShowInvalidFeedback = false;
+        }
+
+        protected virtual async Task OnPageActionInvokedAsync(Exception e)
+        {
+            ResetInvalidFeedback();
+            if (e != null)
+                ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
+
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        }
+        #endregion
     }
 }

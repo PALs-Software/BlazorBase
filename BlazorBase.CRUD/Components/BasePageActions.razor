@@ -1,0 +1,44 @@
+﻿@if (PageActionGroups != null && PageActionGroups.Count > 0)
+{
+    <Card>
+        <CardBody Padding="Padding.Is0">
+            <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
+                <Items>
+                    @foreach (var group in PageActionGroups)
+                    {
+                        if (group.VisibleInGUITypes.Contains(GUIType) && group.Visible(EventServices).Result)
+                        {
+                            <Tab Name="@ModelLocalizer[group.Caption ?? String.Empty]" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
+                                <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
+                                @ModelLocalizer[group.Caption ?? String.Empty]
+                            </Tab>
+                        }
+                    }
+                </Items>
+                <Content>
+                    <TabsContent Padding="Padding.Is2">
+                        @foreach (var group in PageActionGroups)
+                        {
+                            if (group.VisibleInGUITypes.Contains(GUIType) && group.Visible(EventServices).Result)
+                            {
+                                <TabPanel Name="@ModelLocalizer[group.Caption ?? String.Empty]">
+                                    @foreach (var action in group.PageActions)
+                                    {
+                                        if (action.VisibleInGUITypes.Contains(GUIType) && action.Visible(EventServices).Result)
+                                        {
+                                            <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
+                                                <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
+
+                                                @ModelLocalizer[action.Caption ?? String.Empty]
+                                            </Button>
+                                        }
+                                    }
+                                </TabPanel>
+                            }
+                        }
+                    </TabsContent>
+                </Content>
+            </Tabs>
+        </CardBody>
+    </Card>
+}

@@ -36,12 +36,7 @@ namespace BlazorBase.CRUD.Extensions
                     ).ToList();
         }
 
-        public static List<PropertyInfo> GetVisibleProperties(this Type type)
-        {
-            return type.GetProperties().Where(entry => entry.IsVisibleInGUI()).ToList();
-        }
-
-        public static List<PropertyInfo> GetVisibleProperties(this Type type, GUIType guiType)
+        public static List<PropertyInfo> GetVisibleProperties(this Type type, GUIType? guiType = null)
         {
             return type.GetProperties().Where(entry => entry.IsVisibleInGUI(guiType)).ToList();
         }

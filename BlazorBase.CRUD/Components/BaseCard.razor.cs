@@ -50,10 +50,12 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #endregion
+
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public bool Embedded { get; set; }
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
+        [Parameter] public TModel ComponentModelInstance { get; set; }
         #endregion
 
         #region Injects
@@ -65,18 +67,17 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Member
-        protected Snackbar Snackbar;
-        protected MarkupString CardSummaryInvalidFeedback;
-        protected bool ShowInvalidFeedback = false;
+        protected EventServices EventServices;
+
+        protected Snackbar Snackbar;      
 
         protected TModel Model = null;
         protected Type TModelType;
 
+        protected bool ModelLoaded = false;
         protected bool AddingMode;
 
         protected ValidationContext ValidationContext;
-        protected string SelectedPageActionGroup { get; set; }
-        protected List<PageActionGroup> PageActionGroups { get; set; }
         #endregion
 
         #region Property Infos
@@ -97,6 +98,8 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
+                EventServices = GetEventServices();
+
                 TModelType = typeof(TModel);
 
                 if (String.IsNullOrEmpty(SingleDisplayName))
@@ -104,22 +107,20 @@ namespace BlazorBase.CRUD.Components
 
                 BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyCardInput>().ToList();
 
-                SetUpDisplayLists(TModelType, GUIType.Card);
+                SetUpDisplayLists(TModelType, GUIType.Card, ComponentModelInstance);
             });
 
             if (ShowEntryByStart)
             {
-                var entry = await EntryToBeShownByStart?.Invoke(GetEventServices());
+                var entry = await EntryToBeShownByStart?.Invoke(EventServices);
                 await ShowAsync(entry == null, entry?.GetPrimaryKeys());
             }
         }
 
         protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly)
         {
-            var eventServices = GetEventServices();
-
             foreach (var baseinput in BaseInputExtensions)
-                if (await baseinput.IsHandlingPropertyRenderingAsync(Model, displayItem, eventServices))
+                if (await baseinput.IsHandlingPropertyRenderingAsync(Model, displayItem, EventServices))
                     return GetBaseInputExtensionAsRenderFragment(displayItem, isReadonly, baseinput.GetType(), Model);
 
             return null;
@@ -150,6 +151,7 @@ namespace BlazorBase.CRUD.Components
         {
             await Service.RefreshDbContextAsync();
 
+            ModelLoaded = false;
             AddingMode = addingMode;
             BaseInputs.Clear();
             BaseSelectListInputs.Clear();
@@ -159,9 +161,8 @@ namespace BlazorBase.CRUD.Components
 
             if (AddingMode)
             {
-                var eventServices = GetEventServices();
                 Model = new TModel();
-                var args = new OnCreateNewEntryInstanceArgs(Model, eventServices);
+                var args = new OnCreateNewEntryInstanceArgs(Model, EventServices);
                 await OnCreateNewEntryInstance.InvokeAsync(args);
                 await Model.OnCreateNewEntryInstance(args);
             }
@@ -172,7 +173,7 @@ namespace BlazorBase.CRUD.Components
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
             await PrepareForeignKeyProperties(Service, Model);
-            await PrepareCustomLookupData(Model, GetEventServices());
+            await PrepareCustomLookupData(Model, EventServices);
 
             ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object>()
             {
@@ -180,10 +181,8 @@ namespace BlazorBase.CRUD.Components
                 [typeof(BaseService)] = Service
             });
 
-            PageActionGroups = Model.GeneratePageActionGroups() ?? new List<PageActionGroup>();
-            SelectedPageActionGroup = PageActionGroups.FirstOrDefault()?.Caption;
-
             Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
+            ModelLoaded = true;
         }
 
         protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
@@ -206,14 +205,12 @@ namespace BlazorBase.CRUD.Components
             if (!CardIsValid())
                 return false;
 
-            var eventServices = GetEventServices();
-
             var success = true;
             try
             {
                 if (AddingMode)
                 {
-                    var args = new OnBeforeAddEntryArgs(Model, false, eventServices);
+                    var args = new OnBeforeAddEntryArgs(Model, false, EventServices);
                     await OnBeforeAddEntry.InvokeAsync(args);
                     await Model.OnBeforeAddEntry(args);
                     if (args.AbortAdding)
@@ -228,13 +225,13 @@ namespace BlazorBase.CRUD.Components
                         return false;
                     }
 
-                    var onAfterArgs = new OnAfterAddEntryArgs(Model, eventServices);
+                    var onAfterArgs = new OnAfterAddEntryArgs(Model, EventServices);
                     await OnAfterAddEntry.InvokeAsync(onAfterArgs);
                     await Model.OnAfterAddEntry(onAfterArgs);
                 }
                 else
                 {
-                    var args = new OnBeforeUpdateEntryArgs(Model, false, eventServices);
+                    var args = new OnBeforeUpdateEntryArgs(Model, false, EventServices);
                     await OnBeforeUpdateEntry.InvokeAsync(args);
                     await Model.OnBeforeUpdateEntry(args);
                     if (args.AbortUpdating)
@@ -242,14 +239,14 @@ namespace BlazorBase.CRUD.Components
 
                     Service.UpdateEntry(Model);
 
-                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, eventServices);
+                    var onAfterArgs = new OnAfterUpdateEntryArgs(Model, EventServices);
                     await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
                     await Model.OnAfterUpdateEntry(onAfterArgs);
                 }
 
                 await Service.SaveChangesAsync();
                 AddingMode = false;
-                await InvokeOnAfterSaveChangesEvents(eventServices);
+                await InvokeOnAfterSaveChangesEvents(EventServices);
             }
             catch (CRUDException e)
             {
@@ -275,6 +272,7 @@ namespace BlazorBase.CRUD.Components
             ForeignKeyProperties = null;
             CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string, string>>>();
             Model = null;
+            ModelLoaded = false;
         }
 
         public TModel GetCurrentModel()
@@ -312,34 +310,9 @@ namespace BlazorBase.CRUD.Components
                 }
             }
         }
+      
         #endregion
-
-        #region Page Actions
-        private void SelectedPageActionGroupChanged(string name)
-        {
-            SelectedPageActionGroup = name;
-        }
-
-        private async Task InvokePageAction(PageAction action)
-        {
-            ResetInvalidFeedback();
-
-            try
-            {
-                await action.Action?.Invoke(GetEventServices());
-            }
-            catch (Exception e)
-            {
-                ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
-            }
-
-            await InvokeAsync(() =>
-            {
-                StateHasChanged();
-            });
-        }
-
-        #endregion
+       
 
         #region Validation
         public bool HasUnsavedChanges()
@@ -377,18 +350,6 @@ namespace BlazorBase.CRUD.Components
             }
 
             return valid;
-        }
-
-        protected virtual void ShowFormattedInvalidFeedback(string feedback)
-        {
-            CardSummaryInvalidFeedback = MarkupStringValidator.GetWhiteListedMarkupString(feedback);
-            ShowInvalidFeedback = true;
-        }
-
-        protected virtual void ResetInvalidFeedback()
-        {
-            CardSummaryInvalidFeedback = (MarkupString)String.Empty;
-            ShowInvalidFeedback = false;
         }
         #endregion
 

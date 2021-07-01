@@ -1,8 +1,6 @@
 ﻿@typeparam TModel
 @inherits BaseDisplayComponent
 
-@using BlazorBase.CRUD.Extensions
-
 <div class="base-card">
 
     @if (!Embedded)
@@ -13,52 +11,12 @@
         </Heading>
     }
 
-    @if (Model != null)
+    @if (Model != null && ModelLoaded)
     {
-        if (PageActionGroups != null && PageActionGroups.Count > 0)
-        {
-            <Card>
-                <CardBody Padding="Padding.Is0">
-                    <Tabs SelectedTab="@SelectedPageActionGroup" SelectedTabChanged="SelectedPageActionGroupChanged">
-                        <Items>
-                            @foreach (var group in PageActionGroups)
-                            {
-                                if (group.Visible(GetEventServices()).Result)
-                                {
-                                    <Tab Name="@ModelLocalizer[group.Caption ?? String.Empty]" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
-                                        <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
-                                        @ModelLocalizer[group.Caption ?? String.Empty]
-                                    </Tab>
-                                }
-                            }
-                        </Items>
-                        <Content>
-                            <TabsContent Padding="Padding.Is2">
-                                @foreach (var group in PageActionGroups)
-                                {
-                                    <TabPanel Name="@ModelLocalizer[group.Caption ?? String.Empty]">
-                                        @foreach (var action in group.PageActions)
-                                        {
-                                            if (action.Visible(GetEventServices()).Result)
-                                            {
-                                                <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
-                                                    <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
+        <BasePageActions BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
 
-                                                    @ModelLocalizer[action.Caption ?? String.Empty]
-                                                </Button>
-                                            }
-                                        }
-                                    </TabPanel>
-                                }
-                            </TabsContent>
-                        </Content>
-                    </Tabs>
-                </CardBody>
-            </Card>
-        }
-
-        <Alert Class="card-summary-invalid-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
-            @CardSummaryInvalidFeedback
+        <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+            @InvalidSummaryFeedback
         </Alert>
 
         <Accordion>
@@ -101,7 +59,7 @@
                                     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
                                         <Fields>
                                             <Field Horizontal="true">
-                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaption(GetEventServices(), Model, ModelLocalizer, displayItem)</FieldLabel>
+                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)</FieldLabel>
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
@@ -130,19 +88,16 @@
                 </Collapse>
             }
         </Accordion>
-
-
     }
 </div>
 
 <Snackbar @ref="Snackbar"
           Color="ShowInvalidFeedback ? SnackbarColor.Danger : SnackbarColor.Success"
-          Multiline="true"
-          >
+          Multiline="true">
     <SnackbarBody>
         @if (ShowInvalidFeedback)
         {
-            @CardSummaryInvalidFeedback
+            @InvalidSummaryFeedback
         }
         else
         {

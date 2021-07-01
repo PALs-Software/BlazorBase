@@ -57,6 +57,8 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Members
+        protected EventServices EventServices;
+
         protected IStringLocalizer ModelLocalizer { get; set; }
         protected Type IStringModelLocalizerType { get; set; }
         protected IList Entries { get; set; }
@@ -82,6 +84,8 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
+                EventServices = GetEventServices();
+
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
                 ModelImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
 
@@ -114,7 +118,7 @@ namespace BlazorBase.CRUD.Components
             });
 
             await PrepareForeignKeyProperties(Service);
-            await PrepareCustomLookupData(Model, GetEventServices());
+            await PrepareCustomLookupData(Model, EventServices);
         }
 
         protected override void OnParametersSet()
@@ -135,10 +139,8 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly, IBaseModel model)
         {
-            var eventServices = GetEventServices();
-
             foreach (var baseinput in BaseInputExtensions)
-                if (await baseinput.IsHandlingPropertyRenderingAsync(model, displayItem, eventServices))
+                if (await baseinput.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
                     return GetBaseInputExtensionAsRenderFragment(displayItem, isReadonly, baseinput.GetType(), model);
 
             return null;
@@ -258,24 +260,20 @@ namespace BlazorBase.CRUD.Components
         #region Events
         protected async Task OnCreateNewListEntryInstanceAsync(object newEntry)
         {
-            var eventServices = GetEventServices();
-
-            var onCreateNewListEntryInstanceArgs = new OnCreateNewListEntryInstanceArgs(Model, newEntry, eventServices);
+            var onCreateNewListEntryInstanceArgs = new OnCreateNewListEntryInstanceArgs(Model, newEntry, EventServices);
             await OnCreateNewListEntryInstance.InvokeAsync(onCreateNewListEntryInstanceArgs);
             await Model.OnCreateNewListEntryInstance(onCreateNewListEntryInstanceArgs);
 
             if (newEntry is not IBaseModel newBaseEntry)
                 return;
 
-            var onCreateNewEntryInstanceArgs = new OnCreateNewEntryInstanceArgs(Model, eventServices);
+            var onCreateNewEntryInstanceArgs = new OnCreateNewEntryInstanceArgs(Model, EventServices);
             await newBaseEntry.OnCreateNewEntryInstance(onCreateNewEntryInstanceArgs);
         }
 
         protected async Task OnBeforeAddEntryAsync(object newEntry, HandledEventArgs args)
         {
-            var eventServices = GetEventServices();
-
-            var onBeforeAddListEntryArgs = new OnBeforeAddListEntryArgs(Model, newEntry, false, eventServices);
+            var onBeforeAddListEntryArgs = new OnBeforeAddListEntryArgs(Model, newEntry, false, EventServices);
             await OnBeforeAddListEntry.InvokeAsync(onBeforeAddListEntryArgs);
             await Model.OnBeforeAddListEntry(onBeforeAddListEntryArgs);
             if (onBeforeAddListEntryArgs.AbortAdding)
@@ -286,7 +284,7 @@ namespace BlazorBase.CRUD.Components
 
             if (newEntry is IBaseModel newBaseEntry)
             {
-                var onBeforeAddEntryArgs = new OnBeforeAddEntryArgs(Model, false, eventServices);
+                var onBeforeAddEntryArgs = new OnBeforeAddEntryArgs(Model, false, EventServices);
                 await newBaseEntry.OnBeforeAddEntry(onBeforeAddEntryArgs);
                 if (onBeforeAddEntryArgs.AbortAdding)
                 {
@@ -298,21 +296,17 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task OnAfterAddEntryAsync(object newEntry)
         {
-            var eventServices = GetEventServices();
-
-            var onAfterAddListEntryArgs = new OnAfterAddListEntryArgs(Model, newEntry, eventServices);
+            var onAfterAddListEntryArgs = new OnAfterAddListEntryArgs(Model, newEntry, EventServices);
             await OnAfterAddListEntry.InvokeAsync(onAfterAddListEntryArgs);
             await Model.OnAfterAddListEntry(onAfterAddListEntryArgs);
 
             if (newEntry is IBaseModel addedBaseEntry)
-                await addedBaseEntry.OnAfterAddEntry(new OnAfterAddEntryArgs(Model, eventServices));
+                await addedBaseEntry.OnAfterAddEntry(new OnAfterAddEntryArgs(Model, EventServices));
         }
 
         protected async Task OnBeforeRemoveEntryAsync(object entry, HandledEventArgs args)
         {
-            var eventServices = GetEventServices();
-
-            var onBeforeRemoveListEntry = new OnBeforeRemoveListEntryArgs(Model, entry, false, eventServices);
+            var onBeforeRemoveListEntry = new OnBeforeRemoveListEntryArgs(Model, entry, false, EventServices);
             await OnBeforeRemoveListEntry.InvokeAsync(onBeforeRemoveListEntry);
             await Model.OnBeforeRemoveListEntry(onBeforeRemoveListEntry);
             if (onBeforeRemoveListEntry.AbortRemoving)
@@ -323,7 +317,7 @@ namespace BlazorBase.CRUD.Components
 
             if (entry is IBaseModel newBaseEntry)
             {
-                var onBeforeRemoveEntryArgs = new OnBeforeRemoveEntryArgs(Model, false, eventServices);
+                var onBeforeRemoveEntryArgs = new OnBeforeRemoveEntryArgs(Model, false, EventServices);
                 await newBaseEntry.OnBeforeRemoveEntry(onBeforeRemoveEntryArgs);
                 if (onBeforeRemoveEntryArgs.AbortRemoving)
                 {
@@ -335,38 +329,32 @@ namespace BlazorBase.CRUD.Components
 
         protected async Task OnAfterRemoveEntryAsync(object entry)
         {
-            var eventServices = GetEventServices();
-
-            var onAfterRemoveListEntryArgs = new OnAfterRemoveListEntryArgs(Model, entry, eventServices);
+            var onAfterRemoveListEntryArgs = new OnAfterRemoveListEntryArgs(Model, entry, EventServices);
             await OnAfterRemoveListEntry.InvokeAsync(onAfterRemoveListEntryArgs);
             await Model.OnAfterRemoveListEntry(onAfterRemoveListEntryArgs);
 
             if (entry is IBaseModel RemovedBaseEntry)
-                await RemovedBaseEntry.OnAfterRemoveEntry(new OnAfterRemoveEntryArgs(Model, eventServices));
+                await RemovedBaseEntry.OnAfterRemoveEntry(new OnAfterRemoveEntryArgs(Model, EventServices));
         }
 
         protected async Task OnAfterMoveListEntryUpAsync(object entry)
         {
-            var eventServices = GetEventServices();
-
-            var args = new OnAfterMoveListEntryUpArgs(Model, entry, eventServices);
+            var args = new OnAfterMoveListEntryUpArgs(Model, entry, EventServices);
             await OnAfterMoveListEntryUp.InvokeAsync(args);
             await Model.OnAfterMoveListEntryUp(args);
 
             if (entry is IBaseModel baseModel)
-                await baseModel.OnAfterMoveEntryUp(new OnAfterMoveEntryUpArgs(Model, eventServices));
+                await baseModel.OnAfterMoveEntryUp(new OnAfterMoveEntryUpArgs(Model, EventServices));
         }
 
         protected async Task OnAfterMoveListEntryDownAsync(object entry)
         {
-            var eventServices = GetEventServices();
-
-            var args = new OnAfterMoveListEntryDownArgs(Model, entry, eventServices);
+            var args = new OnAfterMoveListEntryDownArgs(Model, entry, EventServices);
             await OnAfterMoveListEntryDown.InvokeAsync(args);
             await Model.OnAfterMoveListEntryDown(args);
 
             if (entry is IBaseModel baseModel)
-                await baseModel.OnAfterMoveEntryDown(new OnAfterMoveEntryDownArgs(Model, eventServices));
+                await baseModel.OnAfterMoveEntryDown(new OnAfterMoveEntryDownArgs(Model, EventServices));
         }
 
         #endregion

@@ -43,10 +43,10 @@ namespace BlazorBase.CRUD.Components
 
         #endregion
 
-        [Parameter]
-        public string SingleDisplayName { get; set; }
+        [Parameter]public string SingleDisplayName { get; set; }
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
+        [Parameter] public TModel ComponentModelInstance { get; set; }
 
         #endregion
 

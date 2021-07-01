@@ -16,6 +16,7 @@ namespace BlazorBase.CRUD.Models
         public string ToolTip { get; set; }
         public Color Color { get; set; } = Color.Secondary;
         public object Image { get; set; }
+        public GUIType[] VisibleInGUITypes { get; set; } = new GUIType[] { GUIType.Card, GUIType.List, GUIType.ListPart };
         public Func<EventServices, Task<bool>> Visible { get; set; } = x => Task.FromResult(true);
         public Func<EventServices, Task> Action { get; set; }
     }

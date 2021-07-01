@@ -23,6 +23,7 @@ using Blazorise;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
+using BlazorBase.Modules;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -60,7 +61,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
 
-        #region BaseList        
+        #region BaseList            
         [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }
         [Parameter] public EventCallback<OnBeforeOpenEditModalArgs> OnBeforeOpenEditModal { get; set; }
         #endregion
@@ -74,6 +75,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
         [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
         [Parameter] public bool ShowEntryByStart { get; set; }
+        [Parameter] public TModel ComponentModelInstance { get; set; }
         [Parameter] public bool DontRenderCard { get; set; }
         [Parameter] public bool Sortable { get; set; } = true;
         [Parameter] public bool Filterable { get; set; } = true;
@@ -92,6 +94,8 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Members
+        protected EventServices EventServices;
+
         protected List<TModel> Entries = new List<TModel>();
         protected Type TModelType;
 
@@ -114,8 +118,10 @@ namespace BlazorBase.CRUD.Components
         {
             await InvokeAsync(() =>
             {
+                EventServices = GetEventServices(Service);
+
                 TModelType = typeof(TModel);
-                SetUpDisplayLists(TModelType, GUIType.List);
+                SetUpDisplayLists(TModelType, GUIType.List, ComponentModelInstance);
 
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
@@ -176,10 +182,8 @@ namespace BlazorBase.CRUD.Components
 
         protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
         {
-            var eventServices = GetEventServices(Service);
-
             foreach (var propertyListDisplay in PropertyListDisplays)
-                if (await propertyListDisplay.IsHandlingPropertyRenderingAsync(model, displayItem, eventServices))
+                if (await propertyListDisplay.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
                     return GetPropertyListDisplayExtensionAsRenderFragment(displayItem, propertyListDisplay.GetType(), model);
 
             return null;
@@ -270,7 +274,8 @@ namespace BlazorBase.CRUD.Components
             return new ItemsProviderResult<TModel>(Entries, totalEntries);
         }
 
-        protected virtual IQueryable<TModel> CreateLoadDataQuery() {
+        protected virtual IQueryable<TModel> CreateLoadDataQuery()
+        {
             var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
 
             var query = baseService.Set<TModel>();
@@ -361,7 +366,7 @@ namespace BlazorBase.CRUD.Components
 
         public virtual async Task AddEntryAsync()
         {
-            var args = new OnBeforeOpenAddModalArgs(false, GetEventServices(Service));
+            var args = new OnBeforeOpenAddModalArgs(false, EventServices);
             await OnBeforeOpenAddModal.InvokeAsync(args);
             if (args.IsHandled)
                 return;
@@ -370,7 +375,7 @@ namespace BlazorBase.CRUD.Components
         }
         public virtual async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
-            var args = new OnBeforeOpenEditModalArgs(false, entry, changeQueryUrl, GetEventServices(Service));
+            var args = new OnBeforeOpenEditModalArgs(false, entry, changeQueryUrl, EventServices);
             await OnBeforeOpenEditModal.InvokeAsync(args);
 
             if (args.ChangeQueryUrl)
@@ -441,6 +446,7 @@ namespace BlazorBase.CRUD.Components
         }
         #endregion
 
+
         #region Actions
         public virtual async Task RefreshDataAsync()
         {
@@ -459,7 +465,6 @@ namespace BlazorBase.CRUD.Components
                 MessageHandler = MessageHandler
             };
         }
-
         #endregion
     }
 }

@@ -12,9 +12,9 @@ namespace BlazorBase.CRUD.ViewModels
 {
     public class EventServices
     {
-        public IServiceProvider ServiceProvider { get; set; }
-        public IStringLocalizer Localizer { get; set; }
-        public BaseService BaseService { get; set; }
-        public IMessageHandler MessageHandler { get; set; }
+        public IServiceProvider ServiceProvider { get; init; }
+        public IStringLocalizer Localizer { get; init; }
+        public BaseService BaseService { get; init; }
+        public IMessageHandler MessageHandler { get; init; }
     }
 }
