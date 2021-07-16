@@ -13,7 +13,7 @@
 
     @if (Model != null && ModelLoaded)
     {
-        <BasePageActions BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+        <BasePageActions BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.Card" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
 
         <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
             @InvalidSummaryFeedback

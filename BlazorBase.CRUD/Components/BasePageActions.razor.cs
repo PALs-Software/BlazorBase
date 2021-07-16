@@ -53,7 +53,7 @@ namespace BlazorBase.CRUD.Components
             Exception exception = null;
             try
             {
-                await action.Action?.Invoke(EventServices);
+                await action.Action?.Invoke(EventServices, BaseModel);
             }
             catch (Exception e)
             {

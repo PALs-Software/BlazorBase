@@ -8,7 +8,7 @@
                     {
                         if (group.VisibleInGUITypes.Contains(GUIType) && group.Visible(EventServices).Result)
                         {
-                            <Tab Name="@ModelLocalizer[group.Caption ?? String.Empty]" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
+                            <Tab Name="@group.Caption" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
                                 <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
                                 @ModelLocalizer[group.Caption ?? String.Empty]
                             </Tab>
@@ -21,7 +21,7 @@
                         {
                             if (group.VisibleInGUITypes.Contains(GUIType) && group.Visible(EventServices).Result)
                             {
-                                <TabPanel Name="@ModelLocalizer[group.Caption ?? String.Empty]">
+                                <TabPanel Name="@group.Caption">
                                     @foreach (var action in group.PageActions)
                                     {
                                         if (action.VisibleInGUITypes.Contains(GUIType) && action.Visible(EventServices).Result)

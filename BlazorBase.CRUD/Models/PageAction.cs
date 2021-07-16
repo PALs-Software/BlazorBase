@@ -18,6 +18,6 @@ namespace BlazorBase.CRUD.Models
         public object Image { get; set; }
         public GUIType[] VisibleInGUITypes { get; set; } = new GUIType[] { GUIType.Card, GUIType.List, GUIType.ListPart };
         public Func<EventServices, Task<bool>> Visible { get; set; } = x => Task.FromResult(true);
-        public Func<EventServices, Task> Action { get; set; }
+        public Func<EventServices, IBaseModel, Task> Action { get; set; }
     }
 }

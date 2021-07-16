@@ -33,7 +33,6 @@ namespace BlazorBase.CRUD
             .AddSingleton<BaseParser>()
             .AddTransient<BaseService>()
             .AddTransient<DbContext, TDbContextImplementation>()
-
             .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
 
             .AddBlazorBaseMessageHandling();

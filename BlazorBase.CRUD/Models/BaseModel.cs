@@ -311,11 +311,11 @@ namespace BlazorBase.CRUD.Models
                 var targetProperty = targetProperties.Where(entry => entry.Name == sourceProperty.Name).FirstOrDefault();
 
                 if (targetProperty == null ||
-                 (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
-                 (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
-                 (targetProperty.GetSetMethod() == null) ||
-                 ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0) ||
-                 typeof(ILazyLoader).IsAssignableFrom(sourceProperty.PropertyType))
+                    (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
+                    (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
+                    (targetProperty.GetSetMethod() == null) ||
+                    ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0) ||
+                    typeof(ILazyLoader).IsAssignableFrom(sourceProperty.PropertyType))
                     continue;
 
                 targetProperty.SetValue(target, sourceProperty.GetValue(this));

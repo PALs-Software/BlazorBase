@@ -109,9 +109,14 @@ namespace BlazorBase.CRUD.Components
                     [typeof(BaseService)] = Service
                 };
 
+                var propertyNameTranslation = ModelLocalizer[Property.Name].ToString();
+                if (String.IsNullOrEmpty(propertyNameTranslation))
+                    propertyNameTranslation = Property.Name;
+
                 PropertyValidationContext = new ValidationContext(Model, ServiceProvider, dict)
                 {
-                    MemberName = Property.Name
+                    MemberName = Property.Name,
+                    DisplayName = propertyNameTranslation
                 };
 
                 if (Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) is ForeignKeyAttribute foreignKey)
@@ -217,7 +222,7 @@ namespace BlazorBase.CRUD.Components
                 LastValueConversionFailed = true;
                 SetValidation(feedback: ErrorHandler.PrepareExceptionErrorMessage(e));
                 await RaiseOnFormatPropertyEventsAsync();
-            }            
+            }
         }
 
         protected async virtual Task ReloadForeignProperties(object newValue)
