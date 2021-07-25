@@ -1,9 +1,10 @@
-﻿
+﻿@using System.ComponentModel.DataAnnotations;
+ 
 @if (Model != null)
 {
     if (RenderType == typeof(string) || DecimalTypes.Contains(RenderType))
     {
-        if (MultilineText)
+        if (PresentationDataType == DataType.MultilineText)
         {
             <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
         }

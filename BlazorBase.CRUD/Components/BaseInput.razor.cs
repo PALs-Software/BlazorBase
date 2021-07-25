@@ -57,9 +57,9 @@ namespace BlazorBase.CRUD.Components
         protected string FeedbackClass;
         protected string Feedback;
         protected string PlaceHolder;
-        protected bool MultilineText;
         protected bool IsReadOnly;
         protected Type RenderType;
+        protected DataType? PresentationDataType = null;
         protected string CustomPropertyCssStyle;
         protected bool LastValueConversionFailed = false;
 
@@ -101,7 +101,7 @@ namespace BlazorBase.CRUD.Components
                     PlaceHolder = placeholderAttribute.Placeholder;
                 RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
-                MultilineText = RenderType == typeof(string) && Property.GetCustomAttribute<TextDisplayModeAttribute>()?.Mode == TextDisplayMode.Multiline;
+                PresentationDataType = Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
                 var dict = new Dictionary<object, object>()
                 {
@@ -303,9 +303,27 @@ namespace BlazorBase.CRUD.Components
         protected void SetInputType()
         {
             if (RenderType == typeof(string))
-                InputType = "text";
+                InputType = GetInputTypeByDataType(PresentationDataType);
             else if (DecimalTypes.Contains(RenderType))
                 InputType = "number";
+        }
+
+        protected string GetInputTypeByDataType(DataType? dataType)
+        {
+            if (dataType == null)
+                return "text";
+
+            switch (dataType)
+            {
+                case DataType.EmailAddress:
+                    return "email";
+                case DataType.Password:
+                    return "password";
+                case DataType.Url:
+                    return "url";
+                default:
+                    return "text";
+            }
         }
 
         private void SetInputAttributes()

@@ -27,18 +27,29 @@ namespace BlazorBase.CRUD.Components
 
         #region Member
         protected List<PageActionGroup> PageActionGroups { get; set; }
+        protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new List<PageActionGroup>();
         protected string SelectedPageActionGroup { get; set; }
         #endregion
 
         #region Init
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
             var instance = BaseModel;
             if (instance == null)
                 instance = Activator.CreateInstance(BaseModelType) as IBaseModel;
 
             PageActionGroups = instance.GeneratePageActionGroups() ?? new List<PageActionGroup>();
-            SelectedPageActionGroup = PageActionGroups.FirstOrDefault()?.Caption;
+            foreach (var group in PageActionGroups)
+                if (group.VisibleInGUITypes.Contains(GUIType) && await group.Visible(EventServices))
+                    VisiblePageActionGroups.Add(group);
+
+            foreach (var group in VisiblePageActionGroups)
+                foreach (var pageAction in group.PageActions.ToList())
+                    if (!pageAction.VisibleInGUITypes.Contains(GUIType) || !await pageAction.Visible(EventServices))
+                        group.PageActions.Remove(pageAction);
+
+            VisiblePageActionGroups.RemoveAll(group => group.PageActions.Count == 0);
+            SelectedPageActionGroup = VisiblePageActionGroups.FirstOrDefault()?.Caption;
         }
         #endregion
 
