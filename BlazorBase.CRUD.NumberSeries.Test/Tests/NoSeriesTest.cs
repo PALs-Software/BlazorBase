@@ -1,3 +1,4 @@
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.NumberSeries.Test.Libraries;
 using BlazorBase.CRUD.Services;

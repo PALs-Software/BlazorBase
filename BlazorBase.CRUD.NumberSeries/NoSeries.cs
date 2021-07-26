@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
