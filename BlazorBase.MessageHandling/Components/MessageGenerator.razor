@@ -1,0 +1,27 @@
+﻿@using BlazorBase.Modules;
+@using BlazorBase.MessageHandling.Models;
+
+@foreach (var modalInfo in ModalInfos)
+{
+    <Modal @ref="modalInfo.Value.Modal" Visible="true" Closing="async (args) => await OnModalClosing(modalInfo.Value, args)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
+        <ModalContent Centered="true" Size="modalInfo.Value.Args.ModalSize">
+            <ModalHeader>
+                <ModalTitle>
+                    <BaseIcon IconName="modalInfo.Value.Args.Icon" Style="@modalInfo.Value.Args.IconStyle"></BaseIcon>
+                    @modalInfo.Value.Args.Title
+                </ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                @MarkupStringValidator.GetWhiteListedMarkupString(@modalInfo.Value.Args.Message)
+            </ModalBody>
+            <ModalFooter>
+                @if (modalInfo.Value.Args is ShowConfirmDialogArgs args)
+                {
+                    <Button Color="args.ConfirmButtonColor" Clicked="() => OnConfirmButtonClicked(modalInfo.Value)">@args.ConfirmButtonText</Button>
+                }
+                <Button Color="modalInfo.Value.Args.CloseButtonColor" Clicked="() => OnAbortButtonClicked(modalInfo.Value)">@modalInfo.Value.Args.CloseButtonText</Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+}

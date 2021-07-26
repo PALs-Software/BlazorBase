@@ -1,0 +1,7 @@
+﻿::deep .custom-select {
+    min-width: 55px;
+}
+
+::deep .form-control {
+    min-width: 4.5rem;
+}

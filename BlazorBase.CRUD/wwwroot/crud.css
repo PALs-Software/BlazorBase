@@ -1,0 +1,9 @@
+﻿@import 'card.css';
+
+.b-layout.b-layout-has-sider .b-layout {
+    overflow-x: auto;
+}
+
+.table thead .th-actions {
+    vertical-align: top;
+}

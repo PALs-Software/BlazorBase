@@ -1,0 +1,52 @@
+﻿@using System.ComponentModel.DataAnnotations;
+ 
+@if (Model != null)
+{
+    if (RenderType == typeof(string) || DecimalTypes.Contains(RenderType))
+    {
+        if (PresentationDataType == DataType.MultilineText)
+        {
+            <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
+        }
+        else
+        {
+            <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass" />
+        }
+    }
+    else if (RenderType == typeof(bool))
+    {
+        <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(bool?))
+    {
+        <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(DateTime))
+    {
+        <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(DateTime?))
+    {
+        <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(DateTimeOffset))
+    {
+        <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(DateTimeOffset?))
+    {
+        <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(Guid))
+    {
+        <TextEdit Text="@(Property.GetValue(Model).ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" Attributes="InputAttributes" />
+    }
+    else if (RenderType == typeof(Guid?))
+    {
+        <TextEdit Text="@(Property.GetValue(Model)?.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Placeholder="@PlaceHolder" Class="@InputClass" Attributes="InputAttributes" />
+    }
+
+    <div class="@FeedbackClass">
+        @Feedback
+    </div>
+}

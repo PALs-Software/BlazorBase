@@ -1,0 +1,17 @@
+﻿.blazor-base-loading-indicator {
+   position: fixed;
+   inset: 0px;
+   z-index: 99999;
+   display: block;
+   overflow: hidden;
+   background-color: rgb(255, 255, 255);
+   opacity: 0.8;
+   text-align: center;
+   font-weight: bold;
+   transition: visibility 0s linear 500ms;
+   visibility: visible;
+}
+
+.blazor-base-loading-indicator-content{
+    margin-top: 20vh;
+}
