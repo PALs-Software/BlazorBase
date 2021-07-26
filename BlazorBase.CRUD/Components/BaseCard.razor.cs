@@ -56,6 +56,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
         [Parameter] public TModel ComponentModelInstance { get; set; }
+        [Parameter] public bool ShowActions { get; set; } = true;
         #endregion
 
         #region Injects
