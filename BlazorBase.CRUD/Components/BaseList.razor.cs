@@ -165,6 +165,7 @@ namespace BlazorBase.CRUD.Components
             SetDisplayNames();
             if (VirtualizeList != null)
                 await VirtualizeList.RefreshDataAsync();
+            await InvokeAsync(() => StateHasChanged());
         }
 
         protected virtual void SetDisplayNames()

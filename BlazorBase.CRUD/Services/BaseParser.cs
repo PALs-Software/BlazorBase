@@ -13,7 +13,8 @@ namespace BlazorBase.CRUD.Services
     {
         protected IStringLocalizer<BaseParser> Localizer { get; set; }
 
-        public BaseParser(IStringLocalizer<BaseParser> localizer) {
+        public BaseParser(IStringLocalizer<BaseParser> localizer)
+        {
             Localizer = localizer;
         }
 
@@ -29,9 +30,13 @@ namespace BlazorBase.CRUD.Services
 
             try
             {
-                Type conversionType = Nullable.GetUnderlyingType(outputType) ?? outputType;
+                var underlyingType = Nullable.GetUnderlyingType(outputType);
+                var isNullable = underlyingType != null;
+                Type conversionType = underlyingType ?? outputType;
 
-                if (conversionType.IsEnum)
+                if (isNullable && conversionType != typeof(string) && String.IsNullOrEmpty(inputValue))
+                    outputValue = null;
+                else if (conversionType.IsEnum)
                     outputValue = Enum.Parse(outputType, inputValue, true);
                 else if (conversionType == typeof(Guid))
                     outputValue = Convert.ChangeType(Guid.Parse(inputValue), conversionType);
@@ -41,7 +46,7 @@ namespace BlazorBase.CRUD.Services
                     outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.CurrentUICulture);
                 else
                     outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.InvariantCulture);
-                
+
                 success = true;
             }
             catch
@@ -49,7 +54,7 @@ namespace BlazorBase.CRUD.Services
                 outputValue = default;
                 errorMessage = Localizer["The Value {0} can not be converted to the format {1}", inputValue, outputType.Name];
             }
-          
+
             return success;
         }
 
