@@ -60,7 +60,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Injects
-        [Inject] public BaseService Service { get; set; }
+        [Inject] protected BaseService Service { get; set; }
         [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
         [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
