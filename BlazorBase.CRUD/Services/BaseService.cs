@@ -285,6 +285,7 @@ namespace BlazorBase.CRUD.Services
         #endregion
 
         #region SaveChanges
+
         public async virtual Task<int> SaveChangesAsync()
         {
             var changedEntries = await HandleOnBeforeDbContextEvents();

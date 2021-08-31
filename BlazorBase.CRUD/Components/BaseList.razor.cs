@@ -79,6 +79,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool DontRenderCard { get; set; }
         [Parameter] public bool Sortable { get; set; } = true;
         [Parameter] public bool Filterable { get; set; } = true;
+        [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
         #endregion
 
         #region Injects
@@ -126,9 +127,12 @@ namespace BlazorBase.CRUD.Components
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
 
-                ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;
-                LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
-                NavigationManager.LocationChanged += LocationEventHandler;
+                ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;                
+                if (UrlNavigationEnabled)
+                {
+                    LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
+                    NavigationManager.LocationChanged += LocationEventHandler;
+                }
             });
 
             await PrepareForeignKeyProperties(Service);
@@ -144,7 +148,8 @@ namespace BlazorBase.CRUD.Components
 
         public void Dispose()
         {
-            NavigationManager.LocationChanged -= LocationEventHandler;
+            if (UrlNavigationEnabled)
+                NavigationManager.LocationChanged -= LocationEventHandler;
         }
 
         protected virtual async Task NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
@@ -155,7 +160,8 @@ namespace BlazorBase.CRUD.Components
                 return;
             }
 
-            await ProcessQueryParameters();
+            if (UrlNavigationEnabled)
+                await ProcessQueryParameters();
         }
 
         public override async Task SetParametersAsync(ParameterView parameters)
