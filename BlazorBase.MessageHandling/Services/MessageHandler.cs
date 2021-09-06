@@ -2,6 +2,7 @@
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
 using Blazorise;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Threading.Tasks;
 using static BlazorBase.MessageHandling.Interfaces.IMessageHandler;
@@ -14,10 +15,16 @@ namespace BlazorBase.MessageHandling.Services
         #region Events
 
         public event ShowMessageEventHandler OnShowMessage;
-
         public event ShowConfirmDialogHandler OnShowConfirmDialog;
 
         public event ShowDateSpanDialogHandler OnShowDateSpanDialog;
+
+        public event ShowLoadingMessageHandler OnShowLoadingMessage;
+        public event UpdateLoadingMessageHandler OnUpdateLoadingMessage;
+        public event CloseLoadingMessageHandler OnCloseLoadingMessage;
+        public event ShowLoadingProgressMessageHandler OnShowLoadingProgressMessage;
+        public event UpdateLoadingProgressMessageHandler OnUpdateLoadingProgressMessage;
+        public event CloseLoadingProgressMessageHandler OnCloseLoadingProgressMessage;
         #endregion
 
         #region ShowMessage
@@ -67,7 +74,7 @@ namespace BlazorBase.MessageHandling.Services
             DateInputMode dateInputMode = DateInputMode.Date,
             string fromDateCaption = null,
             string toDateCaption = null,
-            MessageType messageType = MessageType.Information,            
+            MessageType messageType = MessageType.Information,
             Func<ModalClosingEventArgs, ConfirmDialogResult, DateSpanDialogResult, Task> onClosing = null,
             object icon = null,
             string confirmButtonText = null,
@@ -103,5 +110,60 @@ namespace BlazorBase.MessageHandling.Services
         }
         #endregion
 
+        #region ShowLoadingMessage
+        public Guid ShowLoadingMessage(string message, RenderFragment loadingChildContent = null)
+        {
+            return OnShowLoadingMessage?.Invoke(new ShowLoadingMessageArgs(message, loadingChildContent)) ?? Guid.Empty;
+        }
+
+        public bool UpdateLoadingMessage(Guid id, string message, RenderFragment loadingChildContent = null)
+        {
+            return OnUpdateLoadingMessage?.Invoke(new ShowLoadingMessageArgs(message, loadingChildContent) { Id = id }) ?? false;
+        }
+        public bool CloseLoadingMessage(Guid id)
+        {
+            return OnCloseLoadingMessage?.Invoke(id) ?? false;
+        }
+        #endregion
+
+        #region ShowLoadingProgressMessage
+        public Guid ShowLoadingProgressMessage(string message,
+                                               int currentProgress = 0,
+                                               string progressText = null,                                               
+                                               bool showProgressInText = true,
+                                               RenderFragment loadingChildContent = null)
+        {
+            return OnShowLoadingProgressMessage?.Invoke(
+                new ShowLoadingProgressMessageArgs(
+                    message,
+                    currentProgress,
+                    progressText,                    
+                    showProgressInText,
+                    loadingChildContent)
+                ) ?? Guid.Empty;
+        }
+
+        public bool UpdateLoadingProgressMessage(Guid id,
+                                                 string message,
+                                                 int currentProgress = 0,
+                                                 string progressText = null,                                                 
+                                                 bool showProgressInText = true,
+                                                 RenderFragment loadingChildContent = null)
+        {
+            return OnUpdateLoadingProgressMessage?.Invoke(
+               new ShowLoadingProgressMessageArgs(
+                   message,
+                   currentProgress,
+                   progressText,                   
+                   showProgressInText,
+                   loadingChildContent)
+               { Id = id }) ?? false;
+        }
+
+        public bool CloseLoadingProgressMessage(Guid id)
+        {
+            return OnCloseLoadingProgressMessage?.Invoke(id) ?? false;
+        }
+        #endregion
     }
 }

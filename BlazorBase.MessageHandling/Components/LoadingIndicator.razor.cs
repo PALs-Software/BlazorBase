@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.Files.Components
+namespace BlazorBase.MessageHandling.Components
 {
     public partial class LoadingIndicator
     {

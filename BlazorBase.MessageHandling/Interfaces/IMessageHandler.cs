@@ -2,6 +2,7 @@
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Models;
 using Blazorise;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace BlazorBase.MessageHandling.Interfaces
 {
     public interface IMessageHandler
     {
+        #region Show Message
         public delegate void ShowMessageEventHandler(ShowMessageArgs args);
         public event ShowMessageEventHandler OnShowMessage;
         public void ShowMessage(
@@ -26,7 +28,9 @@ namespace BlazorBase.MessageHandling.Interfaces
             Color closeButtonColor = Color.Secondary,
             ModalSize modalSize = ModalSize.Large);
         public void ShowMessage(ShowMessageArgs args);
+        #endregion
 
+        #region Show Confirm Dialog
         public delegate void ShowConfirmDialogHandler(ShowConfirmDialogArgs args);
         public event ShowConfirmDialogHandler OnShowConfirmDialog;
         public void ShowConfirmDialog(
@@ -41,7 +45,9 @@ namespace BlazorBase.MessageHandling.Interfaces
             Color abortButtonColor = Color.Secondary,
             ModalSize modalSize = ModalSize.Large);
         public void ShowConfirmDialog(ShowConfirmDialogArgs args);
+        #endregion
 
+        #region Show Date Span Dialog
         public delegate void ShowDateSpanDialogHandler(ShowDateSpanDialogArgs args);
         public event ShowDateSpanDialogHandler OnShowDateSpanDialog;
         public void ShowDateSpanDialog(
@@ -61,5 +67,45 @@ namespace BlazorBase.MessageHandling.Interfaces
             Color abortButtonColor = Color.Secondary,
             ModalSize modalSize = ModalSize.Large);
         public void ShowDateSpanDialog(ShowDateSpanDialogArgs args);
+        #endregion
+
+        #region Show Loading Message
+        public delegate Guid ShowLoadingMessageHandler(ShowLoadingMessageArgs args);
+        public event ShowLoadingMessageHandler OnShowLoadingMessage;
+        public Guid ShowLoadingMessage(string message, RenderFragment loadingChildContent = null);
+
+        public delegate bool UpdateLoadingMessageHandler(ShowLoadingMessageArgs args);
+        public event UpdateLoadingMessageHandler OnUpdateLoadingMessage;
+        public bool UpdateLoadingMessage(Guid id, string message, RenderFragment loadingChildContent = null);
+
+        public delegate bool CloseLoadingMessageHandler(Guid id);
+        public event CloseLoadingMessageHandler OnCloseLoadingMessage;
+        public bool CloseLoadingMessage(Guid id);
+        #endregion
+
+        #region Show Loading Message
+        public delegate Guid ShowLoadingProgressMessageHandler(ShowLoadingProgressMessageArgs args);
+        public event ShowLoadingProgressMessageHandler OnShowLoadingProgressMessage;
+        public Guid ShowLoadingProgressMessage(
+            string message,
+            int currentProgress = 0,
+            string progressText = null,            
+            bool showProgressInText = true,
+            RenderFragment loadingChildContent = null);
+
+        public delegate bool UpdateLoadingProgressMessageHandler(ShowLoadingProgressMessageArgs args);
+        public event UpdateLoadingProgressMessageHandler OnUpdateLoadingProgressMessage;
+        public bool UpdateLoadingProgressMessage(
+            Guid id,
+            string message,
+            int currentProgress = 0,
+            string progressText = null,            
+            bool showProgressInText = true,
+            RenderFragment loadingChildContent = null);
+
+        public delegate bool CloseLoadingProgressMessageHandler(Guid id);
+        public event CloseLoadingProgressMessageHandler OnCloseLoadingProgressMessage;
+        public bool CloseLoadingProgressMessage(Guid id);
+        #endregion
     }
 }

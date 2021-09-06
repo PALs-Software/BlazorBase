@@ -160,6 +160,8 @@ namespace BlazorBase.CRUD.Components
             if (propertyName != Property.Name)
                 return;
 
+            LastValueConversionFailed = false;
+            SetCurrentValueAsString(Property.GetValue(Model));            
             ValidatePropertyValue();
             InvokeAsync(() => StateHasChanged());
         }

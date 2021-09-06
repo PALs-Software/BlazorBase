@@ -21,9 +21,9 @@ namespace BlazorBase.MessageHandling.Components
 
         #region Injects
         [Inject] protected ErrorHandler ErrorHandler { get; set; }
-        [Inject] private IMessageHandler MessageHandler { get; set; }
-        [Inject] private IStringLocalizer<MessageGenerator> MessageGeneratorLocalizer { get; set; }
-        [Inject] private IStringLocalizer<DateSpanDialogGenerator> Localizer { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected IStringLocalizer<MessageGenerator> MessageGeneratorLocalizer { get; set; }
+        [Inject] protected IStringLocalizer<DateSpanDialogGenerator> Localizer { get; set; }
         #endregion
 
         #region Init

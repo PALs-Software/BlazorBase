@@ -56,7 +56,7 @@ namespace BlazorBase.Files.Models
         [NotMapped]
         [Editable(false)]
         [Visible(DisplayOrder = 100)]
-        public BaseFile DisplayFile { get { return this; } }
+        public virtual BaseFile DisplayFile { get { return this; } }
 
         [NotMapped]
         public Guid TempFileId { get; set; }
