@@ -69,6 +69,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
         [Parameter] public bool HideTitle { get; set; } = false;
         [Parameter] public string SingleDisplayName { get; set; }
+        [Parameter] public string ExplainText { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
@@ -185,6 +186,12 @@ namespace BlazorBase.CRUD.Components
                 PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
             else
                 PluralDisplayName = ModelLocalizer[PluralDisplayName];
+
+            if (String.IsNullOrEmpty(ExplainText))
+                ExplainText = ModelLocalizer["ExplainText"];
+
+            if (ExplainText == "ExplainText")
+                ExplainText = null;
         }
 
         protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
