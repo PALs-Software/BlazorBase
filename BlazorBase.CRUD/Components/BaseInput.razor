@@ -1,10 +1,69 @@
 ﻿@using System.ComponentModel.DataAnnotations;
- 
+@using Blazorise.RichTextEdit
+
 @if (Model != null)
 {
     if (RenderType == typeof(string) || DecimalTypes.Contains(RenderType))
     {
         if (PresentationDataType == DataType.MultilineText)
+        {
+            <RichTextEdit @ref="richTextEditRef"
+                          Theme="RichTextEditTheme.Snow"
+                          ContentChanged="@OnContentChanged"
+                          ReadOnly="@IsReadOnly"
+                          SubmitOnEnter="false"
+                          EnterPressed="@OnSave"
+                          ToolbarPosition="Placement.Top">
+                <Editor></Editor>
+                <Toolbar>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarSelect Action="RichTextEditAction.Header">
+                            <RichTextEditToolbarSelectItem Value="false" />
+                            <RichTextEditToolbarSelectItem Value="1" />
+                            <RichTextEditToolbarSelectItem Value="2" />
+                            <RichTextEditToolbarSelectItem Value="3" />
+                            <RichTextEditToolbarSelectItem Value="4" />
+                            <RichTextEditToolbarSelectItem Value="5" />
+                            <RichTextEditToolbarSelectItem Value="6" />
+                        </RichTextEditToolbarSelect>
+                        <RichTextEditToolbarSelect Action="RichTextEditAction.Font"></RichTextEditToolbarSelect>
+                    </RichTextEditToolbarGroup>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Strike" />
+                    </RichTextEditToolbarGroup>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarSelect Action="RichTextEditAction.Color"></RichTextEditToolbarSelect>
+                        <RichTextEditToolbarSelect Action="RichTextEditAction.Background"></RichTextEditToolbarSelect>
+                    </RichTextEditToolbarGroup>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Script" Value="sub" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Script" Value="super" />
+                    </RichTextEditToolbarGroup>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
+                    </RichTextEditToolbarGroup>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Indent" Value="-1" />
+                        <RichTextEditToolbarSelect Action="RichTextEditAction.Align"></RichTextEditToolbarSelect>
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Indent" Value="+1" />
+                    </RichTextEditToolbarGroup>
+                    <RichTextEditToolbarGroup>
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Direction" Value="rtl" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.Blockquote" />
+                        <RichTextEditToolbarButton Action="RichTextEditAction.CodeBlock" />
+                    </RichTextEditToolbarGroup>
+                    <!-- Custom toolbar content -->
+                    <RichTextEditToolbarGroup Float="Float.Right">
+                        <Button Clicked="@OnSave"><Icon Name="IconName.Save" /></Button>
+                    </RichTextEditToolbarGroup>
+                </Toolbar>
+            </RichTextEdit>
+        }
+        else if (PresentationDataType == DataType.MultilineText)
         {
             <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
         }

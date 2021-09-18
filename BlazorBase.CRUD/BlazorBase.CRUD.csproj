@@ -25,6 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazorise.RichTextEdit" Version="0.9.3.6" />
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.6" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />

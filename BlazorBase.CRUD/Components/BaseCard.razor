@@ -59,11 +59,18 @@
                                 }
                                 else
                                 {
-                                    <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
+                                    var colSize = ColumnSize.Is6.OnFullHD.Is12.OnWidescreen;
+                                    var colClass = "col-xxl-4";
+                                    if (displayItem.IsFullRow)
+                                    {
+                                        colSize = ColumnSize.IsFull;
+                                        colClass = String.Empty;
+                                    }
+                                    <Column ColumnSize="@colSize" Class="@colClass">
                                         <Fields>
-                                            <Field Horizontal="true">
-                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)</FieldLabel>
-                                                <FieldBody ColumnSize="ColumnSize.Is8">
+                                            <Field Horizontal="false">
+                                                <FieldLabel ColumnSize="ColumnSize.Is12">@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)</FieldLabel>
+                                                <FieldBody ColumnSize="ColumnSize.Is12">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
                                                         <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />

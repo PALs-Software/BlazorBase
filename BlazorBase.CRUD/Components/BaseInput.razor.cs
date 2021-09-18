@@ -7,6 +7,7 @@ using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Modules;
 using Blazorise;
+using Blazorise.RichTextEdit;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +104,11 @@ namespace BlazorBase.CRUD.Components
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 PresentationDataType = Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
+                if(PresentationDataType == DataType.MultilineText)
+                {
+                    richTextEditRef = new RichTextEdit();
+                }
+
                 var dict = new Dictionary<object, object>()
                 {
                     [typeof(IStringLocalizer)] = ModelLocalizer,
@@ -132,6 +138,24 @@ namespace BlazorBase.CRUD.Components
             await RaiseOnFormatPropertyEventsAsync();
         }
 
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (PresentationDataType == DataType.MultilineText && !loadContent)
+            {
+                if (!String.IsNullOrEmpty(CurrentValueAsString))
+                {
+                    if(CurrentValueAsString.First() == '<' && CurrentValueAsString.Last() == '>')
+                        await richTextEditRef.SetHtmlAsync(CurrentValueAsString);
+                    else if(CurrentValueAsString.First() == '{' && CurrentValueAsString.Last() == '}')
+                        await richTextEditRef.SetDeltaAsync(CurrentValueAsString);
+                    else
+                        await richTextEditRef.SetTextAsync(CurrentValueAsString);
+                }
+                loadContent = true;
+            }
+            return;
+        }
+
         public override async Task SetParametersAsync(ParameterView parameters)
         {
             await base.SetParametersAsync(parameters);
@@ -151,6 +175,31 @@ namespace BlazorBase.CRUD.Components
         public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(false);
+        }
+        #endregion
+
+        #region TextEditor
+        private RichTextEdit richTextEditRef;
+        private string contentAsHtml;
+        private string contentAsDeltaJson;
+        private string contentAsText;
+        private string savedContent;
+        private bool loadContent;
+
+        public async Task OnContentChanged()
+        {
+            //contentAsHtml = await richTextEditRef.GetHtmlAsync();
+            //contentAsDeltaJson = await richTextEditRef.GetDeltaAsync();
+            //contentAsText = await richTextEditRef.GetTextAsync();
+        }
+
+        public async Task OnSave()
+        {
+            contentAsDeltaJson = await richTextEditRef.GetDeltaAsync();
+            contentAsHtml = await richTextEditRef.GetHtmlAsync();
+            //contentAsText = await richTextEditRef.GetTextAsync();
+
+            await OnValueChangedAsync(contentAsHtml);
         }
         #endregion
 

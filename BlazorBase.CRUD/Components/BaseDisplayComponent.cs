@@ -13,6 +13,7 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
@@ -49,6 +50,7 @@ namespace BlazorBase.CRUD.Components
                 DisplayPropertyType = displayPropertyType;
                 IsSortable = isSortable;
                 IsFilterable = isFilterable;
+                IsFullRow = property.GetCustomAttribute<DataTypeAttribute>()?.DataType == DataType.MultilineText;
             }
 
             public PropertyInfo Property { get; set; }
@@ -64,6 +66,7 @@ namespace BlazorBase.CRUD.Components
             public Type DisplayPropertyType { get; set; }
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
+            public bool IsFullRow { get; set; }
         }
 
         #region Injects
