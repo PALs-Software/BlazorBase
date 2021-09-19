@@ -83,6 +83,8 @@ namespace BlazorBase.CRUD.Components
             typeof(long?)
         };
 
+        protected RichTextEdit RichTextEditRef { get; set; } = new RichTextEdit();
+        protected bool loadContent { get; set; } = false;
         #endregion
 
         #region Init
@@ -103,11 +105,6 @@ namespace BlazorBase.CRUD.Components
                 RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 PresentationDataType = Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
-
-                if(PresentationDataType == DataType.MultilineText)
-                {
-                    richTextEditRef = new RichTextEdit();
-                }
 
                 var dict = new Dictionary<object, object>()
                 {
@@ -138,23 +135,23 @@ namespace BlazorBase.CRUD.Components
             await RaiseOnFormatPropertyEventsAsync();
         }
 
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (PresentationDataType == DataType.MultilineText && !loadContent)
-            {
-                if (!String.IsNullOrEmpty(CurrentValueAsString))
-                {
-                    if(CurrentValueAsString.First() == '<' && CurrentValueAsString.Last() == '>')
-                        await richTextEditRef.SetHtmlAsync(CurrentValueAsString);
-                    else if(CurrentValueAsString.First() == '{' && CurrentValueAsString.Last() == '}')
-                        await richTextEditRef.SetDeltaAsync(CurrentValueAsString);
-                    else
-                        await richTextEditRef.SetTextAsync(CurrentValueAsString);
-                }
-                loadContent = true;
-            }
-            return;
-        }
+        //protected override async Task OnAfterRenderAsync(bool firstRender)
+        //{
+        //    if (PresentationDataType == DataType.MultilineText && !loadContent)
+        //    {
+        //        if (!String.IsNullOrEmpty(CurrentValueAsString))
+        //        {
+        //            if(CurrentValueAsString.First() == '<' && CurrentValueAsString.Last() == '>')
+        //                await RichTextEditRef.SetHtmlAsync(CurrentValueAsString);
+        //            else if(CurrentValueAsString.First() == '{' && CurrentValueAsString.Last() == '}')
+        //                await RichTextEditRef.SetDeltaAsync(CurrentValueAsString);
+        //            else
+        //                await RichTextEditRef.SetTextAsync(CurrentValueAsString);
+        //        }
+        //        loadContent = true;
+        //    }
+        //    return;
+        //}
 
         public override async Task SetParametersAsync(ParameterView parameters)
         {
@@ -178,27 +175,10 @@ namespace BlazorBase.CRUD.Components
         }
         #endregion
 
-        #region TextEditor
-        private RichTextEdit richTextEditRef;
-        private string contentAsHtml;
-        private string contentAsDeltaJson;
-        private string contentAsText;
-        private string savedContent;
-        private bool loadContent;
-
-        public async Task OnContentChanged()
-        {
-            //contentAsHtml = await richTextEditRef.GetHtmlAsync();
-            //contentAsDeltaJson = await richTextEditRef.GetDeltaAsync();
-            //contentAsText = await richTextEditRef.GetTextAsync();
-        }
-
+        #region RichTextEdit
         public async Task OnSave()
         {
-            contentAsDeltaJson = await richTextEditRef.GetDeltaAsync();
-            contentAsHtml = await richTextEditRef.GetHtmlAsync();
-            //contentAsText = await richTextEditRef.GetTextAsync();
-
+            var contentAsHtml = await RichTextEditRef.GetHtmlAsync();
             await OnValueChangedAsync(contentAsHtml);
         }
         #endregion

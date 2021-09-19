@@ -308,6 +308,18 @@ namespace BlazorBase.CRUD.Components
             return args.Caption;
         }
 
+        protected virtual string GetPropertyTooltip(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        {
+            var caption = modelLocalizer[displayItem.Property.Name];
+
+            var tooltip = modelLocalizer[$"{displayItem.Property.Name}_Tooltip"];
+
+            if(tooltip.Value != caption.Name + "_Tooltip")
+                return caption.Value + Environment.NewLine + " " + Environment.NewLine + tooltip.Value;
+
+            return caption.Value;
+        }
+
         #region Feedback
 
         protected virtual void ShowFormattedInvalidFeedback(string feedback)

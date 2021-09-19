@@ -61,16 +61,31 @@
                                 {
                                     var colSize = ColumnSize.Is6.OnFullHD.Is12.OnWidescreen;
                                     var colClass = "col-xxl-4";
+                                    var isHorizontal = true;
+                                    var colLabel = ColumnSize.Is4;
+                                    var colBody = ColumnSize.Is8;
+                                    var tooltipPos = Placement.Right;
                                     if (displayItem.IsFullRow)
                                     {
                                         colSize = ColumnSize.IsFull;
                                         colClass = String.Empty;
+                                        isHorizontal = false;
+                                        colLabel = ColumnSize.Is12;
+                                        colBody = ColumnSize.Is12;
+                                        tooltipPos = Placement.Top; ;
                                     }
                                     <Column ColumnSize="@colSize" Class="@colClass">
                                         <Fields>
-                                            <Field Horizontal="false">
-                                                <FieldLabel ColumnSize="ColumnSize.Is12">@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)</FieldLabel>
-                                                <FieldBody ColumnSize="ColumnSize.Is12">
+                                            <Field Horizontal="@isHorizontal">
+                                                <FieldLabel ColumnSize="@colLabel" Style="white-space: nowrap">
+                                                    @*<Tooltip Text="@GetPropertyTooltip(EventServices, Model, ModelLocalizer, displayItem)" Placement="@tooltipPos" Multiline="false">
+                                                        @GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)
+                                                    </Tooltip>*@
+                                                    <div title="@GetPropertyTooltip(EventServices, Model, ModelLocalizer, displayItem)">
+                                                        @GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)
+                                                    </div>
+                                                </FieldLabel>
+                                                <FieldBody ColumnSize="@colBody">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
                                                         <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
