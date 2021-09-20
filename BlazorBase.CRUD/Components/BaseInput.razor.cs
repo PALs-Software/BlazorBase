@@ -83,8 +83,7 @@ namespace BlazorBase.CRUD.Components
             typeof(long?)
         };
 
-        protected RichTextEdit RichTextEditRef { get; set; } = new RichTextEdit();
-        protected bool loadContent { get; set; } = false;
+        protected RichTextEdit RichTextEditRef = default!;
         #endregion
 
         #region Init
