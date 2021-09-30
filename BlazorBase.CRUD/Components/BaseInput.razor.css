@@ -4,4 +4,6 @@
 
 ::deep .ql-container.ql-snow {
     border: 1px solid #ccc !important; /*restore original*/
+    overflow-y: auto;
+    max-height: 50vh;
 }
