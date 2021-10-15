@@ -114,12 +114,32 @@ namespace BlazorBase.CRUD.Services
             return Task.FromResult(query.ToList());
         }
 
+        public virtual Task<List<M>> GetDataAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false) where T : class
+        {
+            var query = DbContext.Set<T>().Where(dataLoadCondition).Select(dataSelectCondition);
+
+            //if (asNoTracking)
+            //    query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
+        }
+
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, int index, int count, bool asNoTracking = false) where T : class
         {
             var query = DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count);
 
             if (asNoTracking)
                 query = query.AsNoTracking();
+
+            return Task.FromResult(query.ToList());
+        }
+
+        public virtual Task<List<M>> GetDataAsync<T,M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, int index, int count, bool asNoTracking = false) where T : class
+        {
+            var query = DbContext.Set<T>().Where(dataLoadCondition).Select(dataSelectCondition).Skip(index).Take(count);
+
+            //if (asNoTracking)
+            //    query = query.AsNoTracking();
 
             return Task.FromResult(query.ToList());
         }
