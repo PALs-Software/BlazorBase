@@ -97,7 +97,7 @@ namespace BlazorBase.CRUD.Services
         public virtual Task<List<T>> GetDataAsync<T>(int index, int count, bool asNoTracking = false) where T : class
         {
             var query = DbContext.Set<T>().Skip(index).Take(count);
-            
+
             if (asNoTracking)
                 query = query.AsNoTracking();
 
@@ -116,12 +116,14 @@ namespace BlazorBase.CRUD.Services
 
         public virtual Task<List<M>> GetDataAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false) where T : class
         {
-            var query = DbContext.Set<T>().Where(dataLoadCondition).Select(dataSelectCondition);
+            var query = DbContext.Set<T>().Where(dataLoadCondition);
 
-            //if (asNoTracking)
-            //    query = query.AsNoTracking();
+            if (asNoTracking)
+                query = query.AsNoTracking();
 
-            return Task.FromResult(query.ToList());
+            var selectQuery = query.Select(dataSelectCondition);
+
+            return Task.FromResult(selectQuery.ToList());
         }
 
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, int index, int count, bool asNoTracking = false) where T : class
@@ -134,14 +136,16 @@ namespace BlazorBase.CRUD.Services
             return Task.FromResult(query.ToList());
         }
 
-        public virtual Task<List<M>> GetDataAsync<T,M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, int index, int count, bool asNoTracking = false) where T : class
+        public virtual Task<List<M>> GetDataAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, int index, int count, bool asNoTracking = false) where T : class
         {
-            var query = DbContext.Set<T>().Where(dataLoadCondition).Select(dataSelectCondition).Skip(index).Take(count);
+            var query = DbContext.Set<T>().Where(dataLoadCondition);
 
-            //if (asNoTracking)
-            //    query = query.AsNoTracking();
+            if (asNoTracking)
+                query = query.AsNoTracking();
 
-            return Task.FromResult(query.ToList());
+            var selectQuery = query.Select(dataSelectCondition).Skip(index).Take(count);
+
+            return Task.FromResult(selectQuery.ToList());
         }
 
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition, bool asNoTracking = false) where T : class, IBaseModel
