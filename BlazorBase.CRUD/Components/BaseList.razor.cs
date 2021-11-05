@@ -81,6 +81,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool Sortable { get; set; } = true;
         [Parameter] public bool Filterable { get; set; } = true;
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
+        [Parameter] public string MaxHeight { get; set; } = "";
         #endregion
 
         #region Injects
@@ -101,6 +102,7 @@ namespace BlazorBase.CRUD.Components
         protected List<TModel> Entries = new List<TModel>();
         protected Type TModelType;
 
+        protected BaseFilterModalCard<TModel> BaseFilterModalCard = default!;
         protected BaseModalCard<TModel> BaseModalCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
 
@@ -378,6 +380,15 @@ namespace BlazorBase.CRUD.Components
 
         #region CRUD
 
+        public virtual void ChangeContentFilter()
+        {
+            //var args = new OnBeforeOpenAddModalArgs(false, EventServices);
+            //await OnBeforeOpenAddModal.InvokeAsync(args);
+            //if (args.IsHandled)
+            //    return;
+
+            BaseFilterModalCard.ShowModal();
+        }
         public virtual async Task AddEntryAsync()
         {
             var args = new OnBeforeOpenAddModalArgs(false, EventServices);
@@ -457,6 +468,12 @@ namespace BlazorBase.CRUD.Components
             ChangeUrlToList();
 
             await OnCardClosed.InvokeAsync();
+        }
+
+        protected virtual async Task OnFilterCardClosedAsync()
+        {
+            foreach (var item in DisplayGroups.Values.SelectMany(x=>x.DisplayItems))
+               item.IsVisible = !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(item.Property.Name);
         }
         #endregion
 

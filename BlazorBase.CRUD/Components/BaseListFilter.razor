@@ -7,9 +7,9 @@
     <th class="th-actions">
         <Button Color="Color.Success" title="@BaseListFilterLocalizer["Reset all filters"]" Clicked="ResetAllFiltersAsync"><Icon Name="IconName.Clear" /></Button>
     </th>
-    @foreach (var displayGroup in ListDisplayGroups)
+    @foreach (var displayGroup in ListDisplayGroups.Where(x => x.Value.DisplayItems.Exists(y => y.IsVisible)))
     {
-        @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+        @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty && p.IsVisible))
         {
             <th>
                 @if (displayItem.IsFilterable && (AllowedFilterTypes.Contains(displayItem.DisplayPropertyType) || displayItem.DisplayPropertyType.IsEnum))

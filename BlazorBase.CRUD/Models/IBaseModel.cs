@@ -105,6 +105,7 @@ namespace BlazorBase.CRUD.Models
         Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
         bool ShowOnlySingleEntry { get; }
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
+        List<string> PropertyNamesToRemoveFromListView { get; set; }
         #endregion
 
         #region Helper Methods

@@ -38,7 +38,7 @@ namespace BlazorBase.CRUD.Components
         public class DisplayItem
         {
             public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
-                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, bool isFilterable)
+                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, bool isFilterable, bool isVisible)
             {
                 Property = property;
                 Attribute = attribute;
@@ -51,6 +51,7 @@ namespace BlazorBase.CRUD.Components
                 IsSortable = isSortable;
                 IsFilterable = isFilterable;
                 IsFullRow = property.GetCustomAttribute<DataTypeAttribute>()?.DataType == DataType.MultilineText;
+                IsVisible = isVisible;
             }
 
             public PropertyInfo Property { get; set; }
@@ -67,6 +68,7 @@ namespace BlazorBase.CRUD.Components
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
             public bool IsFullRow { get; set; }
+            public bool IsVisible { get; set; }
         }
 
         #region Injects
@@ -124,7 +126,11 @@ namespace BlazorBase.CRUD.Components
                     sortAndFilterable = true;
                 }
 
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType, sortAndFilterable, sortAndFilterable));
+                bool isVisible = true;
+                if (componentModelInstance != null)
+                    isVisible = !componentModelInstance.PropertyNamesToRemoveFromListView.Contains(property.Name);
+
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType, sortAndFilterable, sortAndFilterable, isVisible));
             }
 
             SortDisplayLists();
