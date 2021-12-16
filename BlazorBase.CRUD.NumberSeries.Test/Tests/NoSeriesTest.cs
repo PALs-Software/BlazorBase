@@ -47,7 +47,7 @@ namespace BlazorBase.CRUD.NumberSeries.Test.Tests
 
             // Test
             series.StartingNo = "A-000";
-            series.OnAfterPropertyChanged(new OnAfterPropertyChangedArgs(series, nameof(NoSeries.StartingNo), series.StartingNo, true, EventServices));
+            series.OnAfterPropertyChanged(new OnAfterPropertyChangedArgs(series, nameof(NoSeries.StartingNo), series.StartingNo, null, true, EventServices));
 
             // Validate
             Assert.Equal("A-999", series.EndingNo);
