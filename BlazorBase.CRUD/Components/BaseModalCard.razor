@@ -17,7 +17,7 @@
                           Embedded="true"
                           ShowEntryByStart="ShowEntryByStart"
                           ComponentModelInstance="ComponentModelInstance"
-                          EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"                        
+                          EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"
                           OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
                           OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
                           OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
@@ -38,6 +38,16 @@
                           OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
                           OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
             </ModalBody>
+            @if (!String.IsNullOrEmpty(ExplainText))
+            {
+                <ModalFooter Style="justify-content:flex-start">
+                    @foreach (var item in ExplainText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None))
+                    {
+                        @item
+                        <br />
+                    }
+                </ModalFooter>
+            }
             <ModalFooter>
                 <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Close"]</Button>
                 <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>

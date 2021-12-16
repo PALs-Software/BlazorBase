@@ -14,6 +14,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -37,7 +38,7 @@ namespace BlazorBase.CRUD.Components
         public class DisplayItem
         {
             public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
-                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, bool isFilterable)
+                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
             {
                 Property = property;
                 Attribute = attribute;
@@ -48,6 +49,7 @@ namespace BlazorBase.CRUD.Components
                 DisplayPropertyPath = displayPropertyPath;
                 DisplayPropertyType = displayPropertyType;
                 IsSortable = isSortable;
+                SortDirection = sortDirection;
                 IsFilterable = isFilterable;
             }
 
@@ -73,12 +75,12 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Protected Properties
-        protected virtual List<PropertyInfo> VisibleProperties { get; set; } = new List<PropertyInfo>();
-        protected virtual Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new Dictionary<string, DisplayGroup>();
+        protected virtual List<PropertyInfo> VisibleProperties { get; set; } = new();
+        protected virtual Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new();
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> ForeignKeyProperties { get; set; }
-        protected static ConcurrentDictionary<Type, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new ConcurrentDictionary<Type, List<KeyValuePair<string, string>>>();
-        protected virtual Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new Dictionary<Type, List<KeyValuePair<string, string>>>();
-        protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties { get; set; } = new Dictionary<PropertyInfo, List<KeyValuePair<string, string>>>();
+        protected static ConcurrentDictionary<long, List<KeyValuePair<string, string>>> CachedEnumValueDictionary { get; set; } = new();
+        protected virtual Dictionary<Type, List<KeyValuePair<string, string>>> CachedForeignKeys { get; set; } = new();
+        protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string, string>>> UsesCustomLookupDataProperties { get; set; } = new();
         #endregion
 
         #region Member
@@ -121,7 +123,11 @@ namespace BlazorBase.CRUD.Components
                     sortAndFilterable = true;
                 }
 
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType, sortAndFilterable, sortAndFilterable));
+                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(
+                    new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(),
+                        property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath,
+                        displayPathAndType.DisplayType, sortAndFilterable, attribute.SortDirection, sortAndFilterable
+                ));
             }
 
             SortDisplayLists();
@@ -269,10 +275,18 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
+        protected virtual long GetEnumTypeDictionaryKey(Type enumType)
+        {
+            return enumType.GetHashCode() * 10000L + CultureInfo.CurrentUICulture.LCID;
+        }
+
+
         protected virtual List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
         {
-            if (CachedEnumValueDictionary.ContainsKey(enumType))
-                return CachedEnumValueDictionary[enumType];
+            long key = GetEnumTypeDictionaryKey(enumType);
+
+            if (CachedEnumValueDictionary.ContainsKey(key))
+                return CachedEnumValueDictionary[key];
 
             var result = new List<KeyValuePair<string, string>>();
             var values = Enum.GetNames(enumType);
@@ -280,7 +294,7 @@ namespace BlazorBase.CRUD.Components
             foreach (var value in values)
                 result.Add(new KeyValuePair<string, string>(value, localizer[value]));
 
-            CachedEnumValueDictionary.TryAdd(enumType, result);
+            CachedEnumValueDictionary.TryAdd(key, result);
             return result;
         }
 

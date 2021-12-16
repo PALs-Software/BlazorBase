@@ -1,0 +1,32 @@
+﻿@using BlazorBase.Modules;
+@using BlazorBase.MessageHandling.Models;
+
+@foreach (var loadingMessage in LoadingMessages)
+{
+    <LoadingIndicator Visible="true">
+        @loadingMessage.Value.Message
+
+        @if (loadingMessage.Value.LoadingChildContent != null)
+        {
+            @loadingMessage.Value.LoadingChildContent
+        }
+
+        @if (loadingMessage.Value is ShowLoadingProgressMessageArgs progressArgs)
+        {
+            <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
+                <ProgressBar Value="progressArgs.CurrentProgress" Animated="true" Striped="true">
+                    @if (!String.IsNullOrEmpty(progressArgs.ProgressText))
+                    {
+                        @progressArgs.ProgressText
+                    }
+
+                    @if (progressArgs.ShowProgressInText)
+                    {
+                        <text>@progressArgs.CurrentProgress %</text>
+                    }
+                </ProgressBar>
+            </Progress>
+
+        }
+    </LoadingIndicator>
+}

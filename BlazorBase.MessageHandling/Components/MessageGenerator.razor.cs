@@ -20,8 +20,8 @@ namespace BlazorBase.MessageHandling.Components
 
         #region Injects
         [Inject] protected ErrorHandler ErrorHandler { get; set; }
-        [Inject]private IMessageHandler MessageHandler { get; set; }
-        [Inject]private IStringLocalizer<MessageGenerator> Localizer { get; set; }
+        [Inject] protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected IStringLocalizer<MessageGenerator> Localizer { get; set; }
         #endregion
 
         #region Init
@@ -125,7 +125,8 @@ namespace BlazorBase.MessageHandling.Components
             }
             catch (Exception e)
             {
-                _ = Task.Run(() => {
+                _ = Task.Run(() =>
+                {
                     ShowMessage(Localizer["Error"], ErrorHandler.PrepareExceptionErrorMessage(e), MessageType.Error);
                 });
             }
@@ -134,13 +135,13 @@ namespace BlazorBase.MessageHandling.Components
         protected void OnConfirmButtonClicked(ModalInfo modalInfo)
         {
             modalInfo.ConfirmDialogResult = ConfirmDialogResult.Confirmed;
-            modalInfo.Modal.Hide();
+            modalInfo.Modal?.Hide();
         }
 
         protected void OnAbortButtonClicked(ModalInfo modalInfo)
         {
             modalInfo.ConfirmDialogResult = ConfirmDialogResult.Aborted;
-            modalInfo.Modal.Hide();
+            modalInfo.Modal?.Hide();
         }
 
         #endregion

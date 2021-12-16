@@ -69,6 +69,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
         [Parameter] public bool HideTitle { get; set; } = false;
         [Parameter] public string SingleDisplayName { get; set; }
+        [Parameter] public string ExplainText { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
@@ -79,6 +80,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool DontRenderCard { get; set; }
         [Parameter] public bool Sortable { get; set; } = true;
         [Parameter] public bool Filterable { get; set; } = true;
+        [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
+        [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
         #endregion
 
         #region Injects
@@ -96,18 +99,18 @@ namespace BlazorBase.CRUD.Components
         #region Members
         protected EventServices EventServices;
 
-        protected List<TModel> Entries = new List<TModel>();
+        protected List<TModel> Entries = new();
         protected Type TModelType;
 
         protected BaseModalCard<TModel> BaseModalCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
 
-        protected List<IBasePropertyListDisplay> PropertyListDisplays = new List<IBasePropertyListDisplay>();
+        protected List<IBasePropertyListDisplay> PropertyListDisplays = new();
 
         protected bool IsSelfNavigating = false;
         protected string ListNavigationBasePath;
         protected EventHandler<LocationChangedEventArgs> LocationEventHandler;
-        protected List<DisplayItem> SortedColumns = new List<DisplayItem>();
+        protected List<DisplayItem> SortedColumns = new();
         #endregion
 
         #region Init
@@ -127,8 +130,13 @@ namespace BlazorBase.CRUD.Components
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
 
                 ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;
-                LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
-                NavigationManager.LocationChanged += LocationEventHandler;
+                if (UrlNavigationEnabled)
+                {
+                    LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
+                    NavigationManager.LocationChanged += LocationEventHandler;
+                }
+
+                SetInitalSortOfPropertyColumns();
             });
 
             await PrepareForeignKeyProperties(Service);
@@ -144,7 +152,8 @@ namespace BlazorBase.CRUD.Components
 
         public void Dispose()
         {
-            NavigationManager.LocationChanged -= LocationEventHandler;
+            if (UrlNavigationEnabled)
+                NavigationManager.LocationChanged -= LocationEventHandler;
         }
 
         protected virtual async Task NavigationManager_LocationChanged(object sender, LocationChangedEventArgs e)
@@ -155,7 +164,8 @@ namespace BlazorBase.CRUD.Components
                 return;
             }
 
-            await ProcessQueryParameters();
+            if (UrlNavigationEnabled)
+                await ProcessQueryParameters();
         }
 
         public override async Task SetParametersAsync(ParameterView parameters)
@@ -165,6 +175,7 @@ namespace BlazorBase.CRUD.Components
             SetDisplayNames();
             if (VirtualizeList != null)
                 await VirtualizeList.RefreshDataAsync();
+            await InvokeAsync(() => StateHasChanged());
         }
 
         protected virtual void SetDisplayNames()
@@ -178,6 +189,12 @@ namespace BlazorBase.CRUD.Components
                 PluralDisplayName = ModelLocalizer[$"{TModelType.Name}_Plural"];
             else
                 PluralDisplayName = ModelLocalizer[PluralDisplayName];
+
+            if (String.IsNullOrEmpty(ExplainText))
+                ExplainText = ModelLocalizer["ExplainText"];
+
+            if (ExplainText == "ExplainText")
+                ExplainText = null;
         }
 
         protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
@@ -200,6 +217,26 @@ namespace BlazorBase.CRUD.Components
 
             builder.CloseComponent();
         };
+
+        protected virtual void SetInitalSortOfPropertyColumns()
+        {
+            if (!Sortable)
+                return;
+                        
+            foreach (var group in DisplayGroups)
+                foreach (var displayItem in group.Value.DisplayItems)
+                {
+                    if (!displayItem.IsSortable)
+                        continue;
+
+                    var sortedColumn = InitalSortPropertyColumns.Where(entry => entry.Key == displayItem.Property.Name);
+                    if (sortedColumn.Any())
+                        displayItem.SortDirection = sortedColumn.First().Value;
+
+                    if (displayItem.SortDirection != Enums.SortDirection.None)
+                        SortedColumns.Add(displayItem);
+                }
+        }
         #endregion
 
         #region Navigation

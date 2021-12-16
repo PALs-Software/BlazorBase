@@ -9,6 +9,7 @@ namespace BlazorBase.Files.Models
     public class BlazorBaseFileOptions
     {
         public static BlazorBaseFileOptions Instance { get; private set; }
+
         #region Members
 
         protected readonly IServiceProvider ServiceProvider;
@@ -17,13 +18,7 @@ namespace BlazorBase.Files.Models
 
         #endregion
 
-        #region Properties
-
-        #endregion
-        public string FileStorePath { get; set; } = @"C:\BlazorBaseFileStore";
-        public string TempFileStorePath { get; set; } = @"C:\BlazorBaseFileStore\Temp";
         #region Constructors
-
         public BlazorBaseFileOptions(IServiceProvider serviceProvider, Action<BlazorBaseFileOptions> configureOptions)
         {
             ServiceProvider = serviceProvider;
@@ -34,10 +29,19 @@ namespace BlazorBase.Files.Models
             SetInstance();
         }
 
-        public void SetInstance() {
+        public void SetInstance()
+        {
             Instance = this;
         }
-
         #endregion
+
+        #region Properties
+        public string FileStorePath { get; set; } = @"C:\BlazorBaseFileStore";
+        public string TempFileStorePath { get; set; } = @"C:\BlazorBaseFileStore\Temp";
+        public bool AutomaticallyDeleteOldTemporaryFiles { get; set; } = true;
+        public uint DeleteTemporaryFilesOlderThanXSeconds { get; set; } = 60 * 60 * 24 * 7; // 7 days
+        #endregion
+
+
     }
 }

@@ -15,6 +15,8 @@ using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using System.Reflection;
+using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorBase.Files.Models
 {
@@ -56,7 +58,7 @@ namespace BlazorBase.Files.Models
         [NotMapped]
         [Editable(false)]
         [Visible(DisplayOrder = 100)]
-        public BaseFile DisplayFile { get { return this; } }
+        public virtual BaseFile DisplayFile { get { return this; } }
 
         [NotMapped]
         public Guid TempFileId { get; set; }
@@ -146,9 +148,17 @@ namespace BlazorBase.Files.Models
             return Convert.ToBase64String(content);
         }
 
-        public async Task<T> CreateCopyAsync<T>(EventServices service) where T : BaseFile, new()
+        public async Task<T> CreateCopyAsync<T>(EventServices eventServices) where T : BaseFile, new()
         {
-            return await CreateFileAsync<T>(service, FileName, BaseFileType, MimeFileType, await GetFileContentAsync());
+            var fileContent = await GetFileContentAsync();
+
+            if (fileContent == null)
+            {
+                var localizer = eventServices.ServiceProvider.GetService<IStringLocalizer<T>>();
+                throw new Exception(localizer["The file \"{0}\" can not be copied, because file with the id \"{1}\" can not be found on the hard disk. Maybe the file was deleted on the disk, but not the file entry.", FileName, Id]);
+            }                
+
+            return await CreateFileAsync<T>(eventServices, FileName, BaseFileType, MimeFileType, fileContent);
         }
 
         protected async Task CopyTempFileToFileStoreAsync()
@@ -203,7 +213,7 @@ namespace BlazorBase.Files.Models
         }
 
         public static async Task<TBaseFile> CreateFileAsync<TBaseFile>(EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent) where TBaseFile : BaseFile, new()
-        {
+        {           
             var file = new TBaseFile()
             {
                 FileName = fileName,

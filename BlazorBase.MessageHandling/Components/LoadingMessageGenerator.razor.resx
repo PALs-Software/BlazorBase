@@ -117,40 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BaseFile" xml:space="preserve">
-    <value>Datei</value>
+  <data name="Abort" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="BaseFileType" xml:space="preserve">
-    <value>Dateityp</value>
+  <data name="Confirm" xml:space="preserve">
+    <value>Ok</value>
   </data>
-  <data name="BaseFile_Plural" xml:space="preserve">
-    <value>Dateien</value>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
   </data>
-  <data name="Description" xml:space="preserve">
-    <value>Beschreibung</value>
-  </data>
-  <data name="DisplayFile" xml:space="preserve">
-    <value />
-  </data>
-  <data name="FileName" xml:space="preserve">
-    <value>Dateiname</value>
-  </data>
-  <data name="FileSize" xml:space="preserve">
-    <value>Dateigröße</value>
-  </data>
-  <data name="Hash" xml:space="preserve">
-    <value>Hash</value>
-  </data>
-  <data name="Id" xml:space="preserve">
-    <value>Id</value>
-  </data>
-  <data name="MimeFileType" xml:space="preserve">
-    <value>MIME-Typ</value>
-  </data>
-  <data name="The file &quot;{0}&quot; can not be copied, because file with the id &quot;{1}&quot; can not be found on the hard disk. Maybe the file was deleted on the disk, but not the file entry." xml:space="preserve">
-    <value>Die Datei "{0}" kann nicht kopiert werden, da die Datei mit der Id "{1}" nicht auf der Festplatte gefunden werden kann. Vielleicht wurde die Datei auf der Festplatte gelöscht, aber nicht der Dateieintrag.</value>
-  </data>
-  <data name="The file exceed the maximum allowed file size of {0} bytes" xml:space="preserve">
-    <value>Die Datei überschreitet die maximal zulässige Dateigröße von {0} Bytes</value>
+  <data name="Ok" xml:space="preserve">
+    <value>Ok</value>
   </data>
 </root>

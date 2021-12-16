@@ -107,7 +107,7 @@ namespace BlazorBase.CRUD.Services
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false) where T : class
         {
             var query = DbContext.Set<T>().Where(dataLoadCondition);
-
+            
             if (asNoTracking)
                 query = query.AsNoTracking();
 
@@ -171,6 +171,30 @@ namespace BlazorBase.CRUD.Services
         }
         #endregion
 
+        #region GetSpecialData
+        public virtual Guid GetNewPrimaryKey<T>() where T : class
+        {
+            Guid guid;
+            do
+            {
+                guid = Guid.NewGuid();
+            } while (DbContext.Find<T>(guid) != null);
+
+            return guid;
+        }
+
+        public async virtual Task<Guid> GetNewPrimaryKeyAsync<T>() where T : class
+        {
+            Guid guid;
+            do
+            {
+                guid = Guid.NewGuid();
+            } while (await DbContext.FindAsync<T>(guid) != null);
+
+            return guid;
+        }
+        #endregion
+
         #region Count Data
         public async virtual Task<int> CountDataAsync<T>() where T : class
         {
@@ -188,10 +212,30 @@ namespace BlazorBase.CRUD.Services
         }
         #endregion
 
+        #region Any
+        public virtual Task<bool> AnyAsync<T>(Expression<Func<T, bool>> condition) where T : class, IBaseModel
+        {
+            return DbContext.Set<T>().AnyAsync(condition);
+        }
+        #endregion
+
         #region Change Data
         public async virtual Task ReloadAsync<T>(T entry) where T : class
         {
             await DbContext.Entry(entry).ReloadAsync();
+        }
+
+        public virtual bool AddEntry<T>(T entry, bool skipEntryAlreadyExistCheck = false) where T : class, IBaseModel
+        {
+            if (entry == null)
+                return false;
+
+            if (skipEntryAlreadyExistCheck && DbContext.Find<T>(entry.GetPrimaryKeys()) != null)
+                return false;
+
+            DbContext.Set<T>().Add(entry);
+
+            return true;
         }
 
         public async virtual Task<bool> AddEntryAsync<T>(T entry, bool skipEntryAlreadyExistCheck = false) where T : class, IBaseModel
@@ -247,9 +291,7 @@ namespace BlazorBase.CRUD.Services
         }
         #endregion
 
-
         #region SaveChanges
-
 
         public async virtual Task<int> SaveChangesAsync()
         {

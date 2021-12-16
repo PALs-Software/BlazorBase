@@ -11,9 +11,23 @@ namespace BlazorBase.CRUD.Services
 {
     public class BaseParser
     {
+        public static List<Type> DecimalTypes { get; } = new List<Type>(){
+            typeof(decimal),
+            typeof(decimal?),
+            typeof(double),
+            typeof(double?),
+            typeof(float),
+            typeof(float?),
+            typeof(int),
+            typeof(int?),
+            typeof(long),
+            typeof(long?)
+        };
+
         protected IStringLocalizer<BaseParser> Localizer { get; set; }
 
-        public BaseParser(IStringLocalizer<BaseParser> localizer) {
+        public BaseParser(IStringLocalizer<BaseParser> localizer)
+        {
             Localizer = localizer;
         }
 
@@ -29,19 +43,21 @@ namespace BlazorBase.CRUD.Services
 
             try
             {
-                Type conversionType = Nullable.GetUnderlyingType(outputType) ?? outputType;
+                var underlyingType = Nullable.GetUnderlyingType(outputType);
+                var isNullable = underlyingType != null;
+                Type conversionType = underlyingType ?? outputType;
 
-                if (conversionType.IsEnum)
+                if (isNullable && conversionType != typeof(string) && String.IsNullOrEmpty(inputValue))
+                    outputValue = null;
+                else if (conversionType.IsEnum)
                     outputValue = Enum.Parse(outputType, inputValue, true);
                 else if (conversionType == typeof(Guid))
                     outputValue = Convert.ChangeType(Guid.Parse(inputValue), conversionType);
                 else if (conversionType == typeof(DateTimeOffset))
                     outputValue = Convert.ChangeType(DateTimeOffset.Parse(inputValue), conversionType);
-                else if (conversionType == typeof(DateTime))
-                    outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.CurrentUICulture);
                 else
                     outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.InvariantCulture);
-                
+
                 success = true;
             }
             catch
@@ -49,7 +65,7 @@ namespace BlazorBase.CRUD.Services
                 outputValue = default;
                 errorMessage = Localizer["The Value {0} can not be converted to the format {1}", inputValue, outputType.Name];
             }
-          
+
             return success;
         }
 

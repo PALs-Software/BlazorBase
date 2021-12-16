@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
@@ -56,7 +57,6 @@ namespace BlazorBase.CRUD.Components
         protected string InputClass;
         protected string FeedbackClass;
         protected string Feedback;
-        protected string PlaceHolder;
         protected bool IsReadOnly;
         protected Type RenderType;
         protected DataType? PresentationDataType = null;
@@ -65,23 +65,11 @@ namespace BlazorBase.CRUD.Components
 
         protected ValidationContext PropertyValidationContext;
         protected PropertyInfo ForeignKeyProperty { get; set; }
+        protected PresentationRulesAttribute PresentationRules { get; set; }
 
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
         protected string CurrentValueAsString;
         protected string InputType;
-        protected List<Type> DecimalTypes { get; } = new List<Type>(){
-            typeof(decimal),
-            typeof(decimal?),
-            typeof(double),
-            typeof(double?),
-            typeof(float),
-            typeof(float?),
-            typeof(int),
-            typeof(int?),
-            typeof(long),
-            typeof(long?)
-        };
-
         #endregion
 
         #region Init
@@ -97,8 +85,6 @@ namespace BlazorBase.CRUD.Components
                 else
                     IsReadOnly = ReadOnly.Value;
 
-                if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
-                    PlaceHolder = placeholderAttribute.Placeholder;
                 RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 PresentationDataType = Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
@@ -119,8 +105,11 @@ namespace BlazorBase.CRUD.Components
                     DisplayName = propertyNameTranslation
                 };
 
-                if (Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) is ForeignKeyAttribute foreignKey)
+                if (Property.TryGetAttribute(out ForeignKeyAttribute foreignKey))
                     ForeignKeyProperty = Model.GetUnproxiedType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+
+                if (Property.TryGetAttribute(out PresentationRulesAttribute presentationRules))
+                    PresentationRules = presentationRules;
 
                 SetInputType();
                 SetInputAttributes();
@@ -135,6 +124,7 @@ namespace BlazorBase.CRUD.Components
         public override async Task SetParametersAsync(ParameterView parameters)
         {
             await base.SetParametersAsync(parameters);
+
             if (Property == null || Model == null)
                 return;
 
@@ -147,11 +137,6 @@ namespace BlazorBase.CRUD.Components
             SetCurrentValueAsString(Property.GetValue(Model));
             await RaiseOnFormatPropertyEventsAsync();
         }
-
-        public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
-        {
-            return Task.FromResult(false);
-        }
         #endregion
 
         #region Events        
@@ -160,16 +145,35 @@ namespace BlazorBase.CRUD.Components
             if (propertyName != Property.Name)
                 return;
 
+            LastValueConversionFailed = false;
+            SetCurrentValueAsString(Property.GetValue(Model));
+
             ValidatePropertyValue();
-            InvokeAsync(() => StateHasChanged());
+
+            InvokeAsync(async () =>
+            {
+                await RaiseOnFormatPropertyEventsAsync();
+                StateHasChanged();
+            });
         }
 
-        protected bool ConvertValueIfNeeded(ref object newValue)
+        protected virtual bool ConvertValueIfNeeded(ref object newValue, Type converType)
         {
-            if (newValue == null || newValue.GetType() == RenderType)
+            if (newValue == null || newValue.GetType() == converType)
                 return true;
 
-            if (BaseParser.TryParseValueFromString(RenderType, newValue.ToString(), out object parsedValue, out string errorMessage))
+            if (newValue is decimal decimalNewValue)
+                newValue = decimalNewValue.ToString(CultureInfo.InvariantCulture);
+            else if (newValue is double doubleNewValue)
+                newValue = doubleNewValue.ToString(CultureInfo.InvariantCulture);
+            else if (newValue is float floatNewValue)
+                newValue = floatNewValue.ToString(CultureInfo.InvariantCulture);
+            else if (newValue is DateTimeOffset dateTimeOffsetNewvalue)
+                newValue = dateTimeOffsetNewvalue.ToString(CultureInfo.InvariantCulture);
+            else if (newValue is DateTime dateTimeNewvalue)
+                newValue = dateTimeNewvalue.ToString(CultureInfo.InvariantCulture);
+
+            if (BaseParser.TryParseValueFromString(converType, newValue.ToString(), out object parsedValue, out string errorMessage))
             {
                 newValue = parsedValue;
                 return true;
@@ -182,25 +186,37 @@ namespace BlazorBase.CRUD.Components
 
         protected async virtual Task OnValueChangedAsync(object newValue)
         {
+            if (IsReadOnly)
+                return;
+
             try
             {
                 if (newValue is ChangeEventArgs changeEventArgs)
                     newValue = changeEventArgs.Value;
 
+                var oldValue = Property.GetValue(Model);
                 var eventServices = GetEventServices();
-                var convertArgs = new OnBeforeConvertPropertyTypeArgs(Model, Property.Name, newValue, eventServices);
+                var convertArgs = new OnBeforeConvertPropertyTypeArgs(Model, Property.Name, newValue, oldValue, eventServices);
                 await OnBeforeConvertPropertyType.InvokeAsync(convertArgs);
                 await Model.OnBeforeConvertPropertyType(convertArgs);
                 newValue = convertArgs.NewValue;
 
-                LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue);
+                LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue, RenderType);
+                if (RenderType != Property.PropertyType)
+                {
+                    LastValueConversionFailed = !ConvertValueIfNeeded(ref newValue, Property.PropertyType);
+                    if (!LastValueConversionFailed && BaseParser.DecimalTypes.Contains(Property.PropertyType))
+                        if (newValue != null && (RenderType == typeof(int) || RenderType == typeof(int?) || RenderType == typeof(long) || RenderType == typeof(long?)))
+                            newValue = Convert.ChangeType(Convert.ChangeType(newValue, RenderType), Property.PropertyType); //Round numeric values if rendertype is without decimal places and the property type has decimal places
+                }
+
                 if (LastValueConversionFailed)
                 {
                     await RaiseOnFormatPropertyEventsAsync();
                     return;
                 }
 
-                var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, eventServices);
+                var args = new OnBeforePropertyChangedArgs(Model, Property.Name, newValue, oldValue, eventServices);
                 await OnBeforePropertyChanged.InvokeAsync(args);
                 await Model.OnBeforePropertyChanged(args);
                 newValue = args.NewValue;
@@ -211,7 +227,7 @@ namespace BlazorBase.CRUD.Components
                 if (valid)
                     await ReloadForeignProperties(newValue);
 
-                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, valid, eventServices);
+                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newValue, oldValue, valid, eventServices);
                 await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
                 await Model.OnAfterPropertyChanged(onAfterArgs);
 
@@ -304,7 +320,7 @@ namespace BlazorBase.CRUD.Components
         {
             if (RenderType == typeof(string))
                 InputType = GetInputTypeByDataType(PresentationDataType);
-            else if (DecimalTypes.Contains(RenderType))
+            else if (BaseParser.DecimalTypes.Contains(RenderType))
                 InputType = "number";
         }
 
@@ -326,35 +342,27 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        private void SetInputAttributes()
+        protected void SetInputAttributes()
         {
             InputAttributes.Clear();
 
             if (!String.IsNullOrEmpty(CustomPropertyCssStyle))
                 InputAttributes.Add("style", CustomPropertyCssStyle);
 
-            if (RenderType != typeof(string) && !DecimalTypes.Contains(RenderType))
-                return;
-
-            if (IsReadOnly)
-                InputAttributes.Add("disabled", "");
-
-            if (Property.TryGetAttribute(out RangeAttribute rangeAttribute))
-            {
-                InputAttributes.Add("min", rangeAttribute.Minimum);
-                InputAttributes.Add("max", rangeAttribute.Maximum);
-            }
-
             if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                 InputAttributes.Add("placeholder", placeholderAttribute.Placeholder);
 
-            if (RenderType != typeof(string))
-                InputAttributes.Add("lang", CultureInfo.CurrentUICulture.Name);
+            if (RenderType != typeof(string) && !BaseParser.DecimalTypes.Contains(RenderType))
+                return;
 
-            if (RenderType == typeof(decimal) || RenderType == typeof(decimal?) ||
-                RenderType == typeof(double) || RenderType == typeof(double?) ||
-                RenderType == typeof(float) || RenderType == typeof(float?))
-                InputAttributes.Add("step", "any");
+            SetTextInputAttributes();
+            SetDecimalInputAttributes();
+        }
+
+        protected void SetTextInputAttributes()
+        {
+            if (IsReadOnly)
+                InputAttributes.Add("disabled", "");
 
             if (AdditionalInputAttributes != null)
                 foreach (var item in AdditionalInputAttributes)
@@ -371,16 +379,50 @@ namespace BlazorBase.CRUD.Components
                 }
         }
 
-        protected void SetCurrentValueAsString(object input)
+        protected void RefreshPresentationRules()
         {
-            if (RenderType != typeof(string) && !DecimalTypes.Contains(RenderType))
+            if (PresentationRules == null)
+                return;
+
+            if (PresentationRules.Rules.Contains(PresentationRule.ShowValueAsTooltip))
+                InputAttributes["title"] = CurrentValueAsString;
+        }
+        protected void SetDecimalInputAttributes()
+        {
+            if (Property.TryGetAttribute(out RangeAttribute rangeAttribute))
+            {
+                InputAttributes.Add("min", rangeAttribute.Minimum);
+                InputAttributes.Add("max", rangeAttribute.Maximum);
+            }
+
+            if (RenderType != typeof(string))
+                InputAttributes.Add("lang", CultureInfo.CurrentUICulture.Name);
+
+            if (RenderType == typeof(decimal) || RenderType == typeof(decimal?) ||
+                RenderType == typeof(double) || RenderType == typeof(double?) ||
+                RenderType == typeof(float) || RenderType == typeof(float?))
+                InputAttributes.Add("step", "any");
+        }
+
+        protected virtual void SetCurrentValueAsString(object input)
+        {
+            if (RenderType != typeof(string) && !BaseParser.DecimalTypes.Contains(RenderType))
                 return;
 
             CurrentValueAsString = FormatValueAsString(input);
+
+            RefreshPresentationRules();
         }
 
-        protected string FormatValueAsString(object value)
+        protected virtual string FormatValueAsString(object value)
         {
+            try
+            {
+                if (RenderType != Property.PropertyType && !LastValueConversionFailed)
+                    value = Convert.ChangeType(value, RenderType);
+            }
+            catch (Exception) { }
+
             if (value is null)
                 return null;
             else if (value is string @string)
