@@ -13,13 +13,14 @@ namespace BlazorBase.CRUD.Attributes
     {
         public VisibleAttribute() { }
 
-        public VisibleAttribute(string displaygroup = "", int displayGroupOrder = 0, int displayOrder = 0, bool collapsed = false, params GUIType[] hideInGUITypes)
+        public VisibleAttribute(string displaygroup = "", int displayGroupOrder = 0, int displayOrder = 0, bool collapsed = false, SortDirection sortDirection = SortDirection.None, params GUIType[] hideInGUITypes)
         {
             HideInGUITypes = hideInGUITypes;
             DisplayGroupOrder = displayGroupOrder;
             DisplayGroup = displaygroup;
             DisplayOrder = displayOrder;
             Collapsed = collapsed;
+            SortDirection = sortDirection;
         }
 
         public VisibleAttribute(bool hideInGUI)
@@ -43,5 +44,7 @@ namespace BlazorBase.CRUD.Attributes
         public int DisplayOrder { get; set; }
 
         public bool Collapsed { get; set; }
+
+        public SortDirection SortDirection { get; set; }
     }
 }

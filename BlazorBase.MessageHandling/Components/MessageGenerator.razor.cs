@@ -135,13 +135,13 @@ namespace BlazorBase.MessageHandling.Components
         protected void OnConfirmButtonClicked(ModalInfo modalInfo)
         {
             modalInfo.ConfirmDialogResult = ConfirmDialogResult.Confirmed;
-            modalInfo.Modal.Hide();
+            modalInfo.Modal?.Hide();
         }
 
         protected void OnAbortButtonClicked(ModalInfo modalInfo)
         {
             modalInfo.ConfirmDialogResult = ConfirmDialogResult.Aborted;
-            modalInfo.Modal.Hide();
+            modalInfo.Modal?.Hide();
         }
 
         #endregion

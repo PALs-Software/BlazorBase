@@ -48,6 +48,7 @@ namespace BlazorBase.CRUD.Extensions
         {
             if (displayItem.FilterType != FilterType.IsNull && displayItem.FilterType != FilterType.IsEmpty && String.IsNullOrEmpty(displayItem.FilterValue?.ToString()))
                 return source;
+
             return source.Where(CreateFilterExpression<T>(displayItem));
         }
 

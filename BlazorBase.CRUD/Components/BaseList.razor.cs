@@ -81,6 +81,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool Sortable { get; set; } = true;
         [Parameter] public bool Filterable { get; set; } = true;
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
+        [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
         #endregion
 
         #region Injects
@@ -98,18 +99,18 @@ namespace BlazorBase.CRUD.Components
         #region Members
         protected EventServices EventServices;
 
-        protected List<TModel> Entries = new List<TModel>();
+        protected List<TModel> Entries = new();
         protected Type TModelType;
 
         protected BaseModalCard<TModel> BaseModalCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
 
-        protected List<IBasePropertyListDisplay> PropertyListDisplays = new List<IBasePropertyListDisplay>();
+        protected List<IBasePropertyListDisplay> PropertyListDisplays = new();
 
         protected bool IsSelfNavigating = false;
         protected string ListNavigationBasePath;
         protected EventHandler<LocationChangedEventArgs> LocationEventHandler;
-        protected List<DisplayItem> SortedColumns = new List<DisplayItem>();
+        protected List<DisplayItem> SortedColumns = new();
         #endregion
 
         #region Init
@@ -128,12 +129,14 @@ namespace BlazorBase.CRUD.Components
                 SetDisplayNames();
                 PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
 
-                ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;                
+                ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;
                 if (UrlNavigationEnabled)
                 {
                     LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
                     NavigationManager.LocationChanged += LocationEventHandler;
                 }
+
+                SetInitalSortOfPropertyColumns();
             });
 
             await PrepareForeignKeyProperties(Service);
@@ -214,6 +217,26 @@ namespace BlazorBase.CRUD.Components
 
             builder.CloseComponent();
         };
+
+        protected virtual void SetInitalSortOfPropertyColumns()
+        {
+            if (!Sortable)
+                return;
+                        
+            foreach (var group in DisplayGroups)
+                foreach (var displayItem in group.Value.DisplayItems)
+                {
+                    if (!displayItem.IsSortable)
+                        continue;
+
+                    var sortedColumn = InitalSortPropertyColumns.Where(entry => entry.Key == displayItem.Property.Name);
+                    if (sortedColumn.Any())
+                        displayItem.SortDirection = sortedColumn.First().Value;
+
+                    if (displayItem.SortDirection != Enums.SortDirection.None)
+                        SortedColumns.Add(displayItem);
+                }
+        }
         #endregion
 
         #region Navigation

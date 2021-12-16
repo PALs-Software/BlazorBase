@@ -107,7 +107,7 @@ namespace BlazorBase.CRUD.Services
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false) where T : class
         {
             var query = DbContext.Set<T>().Where(dataLoadCondition);
-
+            
             if (asNoTracking)
                 query = query.AsNoTracking();
 
@@ -209,6 +209,13 @@ namespace BlazorBase.CRUD.Services
         public virtual Task<int> CountDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition) where T : class, IBaseModel
         {
             return Task.FromResult(DbContext.Set<T>().Where(dataLoadCondition).Count());
+        }
+        #endregion
+
+        #region Any
+        public virtual Task<bool> AnyAsync<T>(Expression<Func<T, bool>> condition) where T : class, IBaseModel
+        {
+            return DbContext.Set<T>().AnyAsync(condition);
         }
         #endregion
 

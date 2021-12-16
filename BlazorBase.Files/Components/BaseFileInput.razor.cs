@@ -48,7 +48,7 @@ namespace BlazorBase.Files.Components
                 FileFilter = filterAttribute?.Filter ?? "*.";
         }
 
-        public override Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(typeof(BaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
         }
@@ -59,73 +59,76 @@ namespace BlazorBase.Files.Components
                 return;
 
             var eventServices = GetEventServices();
+            var oldValue = Property.GetValue(Model);
             bool valid = true;
+            BaseFile newFile = null;
             try
             {
-                var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, eventServices);
+                var files = ((FileChangedEventArgs)fileChangedEventArgs).Files;
+                if (files.Length == 0)
+                    return;
+                
+                var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, oldValue, eventServices);
                 await OnBeforePropertyChanged.InvokeAsync(args);
                 await Model.OnBeforePropertyChanged(args);
                 fileChangedEventArgs = args.NewValue;
 
                 ShowLoadingIndicator = true;
+                var file = files.First();
+                if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
+                    throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
 
-                foreach (var file in ((FileChangedEventArgs)fileChangedEventArgs).Files)
+                new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
+
+                newFile = Activator.CreateInstance(Property.PropertyType) as BaseFile;
+                newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
+                newFile.FileSize = file.Size;
+                newFile.BaseFileType = Path.GetExtension(file.Name);
+                newFile.MimeFileType = mimeFileType;
+
+                if (Model is BaseFile baseFile)
                 {
-                    if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
-                        throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
-
-                    new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
-
-                    var newFile = Activator.CreateInstance(Property.PropertyType) as BaseFile;
-                    newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
-                    newFile.FileSize = file.Size;
-                    newFile.BaseFileType = Path.GetExtension(file.Name);
-                    newFile.MimeFileType = mimeFileType;
-
-                    if (Model is BaseFile baseFile)
+                    if (baseFile.TempFileId == Guid.Empty)
                     {
-                        if (baseFile.TempFileId == Guid.Empty)
+                        var tempFileStorePath = BlazorBaseFileOptions.Instance.TempFileStorePath;
+                        string tempFilePath;
+                        do
                         {
-                            var tempFileStorePath = BlazorBaseFileOptions.Instance.TempFileStorePath;
-                            string tempFilePath;
-                            do
-                            {
-                                newFile.TempFileId = Guid.NewGuid();
-                                tempFilePath = Path.Join(tempFileStorePath, newFile.TempFileId.ToString());
-                            } while (File.Exists(tempFilePath));
-                        }
-                        else
-                            newFile.TempFileId = baseFile.TempFileId;
-
-                        baseFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
-                        baseFile.TempFileId = newFile.TempFileId;
-                        baseFile.FileName = newFile.FileName;
-                        baseFile.FileSize = newFile.FileSize;
-                        baseFile.BaseFileType = newFile.BaseFileType;
-                        baseFile.MimeFileType = newFile.MimeFileType;
-
-                        Model.ForcePropertyRepaint(nameof(BaseFile.FileName));
+                            newFile.TempFileId = Guid.NewGuid();
+                            tempFilePath = Path.Join(tempFileStorePath, newFile.TempFileId.ToString());
+                        } while (File.Exists(tempFilePath));
                     }
                     else
+                        newFile.TempFileId = baseFile.TempFileId;
+
+                    baseFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
+                    baseFile.TempFileId = newFile.TempFileId;
+                    baseFile.FileName = newFile.FileName;
+                    baseFile.FileSize = newFile.FileSize;
+                    baseFile.BaseFileType = newFile.BaseFileType;
+                    baseFile.MimeFileType = newFile.MimeFileType;
+
+                    Model.ForcePropertyRepaint(nameof(BaseFile.FileName));
+                }
+                else
+                {
+                    if (oldValue is BaseFile oldFile)
                     {
-                        if (Property.GetValue(Model) is BaseFile oldFile)
-                        {
-                            await oldFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
-                            var entry = Service.DbContext.Entry(oldFile);
-                            entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
-                        }
-
-                        await newFile.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(Model, eventServices));
-                        newFile.TempFileId = Guid.NewGuid();
-                        await newFile.OnBeforeAddEntry(new OnBeforeAddEntryArgs(newFile, false, eventServices));
-
-                        newFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
-                        Property.SetValue(Model, newFile);
-                        await newFile.OnAfterAddEntry(new OnAfterAddEntryArgs(newFile, eventServices));
+                        await oldFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
+                        var entry = Service.DbContext.Entry(oldFile);
+                        entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
                     }
 
-                    SetValidation(showValidation: false);
+                    await newFile.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(Model, eventServices));
+                    newFile.TempFileId = Guid.NewGuid();
+                    await newFile.OnBeforeAddEntry(new OnBeforeAddEntryArgs(newFile, false, eventServices));
+
+                    newFile.Hash = await WriteFileStreamToTempFileStore(file, newFile);
+                    Property.SetValue(Model, newFile);
+                    await newFile.OnAfterAddEntry(new OnAfterAddEntryArgs(newFile, eventServices));
                 }
+
+                SetValidation(showValidation: false);
             }
             catch (Exception e)
             {
@@ -146,7 +149,7 @@ namespace BlazorBase.Files.Components
                 if (valid)
                     await ReloadForeignProperties(fileChangedEventArgs);
 
-                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, valid, eventServices);
+                var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, newFile, oldValue, valid, eventServices);
                 await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
                 await Model.OnAfterPropertyChanged(onAfterArgs);
             }
@@ -185,7 +188,16 @@ namespace BlazorBase.Files.Components
             if (Property.GetValue(Model) is not BaseFile oldFile)
                 return;
 
+            var eventServices = GetEventServices();
+            var args = new OnBeforePropertyChangedArgs(Model, Property.Name, null, oldFile, eventServices);
+            await OnBeforePropertyChanged.InvokeAsync(args);
+            await Model.OnBeforePropertyChanged(args);
+
             await oldFile.ClearFileFromPropertyAsync(Model, Property, Service);
+
+            var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, Property.GetValue(Model), oldFile, true, eventServices);
+            await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
+            await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
     }

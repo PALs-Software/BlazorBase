@@ -131,8 +131,10 @@ namespace BlazorBase.CRUD.Components
 
         protected override List<KeyValuePair<string, string>> GetEnumValues(Type enumType)
         {
-            if (CachedEnumValueDictionary.ContainsKey(enumType))
-                return CachedEnumValueDictionary[enumType];
+            long key = GetEnumTypeDictionaryKey(enumType);
+
+            if (CachedEnumValueDictionary.ContainsKey(key))
+                return CachedEnumValueDictionary[key];
 
             var enumValues = base.GetEnumValues(enumType);
             enumValues.Insert(0, new KeyValuePair<string, string>(null, String.Empty));
