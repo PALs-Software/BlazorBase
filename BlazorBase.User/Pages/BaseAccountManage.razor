@@ -1,0 +1,17 @@
+﻿@page "/Manage/Account"
+@attribute [Authorize]
+
+<Heading Margin="Margin.Is2.FromTop.Is4.FromBottom">
+    @Localizer["Manage Account"]
+</Heading>
+
+<FullHeightTabs SelectedTab="password">
+    <Items>
+        <Tab Name="password">@Localizer["Password"]</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="password" Class="h-100">
+            <iframe class="fullscreen-iframe" src="/Identity/Account/Manage/ChangePassword" style="border:none;"></iframe>
+        </TabPanel>
+    </Content>
+</FullHeightTabs>

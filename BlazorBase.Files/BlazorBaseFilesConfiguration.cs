@@ -1,22 +1,15 @@
 ﻿using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
 using BlazorBase.Files.Components;
 using BlazorBase.Files.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD
+namespace BlazorBase.Files
 {
     public static class BlazorBaseFilesConfiguration
     {
         /// <summary>
-        /// Register blazor base number series and configures the default behaviour.
+        /// Register blazor base file handling and configures the default behaviour.
         /// </summary>
         /// <param name="serviceCollection"></param>
         /// <param name="configureOptions"></param>

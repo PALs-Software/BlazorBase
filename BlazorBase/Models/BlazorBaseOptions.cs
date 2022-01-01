@@ -4,28 +4,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.Models
+namespace BlazorBase.Models;
+
+public class BlazorBaseOptions : IBlazorBaseOptions
 {
-    public class BlazorBaseOptions
+    #region Members
+    protected readonly IServiceProvider ServiceProvider;
+    protected readonly Action<BlazorBaseOptions> ConfigureOptions;
+    #endregion
+
+    #region Constructors
+    public BlazorBaseOptions(IServiceProvider serviceProvider, Action<BlazorBaseOptions> configureOptions)
     {
-        #region Members
+        this.ServiceProvider = serviceProvider;
+        this.ConfigureOptions = configureOptions;
 
-        private readonly IServiceProvider serviceProvider;
-
-        private readonly Action<BlazorBaseOptions> configureOptions;
-
-        #endregion
-
-        #region Constructors
-
-        public BlazorBaseOptions(IServiceProvider serviceProvider, Action<BlazorBaseOptions> configureOptions)
-        {
-            this.serviceProvider = serviceProvider;
-            this.configureOptions = configureOptions;
-
-            this.configureOptions?.Invoke(this);
-        }
-
-        #endregion
+        this.ConfigureOptions?.Invoke(this);
     }
+    #endregion
+
+    #region Properties
+    public string WebsiteName { get; set; } = "BlazorBase";
+    #endregion
 }
+
