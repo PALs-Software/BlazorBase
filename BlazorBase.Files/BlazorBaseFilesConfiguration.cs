@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.Files.Components;
 using BlazorBase.Files.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -26,9 +27,16 @@ namespace BlazorBase.Files
 
             .AddTransient<IBasePropertyCardInput, BaseFileInput>()
             .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
-            .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>();
+            .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
+
+            .AddControllers();
 
             return serviceCollection;
+        }
+
+        public static void RegisterBlazorBaseFileInstance(this IApplicationBuilder app)
+        {
+            app.ApplicationServices.GetService<BlazorBaseFileOptions>()?.SetInstance();
         }
     }
 }

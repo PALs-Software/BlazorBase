@@ -1,19 +1,19 @@
 ﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ViewModels;
+using BlazorBase.User.Enums;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Components.Authorization;
-using BlazorBase.CRUD.ViewModels;
-using Microsoft.AspNetCore.Authorization;
-using BlazorBase.CRUD.EventArguments;
 using System.Security.Claims;
-using BlazorBase.User.Enums;
+using System.Threading.Tasks;
 
 namespace BlazorBase.User.Models;
 
@@ -25,8 +25,6 @@ public partial class BaseUser : BaseUser<IdentityUser, BaseIdentityRole>
     }
 }
 
-[Route("/Users")]
-[Authorize(Roles = "Admin, CompanyAdmin")]
 public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel where TIdentityUser : IdentityUser, new()
 {
     #region Properties

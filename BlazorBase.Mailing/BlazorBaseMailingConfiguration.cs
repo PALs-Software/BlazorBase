@@ -1,5 +1,7 @@
 ﻿using BlazorBase.Mailing.Models;
+using BlazorBase.Mailing.Services;
 using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.Versioning;
 
 namespace BlazorBase.Mailing;
 public static class BlazorBaseMailingConfiguration
@@ -10,6 +12,7 @@ public static class BlazorBaseMailingConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
+    [SupportedOSPlatform("windows")]
     public static IServiceCollection AddBlazorBaseMailing(this IServiceCollection serviceCollection, Action<IBlazorBaseMailingOptions>? configureOptions = null)
     {
         // If options handler is not defined we will get an exception so
@@ -17,8 +20,10 @@ public static class BlazorBaseMailingConfiguration
         if (configureOptions == null)
             configureOptions = (e) => { };
 
-        serviceCollection.AddSingleton(configureOptions)
-        .AddSingleton<BlazorBaseMailingOptions>();
+        serviceCollection
+            .AddSingleton(configureOptions)
+            .AddSingleton<BlazorBaseMailingOptions>()
+            .AddTransient<BaseMailService>();
 
         return serviceCollection;
     }
