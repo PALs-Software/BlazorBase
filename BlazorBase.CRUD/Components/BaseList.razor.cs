@@ -472,6 +472,8 @@ namespace BlazorBase.CRUD.Components
 
         protected virtual async Task OnFilterCardClosedAsync()
         {
+            if (ComponentModelInstance == null)
+                ComponentModelInstance = new TModel();
             foreach (var item in DisplayGroups.Values.SelectMany(x=>x.DisplayItems))
                item.IsVisible = !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(item.Property.Name);
         }

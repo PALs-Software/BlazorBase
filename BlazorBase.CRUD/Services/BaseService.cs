@@ -21,7 +21,6 @@ namespace BlazorBase.CRUD.Services
         public DbContext DbContext { get; protected set; }
         public IServiceProvider ServiceProvider { get; }
         protected IMessageHandler MessageHandler { get; set; }
-
         public BaseService(DbContext context, IServiceProvider provider, IMessageHandler messageHandler)
         {
             DbContext = context;

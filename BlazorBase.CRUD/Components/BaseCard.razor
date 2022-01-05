@@ -57,7 +57,7 @@
                                                   OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
                                                   OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
                                 }
-                                else
+                                else if (ComponentModelInstance==null || !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(displayItem.Property.Name))
                                 {
                                     var colSize = ColumnSize.Is6.OnFullHD.Is12.OnWidescreen;
                                     var colClass = "col-xxl-4";
