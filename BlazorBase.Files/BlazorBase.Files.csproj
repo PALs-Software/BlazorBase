@@ -18,11 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorBase.CRUD\BlazorBase.CRUD.csproj" />
-    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
-    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
 </Project>
