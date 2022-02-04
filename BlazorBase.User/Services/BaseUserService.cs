@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.User.Services;
 
-public class BaseUserService<TUser, TIdentityUser, TIdentityRole>
-    where TUser : BaseUser<TIdentityUser, TIdentityRole>, new()
+public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserService<TUser, TIdentityUser, TIdentityRole>
+    where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
     where TIdentityUser : IdentityUser, new()
     where TIdentityRole : struct, Enum
 {

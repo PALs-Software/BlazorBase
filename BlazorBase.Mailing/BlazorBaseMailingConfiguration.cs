@@ -1,5 +1,6 @@
 ﻿using BlazorBase.Mailing.Models;
 using BlazorBase.Mailing.Services;
+using BlazorBase.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.Versioning;
 
@@ -13,7 +14,8 @@ public static class BlazorBaseMailingConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
     [SupportedOSPlatform("windows")]
-    public static IServiceCollection AddBlazorBaseMailing(this IServiceCollection serviceCollection, Action<IBlazorBaseMailingOptions>? configureOptions = null)
+    public static IServiceCollection AddBlazorBaseMailing<TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
+        where TOptions : class, IBlazorBaseMailingOptions
     {
         // If options handler is not defined we will get an exception so
         // we need to initialize and empty action.
@@ -22,9 +24,50 @@ public static class BlazorBaseMailingConfiguration
 
         serviceCollection
             .AddSingleton(configureOptions)
-            .AddSingleton<BlazorBaseMailingOptions>()
+            .AddSingleton<IBlazorBaseMailingOptions, TOptions>()
             .AddTransient<BaseMailService>();
 
         return serviceCollection;
+    }
+
+    /// <summary>
+    /// Register blazor base mail handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    [SupportedOSPlatform("windows")]
+    public static IServiceCollection AddBlazorBaseMailing(this IServiceCollection serviceCollection, Action<IBlazorBaseMailingOptions>? configureOptions = null)
+    {
+        return AddBlazorBaseMailing<BlazorBaseMailingOptions>(serviceCollection, configureOptions);
+    }
+
+    /// <summary>
+    /// Register blazor base mail handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    [SupportedOSPlatform("windows")]
+    public static IServiceCollection AddBlazorBaseMailing<TOptions>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
+        where TOptions : class, IBlazorBaseMailingOptions
+    {
+        return AddBlazorBaseMailing<TOptions>(serviceCollection, options =>
+        {
+            options.OptionsImportMode = BaseOptionsImportMode.Database;
+            options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
+        });
+    }
+
+    /// <summary>
+    /// Register blazor base mail handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    [SupportedOSPlatform("windows")]
+    public static IServiceCollection AddBlazorBaseMailing(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
+    {
+        return AddBlazorBaseMailing<BlazorBaseMailingOptions>(serviceCollection, optionsImportFromDatabaseEntryType);
     }
 }

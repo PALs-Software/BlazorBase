@@ -3,6 +3,7 @@ using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Models;
 using BlazorBase.Modules;
+using BlazorBase.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Localization;
 using System.Net;
@@ -16,15 +17,13 @@ public class BaseMailService<TTemplateLocalizer> : BaseMailService
 {
     #region Injects
     protected readonly IStringLocalizer<TTemplateLocalizer> TemplateLocalizer;
-    protected readonly BlazorBaseOptions BlazorBaseOptions;
     #endregion
 
-    public BaseMailService(BlazorBaseMailingOptions options, IMessageHandler messageHandler, ErrorHandler errorHandler,
+    public BaseMailService(BlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
                     IStringLocalizer<BaseMailService> localizer, IHttpContextAccessor httpContextAccessor,
-                    IStringLocalizer<TTemplateLocalizer> templateLocalizer, BlazorBaseOptions blazorBaseOptions) : base(options, messageHandler, errorHandler, localizer, httpContextAccessor)
+                    IStringLocalizer<TTemplateLocalizer> templateLocalizer) : base(options, messageHandler, errorHandler, localizer, httpContextAccessor)
     {
         TemplateLocalizer = templateLocalizer;
-        BlazorBaseOptions = blazorBaseOptions;
     }
 
     /// <summary>
@@ -80,8 +79,8 @@ public class BaseMailService<TTemplateLocalizer> : BaseMailService
     /// <returns>The task object representing the asynchronous operation</returns>
     public Task<bool> SendMailAsync(List<string> receivers, string mailTemplate, object[] subjectArguments, object[] bodyArguments, params string[] attachmentPathes)
     {
-        var defaultSubjectArguments = new object[] { BlazorBaseOptions.WebsiteName };
-        var defaultBodyArguments = new object[] { BlazorBaseOptions.WebsiteName };
+        var defaultSubjectArguments = new object[] { MailingOptions.WebsiteName };
+        var defaultBodyArguments = new object[] { MailingOptions.WebsiteName };
         subjectArguments = defaultSubjectArguments.Concat(subjectArguments).ToArray();
         bodyArguments = defaultBodyArguments.Concat(bodyArguments).ToArray();
 
@@ -95,14 +94,14 @@ public class BaseMailService<TTemplateLocalizer> : BaseMailService
 public class BaseMailService
 {
     #region Injects
-    protected readonly BlazorBaseMailingOptions MailingOptions;
+    protected readonly IBlazorBaseMailingOptions MailingOptions;
     protected readonly IMessageHandler MessageHandler;
-    protected readonly ErrorHandler ErrorHandler;
+    protected readonly BaseErrorHandler ErrorHandler;
     protected readonly IStringLocalizer<BaseMailService> Localizer;
     protected readonly IHttpContextAccessor HttpContextAccessor;
     #endregion
 
-    public BaseMailService(BlazorBaseMailingOptions options, IMessageHandler messageHandler, ErrorHandler errorHandler,
+    public BaseMailService(IBlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
                        IStringLocalizer<BaseMailService> localizer, IHttpContextAccessor httpContextAccessor)
     {
         MailingOptions = options;

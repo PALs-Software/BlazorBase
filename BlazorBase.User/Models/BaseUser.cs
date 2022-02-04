@@ -3,8 +3,6 @@ using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.User.Enums;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +23,8 @@ public partial class BaseUser : BaseUser<IdentityUser, BaseIdentityRole>
     }
 }
 
-public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel where TIdentityUser : IdentityUser, new()
+public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel, IBaseUser<TIdentityUser, TIdentityRole>
+    where TIdentityUser : IdentityUser, new()
 {
     #region Properties
     [Key]

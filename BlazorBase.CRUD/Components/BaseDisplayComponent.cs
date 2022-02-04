@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Modules;
+using BlazorBase.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
@@ -69,7 +70,7 @@ namespace BlazorBase.CRUD.Components
         }
 
         #region Injects
-        [Inject] protected ErrorHandler ErrorHandler { get; set; }
+        [Inject] protected BaseErrorHandler ErrorHandler { get; set; }
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; }
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; }
         #endregion
@@ -323,7 +324,7 @@ namespace BlazorBase.CRUD.Components
 
         protected virtual void ShowFormattedInvalidFeedback(string feedback)
         {
-            InvalidSummaryFeedback = MarkupStringValidator.GetWhiteListedMarkupString(feedback);
+            InvalidSummaryFeedback = BaseMarkupStringValidator.GetWhiteListedMarkupString(feedback);
             ShowInvalidFeedback = true;
         }
 

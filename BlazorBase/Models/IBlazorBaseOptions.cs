@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace BlazorBase.Models;
-
-public interface IBlazorBaseOptions
+﻿namespace BlazorBase.Models;
+public interface IBlazorBaseOptions : IBaseOptions
 {
-    string WebsiteName { get; set; }
 }
