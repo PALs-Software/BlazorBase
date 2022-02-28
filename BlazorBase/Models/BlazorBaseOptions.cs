@@ -4,7 +4,7 @@ namespace BlazorBase.Models;
 public class BlazorBaseOptions : IBlazorBaseOptions
 {
     #region Constructors
-    public BlazorBaseOptions(IServiceProvider serviceProvider, Action<IBlazorBaseOptions> configureOptions)
+    public BlazorBaseOptions(IServiceProvider serviceProvider, Action<BlazorBaseOptions> configureOptions)
     {
         (this as IBlazorBaseOptions).ImportOptions(serviceProvider, configureOptions);
     }

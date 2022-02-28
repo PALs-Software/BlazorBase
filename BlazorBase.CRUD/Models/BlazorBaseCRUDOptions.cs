@@ -5,7 +5,7 @@ namespace BlazorBase.CRUD.Models;
 public class BlazorBaseCRUDOptions : IBlazorBaseCRUDOptions
 {
     #region Constructors
-    public BlazorBaseCRUDOptions(IServiceProvider serviceProvider, Action<IBlazorBaseCRUDOptions> configureOptions)
+    public BlazorBaseCRUDOptions(IServiceProvider serviceProvider, Action<BlazorBaseCRUDOptions> configureOptions)
     {
         (this as IBlazorBaseCRUDOptions).ImportOptions(serviceProvider, configureOptions);
     }

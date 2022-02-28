@@ -117,16 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EmailAddressAttribute" xml:space="preserve">
-    <value>The "{0}" field is not a valid e-mail address</value>
+  <data name="E-Mail" xml:space="preserve">
+    <value>E-Mail</value>
   </data>
-  <data name="RangeAttribute" xml:space="preserve">
-    <value>The "{0}" field must be between {1} and {2}</value>
+  <data name="Log in" xml:space="preserve">
+    <value>Einloggen</value>
   </data>
-  <data name="RequiredAttribute" xml:space="preserve">
-    <value>The "{0}" field is required</value>
+  <data name="Password" xml:space="preserve">
+    <value>Passwort</value>
   </data>
-  <data name="StringLengthAttribute" xml:space="preserve">
-    <value>The "{0}" field may only be a maximum of {1} characters long</value>
+  <data name="Remember me" xml:space="preserve">
+    <value>Angemeldet bleiben</value>
   </data>
 </root>

@@ -6,7 +6,7 @@ namespace BlazorBase.Mailing.Models
     public class BlazorBaseMailingOptions : IBlazorBaseMailingOptions
     {
         #region Constructors
-        public BlazorBaseMailingOptions(IServiceProvider serviceProvider, Action<IBlazorBaseMailingOptions> configureOptions)
+        public BlazorBaseMailingOptions(IServiceProvider serviceProvider, Action<BlazorBaseMailingOptions> configureOptions)
         {
             (this as IBlazorBaseMailingOptions).ImportOptions(serviceProvider, configureOptions);
         }

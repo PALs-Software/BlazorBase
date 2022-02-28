@@ -14,7 +14,7 @@ public static class BlazorBaseUserConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole>(this IServiceCollection serviceCollection)
+    public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole>(this IServiceCollection serviceCollection, bool alwaysRequireAuthenticatedUser = true)
         where TUserService : class, IBaseUserService<TUser, TIdentityUser, TIdentityRole>
         where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
         where TIdentityUser : IdentityUser, new()
@@ -22,6 +22,23 @@ public static class BlazorBaseUserConfiguration
     {
         serviceCollection
             .AddTransient<TUserService>();
+
+        serviceCollection.AddControllers();
+        if (alwaysRequireAuthenticatedUser)
+        {
+            /*
+            serviceCollection.AddAuthorization(options =>
+            {                
+                options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            });
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+
+                options.LoginPath = "/Account/Login";
+            });
+            */
+        }
 
         return serviceCollection;
     }

@@ -22,14 +22,14 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class ValidationAttributesTranslations {
+    public class ValidationAttributesTranslations___Kopieren {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ValidationAttributesTranslations() {
+        internal ValidationAttributesTranslations___Kopieren() {
         }
         
         /// <summary>
@@ -39,7 +39,8 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BlazorBase.CRUD.Resources.ValidationAttributes.ValidationAttributesTranslations", typeof(ValidationAttributesTranslations).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BlazorBase.CRUD.Resources.ValidationAttributes.ValidationAttributesTranslations -" +
+                            " Kopieren", typeof(ValidationAttributesTranslations___Kopieren).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -61,16 +62,7 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is not a valid e-mail address ähnelt.
-        /// </summary>
-        public static string EmailAddressAttribute {
-            get {
-                return ResourceManager.GetString("EmailAddressAttribute", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field must be between {1} and {2} ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Die Eigenschaft &quot;{0}&quot; muss zwischen {1} und {2} liegen ähnelt.
         /// </summary>
         public static string RangeAttribute {
             get {
@@ -79,7 +71,7 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is required ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Die Eigenschaft &quot;{0}&quot; ist erforderlich ähnelt.
         /// </summary>
         public static string RequiredAttribute {
             get {
@@ -88,7 +80,7 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field may only be a maximum of {1} characters long ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die Die Eigenschaft &quot;{0}&quot; darf nur maximal {1} Zeichen lang sein ähnelt.
         /// </summary>
         public static string StringLengthAttribute {
             get {

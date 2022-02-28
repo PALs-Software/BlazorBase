@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Services;
+using BlazorBase.User.Extensions;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -53,7 +54,8 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
 
     public static async Task SeedUserRolesAsync(IServiceProvider serviceProvider)
     {
-        var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
+        using var scope = serviceProvider.CreateAsyncScope();
+        var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
         var userRoles = Enum.GetNames<TIdentityRole>();
 
         foreach (var role in userRoles)
@@ -66,7 +68,8 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
 
     public static async Task SeedUserAsync(IServiceProvider serviceProvider, string username, string email, string initPassword, TIdentityRole role)
     {
-        var userManager = serviceProvider.GetService<UserManager<TIdentityUser>>();
+        using var scope = serviceProvider.CreateAsyncScope();
+        var userManager = scope.ServiceProvider.GetService<UserManager<TIdentityUser>>();
         if (await userManager.FindByEmailAsync(email) != null)
             return;
 
@@ -80,9 +83,15 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         var result = userManager.CreateAsync(identityUser, initPassword).Result;
 
         if (result.Succeeded)
-            userManager.AddToRoleAsync(identityUser, role.ToString()).Wait();
+        {
+            result = userManager.AddToRoleAsync(identityUser, role.ToString()).Result;
+            if (!result.Succeeded)
+                throw new Exception(result.GetErrorMessage());
+        }
+        else
+            throw new Exception(result.GetErrorMessage());
 
-        var baseService = serviceProvider.GetService<BaseService>();
+        var baseService = scope.ServiceProvider.GetService<BaseService>();
         var user = new TUser
         {
             Id = baseService.GetNewPrimaryKey<TUser>(),

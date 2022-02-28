@@ -118,15 +118,15 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="EmailAddressAttribute" xml:space="preserve">
-    <value>The "{0}" field is not a valid e-mail address</value>
+    <value>Die Eigenschaft "{0}" ist keine gültige E-Mail-Adresse</value>
   </data>
   <data name="RangeAttribute" xml:space="preserve">
-    <value>The "{0}" field must be between {1} and {2}</value>
+    <value>Die Eigenschaft "{0}" muss zwischen {1} und {2} liegen</value>
   </data>
   <data name="RequiredAttribute" xml:space="preserve">
-    <value>The "{0}" field is required</value>
+    <value>Die Eigenschaft "{0}" ist erforderlich</value>
   </data>
   <data name="StringLengthAttribute" xml:space="preserve">
-    <value>The "{0}" field may only be a maximum of {1} characters long</value>
+    <value>Die Eigenschaft "{0}" darf nur maximal {1} Zeichen lang sein</value>
   </data>
 </root>

@@ -1,0 +1,88 @@
+﻿<div class="login-form"
+     style="@(ShowImageOfTheDayAsBackgroundImage ? $"background-image: url({ImageOfTheDayUrl});" : "")">
+    <div class="container text-center login-container">
+        <div class="login-container-form-row row align-items-center">
+            <div class="col">
+                <h2 class="h2 text-center pb-5">@WebsiteName</h2>
+
+                <form action="/UserLogin/Login" method="post" class="login-container-form form-signin mx-auto">
+
+                    <input autocomplete="username" name="Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
+                    <div class="form-group">
+                        <input autocomplete="current-password" name="Password" type="password" class="form-control" placeholder="@Localizer["Password"]" />
+                    </div>
+
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label >
+                                <input type="checkbox" name="RememberMe" value="true">
+                                @Localizer["Remember me"]
+                            </label>
+                        </div>
+                    </div>
+
+                    @*
+                    <DataAnnotationsValidator />
+
+                    <InputText @bind-Value="LoginData.Email" autocomplete="username" name="Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
+                    <ValidationMessage For="@(() => LoginData.Email)" />
+                    <div class="form-group">
+                        <InputText @bind-Value="LoginData.Password" autocomplete="current-password" name="Password" type="password" class="form-control" placeholder="@Localizer["Password"]" />
+                        <ValidationMessage For="@(() => LoginData.Password)" />
+                    </div>
+                    <div class="form-group">
+                        <div class="checkbox">
+                            <label>
+                                <InputCheckbox @bind-Value="LoginData.RememberMe" name="RememberMe" />
+                                @Localizer["Remember me"]
+                            </label>
+                        </div>
+                    </div>
+                    *@
+                    <Button Class="btn-block" Size="Size.Large" Color="@ButtonColor" Type="ButtonType.Submit">@Localizer["Log in"]</Button>
+                </form>
+
+                @*
+                    <form id="account" method="post" class="login-container-form form-signin mx-auto">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                    <input asp-for="Input.Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+
+                    <div class="form-group">
+                    <input asp-for="Input.Password" class="form-control" placeholder="@Localizer["Password"]" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    </div>
+                    <div class="form-group remember-me-group">
+                    <div class="checkbox">
+                    <label for="Input_RememberMe">
+                    <input type="checkbox" data-val="true" data-val-required="The Remember me? field is required." id="Input_RememberMe" name="Input.RememberMe" value="true">
+                    @Localizer["Remember me?"]
+                    </label>
+                    </div>
+                    </div>
+
+                    <Button Class="btn-block login-button" Size="Size.Large" Color="@ButtonColor" Type="ButtonType.Submit">@Localizer["Log in"]</Button>
+                    <label class="text-danger"></label>
+                    </form>
+                *@
+            </div>
+        </div>
+        <div class="login-container-logo-row row align-items-end">
+            <div class="col">
+                @if (Logo is not null)
+                {
+                    @Logo
+                }
+                else @if (!String.IsNullOrEmpty(LogoHref) && !String.IsNullOrEmpty(LogoSrc))
+                {
+                    <a href="@LogoHref" target="_blank">
+                        <figure class="figure" style="height: @(LogoHeight)px; width: @(LogoWidth)px">
+                            <img src="@LogoSrc" class="figure-img img-fluid">
+                        </figure>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

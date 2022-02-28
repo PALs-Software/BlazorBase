@@ -1,0 +1,46 @@
+﻿.login-form {
+    max-width: 100vw;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    background-color: var(--base-login-background-color, #121212);
+    color: var(--base-login-text-color, white);
+}
+
+::deep.login-form input {
+    background-color: var(--base-login-input-background-color, #4b4b4b7a);
+    color: var(--base-login-input-text-color, white);
+}
+
+    ::deep.login-form button::placeholder, ::deep.login-form input::placeholder {
+        color: var(--base-login-input-placeholder-text-color, #bababa);
+    }
+
+.login-container .text-danger ul li {
+    list-style-type: none;
+}
+
+.login-container-form-row {
+    height: 80vh;
+}
+
+::deep .login-container-form {
+    max-width: 500px;
+}
+
+.login-container-logo-row {
+    height: 20vh;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+::deep .login-button {
+    margin-top: 15px;
+}
+
+::deep .btn-block {
+    width: 100%;
+}
