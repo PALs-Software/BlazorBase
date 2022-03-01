@@ -69,6 +69,80 @@ namespace BlazorBase.CRUD.Components
             public bool IsFilterable { get; set; }
             public bool IsFullRow { get; set; }
             public bool IsVisible { get; set; }
+
+            public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
+            {
+                var property = typeof(T).GetProperty(propertyName);
+                return CreateFromProperty(property, defaultDisplayGroup);
+            }
+
+            public static DisplayItem CreateFromProperty(PropertyInfo property, string defaultDisplayGroup = null)
+            {
+                var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
+                if (attribute == null)
+                    throw new Exception($"The property \"{property.Name}\" has no visible attribut!\"");
+
+                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
+                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
+
+                (string DisplayPath, Type DisplayType) displayPathAndType;
+                bool sortAndFilterable;
+                if (customPropertyPath == null)
+                {
+                    displayPathAndType = GetDisplayPropertyPathAndType(property);
+                    sortAndFilterable = GetPropertyIsSortAndFilterable(property);
+                }
+                else
+                {
+                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
+                    sortAndFilterable = true;
+                }
+
+                return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                    property.IsKey(), property.IsListProperty(), dateInputMode,
+                    displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
+                    sortAndFilterable, sortAndFilterable, true);
+            }
+
+            protected static (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(PropertyInfo property)
+            {
+                if (!property.IsForeignKey() || property.IsListProperty())
+                    return (property.Name, property.PropertyType);
+
+                var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+                var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
+
+                if (foreignKeyType == null)
+                    return (property.Name, property.PropertyType);
+                if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
+                    return (property.Name, property.PropertyType);
+
+                var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
+                if (displayKeyProperties.Count == 0)
+                    displayKeyProperties = foreignKeyType.GetKeyProperties();
+
+                List<string> displayPropertyPaths = new();
+                foreach (var displayKeyProperty in displayKeyProperties)
+                    displayPropertyPaths.Add($"{foreignKey.Name}.{displayKeyProperty.Name}");
+
+                return (String.Join("|", displayPropertyPaths), displayKeyProperties[0].PropertyType);
+            }
+
+            protected static bool GetPropertyIsSortAndFilterable(PropertyInfo property)
+            {
+                if (property.HasAttribute(typeof(NotMappedAttribute)))
+                    return false;
+
+                var getMethod = property.GetGetMethod();
+                var setMethod = property.GetSetMethod();
+                if (getMethod == null || setMethod == null)
+                    return false;
+
+                //Check if get and set method are not overridden with custom logic and are just normal property get and set methods
+                return System.Attribute.IsDefined(getMethod, typeof(CompilerGeneratedAttribute)) && System.Attribute.IsDefined(setMethod, typeof(CompilerGeneratedAttribute));
+            }
         }
 
         #region Injects
@@ -105,74 +179,18 @@ namespace BlazorBase.CRUD.Components
 
             foreach (var property in VisibleProperties)
             {
-                var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
-                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? BaseDisplayComponentLocalizer["General"] : attribute.DisplayGroup;
-                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
-                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
+                var displayItem = DisplayItem.CreateFromProperty(property, BaseDisplayComponentLocalizer["General"]);
 
-                if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
-                    DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
+                if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup))
+                    DisplayGroups[displayItem.Attribute.DisplayGroup] = new DisplayGroup(displayItem.Attribute, new List<DisplayItem>());
 
-                (string DisplayPath, Type DisplayType) displayPathAndType;
-                bool sortAndFilterable;
-                if (customPropertyPath == null)
-                {
-                    displayPathAndType = GetDisplayPropertyPathAndType(property);
-                    sortAndFilterable = GetPropertyIsSortAndFilterable(property);
-                }
-                else
-                {
-                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
-                    sortAndFilterable = true;
-                }
-
-                bool isVisible = true;
                 if (componentModelInstance != null)
-                    isVisible = !componentModelInstance.PropertyNamesToRemoveFromListView.Contains(property.Name);
+                    displayItem.IsVisible = !componentModelInstance.PropertyNamesToRemoveFromListView.Contains(property.Name);
 
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(), property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath, displayPathAndType.DisplayType, sortAndFilterable, sortAndFilterable, isVisible));
+                DisplayGroups[displayItem.Attribute.DisplayGroup].DisplayItems.Add(displayItem);
             }
 
             SortDisplayLists();
-        }
-
-        protected virtual (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(PropertyInfo property)
-        {
-            if (!property.IsForeignKey() || property.IsListProperty())
-                return (property.Name, property.PropertyType);
-
-            var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-            var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
-            var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
-
-            if (foreignKeyType == null)
-                return (property.Name, property.PropertyType);
-            if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
-                return (property.Name, property.PropertyType);
-
-            var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
-            if (displayKeyProperties.Count == 0)
-                displayKeyProperties = foreignKeyType.GetKeyProperties();
-
-            List<string> displayPropertyPaths = new();
-            foreach (var displayKeyProperty in displayKeyProperties)
-                displayPropertyPaths.Add($"{foreignKey.Name}.{displayKeyProperty.Name}");
-
-            return (String.Join("|", displayPropertyPaths), displayKeyProperties[0].PropertyType);
-        }
-
-        protected virtual bool GetPropertyIsSortAndFilterable(PropertyInfo property)
-        {
-            if (property.HasAttribute(typeof(NotMappedAttribute)))
-                return false;
-
-            var getMethod = property.GetGetMethod();
-            var setMethod = property.GetSetMethod();
-            if (getMethod == null || setMethod == null)
-                return false;
-
-            //Check if get and set method are not overridden with custom logic and are just normal property get and set methods
-            return Attribute.IsDefined(getMethod, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(setMethod, typeof(CompilerGeneratedAttribute));
         }
 
         protected virtual void SortDisplayLists()
@@ -320,7 +338,7 @@ namespace BlazorBase.CRUD.Components
 
             var tooltip = modelLocalizer[$"{displayItem.Property.Name}_Tooltip"];
 
-            if(tooltip.Value != caption.Name + "_Tooltip")
+            if (tooltip.Value != caption.Name + "_Tooltip")
                 return caption.Value + Environment.NewLine + " " + Environment.NewLine + tooltip.Value;
 
             return caption.Value;

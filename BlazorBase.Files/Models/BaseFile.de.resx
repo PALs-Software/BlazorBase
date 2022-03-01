@@ -126,6 +126,9 @@
   <data name="BaseFile_Plural" xml:space="preserve">
     <value>Dateien</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Löschen</value>
+  </data>
   <data name="Description" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
