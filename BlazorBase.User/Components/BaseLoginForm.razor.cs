@@ -1,8 +1,12 @@
-﻿using BlazorBase.User.ViewModels;
+﻿using BlazorBase.User.Models;
+using BlazorBase.User.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
+using Microsoft.JSInterop;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Globalization;
@@ -31,7 +35,10 @@ public partial class BaseLoginForm : ComponentBase
     #region Inject
     [Inject] protected IStringLocalizer<BaseLoginForm> Localizer { get; set; }
     [Inject] protected SignInManager<IdentityUser> SignInManager { get; set; }
+    [Inject] protected UserManager<IdentityUser> UserManager { get; set; }
     [Inject] protected ILogger<BaseLoginForm> Logger { get; set; }
+    [Inject] protected IJSRuntime JSRuntime { get; set; }
+    [Inject] protected NavigationManager NavigationManager { get; set; }
     #endregion
 
     #region Properties
@@ -41,11 +48,18 @@ public partial class BaseLoginForm : ComponentBase
     protected string AdditionalStyle { get; set; }
 
     protected LoginData LoginData { get; set; } = new();
+    protected string ReturnUrl { get; set; }
+    protected string Feedback { get; set; }
     #endregion
 
     #region Init
     protected override async Task OnInitializedAsync()
     {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        if (query.TryGetValue("returnUrl", out StringValues value))
+            ReturnUrl = value;
+
         if (!ShowImageOfTheDayAsBackgroundImage)
             return;
 
@@ -60,24 +74,21 @@ public partial class BaseLoginForm : ComponentBase
     #region Submit Login
     public async Task HandleValidSubmit()
     {
-        var result = await SignInManager.PasswordSignInAsync(LoginData.Email, LoginData.Password, LoginData.RememberMe, lockoutOnFailure: false);
+        Feedback = String.Empty;
+        var result = new SignInResult();
+        var user = await UserManager.FindByEmailAsync(LoginData.Email);
+        if (user != null)
+            result = await SignInManager.CheckPasswordSignInAsync(user, LoginData.Password, lockoutOnFailure: false);
 
         if (result.Succeeded)
-        {
-            Logger.LogInformation($"User {LoginData.Email} logged in.");
-            //return LocalRedirect(returnUrl);
-        }
-
-        if (result.IsLockedOut)
-        {
-            Logger.LogInformation($"User {LoginData.Email} account locked out.");
-            //return RedirectToPage("./Lockout");
-        }
+            // Needed because Identity Framework Login is not Possible over Blazor Session, so post values also to a standard controller
+            await JSRuntime.InvokeVoidAsync("blazorBase.user.submitForm", "action-login-form");
         else
         {
-            //ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-            // return Page();
+            Logger.LogInformation("Login of User \"{Email}\" failed.", LoginData.Email);
+            Feedback = Localizer["Invalid login attempt. Please check your e-mail address and the password you entered."];
         }
+
     }
     #endregion
 

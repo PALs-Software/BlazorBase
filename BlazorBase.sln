@@ -23,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.CRUD.NumberSerie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.MessageHandling", "BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj", "{80A753EF-11BC-4BCB-8A70-525686D0E758}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.Mailing", "BlazorBase.Mailing\BlazorBase.Mailing.csproj", "{E051A659-2321-4BEF-B760-2359A77927EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Mailing", "BlazorBase.Mailing\BlazorBase.Mailing.csproj", "{E051A659-2321-4BEF-B760-2359A77927EC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

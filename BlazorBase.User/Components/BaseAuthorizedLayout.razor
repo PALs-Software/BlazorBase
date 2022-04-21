@@ -1,0 +1,10 @@
+﻿@inherits BaseLayout
+
+<Microsoft.AspNetCore.Components.Authorization.AuthorizeView>
+    <Authorized>
+       @Body
+    </Authorized>
+    <NotAuthorized>
+        @Localizer["You are not authorized"]
+    </NotAuthorized>
+</Microsoft.AspNetCore.Components.Authorization.AuthorizeView>

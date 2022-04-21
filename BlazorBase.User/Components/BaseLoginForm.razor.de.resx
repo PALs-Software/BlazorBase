@@ -120,6 +120,9 @@
   <data name="E-Mail" xml:space="preserve">
     <value>E-Mail</value>
   </data>
+  <data name="Invalid login attempt. Please check your e-mail address and the password you entered." xml:space="preserve">
+    <value>Ungültiger Anmeldeversuch. Bitte überprüfen Sie Ihre eingegebene E-Mail-Adresse und  Passwort.</value>
+  </data>
   <data name="Log in" xml:space="preserve">
     <value>Einloggen</value>
   </data>

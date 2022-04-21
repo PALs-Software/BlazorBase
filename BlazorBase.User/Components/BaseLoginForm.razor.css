@@ -29,6 +29,10 @@
     max-width: 500px;
 }
 
+::deep .login-button {
+    max-width: 500px;
+}
+
 .login-container-logo-row {
     height: 20vh;
 }
@@ -43,4 +47,8 @@
 
 ::deep .btn-block {
     width: 100%;
+}
+
+.login-feedback {
+    margin-bottom: 1rem;
 }

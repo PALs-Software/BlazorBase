@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BlazorBase.User.Models;
+using BlazorBase.User.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,32 +17,47 @@ namespace BlazorBase.User.Controller
     public class UserLoginController : ControllerBase
     {
         protected readonly SignInManager<IdentityUser> SignInManager;
+        protected readonly UserManager<IdentityUser> UserManager;
+        protected readonly ILogger<UserLoginController> Logger;
+        protected readonly IBlazorBaseUserOptions Options;
 
-        public UserLoginController(SignInManager<IdentityUser> signInManager)
+        public const string LoginPath = "/UserLogin/Login";
+        public const string LogoutPath = "/UserLogin/Logout";
+
+        public UserLoginController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, ILogger<UserLoginController> logger, IBlazorBaseUserOptions options)
         {
             SignInManager = signInManager;
+            UserManager = userManager;
+            Logger = logger;
+            Options = options;
         }
-     
+
         [HttpPost()]
-        public IActionResult Index([FromForm] string email, [FromForm] string password, [FromForm] string rememberMe)
+        public async Task<IActionResult> Login([FromForm] LoginData loginData, string returnUrl = null)
         {
-            _ = bool.TryParse(rememberMe, out bool res);
-            var signInResult = SignInManager.PasswordSignInAsync(email, password, res, false);
-            if (signInResult.Result.Succeeded)
+            returnUrl ??= Url.Content("~/");
+
+            var result = new Microsoft.AspNetCore.Identity.SignInResult();
+            var user = await UserManager.FindByEmailAsync(loginData.Email);
+            if (user != null)
+                result = await SignInManager.PasswordSignInAsync(user.UserName, loginData.Password, loginData.RememberMe, lockoutOnFailure: false);
+
+            if (result.Succeeded)
             {
-                return Redirect("/");
+                Logger.LogInformation("User {Email} logged successfully in.", loginData.Email);
+                return LocalRedirect(returnUrl);
             }
-            return Redirect("/login/" + signInResult.Result.Succeeded);
+
+            return Redirect(Options.LoginPath);
         }
 
         [HttpPost()]
         public async Task<IActionResult> Logout()
         {
             if (SignInManager.IsSignedIn(User))
-            {
                 await SignInManager.SignOutAsync();
-            }
-            return Redirect("/");
+
+            return Redirect("~/");
         }
     }
 }
