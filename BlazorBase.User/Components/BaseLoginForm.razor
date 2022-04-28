@@ -12,7 +12,7 @@
                     <div class="login-feedback validation-message">@Feedback</div>                                        
                     <DataAnnotationsValidator />
 
-                    <form id="action-login-form" action="@UserLoginController.LoginPath" method="post">
+                    <form id="action-login-form" action="@Options.LoginControllerPath" method="post">
                         <input name="returnUrl" type="hidden" @bind-value="ReturnUrl" />
                         <InputText @bind-Value="LoginData.Email" autocomplete="username" name="Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
                         <ValidationMessage For="@(() => LoginData.Email)" />

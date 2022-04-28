@@ -59,7 +59,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
-        {
+        {            
             return await DbContext.FindAsync(type, keyValues);
         }
 
@@ -190,6 +190,28 @@ namespace BlazorBase.CRUD.Services
             {
                 guid = Guid.NewGuid();
             } while (await DbContext.FindAsync<T>(guid) != null);
+
+            return guid;
+        }
+
+        public virtual Guid GetNewPrimaryKey(Type type)
+        {
+            Guid guid;
+            do
+            {
+                guid = Guid.NewGuid();
+            } while (DbContext.Find(type, guid) != null);
+
+            return guid;
+        }
+
+        public async virtual Task<Guid> GetNewPrimaryKeyAsync(Type type)
+        {
+            Guid guid;
+            do
+            {
+                guid = Guid.NewGuid();
+            } while (await DbContext.FindAsync(type, guid) != null);
 
             return guid;
         }

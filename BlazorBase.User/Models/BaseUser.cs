@@ -56,11 +56,8 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         var userManager = args.EventServices.ServiceProvider.GetService<UserManager<TIdentityUser>>();
         await CheckIdentityRolePermissionsAsync(args.EventServices, userManager, null);
 
-        do
-        {
-            Id = Guid.NewGuid();
-        } while (await args.EventServices.BaseService.GetAsync<BaseUser>(Id) != null);
-
+        Id = await args.EventServices.BaseService.GetNewPrimaryKeyAsync(GetType());
+       
         IdentityUser = new TIdentityUser
         {
             Email = Email,

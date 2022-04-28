@@ -1,4 +1,5 @@
 ﻿using BlazorBase.Models;
+using BlazorBase.User.Controller;
 using System;
 using System.Security;
 
@@ -17,7 +18,12 @@ public class BlazorBaseUserOptions : IBlazorBaseUserOptions
     public BaseOptionsImportMode OptionsImportMode { get; set; }
     public Type OptionsImportFromDatabaseEntryType { get; set; } = default!;
 
-    public string LoginPath { get; set; }
+    public string LoginPath { get; set; } = "User/Login";
+    public string LoginControllerPath { get; set; } = UserLoginController.LoginPath;
+    public string LogoutControllerPath { get; set; } = UserLoginController.LogoutPath;
+    public string ManageUserPath { get; set; } = "User/Manage";
+    public string WebsiteName { get; set; } = "BlazorBase";
+    public bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; } = true;
     #endregion
 
 

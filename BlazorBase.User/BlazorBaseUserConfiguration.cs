@@ -51,6 +51,7 @@ public static class BlazorBaseUserConfiguration
 
     public static void RemoveDefaultIdentityControllerEndpoints(this WebApplication app, string defaultRedirectPath = "~/")
     {
+        /*
         app.MapGet("/Identity/Account/Login", context => Task.Factory.StartNew(() => context.Response.Redirect(defaultRedirectPath, true, true)));
         app.MapPost("/Identity/Account/Login", context => Task.Factory.StartNew(() => context.Response.Redirect(defaultRedirectPath, true, true)));
 
@@ -107,5 +108,6 @@ public static class BlazorBaseUserConfiguration
 
         app.MapGet("/Identity/Account/Manage/PersonalData", context => Task.Factory.StartNew(() => context.Response.Redirect(defaultRedirectPath, true, true)));
         app.MapPost("/Identity/Account/Manage/PersonalData", context => Task.Factory.StartNew(() => context.Response.Redirect(defaultRedirectPath, true, true)));
+        */
     }
 }

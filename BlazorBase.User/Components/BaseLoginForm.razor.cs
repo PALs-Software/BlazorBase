@@ -39,6 +39,7 @@ public partial class BaseLoginForm : ComponentBase
     [Inject] protected ILogger<BaseLoginForm> Logger { get; set; }
     [Inject] protected IJSRuntime JSRuntime { get; set; }
     [Inject] protected NavigationManager NavigationManager { get; set; }
+    [Inject] protected IBlazorBaseUserOptions Options{ get; set; }
     #endregion
 
     #region Properties

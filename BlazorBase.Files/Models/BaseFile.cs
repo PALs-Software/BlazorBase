@@ -67,10 +67,7 @@ namespace BlazorBase.Files.Models
 
         public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
         {
-            do
-            {
-                Id = Guid.NewGuid();
-            } while (await args.EventServices.BaseService.GetAsync(GetType(), Id) != null);
+            Id = await args.EventServices.BaseService.GetNewPrimaryKeyAsync(GetType());
 
             args.EventServices.BaseService.DbContext.Entry(this).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a basefile is a navigation property and is newly added, it must add the base file before it add or update the entity itself
         }
