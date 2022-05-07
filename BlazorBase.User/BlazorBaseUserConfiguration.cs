@@ -34,7 +34,9 @@ public static class BlazorBaseUserConfiguration
         serviceCollection
             .AddSingleton(configureOptions)
             .AddSingleton<IBlazorBaseUserOptions, TOptions>()
+            .AddSingleton<IBaseUser, TUser>()
             .AddTransient<TUserService>();
+        
 
         serviceCollection.AddControllers();
 

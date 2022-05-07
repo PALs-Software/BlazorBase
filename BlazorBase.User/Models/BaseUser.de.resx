@@ -117,11 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CompanyId" xml:space="preserve">
-    <value>Unternehmen</value>
-  </data>
   <data name="Email" xml:space="preserve">
     <value>E-Mail</value>
+  </data>
+  <data name="IdentityRole" xml:space="preserve">
+    <value>Rolle</value>
   </data>
   <data name="Process" xml:space="preserve">
     <value>Prozess</value>
@@ -158,9 +158,6 @@
   </data>
   <data name="UserName" xml:space="preserve">
     <value>Benutzername</value>
-  </data>
-  <data name="UserRole" xml:space="preserve">
-    <value>Rolle</value>
   </data>
   <data name="User_Plural" xml:space="preserve">
     <value>Benutzer</value>

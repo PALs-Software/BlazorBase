@@ -1,18 +1,23 @@
 ﻿@page "/User/Manage"
+@using BlazorBase.User.Models
 @attribute [Authorize]
 
 <Heading Margin="Margin.Is2.FromTop.Is4.FromBottom">
     @Localizer["Manage Account"]
 </Heading>
 
-<FullHeightTabs SelectedTab="password">
+<FullHeightTabs SelectedTab="profile">
     <Items>
         <Tab Name="profile">@Localizer["Profile"]</Tab>
+        <Tab Name="change-password">@Localizer["Change Password"]</Tab>
         <Tab Name="personal data">@Localizer["Personal data"]</Tab>
     </Items>
     <Content>
-        <TabPanel Name="password" Class="h-100">
-            
+        <TabPanel Name="profile" Class="h-100">
+            <BaseUserManageProfile />
+        </TabPanel>
+        <TabPanel Name="change-password" Class="h-100">
+            <BaseUserManagePassword />
         </TabPanel>
     </Content>
 </FullHeightTabs>

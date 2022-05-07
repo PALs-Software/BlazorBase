@@ -5,7 +5,6 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
-using BlazorBase.Modules;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
