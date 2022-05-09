@@ -69,7 +69,7 @@
             <Buttons>
                 @AdditionalButtons
 
-                @if (!HideSaveButton)
+                @if (!HideSaveButton && !ReadOnly)
                 {
                     <Button Clicked="SaveAsync"><Icon Name="IconName.Save" /></Button>
                 }
