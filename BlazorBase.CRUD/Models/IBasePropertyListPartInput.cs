@@ -18,6 +18,7 @@ namespace BlazorBase.CRUD.Models
         [Parameter] bool? ReadOnly { get; set; }
         [Parameter] BaseService Service { get; set; }
         [Parameter] IStringLocalizer ModelLocalizer { get; set; }
+        [Parameter] DisplayItem DisplayItem { get; set; }
 
         #region Events
         [Parameter] EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }

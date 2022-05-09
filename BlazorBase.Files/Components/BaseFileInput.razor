@@ -15,13 +15,15 @@
         <Fields>
             <Field Horizontal="true">
                 <FieldLabel ColumnSize="ColumnSize.Is4">
-                    @ModelLocalizer[Property.Name]
+                    <div title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
+                        @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
+                    </div>
                 </FieldLabel>
                 <FieldBody ColumnSize="ColumnSize.Is8">
                     <div class="@InputClass">
                         <Row Margin="Margin.Is0">
                             <Column ColumnSize="ColumnSize.Is6" Padding="Padding.Is0.FromLeft">
-                                <BaseFileListDisplay Model="Model" Property="Property" Service="Service" ModelLocalizer="ModelLocalizer" IsDisplayedInGuiType="CRUD.Enums.GUIType.Card"/>
+                                <BaseFileListDisplay Model="Model" Property="Property" Service="Service" ModelLocalizer="ModelLocalizer" IsDisplayedInGuiType="CRUD.Enums.GUIType.Card" />
                             </Column>
                             @if (!IsReadOnly)
                             {

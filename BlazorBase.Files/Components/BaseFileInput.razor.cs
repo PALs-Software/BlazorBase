@@ -35,6 +35,7 @@ namespace BlazorBase.Files.Components
         protected int UploadProgress = 0;
         protected FileEdit FileEdit = default;
         protected bool FileEditIsResetting = false;
+        protected EventServices EventServices;
         #endregion
 
         protected override async Task OnInitializedAsync()
@@ -46,14 +47,31 @@ namespace BlazorBase.Files.Components
 
             if (FileFilter == null && Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) is FileInputFilterAttribute filterAttribute)
                 FileFilter = filterAttribute?.Filter ?? "*.";
+
+            EventServices = new EventServices()
+            {
+                ServiceProvider = ServiceProvider,
+                Localizer = ModelLocalizer,
+                BaseService = Service,
+                MessageHandler = MessageHandler
+            };
         }
 
-        public override Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(typeof(BaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
         }
 
-        protected override async Task OnValueChangedAsync(object fileChangedEventArgs)
+        public Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args) { return Task.CompletedTask; }
+
+        public Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
+
+        public Task<bool> InputHasAdditionalContentChanges()
+        {
+            return Task.FromResult(false);
+        }
+
+        protected override async Task OnValueChangedAsync(object fileChangedEventArgs, bool setCurrentValueAsString = true)
         {
             if (FileEditIsResetting)
                 return;
@@ -187,6 +205,5 @@ namespace BlazorBase.Files.Components
 
             await oldFile.ClearFileFromPropertyAsync(Model, Property, Service);
         }
-
     }
 }

@@ -6,8 +6,6 @@ using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Modules;
-using Blazorise;
-using Blazorise.RichTextEdit;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +52,7 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Members
+        protected bool SkipCustomSetParametersAsync = false;
         protected string InputClass;
         protected string FeedbackClass;
         protected string Feedback;
@@ -82,8 +81,6 @@ namespace BlazorBase.CRUD.Components
             typeof(long),
             typeof(long?)
         };
-
-        protected RichTextEdit RichTextEditRef = default!;
         #endregion
 
         #region Init
@@ -134,27 +131,13 @@ namespace BlazorBase.CRUD.Components
             await RaiseOnFormatPropertyEventsAsync();
         }
 
-        //protected override async Task OnAfterRenderAsync(bool firstRender)
-        //{
-        //    if (PresentationDataType == DataType.MultilineText && !loadContent)
-        //    {
-        //        if (!String.IsNullOrEmpty(CurrentValueAsString))
-        //        {
-        //            if(CurrentValueAsString.First() == '<' && CurrentValueAsString.Last() == '>')
-        //                await RichTextEditRef.SetHtmlAsync(CurrentValueAsString);
-        //            else if(CurrentValueAsString.First() == '{' && CurrentValueAsString.Last() == '}')
-        //                await RichTextEditRef.SetDeltaAsync(CurrentValueAsString);
-        //            else
-        //                await RichTextEditRef.SetTextAsync(CurrentValueAsString);
-        //        }
-        //        loadContent = true;
-        //    }
-        //    return;
-        //}
-
         public override async Task SetParametersAsync(ParameterView parameters)
         {
             await base.SetParametersAsync(parameters);
+
+            if (SkipCustomSetParametersAsync)
+                return;
+
             if (Property == null || Model == null)
                 return;
 
@@ -168,18 +151,6 @@ namespace BlazorBase.CRUD.Components
             await RaiseOnFormatPropertyEventsAsync();
         }
 
-        public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
-        {
-            return Task.FromResult(false);
-        }
-        #endregion
-
-        #region RichTextEdit
-        public async Task OnSave()
-        {
-            var contentAsHtml = await RichTextEditRef.GetHtmlAsync();
-            await OnValueChangedAsync(contentAsHtml);
-        }
         #endregion
 
         #region Events        
@@ -210,7 +181,7 @@ namespace BlazorBase.CRUD.Components
             return false;
         }
 
-        protected async virtual Task OnValueChangedAsync(object newValue)
+        protected async virtual Task OnValueChangedAsync(object newValue, bool setCurrentValueAsString = true)
         {
             try
             {
@@ -245,7 +216,8 @@ namespace BlazorBase.CRUD.Components
                 await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
                 await Model.OnAfterPropertyChanged(onAfterArgs);
 
-                SetCurrentValueAsString(newValue);
+                if(setCurrentValueAsString)
+                    SetCurrentValueAsString(newValue);
             }
             catch (Exception e)
             {
@@ -356,7 +328,7 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        private void SetInputAttributes()
+        protected void SetInputAttributes()
         {
             InputAttributes.Clear();
 

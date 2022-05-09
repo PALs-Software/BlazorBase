@@ -1,12 +1,15 @@
 ﻿using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Helper;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components
@@ -26,6 +29,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnBeforeCardSaveChangesArgs> OnBeforeSaveChanges { get; set; }
         [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
         #region List Events
@@ -43,7 +47,7 @@ namespace BlazorBase.CRUD.Components
 
         #endregion
 
-        [Parameter]public string SingleDisplayName { get; set; }
+        [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string ExplainText { get; set; }
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
@@ -101,7 +105,8 @@ namespace BlazorBase.CRUD.Components
 
         protected bool HasUnsavedChanges()
         {
-            if (!BaseCard.HasUnsavedChanges())
+            var result = AsyncHelper.RunSync(() => BaseCard.HasUnsavedChangesAsync());
+            if (!result)
                 return false;
 
             MessageHandler.ShowConfirmDialog(

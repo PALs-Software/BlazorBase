@@ -50,7 +50,6 @@ namespace BlazorBase.CRUD.Components
                 DisplayPropertyType = displayPropertyType;
                 IsSortable = isSortable;
                 IsFilterable = isFilterable;
-                IsFullRow = property.GetCustomAttribute<DataTypeAttribute>()?.DataType == DataType.MultilineText;
                 IsVisible = isVisible;
             }
 
@@ -67,7 +66,6 @@ namespace BlazorBase.CRUD.Components
             public Type DisplayPropertyType { get; set; }
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
-            public bool IsFullRow { get; set; }
             public bool IsVisible { get; set; }
 
             public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
@@ -322,26 +320,6 @@ namespace BlazorBase.CRUD.Components
                 query.Remove(keyProperty.Name);
 
             return query;
-        }
-
-        protected virtual string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
-        {
-            var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
-            model.OnGetPropertyCaption(args);
-
-            return args.Caption;
-        }
-
-        protected virtual string GetPropertyTooltip(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
-        {
-            var caption = modelLocalizer[displayItem.Property.Name];
-
-            var tooltip = modelLocalizer[$"{displayItem.Property.Name}_Tooltip"];
-
-            if (tooltip.Value != caption.Name + "_Tooltip")
-                return caption.Value + Environment.NewLine + " " + Environment.NewLine + tooltip.Value;
-
-            return caption.Value;
         }
 
         #region Feedback

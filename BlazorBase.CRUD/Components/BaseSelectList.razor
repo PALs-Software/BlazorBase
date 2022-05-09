@@ -1,7 +1,8 @@
-﻿@typeparam TModel
-@inherits BaseList<TModel>
-
+﻿@using BlazorBase.CRUD.Models
 @using BlazorBase.Components
+
+@typeparam TModel
+@inherits BaseList<TModel>
 
 <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
     <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
@@ -27,7 +28,7 @@
                             @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                             {
                                 <th>
-                                    @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
+                                    @IBaseModel.GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem)
                                 </th>
                             }
                         }

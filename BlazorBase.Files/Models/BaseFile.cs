@@ -99,7 +99,18 @@ namespace BlazorBase.Files.Models
         #endregion
 
         #region File Handling
-        public string GetFileLink()
+        public string GetFileLink(bool ignoreTemporaryLink = false)
+        {
+            if (String.IsNullOrEmpty(MimeFileType))
+                return null;
+
+            if (TempFileId == Guid.Empty || ignoreTemporaryLink)
+                return $"/api/BaseFile/GetFile/{BaseFileController.EncodeUrl(MimeFileType)}/{Id}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
+            else
+                return $"/api/BaseFile/GetTemporaryFile/{BaseFileController.EncodeUrl(MimeFileType)}/{TempFileId}?hash={Hash}";
+        }
+
+        public string GetNonTemporaryFileLink()
         {
             if (String.IsNullOrEmpty(MimeFileType))
                 return null;
@@ -212,6 +223,23 @@ namespace BlazorBase.Files.Models
                 MimeFileType = mimeFileType,
                 Hash = ComputeSha256Hash(fileContent)
             };
+
+            return (TBaseFile) await FinishCreateFileTaskAsync(file, eventServices, fileContent);
+        }
+        public static async Task<BaseFile> CreateFileAsync(Type FileType, EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent)
+        {
+            var file = (BaseFile)Activator.CreateInstance(FileType);
+            file.FileName = fileName;
+            file.FileSize = fileContent.Length;
+            file.BaseFileType = baseFileType;
+            file.MimeFileType = mimeFileType;
+            file.Hash = ComputeSha256Hash(fileContent);
+
+            return await FinishCreateFileTaskAsync(file, eventServices, fileContent);
+        }
+
+        protected static async Task<BaseFile> FinishCreateFileTaskAsync(BaseFile file, EventServices eventServices, byte[] fileContent)
+        {
             await file.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(file, eventServices));
 
             var options = BlazorBaseFileOptions.Instance;
