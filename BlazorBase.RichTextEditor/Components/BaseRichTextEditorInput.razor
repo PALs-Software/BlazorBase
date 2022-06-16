@@ -17,8 +17,10 @@
                         <BaseRichTextEditor @ref="BaseRichTextEditor"
                                         BaseService="Service"
                                         ConnectedModel="Model"
-                                        HideSaveButton="true"
+                                        HideSaveButton="false"
                                         OnContentChanged="OnContentChanged"
+                                        OnSave="() => OnBeforeCardSaveChanges(null)"
+                                        
                                         ReadOnly="IsReadOnly">
 
                             <EditorContent>@((MarkupString)CurrentValueAsString)</EditorContent>
