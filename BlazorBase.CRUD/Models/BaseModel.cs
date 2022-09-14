@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Resources.ValidationAttributes;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Extensions;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
@@ -299,27 +300,10 @@ namespace BlazorBase.CRUD.Models
             var sourceProperties = this.GetType().GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
             TransferPropertiesTo(target, sourceProperties.ToArray());
         }
-
+        
         public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null)
         {
-            if (sourceProperties == null)
-                sourceProperties = this.GetType().GetProperties();
-            var targetProperties = target.GetType().GetProperties();
-
-            foreach (var sourceProperty in sourceProperties)
-            {
-                var targetProperty = targetProperties.Where(entry => entry.Name == sourceProperty.Name).FirstOrDefault();
-
-                if (targetProperty == null ||
-                    (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
-                    (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
-                    (targetProperty.GetSetMethod() == null) ||
-                    ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0) ||
-                    typeof(ILazyLoader).IsAssignableFrom(sourceProperty.PropertyType))
-                    continue;
-
-                targetProperty.SetValue(target, sourceProperty.GetValue(this));
-            }
+            ObjectExtension.TransferPropertiesTo(this, target, sourceProperties);
         }
 
         public Type GetUnproxiedType()

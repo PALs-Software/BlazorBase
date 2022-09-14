@@ -1,31 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BlazorBase.Models;
+using System;
 
-namespace BlazorBase.CRUD.Models
+namespace BlazorBase.CRUD.Models;
+public class BlazorBaseCRUDOptions : IBlazorBaseCRUDOptions
 {
-    public class BlazorBaseCRUDOptions
+    #region Constructors
+    public BlazorBaseCRUDOptions(IServiceProvider serviceProvider, Action<BlazorBaseCRUDOptions> configureOptions)
     {
-        #region Members
-
-        private readonly IServiceProvider serviceProvider;
-
-        private readonly Action<BlazorBaseCRUDOptions> configureOptions;
-
-        #endregion
-
-        #region Constructors
-
-        public BlazorBaseCRUDOptions(IServiceProvider serviceProvider, Action<BlazorBaseCRUDOptions> configureOptions)
-        {
-            this.serviceProvider = serviceProvider;
-            this.configureOptions = configureOptions;
-
-            this.configureOptions?.Invoke(this);
-        }
-
-        #endregion
+        (this as IBlazorBaseCRUDOptions).ImportOptions(serviceProvider, configureOptions);
     }
+    #endregion
+
+    #region Properties
+    public BaseOptionsImportMode OptionsImportMode { get; set; }
+    public Type OptionsImportFromDatabaseEntryType { get; set; } = default!;
+    #endregion
 }

@@ -6,8 +6,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
-using BlazorBase.Modules;
-using Blazorise;
+using BlazorBase.Services;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -50,7 +49,7 @@ namespace BlazorBase.CRUD.Components
         [Inject] protected BaseParser BaseParser { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
-        [Inject] protected ErrorHandler ErrorHandler { get; set; }
+        [Inject] protected BaseErrorHandler ErrorHandler { get; set; }
         #endregion
 
         #region Members

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,10 +26,12 @@
 
   <ItemGroup>
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="5.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.6" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="5.0.6" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +40,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.Designer.cs">
+      <DependentUpon>ValidationAttributesTranslations.de.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+    </Compile>
     <Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -60,6 +67,10 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Components\BaseList.razor.resx">
       <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
+      <LastGenOutput>ValidationAttributesTranslations.de.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

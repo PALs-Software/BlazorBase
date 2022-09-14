@@ -1,41 +1,90 @@
 ﻿using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
 using BlazorBase.Files.Components;
 using BlazorBase.Files.Models;
-using Microsoft.EntityFrameworkCore;
+using BlazorBase.Models;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD
+namespace BlazorBase.Files;
+public static class BlazorBaseFilesConfiguration
 {
-    public static class BlazorBaseFilesConfiguration
+    /// <summary>
+    /// Register the blazore base file options instance
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    public static void RegisterBlazorBaseFileOptionsInstance(this IApplicationBuilder app)
     {
-        /// <summary>
-        /// Register blazor base number series and configures the default behaviour.
-        /// </summary>
-        /// <param name="serviceCollection"></param>
-        /// <param name="configureOptions"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<BlazorBaseFileOptions> configureOptions = null)
+        _ = app.ApplicationServices.GetService<IBlazorBaseFileOptions>(); // Just getting options on startup so constructor will fill up the static instance for later use
+    }
+
+    /// <summary>
+    /// Register blazor base file handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+
+    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
+        where TOptions : class, IBlazorBaseFileOptions
+    {
+        // If options handler is not defined we will get an exception so
+        // we need to initialize and empty action.
+        if (configureOptions == null)
+            configureOptions = (e) => { };
+
+        serviceCollection.AddSingleton(configureOptions)
+        .AddSingleton<IBlazorBaseFileOptions, TOptions>()
+
+        .AddTransient<IBasePropertyCardInput, BaseFileInput>()
+        .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
+        .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
+
+        .AddControllers();
+
+        return serviceCollection;
+    }
+
+    /// <summary>
+    /// Register blazor base file handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+
+    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions> configureOptions = null)
+    {
+        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions);
+    }
+
+    /// <summary>
+    /// Register blazor base file handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+
+    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
+        where TOptions : class, IBlazorBaseFileOptions
+    {
+        return AddBlazorBaseFiles<TOptions>(serviceCollection, options =>
         {
-            // If options handler is not defined we will get an exception so
-            // we need to initialize and empty action.
-            if (configureOptions == null)
-                configureOptions = (e) => { };
+            options.OptionsImportMode = BaseOptionsImportMode.Database;
+            options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
+        });
+    }
 
-            serviceCollection.AddSingleton(configureOptions)
-            .AddSingleton<BlazorBaseFileOptions>()
+    /// <summary>
+    /// Register blazor base file handling and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
 
-            .AddTransient<IBasePropertyCardInput, BaseFileInput>()
-            .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
-            .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>();
-
-            return serviceCollection;
-        }
+    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
+    {
+        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, optionsImportFromDatabaseEntryType);
     }
 }

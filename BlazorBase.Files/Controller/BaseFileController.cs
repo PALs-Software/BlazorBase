@@ -21,10 +21,10 @@ namespace BlazorBase.Files.Controller
         public static readonly string PlusEscapeSequence = "[%PLUS%]";
         public static readonly string SpaceEscapeSequence = "[%SPACE%]";
 
-        protected BlazorBaseFileOptions Options { get; set; }
+        protected IBlazorBaseFileOptions Options { get; set; }
         protected static DateTime NextCheckIfOldTemporaryFilesMustBeDeleted = DateTime.MinValue;
 
-        public BaseFileController(BlazorBaseFileOptions options)
+        public BaseFileController(IBlazorBaseFileOptions options)
         {
             Options = options;
         }

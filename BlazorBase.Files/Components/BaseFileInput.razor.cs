@@ -27,7 +27,7 @@ namespace BlazorBase.Files.Components
 
         #region Inject
         [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; }
-        [Inject] protected BlazorBaseFileOptions Options { get; set; }
+        [Inject] protected IBlazorBaseFileOptions Options { get; set; }
         #endregion
 
         #region Member
@@ -90,7 +90,7 @@ namespace BlazorBase.Files.Components
                 {
                     if (baseFile.TempFileId == Guid.Empty)
                     {
-                        var tempFileStorePath = BlazorBaseFileOptions.Instance.TempFileStorePath;
+                        var tempFileStorePath = Options.TempFileStorePath;
                         string tempFilePath;
                         do
                         {

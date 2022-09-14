@@ -1,0 +1,18 @@
+﻿<AuthorizeView>
+    <Authorized>
+
+        <BarItem>
+            <BarLink To="@Options.ManageUserPath">@Greeting @context.User.Identity.Name!</BarLink>
+            <BarLink To="javascript:$('#logout-form').submit()">@Localizer["Log out"]</BarLink>
+            <form id="logout-form" method="post" action="@Options.LogoutControllerPath"></form>
+        </BarItem>
+
+    </Authorized>
+    <NotAuthorized>
+
+        <BarItem>
+            <BarLink To="@Options.LoginPath">@Localizer["Log in"]</BarLink>
+        </BarItem>
+
+    </NotAuthorized>
+</AuthorizeView>
