@@ -35,10 +35,10 @@ public static class BlazorBaseUserConfiguration
             .AddSingleton(configureOptions)
             .AddSingleton<IBlazorBaseUserOptions, TOptions>()
             .AddSingleton<IBaseUser, TUser>()
-            .AddTransient<TUserService>();
+            .AddTransient<TUserService>()
         
 
-        serviceCollection.AddControllers();
+        .AddControllers().AddApplicationPart(typeof(UserLoginController).Assembly).AddControllersAsServices();
 
         var options = new TOptions();
         configureOptions.Invoke(options);

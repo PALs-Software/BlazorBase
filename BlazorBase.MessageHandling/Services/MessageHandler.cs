@@ -7,6 +7,7 @@ using System;
 using System.Threading.Tasks;
 using static BlazorBase.MessageHandling.Interfaces.IMessageHandler;
 using static BlazorBase.MessageHandling.Models.ShowDateSpanDialogArgs;
+using static BlazorBase.MessageHandling.Models.ShowFileInputDialogArgs;
 
 namespace BlazorBase.MessageHandling.Services
 {
@@ -18,6 +19,7 @@ namespace BlazorBase.MessageHandling.Services
         public event ShowConfirmDialogHandler OnShowConfirmDialog;
 
         public event ShowDateSpanDialogHandler OnShowDateSpanDialog;
+        public event ShowFileInputDialogHandler OnShowFileInputDialog;
 
         public event ShowLoadingMessageHandler OnShowLoadingMessage;
         public event UpdateLoadingMessageHandler OnUpdateLoadingMessage;
@@ -110,6 +112,48 @@ namespace BlazorBase.MessageHandling.Services
         }
         #endregion
 
+        #region ShowFileInputDialog
+        public void ShowFileInputDialog(
+            string title,
+            string message,
+            string fileInputCaption,
+            ulong? maxFileSize,
+            string fileFilter,
+            MessageType messageType = MessageType.Information,
+            Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult, Task> onClosing = null,
+            object icon = null,
+            string confirmButtonText = null,
+            Color confirmButtonColor = Color.Primary,
+            string abortButtonText = null,
+            Color abortButtonColor = Color.Secondary,
+            ModalSize modalSize = ModalSize.Large)
+        {
+            ShowFileInputDialog(
+               new ShowFileInputDialogArgs(
+                   title,
+                   message,
+                   fileInputCaption,
+                   maxFileSize,
+                   fileFilter,
+                   messageType,
+                   onClosing,
+                   icon,
+                   confirmButtonText,
+                   confirmButtonColor,
+                   abortButtonText,
+                   abortButtonColor,
+                   modalSize
+               )
+           );
+        }
+
+        public void ShowFileInputDialog(ShowFileInputDialogArgs args)
+        {
+            OnShowFileInputDialog?.Invoke(args);
+        }
+        #endregion
+
+
         #region ShowLoadingMessage
         public Guid ShowLoadingMessage(string message, RenderFragment loadingChildContent = null)
         {
@@ -129,7 +173,7 @@ namespace BlazorBase.MessageHandling.Services
         #region ShowLoadingProgressMessage
         public Guid ShowLoadingProgressMessage(string message,
                                                int currentProgress = 0,
-                                               string progressText = null,                                               
+                                               string progressText = null,
                                                bool showProgressInText = true,
                                                RenderFragment loadingChildContent = null)
         {
@@ -137,7 +181,7 @@ namespace BlazorBase.MessageHandling.Services
                 new ShowLoadingProgressMessageArgs(
                     message,
                     currentProgress,
-                    progressText,                    
+                    progressText,
                     showProgressInText,
                     loadingChildContent)
                 ) ?? Guid.Empty;
@@ -146,7 +190,7 @@ namespace BlazorBase.MessageHandling.Services
         public bool UpdateLoadingProgressMessage(Guid id,
                                                  string message,
                                                  int currentProgress = 0,
-                                                 string progressText = null,                                                 
+                                                 string progressText = null,
                                                  bool showProgressInText = true,
                                                  RenderFragment loadingChildContent = null)
         {
@@ -154,7 +198,7 @@ namespace BlazorBase.MessageHandling.Services
                new ShowLoadingProgressMessageArgs(
                    message,
                    currentProgress,
-                   progressText,                   
+                   progressText,
                    showProgressInText,
                    loadingChildContent)
                { Id = id }) ?? false;

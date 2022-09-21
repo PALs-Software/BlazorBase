@@ -42,7 +42,7 @@ public static class BlazorBaseFilesConfiguration
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
         .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
 
-        .AddControllers();
+        .AddControllers().AddApplicationPart(typeof(Controller.BaseFileController).Assembly).AddControllersAsServices();
 
         return serviceCollection;
     }
