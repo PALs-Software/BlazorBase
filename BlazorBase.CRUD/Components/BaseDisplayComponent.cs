@@ -115,8 +115,8 @@ namespace BlazorBase.CRUD.Components
                 bool sortAndFilterable;
                 if (customPropertyPath == null)
                 {
-                    displayPathAndType = GetDisplayPropertyPathAndType(property);
-                    sortAndFilterable = GetPropertyIsSortAndFilterable(property);
+                    displayPathAndType = property.GetDisplayPropertyPathAndType();
+                    sortAndFilterable = property.GetPropertyIsSortAndFilterable();
                 }
                 else
                 {
@@ -132,45 +132,6 @@ namespace BlazorBase.CRUD.Components
             }
 
             SortDisplayLists();
-        }
-
-        protected virtual (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(PropertyInfo property)
-        {
-            if (!property.IsForeignKey() || property.IsListProperty())
-                return (property.Name, property.PropertyType);
-
-            var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-            var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
-            var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
-
-            if (foreignKeyType == null)
-                return (property.Name, property.PropertyType);
-            if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
-                return (property.Name, property.PropertyType);
-
-            var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
-            if (displayKeyProperties.Count == 0)
-                displayKeyProperties = foreignKeyType.GetKeyProperties();
-
-            List<string> displayPropertyPaths = new();
-            foreach (var displayKeyProperty in displayKeyProperties)
-                displayPropertyPaths.Add($"{foreignKey.Name}.{displayKeyProperty.Name}");
-
-            return (String.Join("|", displayPropertyPaths), displayKeyProperties[0].PropertyType);
-        }
-
-        protected virtual bool GetPropertyIsSortAndFilterable(PropertyInfo property)
-        {
-            if (property.HasAttribute(typeof(NotMappedAttribute)))
-                return false;
-
-            var getMethod = property.GetGetMethod();
-            var setMethod = property.GetSetMethod();
-            if (getMethod == null || setMethod == null)
-                return false;
-
-            //Check if get and set method are not overridden with custom logic and are just normal property get and set methods
-            return Attribute.IsDefined(getMethod, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(setMethod, typeof(CompilerGeneratedAttribute));
         }
 
         protected virtual void SortDisplayLists()

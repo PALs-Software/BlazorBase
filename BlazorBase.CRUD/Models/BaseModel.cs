@@ -138,6 +138,14 @@ namespace BlazorBase.CRUD.Models
         {
             OnReloadEntityFromDatabase?.Invoke(this, EventArgs.Empty);
         }
+
+        public async Task InvokeStateHasChanged()
+        {
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        }
         #endregion
 
         #region Events

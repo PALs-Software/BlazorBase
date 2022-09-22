@@ -7,6 +7,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace BlazorBase.CRUD.Extensions
 {
@@ -105,6 +106,45 @@ namespace BlazorBase.CRUD.Extensions
                 return false;
 
             return propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
+        }
+
+        public static (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(this PropertyInfo property)
+        {
+            if (!property.IsForeignKey() || property.IsListProperty())
+                return (property.Name, property.PropertyType);
+
+            var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+            var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+            var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
+
+            if (foreignKeyType == null)
+                return (property.Name, property.PropertyType);
+            if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
+                return (property.Name, property.PropertyType);
+
+            var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
+            if (displayKeyProperties.Count == 0)
+                displayKeyProperties = foreignKeyType.GetKeyProperties();
+
+            List<string> displayPropertyPaths = new();
+            foreach (var displayKeyProperty in displayKeyProperties)
+                displayPropertyPaths.Add($"{foreignKey.Name}.{displayKeyProperty.Name}");
+
+            return (String.Join("|", displayPropertyPaths), displayKeyProperties[0].PropertyType);
+        }
+
+        public static bool GetPropertyIsSortAndFilterable(this PropertyInfo property)
+        {
+            if (property.HasAttribute(typeof(NotMappedAttribute)))
+                return false;
+
+            var getMethod = property.GetGetMethod();
+            var setMethod = property.GetSetMethod();
+            if (getMethod == null || setMethod == null)
+                return false;
+
+            //Check if get and set method are not overridden with custom logic and are just normal property get and set methods
+            return Attribute.IsDefined(getMethod, typeof(CompilerGeneratedAttribute)) && Attribute.IsDefined(setMethod, typeof(CompilerGeneratedAttribute));
         }
     }
 }
