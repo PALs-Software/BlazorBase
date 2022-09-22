@@ -57,11 +57,15 @@
                     <Buttons>
                         @if (UserCanEditEntries)
                         {
-                            <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)"><Icon Name="IconName.Edit" /></Button>
+                            <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Icon Name="IconName.Edit" /></Button>
+                        }
+                        @if (UserCanOpenCardReadOnly)
+                        {
+                            <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Icon Name="IconName.FolderOpen" /></Button>
                         }
                         @if (UserCanDeleteEntries)
                         {
-                            <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)"><Icon Name=" IconName.Delete" /></Button>
+                            <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Icon Name=" IconName.Delete" /></Button>
                         }
                     </Buttons>
                 </td>

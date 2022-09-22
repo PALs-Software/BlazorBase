@@ -76,6 +76,7 @@ namespace BlazorBase.CRUD.Components
 
         protected bool ModelLoaded = false;
         protected bool AddingMode;
+        protected bool ViewMode;
 
         protected ValidationContext ValidationContext;
         #endregion
@@ -113,7 +114,7 @@ namespace BlazorBase.CRUD.Components
             if (ShowEntryByStart)
             {
                 var entry = await EntryToBeShownByStart?.Invoke(EventServices);
-                await ShowAsync(entry == null, entry?.GetPrimaryKeys());
+                await ShowAsync(entry == null, false, entry?.GetPrimaryKeys());
             }
         }
 
@@ -147,18 +148,19 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #region Actions
-        public async Task ShowAsync(bool addingMode, params object[] primaryKeys)
+        public async Task ShowAsync(bool addingMode, bool viewMode, params object[] primaryKeys)
         {
             await Service.RefreshDbContextAsync();
 
             ModelLoaded = false;
             AddingMode = addingMode;
+            ViewMode = viewMode;
             BaseInputs.Clear();
             BaseSelectListInputs.Clear();
             BaseListParts.Clear();
             BasePropertyCardInputs.Clear();
             ResetInvalidFeedback();
-
+               
             if (AddingMode)
             {
                 Model = new TModel();
@@ -181,16 +183,16 @@ namespace BlazorBase.CRUD.Components
                 [typeof(BaseService)] = Service
             });
 
-            Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
+            Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, viewMode, e);
             ModelLoaded = true;
         }
 
-        protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
+        protected async Task Entry_OnReloadEntityFromDatabase(object sender, bool viewMode, EventArgs e)
         {
             if (Model == null)
                 return;
 
-            await ShowAsync(false, Model.GetPrimaryKeys());
+            await ShowAsync(false, viewMode, Model.GetPrimaryKeys());
 
             await InvokeAsync(() =>
             {

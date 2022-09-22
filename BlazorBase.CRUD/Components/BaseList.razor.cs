@@ -64,6 +64,7 @@ namespace BlazorBase.CRUD.Components
         #region BaseList            
         [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }
         [Parameter] public EventCallback<OnBeforeOpenEditModalArgs> OnBeforeOpenEditModal { get; set; }
+        [Parameter] public EventCallback<OnBeforeOpenViewModalArgs> OnBeforeOpenViewModal { get; set; }
         #endregion
 
         #endregion
@@ -74,6 +75,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
+        [Parameter] public bool UserCanOpenCardReadOnly { get; set; } = false;
         [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public TModel ComponentModelInstance { get; set; }
@@ -222,7 +224,7 @@ namespace BlazorBase.CRUD.Components
         {
             if (!Sortable)
                 return;
-                        
+
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)
                 {
@@ -248,6 +250,9 @@ namespace BlazorBase.CRUD.Components
             if (uri.AbsolutePath != ListNavigationBasePath)
                 return;
 
+            if (!UserCanEditEntries && !UserCanOpenCardReadOnly)
+                return;
+
             var query = QueryHelpers.ParseQuery(uri.Query);
             if (query.Count == 0)
                 return;
@@ -269,7 +274,12 @@ namespace BlazorBase.CRUD.Components
         {
             var entry = await Service.GetAsync<TModel>(primaryKeys);
             if (entry != null && (DataLoadCondition == null || DataLoadCondition.Compile()(entry))) //Check if user is allowed to see this entry
-                await EditEntryAsync(entry, false);
+            {  
+                if (UserCanOpenCardReadOnly)
+                    await ViewEntryAsync(entry, false);
+                else if (UserCanEditEntries)
+                    await EditEntryAsync(entry, false);
+            }
             else
                 ChangeUrlToList();
         }
@@ -410,6 +420,7 @@ namespace BlazorBase.CRUD.Components
 
             await BaseModalCard.ShowModalAsync(addingMode: true);
         }
+
         public virtual async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
         {
             var args = new OnBeforeOpenEditModalArgs(false, entry, changeQueryUrl, EventServices);
@@ -421,7 +432,21 @@ namespace BlazorBase.CRUD.Components
             if (args.IsHandled)
                 return;
 
-            await BaseModalCard.ShowModalAsync(addingMode: false, entry.GetPrimaryKeys());
+            await BaseModalCard.ShowModalAsync(addingMode: false, viewMode: false, entry.GetPrimaryKeys());
+        }
+
+        public virtual async Task ViewEntryAsync(TModel entry, bool changeQueryUrl = true)
+        {
+            var args = new OnBeforeOpenViewModalArgs(false, entry, changeQueryUrl, EventServices);
+            await OnBeforeOpenViewModal.InvokeAsync(args);
+
+            if (args.ChangeQueryUrl)
+                ChangeUrlToEntry(entry);
+
+            if (args.IsHandled)
+                return;
+
+            await BaseModalCard.ShowModalAsync(addingMode: false, viewMode: true, entry.GetPrimaryKeys());
         }
 
         public virtual async Task RemoveEntryAsync(TModel model)

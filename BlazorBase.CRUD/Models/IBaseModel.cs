@@ -101,6 +101,7 @@ namespace BlazorBase.CRUD.Models
         #region ComponentBase        
         bool UserCanAddEntries { get; }
         bool UserCanEditEntries { get; }
+        bool UserCanOpenCardReadOnly { get; }
         bool UserCanDeleteEntries { get; }
         Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
         bool ShowOnlySingleEntry { get; }

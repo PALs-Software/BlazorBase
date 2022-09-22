@@ -25,4 +25,16 @@ namespace BlazorBase.CRUD.EventArguments
         public bool IsHandled { get; set; }
         public bool ChangeQueryUrl { get; set; }
     }
+
+    public record OnBeforeOpenViewModalArgs(IBaseModel Model, EventServices EventServices)
+    {
+        public OnBeforeOpenViewModalArgs(bool isHandled, IBaseModel model, bool changeQueryUrl, EventServices eventServices) : this(model, eventServices)
+        {
+            IsHandled = isHandled;
+            ChangeQueryUrl = changeQueryUrl;
+        }
+
+        public bool IsHandled { get; set; }
+        public bool ChangeQueryUrl { get; set; }
+    }
 }

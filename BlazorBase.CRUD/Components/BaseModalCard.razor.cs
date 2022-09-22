@@ -60,13 +60,15 @@ namespace BlazorBase.CRUD.Components
         protected Modal Modal = default!;
         protected BaseCard<TModel> BaseCard = default!;
         protected bool ContinueByUnsavedChanges = false;
+        protected bool ViewMode = false;
         #endregion
 
-        public async Task ShowModalAsync(bool addingMode = false, params object[] primaryKeys)
+        public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, params object[] primaryKeys)
         {
             ContinueByUnsavedChanges = false;
+            ViewMode = viewMode;
 
-            await BaseCard.ShowAsync(addingMode, primaryKeys);
+            await BaseCard.ShowAsync(addingMode, viewMode, primaryKeys);
             Modal.Show();
         }
 

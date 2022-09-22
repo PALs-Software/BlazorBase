@@ -252,7 +252,7 @@ namespace BlazorBase.CRUD.Services
             if (entry == null)
                 return false;
 
-            if (skipEntryAlreadyExistCheck && DbContext.Find<T>(entry.GetPrimaryKeys()) != null)
+            if ((!skipEntryAlreadyExistCheck) && DbContext.Find<T>(entry.GetPrimaryKeys()) != null)
                 return false;
 
             DbContext.Set<T>().Add(entry);
@@ -265,7 +265,7 @@ namespace BlazorBase.CRUD.Services
             if (entry == null)
                 return false;
 
-            if (skipEntryAlreadyExistCheck && await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) != null)
+            if ((!skipEntryAlreadyExistCheck) && await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) != null)
                 return false;
 
             DbContext.Set<T>().Add(entry);
@@ -303,7 +303,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public virtual void RemoveRange(params object[] entriesToRemove)
-        {
+        {            
             DbContext.RemoveRange(entriesToRemove);
         }
 

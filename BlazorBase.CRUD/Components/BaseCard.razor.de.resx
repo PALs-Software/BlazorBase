@@ -153,4 +153,7 @@
   <data name="Unsaved changes" xml:space="preserve">
     <value>Ungespeicherte Änderungen</value>
   </data>
+  <data name="View {0}" xml:space="preserve">
+    <value>{0} ansehen</value>
+  </data>
 </root>

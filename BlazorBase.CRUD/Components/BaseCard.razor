@@ -6,8 +6,15 @@
     @if (!Embedded)
     {
         <Heading Margin="Margin.Is2.FromTop">
-            @Localizer["Edit {0}", SingleDisplayName]
-            <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
+            @if (ViewMode)
+            {
+                <span>@Localizer["View {0}", SingleDisplayName]</span>
+            }
+            else
+            {
+                <span>@Localizer["Edit {0}", SingleDisplayName]</span>
+                <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
+            }
         </Heading>
     }
 
@@ -35,7 +42,7 @@
                         <Row>
                             @foreach (var displayItem in displayGroup.Value.DisplayItems)
                             {
-                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, displayItem.IsReadOnly || !AddingMode && displayItem.IsKey).Result;
+                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode).Result;
                                 if (renderFragment != null)
                                 {
                                     @renderFragment
@@ -43,19 +50,20 @@
                                 else if (displayItem.IsListProperty)
                                 {
                                     <BaseListPart @ref="AddToBaseListParts"
-                                                  Model="Model"
-                                                  Property="displayItem.Property"
-                                                  Service="Service"
-                                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
-                                                  OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
-                                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
+                                  Model="Model"
+                                  Property="displayItem.Property"
+                                  Service="Service"
+                                  ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
+                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+                                  OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
                                 }
                                 else
                                 {
@@ -66,19 +74,19 @@
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else if (displayItem.Property.PropertyType.IsEnum)
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else
                                                     {
-                                                        <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                 </FieldBody>
                                             </Field>
