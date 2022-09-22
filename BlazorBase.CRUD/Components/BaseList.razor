@@ -61,11 +61,11 @@
                         }
                         @if (UserCanOpenCardReadOnly)
                         {
-                            <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Icon Name="IconName.FolderOpen" /></Button>
+                            <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Icon Name="IconName.Search" /></Button>
                         }
                         @if (UserCanDeleteEntries)
                         {
-                            <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Icon Name=" IconName.Delete" /></Button>
+                            <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Icon Name="IconName.Delete" /></Button>
                         }
                     </Buttons>
                 </td>
