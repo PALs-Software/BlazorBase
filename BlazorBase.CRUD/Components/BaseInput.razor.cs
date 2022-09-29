@@ -84,7 +84,7 @@ namespace BlazorBase.CRUD.Components
                 else
                     IsReadOnly = ReadOnly.Value;
 
-                RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
+                RenderType = DisplayItem.DisplayPropertyType;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
                 PresentationDataType = Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
