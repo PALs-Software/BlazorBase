@@ -33,7 +33,7 @@
                         Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)">
 
                         <div class="sortable-table-header">
-                            @GetPropertyCaption(EventServices, new TModel(), ModelLocalizer, displayItem)
+                            @GetPropertyCaption(EventServices, new TModel(), ModelLocalizer, displayItem, out string propertyCaption)
 
                             @if (displayItem.SortDirection != Enums.SortDirection.None)
                             {

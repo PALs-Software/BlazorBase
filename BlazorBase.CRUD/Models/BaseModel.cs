@@ -204,16 +204,26 @@ namespace BlazorBase.CRUD.Models
             return Validator.TryValidateObject(this, validationContext, validationResults, true);
         }
 
-        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo)
+
+        public record ValidationTranslationResource(System.Resources.ResourceManager ResourceManager, Type ResourceType);
+        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null)
         {
             validationResults = new List<ValidationResult>();
-            var attributes = propertyInfo.GetCustomAttributes<Attribute>().OfType<ValidationAttribute>();
+            var attributes = propertyInfo.GetCustomAttributes<Attribute>().OfType<ValidationAttribute>().ToList();
+
+            if (additionalValidationAttributes != null)
+                attributes.AddRange(additionalValidationAttributes);
+
             foreach (var attribute in attributes.Where(attribute => attribute.ErrorMessage == null))
             {
                 var attributeName = attribute.GetType().Name;
-                if (ValidationAttributesTranslations.ResourceManager.GetString(attributeName) != null)
+
+                if (translationResource == null)
+                    translationResource = new ValidationTranslationResource(ValidationAttributesTranslations.ResourceManager, typeof(ValidationAttributesTranslations));
+
+                if (translationResource.ResourceManager.GetString(attributeName) != null)
                 {
-                    attribute.ErrorMessageResourceType = typeof(ValidationAttributesTranslations);
+                    attribute.ErrorMessageResourceType = translationResource.ResourceType;
                     attribute.ErrorMessageResourceName = attributeName;
                 }
             }

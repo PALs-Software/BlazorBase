@@ -40,11 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.Designer.cs">
-      <DependentUpon>ValidationAttributesTranslations.de.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-    </Compile>
     <Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

@@ -70,24 +70,29 @@
                                     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
                                         <Fields>
                                             <Field Horizontal="true">
-                                                <FieldLabel ColumnSize="ColumnSize.Is4">@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)</FieldLabel>
+                                                <FieldLabel ColumnSize="ColumnSize.Is4" Class="text-truncate" title="@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem, out string propertyCaption)">@propertyCaption</FieldLabel>
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else if (displayItem.Property.PropertyType.IsEnum)
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else
                                                     {
                                                         <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
+
+                                                    @if(GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
+                                                    {
+                                                        <FieldHelp>@fieldHelpCaption</FieldHelp>
+                                                    }                                                    
                                                 </FieldBody>
                                             </Field>
                                         </Fields>

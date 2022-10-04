@@ -67,7 +67,7 @@ namespace BlazorBase.Files.Components
                 var files = ((FileChangedEventArgs)fileChangedEventArgs).Files;
                 if (files.Length == 0)
                     return;
-                
+
                 var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, oldValue, eventServices);
                 await OnBeforePropertyChanged.InvokeAsync(args);
                 await Model.OnBeforePropertyChanged(args);
@@ -78,13 +78,11 @@ namespace BlazorBase.Files.Components
                 if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
                     throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
 
-                new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
-
-                newFile = Activator.CreateInstance(Property.PropertyType) as BaseFile;
+                newFile = Activator.CreateInstance(RenderType) as BaseFile;
                 newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
                 newFile.FileSize = file.Size;
                 newFile.BaseFileType = Path.GetExtension(file.Name);
-                newFile.MimeFileType = mimeFileType;
+                newFile.MimeFileType = GetMimeTypeOfFile(file);
 
                 if (Model is BaseFile baseFile)
                 {
@@ -200,5 +198,11 @@ namespace BlazorBase.Files.Components
             await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
+
+        protected virtual string GetMimeTypeOfFile(IFileEntry file)
+        {
+            new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
+            return mimeFileType ?? "application/octet-stream";
+        }
     }
 }

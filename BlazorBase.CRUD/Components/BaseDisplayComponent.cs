@@ -273,12 +273,20 @@ namespace BlazorBase.CRUD.Components
             return query;
         }
 
-        protected virtual string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        protected virtual string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem, out string caption)
         {
             var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
             model.OnGetPropertyCaption(args);
+            
+            return caption = args.Caption;
+        }
 
-            return args.Caption;
+
+        protected virtual bool GetFieldHelpCaption(IStringLocalizer modelLocalizer, DisplayItem displayItem, out string caption)
+        {
+            caption = modelLocalizer[$"{displayItem.Property.Name}_FieldHelp"];
+
+            return caption != $"{displayItem.Property.Name}_FieldHelp";
         }
 
         #region Feedback

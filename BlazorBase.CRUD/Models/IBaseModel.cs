@@ -2,18 +2,13 @@
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Models.BaseModel;
 
 namespace BlazorBase.CRUD.Models
 {
@@ -90,7 +85,7 @@ namespace BlazorBase.CRUD.Models
 
         #region Validation Methods
         bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
-        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
+        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null);
         bool CheckIfModelIsInAddingMode(BaseService baseService);
         #endregion
 
