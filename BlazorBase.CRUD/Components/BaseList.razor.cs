@@ -68,15 +68,18 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #endregion
+
         [Parameter] public bool HideTitle { get; set; } = false;
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string ExplainText { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
         [Parameter] public bool UserCanOpenCardReadOnly { get; set; } = false;
         [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
+
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public TModel ComponentModelInstance { get; set; }
         [Parameter] public bool DontRenderCard { get; set; }
@@ -84,6 +87,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool Filterable { get; set; } = true;
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
+        
+        [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
         #endregion
 
         #region Injects
@@ -226,7 +231,7 @@ namespace BlazorBase.CRUD.Components
                 return;
 
             foreach (var group in DisplayGroups)
-                foreach (var displayItem in group.Value.DisplayItems)
+                foreach (var displayItem in group.Value.DisplayItems.OrderBy(entry => entry.Attribute.SortOrder))
                 {
                     if (!displayItem.IsSortable)
                         continue;

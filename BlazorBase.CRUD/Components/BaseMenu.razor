@@ -9,7 +9,7 @@
             @foreach (var navigationEntry in NavigationEntries)
             {
                 <BarDropdownItem To="@navigationEntry.Link">
-                    <BarIcon Class="@navigationEntry.Icon" />
+                    <BarIcon Class="@($"fa-fw {@navigationEntry.Icon}")" />
                     @navigationEntry.Name
                 </BarDropdownItem>
             }
