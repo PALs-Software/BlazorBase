@@ -3,6 +3,7 @@ using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
+using BlazorBase.Files.Controller;
 using BlazorBase.Files.Models;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
@@ -93,7 +94,7 @@ namespace BlazorBase.Files.Components
                         do
                         {
                             newFile.TempFileId = Guid.NewGuid();
-                            tempFilePath = Path.Join(tempFileStorePath, newFile.TempFileId.ToString());
+                            tempFilePath = Path.Join(tempFileStorePath, newFile.GetTemporaryFileNameWithExtension());
                         } while (File.Exists(tempFilePath));
                     }
                     else
@@ -169,7 +170,7 @@ namespace BlazorBase.Files.Components
             if (!Directory.Exists(Options.TempFileStorePath))
                 Directory.CreateDirectory(Options.TempFileStorePath);
 
-            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.TempFileId.ToString()));
+            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.GetTemporaryFileNameWithExtension()));
             await file.WriteToStreamAsync(fileStream);
             fileStream.Position = 0;
 
