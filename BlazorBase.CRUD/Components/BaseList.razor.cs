@@ -87,7 +87,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool Filterable { get; set; } = true;
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
-        
+
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
         #endregion
 
@@ -279,7 +279,7 @@ namespace BlazorBase.CRUD.Components
         {
             var entry = await Service.GetAsync<TModel>(primaryKeys);
             if (entry != null && (DataLoadCondition == null || DataLoadCondition.Compile()(entry))) //Check if user is allowed to see this entry
-            {  
+            {
                 if (UserCanOpenCardReadOnly)
                     await ViewEntryAsync(entry, false);
                 else if (UserCanEditEntries)
@@ -383,24 +383,30 @@ namespace BlazorBase.CRUD.Components
 
             if (fromRightClicked)
             {
-                foreach (var displayGroup in DisplayGroups)
-                    foreach (var item in displayGroup.Value.DisplayItems)
-                        item.SortDirection = Enums.SortDirection.None;
-
-                displayItem.SortDirection = Enums.SortDirection.Ascending;
-                SortedColumns.Clear();
-            }
-            else
                 displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
 
-            switch (displayItem.SortDirection)
+                switch (displayItem.SortDirection)
+                {
+                    case Enums.SortDirection.None:
+                        SortedColumns.Remove(displayItem);
+                        break;
+                    case Enums.SortDirection.Ascending:
+                        SortedColumns.Add(displayItem);
+                        break;
+                }
+            }
+            else
             {
-                case Enums.SortDirection.None:
-                    SortedColumns.Remove(displayItem);
-                    break;
-                case Enums.SortDirection.Ascending:
+                foreach (var displayGroup in DisplayGroups)
+                    foreach (var item in displayGroup.Value.DisplayItems)
+                        if (displayItem != item)
+                            item.SortDirection = Enums.SortDirection.None;
+
+                displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
+                SortedColumns.Clear();
+
+                if (displayItem.SortDirection != Enums.SortDirection.None)
                     SortedColumns.Add(displayItem);
-                    break;
             }
 
             await VirtualizeList.RefreshDataAsync();
