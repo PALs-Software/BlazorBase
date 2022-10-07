@@ -5,6 +5,7 @@ namespace BlazorBase.Files.Models;
 public interface IBlazorBaseFileOptions : IBaseOptions
 {
     Type FileImplementationType { get; set; }
+    string ControllerRoute { get; set; }
     string FileStorePath { get; set; }
     string TempFileStorePath { get; set; }
     bool AutomaticallyDeleteOldTemporaryFiles { get; set; }

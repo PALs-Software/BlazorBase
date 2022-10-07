@@ -27,7 +27,7 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, bool notAddBaseFileControllerToServices = false, Action<TOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
         where TOptions : class, IBlazorBaseFileOptions
     {
         // If options handler is not defined we will get an exception so
@@ -40,10 +40,9 @@ public static class BlazorBaseFilesConfiguration
 
         .AddTransient<IBasePropertyCardInput, BaseFileInput>()
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
-        .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>();
+        .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
 
-        if (!notAddBaseFileControllerToServices)
-            serviceCollection.AddControllers().AddApplicationPart(typeof(Controller.BaseFileController).Assembly).AddControllersAsServices();
+        .AddControllers().AddApplicationPart(typeof(Controller.BaseFileController).Assembly).AddControllersAsServices();
 
         return serviceCollection;
     }
@@ -55,9 +54,9 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, bool notAddBaseFileControllerToServices = false, Action<IBlazorBaseFileOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions> configureOptions = null)
     {
-        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, notAddBaseFileControllerToServices, configureOptions);
+        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions);
     }
 
     /// <summary>
@@ -67,10 +66,10 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType, bool notAddBaseFileControllerToServices = false)
+    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
         where TOptions : class, IBlazorBaseFileOptions
     {
-        return AddBlazorBaseFiles<TOptions>(serviceCollection, notAddBaseFileControllerToServices, options =>
+        return AddBlazorBaseFiles<TOptions>(serviceCollection, options =>
         {
             options.OptionsImportMode = BaseOptionsImportMode.Database;
             options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
@@ -84,8 +83,8 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType, bool notAddBaseFileControllerToServices = false)
+    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
     {
-        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, optionsImportFromDatabaseEntryType, notAddBaseFileControllerToServices);
+        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, optionsImportFromDatabaseEntryType);
     }
 }

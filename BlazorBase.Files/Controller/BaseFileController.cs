@@ -1,10 +1,8 @@
-﻿using BlazorBase.CRUD.Services;
-using BlazorBase.Files.Models;
+﻿using BlazorBase.Files.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using System;
-using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,8 +10,8 @@ using System.Threading.Tasks;
 namespace BlazorBase.Files.Controller
 {
     [Authorize]
-    [Route("api/[controller]/[action]")]
     [ApiController]
+    [Route("api/[controller]/[action]")]
     public class BaseFileController : ControllerBase
     {
         #region Injects

@@ -108,9 +108,9 @@ namespace BlazorBase.Files.Models
                 return null;
 
             if (TempFileId == Guid.Empty)
-                return $"/api/BaseFile/GetFile/{Id}/{Uri.EscapeDataString(FileName)}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
+                return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetFile/{Id}/{Uri.EscapeDataString(FileName)}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
             else
-                return $"/api/BaseFile/GetTemporaryFile/{TempFileId}/{Uri.EscapeDataString(FileName)}?hash={Hash}";
+                return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetTemporaryFile/{TempFileId}/{Uri.EscapeDataString(FileName)}?hash={Hash}";
         }
 
         public string GetPhysicalFilePath()
