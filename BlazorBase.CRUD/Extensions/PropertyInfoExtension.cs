@@ -110,17 +110,18 @@ namespace BlazorBase.CRUD.Extensions
 
         public static (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(this PropertyInfo property)
         {
+            var propertyRenderType = property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? property.PropertyType;
             if (!property.IsForeignKey() || property.IsListProperty())
-                return (property.Name, property.PropertyType);
+                return (property.Name, propertyRenderType);
 
             var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
             var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
             var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
 
             if (foreignKeyType == null)
-                return (property.Name, property.PropertyType);
+                return (property.Name, propertyRenderType);
             if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
-                return (property.Name, property.PropertyType);
+                return (property.Name, propertyRenderType);
 
             var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
             if (displayKeyProperties.Count == 0)

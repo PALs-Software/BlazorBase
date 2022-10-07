@@ -20,6 +20,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Models.BaseModel;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -32,7 +33,10 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public BaseService Service { get; set; }
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
         [Parameter] public DisplayItem DisplayItem { get; set; }
-
+        [Parameter] public DataType? InputPresentationDataType { get; set; } = null;
+        [Parameter] public List<ValidationAttribute> AdditionalValidationAttributes { get; set; } = null;
+        [Parameter] public ValidationTranslationResource ValidationTranslationResource { get; set; } = null;
+        
         [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalInputAttributes { get; set; }
         #region Events
@@ -40,7 +44,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
-
+        
         #endregion
 
         #endregion
@@ -84,9 +88,9 @@ namespace BlazorBase.CRUD.Components
                 else
                     IsReadOnly = ReadOnly.Value;
 
-                RenderType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType;
+                RenderType = DisplayItem?.DisplayPropertyType ?? Property.PropertyType;
                 CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
-                PresentationDataType = Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
+                PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
                 var dict = new Dictionary<object, object>()
                 {
@@ -156,11 +160,11 @@ namespace BlazorBase.CRUD.Components
             });
         }
 
-        protected virtual bool ConvertValueIfNeeded(ref object newValue, Type converType)
+        protected virtual bool ConvertValueIfNeeded(ref object newValue, Type converType, bool doOnlyConversion = false)
         {
-            if (newValue == null || newValue.GetType() == converType)
+            if (newValue == null || newValue.GetType() == converType || converType == typeof(object))
                 return true;
-
+                        
             if (newValue is decimal decimalNewValue)
                 newValue = decimalNewValue.ToString(CultureInfo.InvariantCulture);
             else if (newValue is double doubleNewValue)
@@ -178,8 +182,12 @@ namespace BlazorBase.CRUD.Components
                 return true;
             }
 
-            SetCurrentValueAsString(newValue);
-            SetValidation(feedback: errorMessage);
+            if (!doOnlyConversion)
+            {
+                SetCurrentValueAsString(newValue);
+                SetValidation(feedback: errorMessage);
+            }
+
             return false;
         }
 
@@ -259,7 +267,7 @@ namespace BlazorBase.CRUD.Components
             if (LastValueConversionFailed)
                 return false;
 
-            if (Model.TryValidateProperty(out List<ValidationResult> validationResults, PropertyValidationContext, Property))
+            if (Model.TryValidateProperty(out List<ValidationResult> validationResults, PropertyValidationContext, Property, AdditionalValidationAttributes, ValidationTranslationResource))
             {
                 SetValidation(showValidation: false);
                 return true;
@@ -415,12 +423,8 @@ namespace BlazorBase.CRUD.Components
 
         protected virtual string FormatValueAsString(object value)
         {
-            try
-            {
-                if (RenderType != Property.PropertyType && !LastValueConversionFailed)
-                    value = Convert.ChangeType(value, RenderType);
-            }
-            catch (Exception) { }
+            if (RenderType != Property.PropertyType && !LastValueConversionFailed)
+                ConvertValueIfNeeded(ref value, RenderType, doOnlyConversion: true);
 
             if (value is null)
                 return null;
