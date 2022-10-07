@@ -21,6 +21,7 @@ public class BlazorBaseFileOptions : IBlazorBaseFileOptions
     public Type OptionsImportFromDatabaseEntryType { get; set; } = default!;
 
     public Type FileImplementationType { get; set; } = typeof(BaseFile);
+    public string ControllerRoute { get; set; } = "api/BaseFile";
     public string FileStorePath { get; set; } = @"C:\BlazorBaseFileStore";
     public string TempFileStorePath { get; set; } = @"C:\BlazorBaseFileStore\Temp";
     public bool AutomaticallyDeleteOldTemporaryFiles { get; set; } = true;
