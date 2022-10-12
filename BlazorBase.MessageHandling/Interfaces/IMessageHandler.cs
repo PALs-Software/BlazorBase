@@ -57,6 +57,7 @@ namespace BlazorBase.MessageHandling.Interfaces
             DateTime? fromDate = null,
             DateTime? toDate = null,
             DateInputMode dateInputMode = DateInputMode.Date,
+            bool useAsSingleDatePicker = false,
             string fromDateCaption = null,
             string toDateCaption = null,
             MessageType messageType = MessageType.Information,

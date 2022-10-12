@@ -18,6 +18,8 @@ namespace BlazorBase.CRUD.Models
         event EventHandler<string> OnForcePropertyRepaint;
 
         event EventHandler OnReloadEntityFromDatabase;
+
+        event EventHandler OnRecalculateVisibilityStatesOfActions;
         #endregion
 
         #region Attribute Methods
@@ -37,6 +39,8 @@ namespace BlazorBase.CRUD.Models
         #region CRUD Methods
         void ForcePropertyRepaint(string propertyName);
         void ReloadEntityFromDatabase();
+
+        void RecalculateVisibilityStatesOfActions();
         #endregion
 
         #region Base Model Events

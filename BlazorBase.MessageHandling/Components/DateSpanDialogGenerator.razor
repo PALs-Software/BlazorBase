@@ -26,12 +26,15 @@
                                 <DateEdit TValue="DateTime?" @bind-Date="@args.FromDate" InputMode="args.DateInputMode" />
                             </FieldBody>
                         </Field>
-                        <Field Horizontal="true">
-                            <FieldLabel ColumnSize="ColumnSize.Is4">@args.ToDateCaption</FieldLabel>
-                            <FieldBody ColumnSize="ColumnSize.Is8">
-                                <DateEdit TValue="DateTime?" @bind-Date="@args.ToDate" InputMode="args.DateInputMode" />
-                            </FieldBody>
-                        </Field>
+                        @if (!args.UseAsSingleDatePicker)
+                        {
+                            <Field Horizontal="true">
+                                <FieldLabel ColumnSize="ColumnSize.Is4">@args.ToDateCaption</FieldLabel>
+                                <FieldBody ColumnSize="ColumnSize.Is8">
+                                    <DateEdit TValue="DateTime?" @bind-Date="@args.ToDate" InputMode="args.DateInputMode" />
+                                </FieldBody>
+                            </Field>
+                        }
                     </Fields>
                 </ModalBody>
                 <ModalFooter>

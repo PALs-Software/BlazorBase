@@ -157,7 +157,7 @@ namespace BlazorBase.CRUD.Components
             await ProcessQueryParameters();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (UrlNavigationEnabled)
                 NavigationManager.LocationChanged -= LocationEventHandler;
