@@ -66,6 +66,10 @@ namespace BlazorBase.CRUD.Components
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
+        #region Properties
+        public TModel CurrentModelInstance { get { return Model; } }
+        #endregion
+
         #region Member
         protected EventServices EventServices;
 
@@ -183,16 +187,20 @@ namespace BlazorBase.CRUD.Components
                 [typeof(BaseService)] = Service
             });
 
-            Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, viewMode, e);
+            Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
             ModelLoaded = true;
         }
 
-        protected async Task Entry_OnReloadEntityFromDatabase(object sender, bool viewMode, EventArgs e)
+        protected async Task Entry_OnReloadEntityFromDatabase(object sender, EventArgs e)
         {
+            await ReloadEntityFromDatabase();
+        }
+
+        public virtual async Task ReloadEntityFromDatabase() {
             if (Model == null)
                 return;
 
-            await ShowAsync(false, viewMode, Model.GetPrimaryKeys());
+            await ShowAsync(false, ViewMode, Model.GetPrimaryKeys());
 
             await InvokeAsync(() =>
             {

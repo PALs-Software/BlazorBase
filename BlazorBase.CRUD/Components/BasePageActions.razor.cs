@@ -31,7 +31,7 @@ namespace BlazorBase.CRUD.Components
         protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new List<PageActionGroup>();
         protected string SelectedPageActionGroup { get; set; }
 
-
+        public IBaseModel OldBaseModel { get; set; }
         #endregion
 
         #region Init
@@ -42,6 +42,21 @@ namespace BlazorBase.CRUD.Components
             if (BaseModel != null)
                 BaseModel.OnRecalculateVisibilityStatesOfActions += BaseModel_OnRecalculateVisibilityStatesOfActions;
         }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            await base.OnParametersSetAsync();
+
+            if (OldBaseModel != BaseModel)
+            {
+                OldBaseModel = BaseModel;
+                await GeneratePageActionsAsync();
+            }   
+        }
+
+        #endregion
+
+        #region Generate Page Actions
 
         protected async Task GeneratePageActionsAsync()
         {

@@ -56,6 +56,10 @@ namespace BlazorBase.CRUD.Components
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
+        #region Properties
+        public TModel CurrentModelInstance { get { return BaseCard?.CurrentModelInstance; } }
+        #endregion
+
         #region Member
         protected Modal Modal = default!;
         protected BaseCard<TModel> BaseCard = default!;
@@ -72,6 +76,11 @@ namespace BlazorBase.CRUD.Components
 
             await BaseCard.ShowAsync(addingMode, viewMode, primaryKeys);
             Modal.Show();
+        }
+
+        public virtual async Task ReloadEntityFromDatabase()
+        {
+            await BaseCard.ReloadEntityFromDatabase();
         }
 
         public async Task<bool> SaveModalAsync()
