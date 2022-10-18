@@ -28,11 +28,12 @@
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
                     <th @onclick="async () => await OnSortClicked(displayItem, false)"
-                        @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
-                        @oncontextmenu:preventDefault="true"
-                        Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)">
+                @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
+                @oncontextmenu:preventDefault="true"
+                Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)"
+                title="@(Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty)">
 
-                        <div class="sortable-table-header">
+                        <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower()">
                             @GetPropertyCaption(EventServices, new TModel(), ModelLocalizer, displayItem, out string propertyCaption)
 
                             @if (displayItem.SortDirection != Enums.SortDirection.None)
@@ -47,7 +48,7 @@
         @if (Filterable)
         {
             <BaseListFilter ListDisplayGroups="DisplayGroups"
-                            OnFilterChanged="OnFilterChangedAsync" />
+                        OnFilterChanged="OnFilterChangedAsync" />
         }
     </thead>
     <tbody>
@@ -67,6 +68,11 @@
                         {
                             <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Icon Name="IconName.Delete" /></Button>
                         }
+
+                        @if (AdditionalRowButtons != null)
+                        {
+                            @AdditionalRowButtons(context)
+                        }
                     </Buttons>
                 </td>
 
@@ -74,7 +80,7 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <td>
+                        <td class="base-list-table-cell-@displayItem.Property.Name.ToLower()">
                             @{
                                 var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
                                 if (renderFragment != null)
@@ -129,28 +135,28 @@
 @if (!DontRenderCard)
 {
     <BaseModalCard @ref="BaseModalCard"
-                   TModel="TModel"
-                   SingleDisplayName="@SingleDisplayName"
-                   ExplainText="@ExplainText"
-                   ComponentModelInstance="ComponentModelInstance"
-                   OnCardClosed="OnCardClosedAsync"
-                   OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
-                   OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
-                   OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
-                   OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
-                   OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
-                   OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
-                   OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
-                   OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
-                   OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
-                   OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                   OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                   OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                   OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                   OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                   OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                   OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                   OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
-                   OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
-                   OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
+               TModel="TModel"
+               SingleDisplayName="@SingleDisplayName"
+               ExplainText="@ExplainText"
+               ComponentModelInstance="ComponentModelInstance"
+               OnCardClosed="OnCardClosedAsync"
+               OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
+               OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
+               OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
+               OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
+               OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
+               OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
+               OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
+               OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+               OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
+               OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+               OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+               OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+               OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+               OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+               OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+               OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+               OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+               OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+               OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
 }

@@ -39,7 +39,7 @@
                         </Heading>
                     </CollapseHeader>
                     <CollapseBody>
-                        <Row>
+                        <Row class="@($"base-card-row-{displayGroup.Key.ToLower()}")">
                             @foreach (var displayItem in displayGroup.Value.DisplayItems)
                             {
                                 var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode).Result;

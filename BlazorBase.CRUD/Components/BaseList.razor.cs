@@ -68,15 +68,18 @@ namespace BlazorBase.CRUD.Components
         #endregion
 
         #endregion
+
         [Parameter] public bool HideTitle { get; set; } = false;
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string ExplainText { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
         [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
         [Parameter] public bool UserCanOpenCardReadOnly { get; set; } = false;
         [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
+
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public TModel ComponentModelInstance { get; set; }
         [Parameter] public bool DontRenderCard { get; set; }
@@ -84,6 +87,8 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool Filterable { get; set; } = true;
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
+
+        [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
         #endregion
 
         #region Injects
@@ -152,7 +157,7 @@ namespace BlazorBase.CRUD.Components
             await ProcessQueryParameters();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (UrlNavigationEnabled)
                 NavigationManager.LocationChanged -= LocationEventHandler;
@@ -226,7 +231,7 @@ namespace BlazorBase.CRUD.Components
                 return;
 
             foreach (var group in DisplayGroups)
-                foreach (var displayItem in group.Value.DisplayItems)
+                foreach (var displayItem in group.Value.DisplayItems.OrderBy(entry => entry.Attribute.SortOrder))
                 {
                     if (!displayItem.IsSortable)
                         continue;
@@ -274,7 +279,7 @@ namespace BlazorBase.CRUD.Components
         {
             var entry = await Service.GetAsync<TModel>(primaryKeys);
             if (entry != null && (DataLoadCondition == null || DataLoadCondition.Compile()(entry))) //Check if user is allowed to see this entry
-            {  
+            {
                 if (UserCanOpenCardReadOnly)
                     await ViewEntryAsync(entry, false);
                 else if (UserCanEditEntries)
@@ -378,24 +383,30 @@ namespace BlazorBase.CRUD.Components
 
             if (fromRightClicked)
             {
-                foreach (var displayGroup in DisplayGroups)
-                    foreach (var item in displayGroup.Value.DisplayItems)
-                        item.SortDirection = Enums.SortDirection.None;
-
-                displayItem.SortDirection = Enums.SortDirection.Ascending;
-                SortedColumns.Clear();
-            }
-            else
                 displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
 
-            switch (displayItem.SortDirection)
+                switch (displayItem.SortDirection)
+                {
+                    case Enums.SortDirection.None:
+                        SortedColumns.Remove(displayItem);
+                        break;
+                    case Enums.SortDirection.Ascending:
+                        SortedColumns.Add(displayItem);
+                        break;
+                }
+            }
+            else
             {
-                case Enums.SortDirection.None:
-                    SortedColumns.Remove(displayItem);
-                    break;
-                case Enums.SortDirection.Ascending:
+                foreach (var displayGroup in DisplayGroups)
+                    foreach (var item in displayGroup.Value.DisplayItems)
+                        if (displayItem != item)
+                            item.SortDirection = Enums.SortDirection.None;
+
+                displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
+                SortedColumns.Clear();
+
+                if (displayItem.SortDirection != Enums.SortDirection.None)
                     SortedColumns.Add(displayItem);
-                    break;
             }
 
             await VirtualizeList.RefreshDataAsync();

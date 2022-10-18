@@ -33,6 +33,8 @@ namespace BlazorBase.CRUD.Models
         public event EventHandler<string> OnForcePropertyRepaint;
 
         public event EventHandler OnReloadEntityFromDatabase;
+
+        public event EventHandler OnRecalculateVisibilityStatesOfActions;
         #endregion
 
         public BaseModel()
@@ -139,7 +141,12 @@ namespace BlazorBase.CRUD.Models
             OnReloadEntityFromDatabase?.Invoke(this, EventArgs.Empty);
         }
 
-        public async Task InvokeStateHasChanged()
+        public void RecalculateVisibilityStatesOfActions()
+        {
+            OnRecalculateVisibilityStatesOfActions?.Invoke(this, EventArgs.Empty);
+        }
+
+        public async Task InvokeStateHasChangedAsync()
         {
             await InvokeAsync(() =>
             {

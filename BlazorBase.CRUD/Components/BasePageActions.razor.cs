@@ -23,21 +23,48 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public EventServices EventServices { get; set; }
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
         [Parameter] public GUIType GUIType { get; set; }
+        [Parameter] public bool ShowOnlyButtons { get; set; }
         #endregion
 
         #region Member
         protected List<PageActionGroup> PageActionGroups { get; set; }
         protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new List<PageActionGroup>();
         protected string SelectedPageActionGroup { get; set; }
+
+        public IBaseModel OldBaseModel { get; set; }
         #endregion
 
         #region Init
         protected override async Task OnInitializedAsync()
         {
+            await GeneratePageActionsAsync();
+
+            if (BaseModel != null)
+                BaseModel.OnRecalculateVisibilityStatesOfActions += BaseModel_OnRecalculateVisibilityStatesOfActions;
+        }
+
+        protected override async Task OnParametersSetAsync()
+        {
+            await base.OnParametersSetAsync();
+
+            if (OldBaseModel != BaseModel)
+            {
+                OldBaseModel = BaseModel;
+                await GeneratePageActionsAsync();
+            }   
+        }
+
+        #endregion
+
+        #region Generate Page Actions
+
+        protected async Task GeneratePageActionsAsync()
+        {
             var instance = BaseModel;
             if (instance == null)
                 instance = Activator.CreateInstance(BaseModelType) as IBaseModel;
 
+            VisiblePageActionGroups.Clear();
             PageActionGroups = instance.GeneratePageActionGroups() ?? new List<PageActionGroup>();
             foreach (var group in PageActionGroups)
                 if (group.VisibleInGUITypes.Contains(GUIType) && await group.Visible(EventServices))
@@ -45,11 +72,20 @@ namespace BlazorBase.CRUD.Components
 
             foreach (var group in VisiblePageActionGroups)
                 foreach (var pageAction in group.PageActions.ToList())
-                    if (!pageAction.VisibleInGUITypes.Contains(GUIType) || !await pageAction.Visible(EventServices))
+                    if (!pageAction.VisibleInGUITypes.Contains(GUIType) || pageAction.ShowAsRowButtonInList != ShowOnlyButtons || !await pageAction.Visible(EventServices))
                         group.PageActions.Remove(pageAction);
 
             VisiblePageActionGroups.RemoveAll(group => group.PageActions.Count == 0);
             SelectedPageActionGroup = VisiblePageActionGroups.FirstOrDefault()?.Caption;
+        }
+
+        private void BaseModel_OnRecalculateVisibilityStatesOfActions(object sender, EventArgs e)
+        {
+            InvokeAsync(async () =>
+            {
+                await GeneratePageActionsAsync();
+                StateHasChanged();
+            });
         }
         #endregion
 

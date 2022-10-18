@@ -84,7 +84,7 @@ namespace BlazorBase.CRUD.Components
 
         protected ComponentBase AddToComponents { set { Components.Add(value); } }
         protected List<ComponentBase> Components = new();
-
+                
         #endregion
 
         #region Init
