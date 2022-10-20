@@ -1,5 +1,5 @@
 ﻿<BarItem @attributes="AdditionalAttributes">
-    <BarDropdown @bind-Visible="DropDownIsVisible">
+    <BarDropdown Visible="DropDownIsVisible" VisibleChanged="DropDownVisibleChanged">
         <BarDropdownToggle>
             <BarIcon IconName="@MenuIcon" />
             @MenuName

@@ -5,6 +5,7 @@
     overflow-x: auto;
     overflow-y: auto;
     background-color: var(--bs-body-bg);
+    z-index: 1;
 }
 
     datalist option {
