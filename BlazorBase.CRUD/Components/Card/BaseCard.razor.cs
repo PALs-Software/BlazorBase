@@ -1,4 +1,6 @@
-﻿using BlazorBase.CRUD.Components.SelectList;
+﻿using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Inputs;
+using BlazorBase.CRUD.Components.List;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
@@ -19,7 +21,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.Card
 {
     public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : class, IBaseModel, new()
     {

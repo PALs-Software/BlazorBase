@@ -1,5 +1,4 @@
-﻿using BlazorBase.Components;
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
@@ -10,10 +9,7 @@ using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using BlazorBase.CRUD.EventArguments;
@@ -23,9 +19,11 @@ using Blazorise;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
-using BlazorBase.Modules;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
+using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Card;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.List
 {
     public partial class BaseList<TModel> : BaseDisplayComponent, IDisposable where TModel : class, IBaseModel, new()
     {
@@ -89,6 +87,11 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
+
+        #region Style
+        [Parameter] public string TableClass { get; set; }
+        #endregion
+
         #endregion
 
         #region Injects

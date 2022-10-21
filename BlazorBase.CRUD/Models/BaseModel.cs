@@ -1,5 +1,6 @@
 ﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Components;
+using BlazorBase.CRUD.Components.Card;
+using BlazorBase.CRUD.Components.List;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
@@ -11,18 +12,15 @@ using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Models

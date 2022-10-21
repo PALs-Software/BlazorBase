@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.Inputs
 {
     public partial class BaseNumberFilterInput
     {

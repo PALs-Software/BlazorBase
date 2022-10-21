@@ -1,11 +1,7 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.EventArguments
 {

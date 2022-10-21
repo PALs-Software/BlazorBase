@@ -18,10 +18,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.General
 {
     public class BaseDisplayComponent : ComponentBase
     {

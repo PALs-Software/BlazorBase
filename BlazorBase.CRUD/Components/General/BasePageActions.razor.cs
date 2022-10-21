@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.General
 {
     public partial class BasePageActions
     {

@@ -1,11 +1,10 @@
 ﻿using BlazorBase.CRUD.Models;
-using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.SelectList;
 
 public interface IBaseSelectList
 {
-    Task ShowModalAsync();
+    void ShowModal(object additionalData = null);
     void HideModal();
     IBaseModel GetSelectedEntry();
 }

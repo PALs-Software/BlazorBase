@@ -1,5 +1,4 @@
 ﻿@typeparam TModel
-@inherits BaseList<TModel>
 
 @using BlazorBase.Components
 
@@ -15,80 +14,36 @@
             <CloseButton />
         </ModalHeader>
         <ModalBody>
+            @if (CurrentlyVisible)
+            {
+                <BaseList TModel="TModel"
+                      UserCanAddEntries="false"
+                      UserCanDeleteEntries="false"
+                      UserCanEditEntries="false"
+                      UserCanOpenCardReadOnly="false"
+                      DataLoadCondition="DataLoadCondition"
+                      HideTitle="true"
+                      TableClass="table-responsive">
 
-            <table class="table table-hover table-responsive">
-                <thead>
-                    <tr>
-                        <th class="th-actions">
-
-                        </th>
-                        @foreach (var displayGroup in DisplayGroups)
+                    <AdditionalRowButtons>
+                        @if (!HideSelectButton)
                         {
-                            @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                            <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@(@SelectButtonText ?? @SelectListLocalizer["Select"])</Button>
+
+                            @if (AdditionalActions != null && !RenderAdditionalActionsOutsideOfButtonGroup)
                             {
-                                <th>
-                                    @GetPropertyCaption(GetEventServices(Service), new TModel(), ModelLocalizer, displayItem, out string PropertyCaption)
-                                </th>
+                                @AdditionalActions(context)
                             }
                         }
-                    </tr>
-                </thead>
-                <tbody>
-                    <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList">
-                        <tr>
-                            <td>
-                                @if (!HideSelectButton)
-                                {
-                                    <Buttons>
-                                        <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@(@SelectButtonText ?? @SelectListLocalizer["Select"])</Button>
 
-                                        @if (AdditionalActions != null && !RenderAdditionalActionsOutsideOfButtonGroup)
-                                        {
-                                            @AdditionalActions(context)
-                                        }
-                                    </Buttons>
-                                }
+                        @if (AdditionalActions != null && RenderAdditionalActionsOutsideOfButtonGroup)
+                        {
+                            @AdditionalActions(context)
+                        }
+                    </AdditionalRowButtons>
 
-                                @if (AdditionalActions != null && RenderAdditionalActionsOutsideOfButtonGroup)
-                                {
-                                    @AdditionalActions(context)
-                                }
-                            </td>
-
-                            @foreach (var displayGroup in DisplayGroups)
-                            {
-                                @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
-                                {
-                                    <td>
-                                        @{
-                                            var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
-                                            if (renderFragment != null)
-                                            {
-                                                @renderFragment
-                                            }
-                                            else
-                                            {
-                                                @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
-                                                {
-                                                    @DisplayForeignKey(displayItem, context)
-                                                }
-                                                else if (displayItem.Property.PropertyType.IsEnum)
-                                                {
-                                                    @DisplayEnum(displayItem, context)
-                                                }
-                                                else
-                                                {
-                                                    @displayItem.Property.GetValue(context)
-                                                }
-                                            }
-                                        }
-                                    </td>
-                                }
-                            }
-                        </tr>
-                    </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
-                </tbody>
-            </table>
+                </BaseList>
+            }
         </ModalBody>
         <ModalFooter>
             <Button Color="Color.Secondary" Clicked="HideModal">@SelectListLocalizer["Abort"]</Button>

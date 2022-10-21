@@ -6,7 +6,7 @@ using Microsoft.Extensions.Localization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.General
 {
     public partial class BaseMenu
     {

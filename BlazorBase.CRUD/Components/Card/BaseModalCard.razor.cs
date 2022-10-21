@@ -9,7 +9,7 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.Card
 {
     public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new()
     {

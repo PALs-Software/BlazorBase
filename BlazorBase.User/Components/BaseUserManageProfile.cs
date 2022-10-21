@@ -1,13 +1,11 @@
-﻿using BlazorBase.CRUD.Components;
+﻿using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorBase.User.Components

@@ -19,10 +19,10 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 using static BlazorBase.CRUD.Models.BaseModel;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.Inputs
 {
     public partial class BaseInput
     {

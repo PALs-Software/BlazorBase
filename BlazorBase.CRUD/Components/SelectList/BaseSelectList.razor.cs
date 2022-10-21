@@ -1,83 +1,82 @@
-﻿using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.Models;
+﻿using BlazorBase.CRUD.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Blazorise;
 using System;
 using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
+using System.Linq.Expressions;
 
-namespace BlazorBase.CRUD.Components.SelectList
+namespace BlazorBase.CRUD.Components.SelectList;
+
+public partial class BaseSelectList<TModel> : ComponentBase, IBaseSelectList where TModel : class, IBaseModel, new()
 {
+    #region Parameters
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string SelectButtonText { get; set; }
+    [Parameter] public bool HideTitle { get; set; } = false;
+    [Parameter] public bool HideSelectButton { get; set; } = false;
+    [Parameter] public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+    [Parameter] public bool RenderAdditionalActionsOutsideOfButtonGroup { get; set; } = false;
+    [Parameter] public RenderFragment<TModel> AdditionalActions { get; set; } = null;
+    [Parameter] public EventCallback<OnSelectListClosedArgs> OnSelectListClosed { get; set; }
+    #endregion
 
-    public partial class BaseSelectList<TModel> : BaseList<TModel>, IBaseSelectList where TModel : class, IBaseModel, new()
+    #region Injects
+    [Inject] protected IStringLocalizer<BaseSelectList<TModel>> SelectListLocalizer { get; set; }
+    [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
+    #endregion
+
+    #region Members
+    protected bool CurrentlyVisible = false;
+    protected Modal Modal = default!;
+    protected TModel SelectedEntry = null;
+
+    protected object AdditionalData = null;
+    #endregion
+
+    #region Init
+    protected override Task OnInitializedAsync()
     {
-        #region Parameters
-        [Parameter] public string Title { get; set; }
-        [Parameter] public string SelectButtonText { get; set; }
-        [Parameter] public bool HideSelectButton { get; set; } = false;
-        [Parameter] public bool RenderAdditionalActionsOutsideOfButtonGroup { get; set; } = false;
-        [Parameter] public RenderFragment<TModel> AdditionalActions { get; set; } = null;
-        [Parameter] public EventCallback<OnSelectListClosedArgs> OnSelectListClosed { get; set; }
-        #endregion
+        var modelType = typeof(TModel);
+        if (String.IsNullOrEmpty(Title))
+            Title = ModelLocalizer[$"{modelType.Name}_Plural"];
 
-        #region Injects
-        [Inject] protected IStringLocalizer<BaseSelectList<TModel>> SelectListLocalizer { get; set; }
-        #endregion
+        if (HideSelectButton)
+            RenderAdditionalActionsOutsideOfButtonGroup = true;
 
-        #region Members
-        protected Modal Modal = default!;
-        protected TModel SelectedEntry = null;
-        #endregion
-
-        #region Init
-        protected override async Task OnInitializedAsync()
-        {
-            TModelType = typeof(TModel);
-            SetUpDisplayLists(TModelType, GUIType.List);
-
-            SetDisplayNames();
-            PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
-
-            if (String.IsNullOrEmpty(Title))
-                Title = ModelLocalizer[$"{TModelType.Name}_Plural"];
-
-            if (HideSelectButton)
-                RenderAdditionalActionsOutsideOfButtonGroup = true;
-
-            await PrepareForeignKeyProperties(Service);
-        }
-        #endregion
-
-        protected void SelectEntry(TModel entry)
-        {
-            SelectedEntry = entry;
-            HideModal();
-        }
-
-        public IBaseModel GetSelectedEntry()
-        {
-            return SelectedEntry;
-        }
-
-        public async Task ShowModalAsync()
-        {
-            SelectedEntry = null;
-            await VirtualizeList.RefreshDataAsync();
-            Modal.Show();
-        }
-
-        public void HideModal()
-        {
-            Modal.Hide();
-        }
-
-        public void OnModalClosing(ModalClosingEventArgs args)
-        {
-            InvokeAsync(async () => await OnSelectListClosed.InvokeAsync(new OnSelectListClosedArgs(args, SelectedEntry)));
-        }
-
+        return base.OnInitializedAsync();
     }
+    #endregion
+
+    protected void SelectEntry(TModel entry)
+    {
+        SelectedEntry = entry;
+        HideModal();
+    }
+
+    public IBaseModel GetSelectedEntry()
+    {
+        return SelectedEntry;
+    }
+
+    public void ShowModal(object additionalData = null)
+    {
+        AdditionalData = additionalData;
+        CurrentlyVisible = true;
+        SelectedEntry = null;
+        Modal.Show();
+    }
+
+    public void HideModal()
+    {
+        Modal.Hide();
+        CurrentlyVisible = false;
+    }
+
+    public void OnModalClosing(ModalClosingEventArgs args)
+    {
+        InvokeAsync(async () => await OnSelectListClosed.InvokeAsync(new OnSelectListClosedArgs(args, SelectedEntry, AdditionalData)));
+    }
+
 }

@@ -2,9 +2,7 @@
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.Extensions.Localization;
 using System;
-using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.SelectList;
 
@@ -19,7 +17,7 @@ public class BaseTypeBasedSelectList : ComponentBase, IBaseSelectList
     #endregion
 
     #region Records
-    public record OnSelectListClosedArgs(ModalClosingEventArgs ModalClosingEventArgs, IBaseModel SelectedModel);
+    public record OnSelectListClosedArgs(ModalClosingEventArgs ModalClosingEventArgs, IBaseModel SelectedModel, object AdditionalData);
     #endregion
 
     #region Member
@@ -41,9 +39,9 @@ public class BaseTypeBasedSelectList : ComponentBase, IBaseSelectList
         builder.CloseComponent();
     }
 
-    public Task ShowModalAsync()
+    public void ShowModal(object additionalData = null)
     {
-        return BaseSelectList.ShowModalAsync();
+        BaseSelectList.ShowModal(additionalData);
     }
 
     public void HideModal()

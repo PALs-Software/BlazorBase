@@ -1,5 +1,5 @@
-﻿using BlazorBase.Components;
-using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.SelectList;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
@@ -8,24 +8,23 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using BlazorBase.CRUD.Components.Inputs;
 using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
+using Microsoft.AspNetCore.Components;
+using System;
+using BlazorBase.MessageHandling.Interfaces;
+using Microsoft.Extensions.Localization;
+using System.Reflection;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Collections;
+using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.List
 {
     public partial class BaseListPart : BaseDisplayComponent
     {
@@ -66,6 +65,7 @@ namespace BlazorBase.CRUD.Components
         protected IList Entries { get; set; }
         protected Type ModelListEntryType { get; set; }
 
+        protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; }
         protected bool ModelImplementedISortableItem { get; set; }
         protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
 
@@ -91,6 +91,8 @@ namespace BlazorBase.CRUD.Components
                 EventServices = GetEventServices();
 
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
+                DisplayOptions = Property.GetCustomAttribute<BaseListPartDisplayOptionsAttribute>() ?? new BaseListPartDisplayOptionsAttribute();
+
                 ModelImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
 
                 IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
@@ -194,16 +196,16 @@ namespace BlazorBase.CRUD.Components
             else
                 Entries.Add(newEntry);
 
-            await Service.AddEntryAsync(ModelListEntryType, (IBaseModel)newEntry);
-
             SetSortIndex();
 
             await OnAfterAddEntryAsync(newEntry);
         }
 
-        protected async Task AddExistingEntryAsync()
+        protected Task AddExistingEntryAsync(object aboveEntry = null)
         {
-            await BaseSelectList.ShowModalAsync();
+            BaseSelectList.ShowModal(aboveEntry);
+
+            return Task.CompletedTask;
         }
 
         protected async Task AddExistingEntrySelectListClosedAsync(OnSelectListClosedArgs args)
@@ -217,7 +219,11 @@ namespace BlazorBase.CRUD.Components
             if (handledEventArgs.Handled)
                 return;
 
-            Entries.Add(entryToAdd);
+            var aboveEntry = args.AdditionalData;
+            if (ModelImplementedISortableItem && aboveEntry != null)
+                Entries.Insert(Entries.IndexOf(aboveEntry), entryToAdd);
+            else
+                Entries.Add(entryToAdd);
 
             SetSortIndex();
 
@@ -235,6 +241,10 @@ namespace BlazorBase.CRUD.Components
             BaseInputs.RemoveAll(input => input.Model == entry);
             BaseSelectListInputs.RemoveAll(input => input.Model == entry);
             BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
+
+            var entityEntry = Service.DbContext.Entry(entry);
+            if (entityEntry.State != EntityState.Detached)
+                entityEntry.State = entityEntry.State == EntityState.Added ? EntityState.Detached : EntityState.Unchanged;
 
             await OnAfterRemoveEntryAsync(entry);
         }
