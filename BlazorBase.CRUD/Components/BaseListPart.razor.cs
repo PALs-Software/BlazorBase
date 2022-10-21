@@ -1,5 +1,6 @@
 ﻿using BlazorBase.Components;
 using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.SelectList;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
@@ -22,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 
 namespace BlazorBase.CRUD.Components
 {
@@ -76,6 +78,8 @@ namespace BlazorBase.CRUD.Components
         protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
         protected BaseSelectListInput AddToBaseInputSelectLists { set { BaseSelectListInputs.Add(value); } }
         protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
+
+        protected BaseTypeBasedSelectList BaseSelectList = null!;
         #endregion
         #endregion
 
@@ -190,9 +194,34 @@ namespace BlazorBase.CRUD.Components
             else
                 Entries.Add(newEntry);
 
+            await Service.AddEntryAsync(ModelListEntryType, (IBaseModel)newEntry);
+
             SetSortIndex();
 
             await OnAfterAddEntryAsync(newEntry);
+        }
+
+        protected async Task AddExistingEntryAsync()
+        {
+            await BaseSelectList.ShowModalAsync();
+        }
+
+        protected async Task AddExistingEntrySelectListClosedAsync(OnSelectListClosedArgs args)
+        {
+            if (args.SelectedModel == null)
+                return;
+
+            var entryToAdd = await Service.GetAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
+            var handledEventArgs = new HandledEventArgs();
+            await OnBeforeAddEntryAsync(entryToAdd, handledEventArgs, callAddEventOnListEntry: false);
+            if (handledEventArgs.Handled)
+                return;
+
+            Entries.Add(entryToAdd);
+
+            SetSortIndex();
+
+            await OnAfterAddEntryAsync(entryToAdd, callAddEventOnListEntry: false);
         }
 
         protected async Task RemoveEntryAsync(object entry)
@@ -271,7 +300,7 @@ namespace BlazorBase.CRUD.Components
             await newBaseEntry.OnCreateNewEntryInstance(onCreateNewEntryInstanceArgs);
         }
 
-        protected async Task OnBeforeAddEntryAsync(object newEntry, HandledEventArgs args)
+        protected async Task OnBeforeAddEntryAsync(object newEntry, HandledEventArgs args, bool callAddEventOnListEntry = true)
         {
             var onBeforeAddListEntryArgs = new OnBeforeAddListEntryArgs(Model, newEntry, false, EventServices);
             await OnBeforeAddListEntry.InvokeAsync(onBeforeAddListEntryArgs);
@@ -282,7 +311,7 @@ namespace BlazorBase.CRUD.Components
                 return;
             }
 
-            if (newEntry is IBaseModel newBaseEntry)
+            if (callAddEventOnListEntry && newEntry is IBaseModel newBaseEntry)
             {
                 var onBeforeAddEntryArgs = new OnBeforeAddEntryArgs(Model, false, EventServices);
                 await newBaseEntry.OnBeforeAddEntry(onBeforeAddEntryArgs);
@@ -294,13 +323,13 @@ namespace BlazorBase.CRUD.Components
             }
         }
 
-        protected async Task OnAfterAddEntryAsync(object newEntry)
+        protected async Task OnAfterAddEntryAsync(object newEntry, bool callAddEventOnListEntry = true)
         {
             var onAfterAddListEntryArgs = new OnAfterAddListEntryArgs(Model, newEntry, EventServices);
             await OnAfterAddListEntry.InvokeAsync(onAfterAddListEntryArgs);
             await Model.OnAfterAddListEntry(onAfterAddListEntryArgs);
 
-            if (newEntry is IBaseModel addedBaseEntry)
+            if (callAddEventOnListEntry && newEntry is IBaseModel addedBaseEntry)
                 await addedBaseEntry.OnAfterAddEntry(new OnAfterAddEntryArgs(Model, EventServices));
         }
 

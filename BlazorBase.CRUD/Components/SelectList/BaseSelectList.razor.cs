@@ -7,10 +7,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Blazorise;
 using System;
+using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.SelectList
 {
-    public partial class BaseSelectList<TModel> : BaseList<TModel> where TModel : class, IBaseModel, new()
+
+    public partial class BaseSelectList<TModel> : BaseList<TModel>, IBaseSelectList where TModel : class, IBaseModel, new()
     {
         #region Parameters
         [Parameter] public string Title { get; set; }
@@ -18,6 +20,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public bool HideSelectButton { get; set; } = false;
         [Parameter] public bool RenderAdditionalActionsOutsideOfButtonGroup { get; set; } = false;
         [Parameter] public RenderFragment<TModel> AdditionalActions { get; set; } = null;
+        [Parameter] public EventCallback<OnSelectListClosedArgs> OnSelectListClosed { get; set; }
         #endregion
 
         #region Injects
@@ -32,23 +35,17 @@ namespace BlazorBase.CRUD.Components
         #region Init
         protected override async Task OnInitializedAsync()
         {
-            await InvokeAsync(() =>
-            {
-                TModelType = typeof(TModel);
-                SetUpDisplayLists(TModelType, GUIType.List);
+            TModelType = typeof(TModel);
+            SetUpDisplayLists(TModelType, GUIType.List);
 
-                SetDisplayNames();
-                PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+            SetDisplayNames();
+            PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
 
-                if (String.IsNullOrEmpty(SelectButtonText))
-                    SelectButtonText = @SelectListLocalizer["Select"];
+            if (String.IsNullOrEmpty(Title))
+                Title = ModelLocalizer[$"{TModelType.Name}_Plural"];
 
-                if (String.IsNullOrEmpty(Title))
-                    Title = ModelLocalizer[$"{TModelType.Name}_Plural"];
-
-                if (HideSelectButton)
-                    RenderAdditionalActionsOutsideOfButtonGroup = true;
-            });
+            if (HideSelectButton)
+                RenderAdditionalActionsOutsideOfButtonGroup = true;
 
             await PrepareForeignKeyProperties(Service);
         }
@@ -60,7 +57,7 @@ namespace BlazorBase.CRUD.Components
             HideModal();
         }
 
-        public TModel GetSelectedEntry()
+        public IBaseModel GetSelectedEntry()
         {
             return SelectedEntry;
         }
@@ -79,7 +76,7 @@ namespace BlazorBase.CRUD.Components
 
         public void OnModalClosing(ModalClosingEventArgs args)
         {
-            InvokeAsync(async () => await OnCardClosed.InvokeAsync(null));
+            InvokeAsync(async () => await OnSelectListClosed.InvokeAsync(new OnSelectListClosedArgs(args, SelectedEntry)));
         }
 
     }

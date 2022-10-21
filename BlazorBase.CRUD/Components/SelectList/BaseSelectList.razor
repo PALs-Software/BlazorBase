@@ -40,7 +40,7 @@
                                 @if (!HideSelectButton)
                                 {
                                     <Buttons>
-                                        <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@SelectButtonText</Button>
+                                        <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@(@SelectButtonText ?? @SelectListLocalizer["Select"])</Button>
 
                                         @if (AdditionalActions != null && !RenderAdditionalActionsOutsideOfButtonGroup)
                                         {

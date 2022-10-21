@@ -5,6 +5,11 @@
 
 <BasePageActions BaseModel="null" BaseModelType="ModelListEntryType" GUIType="Enums.GUIType.ListPart" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
 
+<BaseTypeBasedSelectList @ref="BaseSelectList"
+                BaseModelType="ModelListEntryType"
+                Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
+                OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
+
 <table class="table table-responsive table-hover table-sm">
     <thead>
         <tr>
@@ -12,6 +17,7 @@
                 @if (!IsReadOnly)
                 {
                     <Button Color="Color.Success" Clicked="AddEntryAsync" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
+                    <Button Color="Color.Primary" Clicked="AddExistingEntryAsync" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
                 }
             </th>
             @foreach (var displayGroup in DisplayGroups)
@@ -78,7 +84,8 @@
                             }
                             else
                             {
-                                @displayItem.Property.GetValue(entry);
+                                @displayItem.Property.GetValue(entry)
+                                ;
                             }
 
                         </td>
