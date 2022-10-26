@@ -62,9 +62,14 @@ class blazorbaseDataListInput {
         if (element.tagName === "INPUT") {
             input = element;
             datalist = input.datalist;
-        } else {
+        } else if (element.tagName === "DATALIST") {
+            datalist = element;
+            input = datalist.previousElementSibling;
+        } else if (element.tagName === "OPTION") {
             datalist = element.parentElement;
             input = datalist.previousElementSibling;
+        } else {
+            return;
         }
 
         if (blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating) {
@@ -73,11 +78,15 @@ class blazorbaseDataListInput {
         }
 
         setTimeout(function () { // Wait for new focus, so active element can be checked
-            if (document.activeElement && (document.activeElement == input || (document.activeElement.parentElement && document.activeElement.parentElement == datalist)))
+            if (document.activeElement &&
+                (
+                    document.activeElement == input ||
+                    document.activeElement == datalist ||
+                    (document.activeElement.parentElement && document.activeElement.parentElement == datalist)
+                ))
                 return;
 
             blazorbaseDataListInput.listHide(input.datalist);
-
         }, 2);
     }
 
