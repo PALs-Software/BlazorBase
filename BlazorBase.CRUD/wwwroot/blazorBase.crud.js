@@ -4,7 +4,9 @@ class blazorbaseDataListInput {
 
     static init(id, dotNetReference, resetValueAfterSelection) {
         document.getElementById(id).addEventListener('focusin', blazorbaseDataListInput.listShow);
-        blazorbaseDataListInput.dotNetReferences[id] = { dotNetReference: dotNetReference, resetValueAfterSelection: resetValueAfterSelection };
+        document.getElementById(id).addEventListener('focusout', blazorbaseDataListInput.onFocusOut);
+
+        blazorbaseDataListInput.dotNetReferences[id] = { dotNetReference: dotNetReference, resetValueAfterSelection: resetValueAfterSelection, isSelfNavigating: false };
     }
 
     static listShow(e) {
@@ -27,7 +29,7 @@ class blazorbaseDataListInput {
             input.addEventListener('keydown', blazorbaseDataListInput.listControl);
             dl.addEventListener('keydown', blazorbaseDataListInput.listKey);
             dl.addEventListener('click', blazorbaseDataListInput.listSet);
-
+            dl.addEventListener('focusout', blazorbaseDataListInput.onFocusOut);
         }
 
         // show datalist
@@ -40,15 +42,43 @@ class blazorbaseDataListInput {
             blazorbaseDataListInput.listLimit(e);
             if (input.offsetWidth < 230)
                 dl.style.width = '230px';
-             else 
+            else
                 dl.style.width = input.offsetWidth + 'px';
-            
+
             dl.style.left = input.offsetLeft + 'px';
             dl.style.display = 'block';
             blazorbaseDataListInput.listActive = dl;
 
         }
 
+    }
+
+    static onFocusOut(e) {
+        const element = blazorbaseDataListInput.target(e);
+        if (!element)
+            return;
+
+        let input, datalist;
+        if (element.tagName === "INPUT") {
+            input = element;
+            datalist = input.datalist;
+        } else {
+            datalist = element.parentElement;
+            input = datalist.previousElementSibling;
+        }
+
+        if (blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating) {
+            blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating = false;
+            return;
+        }
+
+        setTimeout(function () { // Wait for new focus, so active element can be checked
+            if (document.activeElement && (document.activeElement == input || (document.activeElement.parentElement && document.activeElement.parentElement == datalist)))
+                return;
+
+            blazorbaseDataListInput.listHide(input.datalist);
+
+        }, 2);
     }
 
     // hide datalist
@@ -73,7 +103,7 @@ class blazorbaseDataListInput {
         const v = input.value.trim().toLowerCase();
         const valueArr = v.split(' ');
         Array.from(input.datalist.getElementsByTagName('option')).forEach(opt => {
-            opt.setAttribute('tabindex', 0);            
+            opt.setAttribute('tabindex', 0);
             opt.style.display = !v || blazorbaseDataListInput.valueContainsAllSearchArrValues(valueArr, opt.getAttribute('label').toLowerCase()) ? 'block' : 'none';
         });
 
@@ -100,7 +130,10 @@ class blazorbaseDataListInput {
                 // arrow down
                 let opt = input.datalist.firstElementChild;
                 if (!opt.offsetHeight) opt = blazorbaseDataListInput.visibleSibling(opt, 1);
-                opt && opt.focus();
+                if (opt) {
+                    blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating = true;
+                    opt.focus();
+                }
                 break;
             }
 
@@ -138,10 +171,12 @@ class blazorbaseDataListInput {
             dl = t.parentElement;
 
         if (dir) {
-
             // move through list
             let opt = blazorbaseDataListInput.visibleSibling(t, dir);
-            opt && opt.focus();
+            if (opt) {
+                blazorbaseDataListInput.dotNetReferences[dl.input.id].isSelfNavigating = true;
+                opt.focus();
+            }
             e.preventDefault();
 
         }
@@ -195,7 +230,7 @@ class blazorbaseDataListInput {
         let t = blazorbaseDataListInput.target(e);
         let dl = t && t.parentElement;
         let input = dl.input;
-        
+
         if (!dl || !dl.input) {
             // Enter without selecting a value from the drop down list
             const v = t.value.trim().toLowerCase();
@@ -211,7 +246,7 @@ class blazorbaseDataListInput {
             t = firstOpenOption;
             dl = firstOpenOption.parentElement;
         }
-       
+
         input.value = (t && t.getAttribute('label')) || '';
         input.setAttribute('data-value', (t && t.value) || '');
         await blazorbaseDataListInput.dotNetReferences[input.id].dotNetReference.invokeMethodAsync('ValueChanged', (t && t.value) || '');

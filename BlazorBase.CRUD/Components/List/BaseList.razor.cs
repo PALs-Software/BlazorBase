@@ -19,7 +19,6 @@ using Blazorise;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Card;
 
@@ -159,7 +158,7 @@ namespace BlazorBase.CRUD.Components.List
 
             await ProcessQueryParameters();
         }
-
+              
         public virtual void Dispose()
         {
             if (UrlNavigationEnabled)
