@@ -102,7 +102,7 @@ namespace BlazorBase.CRUD.Models
         bool UserCanEditEntries { get; }
         bool UserCanOpenCardReadOnly { get; }
         bool UserCanDeleteEntries { get; }
-        Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
+        List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; }
         bool ShowOnlySingleEntry { get; }
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
         #endregion

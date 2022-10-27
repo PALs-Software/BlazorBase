@@ -243,8 +243,8 @@ namespace BlazorBase.CRUD.Components.List
             BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
 
             var entityEntry = Service.DbContext.Entry(entry);
-            if (entityEntry.State != EntityState.Detached)
-                entityEntry.State = entityEntry.State == EntityState.Added ? EntityState.Detached : EntityState.Unchanged;
+            if (entityEntry.State == EntityState.Added)
+                entityEntry.State = EntityState.Detached;
 
             await OnAfterRemoveEntryAsync(entry);
         }

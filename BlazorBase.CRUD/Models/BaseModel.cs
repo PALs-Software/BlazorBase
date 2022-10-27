@@ -58,7 +58,7 @@ namespace BlazorBase.CRUD.Models
         [NotMapped] public virtual bool UserCanEditEntries { get; protected set; } = true;
         [NotMapped] public virtual bool UserCanOpenCardReadOnly { get; protected set; } = false;
         [NotMapped] public virtual bool UserCanDeleteEntries { get; protected set; } = true;
-        [NotMapped] public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; protected set; }
+        [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; protected set; }
         [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
         #endregion
 
@@ -271,7 +271,7 @@ namespace BlazorBase.CRUD.Models
             builder.AddAttribute(2, "UserCanEditEntries", UserCanEditEntries);
             builder.AddAttribute(3, "UserCanOpenCardReadOnly", UserCanOpenCardReadOnly);
             builder.AddAttribute(4, "UserCanDeleteEntries", UserCanDeleteEntries);
-            builder.AddAttribute(5, "DataLoadCondition", DataLoadCondition);
+            builder.AddAttribute(5, "DataLoadConditions", DataLoadConditions);
             builder.AddAttribute(6, "ComponentModelInstance", this);
             builder.CloseComponent();
         }

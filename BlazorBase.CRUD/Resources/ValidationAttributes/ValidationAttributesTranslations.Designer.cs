@@ -61,6 +61,15 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is required ähnelt.
+        /// </summary>
+        public static string DisallowEmptyGuidAttribute {
+            get {
+                return ResourceManager.GetString("DisallowEmptyGuidAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is not a valid e-mail address ähnelt.
         /// </summary>
         public static string EmailAddressAttribute {
@@ -75,6 +84,15 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         public static string RangeAttribute {
             get {
                 return ResourceManager.GetString("RangeAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field must match the regular expression &quot;{1}&quot; ähnelt.
+        /// </summary>
+        public static string RegularExpressionAttribute {
+            get {
+                return ResourceManager.GetString("RegularExpressionAttribute", resourceCulture);
             }
         }
         

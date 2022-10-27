@@ -70,7 +70,7 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string ExplainText { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
-        [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+        [Parameter] public List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; set; }
 
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
@@ -158,7 +158,7 @@ namespace BlazorBase.CRUD.Components.List
 
             await ProcessQueryParameters();
         }
-              
+
         public virtual void Dispose()
         {
             if (UrlNavigationEnabled)
@@ -280,15 +280,26 @@ namespace BlazorBase.CRUD.Components.List
         protected virtual async Task NavigateToEntryAsync(params object[] primaryKeys)
         {
             var entry = await Service.GetAsync<TModel>(primaryKeys);
-            if (entry != null && (DataLoadCondition == null || DataLoadCondition.Compile()(entry))) //Check if user is allowed to see this entry
+
+            if (entry == null)
             {
-                if (UserCanOpenCardReadOnly)
-                    await ViewEntryAsync(entry, false);
-                else if (UserCanEditEntries)
-                    await EditEntryAsync(entry, false);
-            }
-            else
                 ChangeUrlToList();
+                return;
+            }
+
+            if (DataLoadConditions != null)
+                foreach (var dataLoadCondition in DataLoadConditions) //Check all data load conditions if user is allowed to see this entry
+                    if (dataLoadCondition != null && !dataLoadCondition.Compile()(entry))
+                    {
+                        ChangeUrlToList();
+                        return;
+                    }
+
+            if (UserCanOpenCardReadOnly)
+                await ViewEntryAsync(entry, false);
+            else if (UserCanEditEntries)
+                await EditEntryAsync(entry, false);
+
         }
 
         protected virtual void ChangeUrlToEntry(TModel entry)
@@ -342,8 +353,10 @@ namespace BlazorBase.CRUD.Components.List
                         query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
                 }
 
-            if (DataLoadCondition != null)
-                query = query.Where(DataLoadCondition).Cast<TModel>();
+            if (DataLoadConditions != null)
+                foreach (var dataLoadCondition in DataLoadConditions)
+                    if (dataLoadCondition != null)
+                        query = query.Where(dataLoadCondition).Cast<TModel>();
 
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)

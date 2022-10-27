@@ -6,6 +6,7 @@ using Blazorise;
 using System;
 using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 using System.Linq.Expressions;
+using System.Collections.Generic;
 
 namespace BlazorBase.CRUD.Components.SelectList;
 
@@ -16,7 +17,7 @@ public partial class BaseSelectList<TModel> : ComponentBase, IBaseSelectList whe
     [Parameter] public string SelectButtonText { get; set; }
     [Parameter] public bool HideTitle { get; set; } = false;
     [Parameter] public bool HideSelectButton { get; set; } = false;
-    [Parameter] public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+    [Parameter] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; set; }
     [Parameter] public bool RenderAdditionalActionsOutsideOfButtonGroup { get; set; } = false;
     [Parameter] public RenderFragment<TModel> AdditionalActions { get; set; } = null;
     [Parameter] public EventCallback<OnSelectListClosedArgs> OnSelectListClosed { get; set; }
