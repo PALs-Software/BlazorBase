@@ -1,79 +1,85 @@
 ﻿@using Blazorise.RichTextEdit;
 
-<RichTextEdit @ref="RichTextEdit"
-              Theme="Theme"
-              ReadOnly="ReadOnly"
-              SubmitOnEnter="SubmitOnEnter"
-              EnterPressed="SaveAsync"
-              ToolbarPosition="ToolbarPosition"
-              ContentChanged="OnContentChangedAsync"
-              ConfigureQuillJsMethod="blazorBase.richTextEditor.configureQuillJs">
+<div class="blazor-base-rich-text-editor @RootClass">
+    <RichTextEdit @ref="RichTextEdit"
+                  Theme="Theme"
+                  ReadOnly="ReadOnly"
+                  SubmitOnEnter="SubmitOnEnter"
+                  EnterPressed="SaveAsync"
+                  ToolbarPosition="ToolbarPosition"
+                  ContentChanged="OnContentChangedAsync"
+                  ConfigureQuillJsMethod="blazorBase.richTextEditor.configureQuillJs"
+                  Style="@Style">
 
-    <Editor> @EditorContent </Editor>
+        <Editor> @EditorContent </Editor>
 
-    <Toolbar>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarSelect Action="RichTextEditAction.Font"></RichTextEditToolbarSelect>
-            <RichTextEditToolbarSelect Action="RichTextEditAction.Header">
-                <RichTextEditToolbarSelectItem Value="1" />
-                <RichTextEditToolbarSelectItem Value="2" />
-                <RichTextEditToolbarSelectItem Value="3" />
-                <RichTextEditToolbarSelectItem Value="4" />
-                <RichTextEditToolbarSelectItem Value="5" />
-                <RichTextEditToolbarSelectItem Value="6" />
-                <RichTextEditToolbarSelectItem Selected="true" />
-            </RichTextEditToolbarSelect>
-            <RichTextEditToolbarSelect Action="RichTextEditAction.Size">
-                <RichTextEditToolbarSelectItem Value="small" />
-                <RichTextEditToolbarSelectItem Selected="true" />
-                <RichTextEditToolbarSelectItem Value="large" />
-                <RichTextEditToolbarSelectItem Value="huge" />
-            </RichTextEditToolbarSelect>
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Strike" />
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarSelect Action="RichTextEditAction.Color"></RichTextEditToolbarSelect>
-            <RichTextEditToolbarSelect Action="RichTextEditAction.Background"></RichTextEditToolbarSelect>
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
-            <RichTextEditToolbarSelect Action="RichTextEditAction.Align"></RichTextEditToolbarSelect>
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.Script" Value="sub" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Script" Value="super" />
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.Indent" Value="-1" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Indent" Value="+1" />
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.Direction" Value="rtl" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Blockquote" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.CodeBlock" />
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.Link" />
-            <RichTextEditToolbarButton Action="RichTextEditAction.Image" />
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup>
-            <RichTextEditToolbarButton Action="RichTextEditAction.Clean" />
-        </RichTextEditToolbarGroup>
-        <RichTextEditToolbarGroup Float="Float.Right">
-            <Buttons>
-                @AdditionalButtons
+        <Toolbar>
+            @if (!ReadOnly)
+            {
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarSelect Action="RichTextEditAction.Font"></RichTextEditToolbarSelect>
+                    <RichTextEditToolbarSelect Action="RichTextEditAction.Header">
+                        <RichTextEditToolbarSelectItem Value="1" />
+                        <RichTextEditToolbarSelectItem Value="2" />
+                        <RichTextEditToolbarSelectItem Value="3" />
+                        <RichTextEditToolbarSelectItem Value="4" />
+                        <RichTextEditToolbarSelectItem Value="5" />
+                        <RichTextEditToolbarSelectItem Value="6" />
+                        <RichTextEditToolbarSelectItem Selected="true" />
+                    </RichTextEditToolbarSelect>
+                    <RichTextEditToolbarSelect Action="RichTextEditAction.Size">
+                        <RichTextEditToolbarSelectItem Value="small" />
+                        <RichTextEditToolbarSelectItem Selected="true" />
+                        <RichTextEditToolbarSelectItem Value="large" />
+                        <RichTextEditToolbarSelectItem Value="huge" />
+                    </RichTextEditToolbarSelect>
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Bold" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Italic" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Underline" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Strike" />
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarSelect Action="RichTextEditAction.Color"></RichTextEditToolbarSelect>
+                    <RichTextEditToolbarSelect Action="RichTextEditAction.Background"></RichTextEditToolbarSelect>
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="ordered" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.List" Value="bullet" />
+                    <RichTextEditToolbarSelect Action="RichTextEditAction.Align"></RichTextEditToolbarSelect>
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Script" Value="sub" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Script" Value="super" />
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Indent" Value="-1" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Indent" Value="+1" />
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Direction" Value="rtl" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Blockquote" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.CodeBlock" />
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Link" />
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Image" />
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup>
+                    <RichTextEditToolbarButton Action="RichTextEditAction.Clean" />
+                </RichTextEditToolbarGroup>
+                <RichTextEditToolbarGroup Float="Float.Right">
+                    <Buttons>
+                        @AdditionalButtons
 
-                @if (!HideSaveButton && !ReadOnly)
-                {
-                    <Button Clicked="SaveAsync"><Icon Name="IconName.Save" /></Button>
-                }
-            </Buttons>
-        </RichTextEditToolbarGroup>
-    </Toolbar>
-</RichTextEdit>
+                        @if (!HideSaveButton && !ReadOnly)
+                        {
+                            <Button Clicked="SaveAsync"><Icon Name="IconName.Save" /></Button>
+                        }
+                    </Buttons>
+                </RichTextEditToolbarGroup>
+            }
+        </Toolbar>
+    </RichTextEdit>
+</div>

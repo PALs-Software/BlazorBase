@@ -58,6 +58,7 @@ namespace BlazorBase.CRUD.Components
 
         #region Injects
         [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
+        [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
@@ -65,6 +66,20 @@ namespace BlazorBase.CRUD.Components
         protected Modal Modal = default!;
         protected BaseCard<TModel> BaseCard = default!;
         protected bool ContinueByUnsavedChanges = false;
+        #endregion
+
+        #region Init
+
+        protected override Task OnInitializedAsync()
+        {
+            if (String.IsNullOrEmpty(SingleDisplayName))
+                SingleDisplayName = ModelLocalizer[typeof(TModel).Name];
+            else
+                SingleDisplayName = ModelLocalizer[SingleDisplayName];
+
+            return base.OnInitializedAsync();
+        }
+
         #endregion
 
         public async Task ShowModalAsync(bool addingMode = false, params object[] primaryKeys)

@@ -34,6 +34,8 @@ namespace BlazorBase.RichTextEditor.Components
         [Parameter] public RenderFragment AdditionalButtons { get; set; }
         [Parameter] public RenderFragment EditorContent { get; set; }
 
+        [Parameter] public string BackgroundColor { get; set; }
+
         #region Events
         public record OnSaveArgs(IBaseModel ConnectedModel, string Content) { public object AdditionalInformations { get; set; } }
         [Parameter] public EventCallback<OnSaveArgs> OnSave { get; set; }
@@ -62,6 +64,24 @@ namespace BlazorBase.RichTextEditor.Components
 
         #region Properties
         protected RichTextEdit RichTextEdit { get; set; }
+        #endregion
+
+        #region Member
+        protected string RootClass;
+        protected string Style;
+        #endregion
+
+        #region Init
+        protected override Task OnInitializedAsync()
+        {
+            if (ReadOnly)
+                RootClass = "readonly";
+
+            if (!String.IsNullOrEmpty(BackgroundColor))
+                Style = $"background-color: {BackgroundColor}";
+
+            return base.OnInitializedAsync();
+        }
         #endregion
 
         #region Public Methods

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DisallowEmptyGuidAttribute" xml:space="preserve">
+    <value>Die Eigenschaft "{0}" ist erforderlich</value>
+  </data>
   <data name="RangeAttribute" xml:space="preserve">
     <value>Die Eigenschaft "{0}" muss zwischen {1} und {2} liegen</value>
   </data>
