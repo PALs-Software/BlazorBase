@@ -8,7 +8,7 @@
     }
     else
     {
-        <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="InitialSelectedValue" SelectedValueChanged="(x) => OnSelectedValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
+        <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="Property.GetValue(Model)?.ToString()" SelectedValueChanged="(x) => OnValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
     }
 
     <div class="@FeedbackClass">

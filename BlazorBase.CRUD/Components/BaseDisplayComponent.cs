@@ -10,7 +10,6 @@ using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -67,7 +66,7 @@ namespace BlazorBase.CRUD.Components
             public Type DisplayPropertyType { get; set; }
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
-            public bool IsVisible { get; set; }            
+            public bool IsVisible { get; set; }
 
             public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
             {
@@ -84,18 +83,6 @@ namespace BlazorBase.CRUD.Components
                 attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
                 var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
                 var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
-
-                if (property.IsForeignKey() && typeof(IBaseModel).IsAssignableFrom(property.PropertyType))
-                {
-                    var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                    if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
-                    {
-                        return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
-                                property.IsKey(), property.IsListProperty(), dateInputMode,
-                                property.Name, property.PropertyType,
-                                false, false, true);
-                    }
-                }
 
                 (string DisplayPath, Type DisplayType) displayPathAndType;
                 bool sortAndFilterable;
@@ -227,11 +214,7 @@ namespace BlazorBase.CRUD.Components
             {
                 var isReadonly = foreignKeyProperty.IsReadOnlyInGUI();
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                PropertyInfo foreignProperty;
-                if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
-                    foreignProperty = foreignKeyProperty;
-                else
-                    foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                var foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
                 var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
 
                 if (foreignKeyType == null)
@@ -276,13 +259,12 @@ namespace BlazorBase.CRUD.Components
 
         protected void AddEntryToForeignKeyList(IBaseModel model, List<KeyValuePair<string, string>> foreignKeyList, List<PropertyInfo> displayKeyProperties)
         {
-            var primaryKeys = model.GetPrimaryKeys();
-            var primaryKeysAsJson = JsonConvert.SerializeObject(model.GetPrimaryKeys());
+            var primaryKeysAsString = model.GetPrimaryKeysAsString();
 
             if (displayKeyProperties.Count == 0)
-                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsJson, String.Join(", ", primaryKeys)));
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
             else
-                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsJson, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
         }
 
         protected virtual async Task PrepareCustomLookupData(IBaseModel cardModel, EventServices eventServices)

@@ -335,13 +335,6 @@ namespace BlazorBase.CRUD.Models
             return type;
         }
 
-        #endregion
-
-        #region MISC
-        public override string ToString()
-        {
-            return GetPrimaryKeysAsString();
-        }
-        #endregion
+        #endregion       
     }
 }
