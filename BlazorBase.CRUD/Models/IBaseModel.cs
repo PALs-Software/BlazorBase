@@ -88,6 +88,9 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Validation Methods
+        Task OnBeforeValidateProperty(OnBeforeValidatePropertyArgs args);
+        Task OnAfterValidateProperty(OnAfterValidatePropertyArgs args);
+
         bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null);
         bool CheckIfModelIsInAddingMode(BaseService baseService);

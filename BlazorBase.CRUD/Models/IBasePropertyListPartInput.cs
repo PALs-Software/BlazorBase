@@ -29,7 +29,7 @@ namespace BlazorBase.CRUD.Models
 
         Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices);
 
-        bool ValidatePropertyValue();
+        Task<bool> ValidatePropertyValueAsync();
 
         void SetValidation(bool showValidation, bool isValid, string feedback);
     }

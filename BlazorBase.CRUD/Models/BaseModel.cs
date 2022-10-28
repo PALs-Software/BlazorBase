@@ -203,12 +203,14 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Validation Methods
+        public virtual Task OnBeforeValidateProperty(OnBeforeValidatePropertyArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterValidateProperty(OnAfterValidatePropertyArgs args) { return Task.CompletedTask; }
+
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext)
         {
             validationResults = new List<ValidationResult>();
             return Validator.TryValidateObject(this, validationContext, validationResults, true);
         }
-
 
         public record ValidationTranslationResource(System.Resources.ResourceManager ResourceManager, Type ResourceType);
         public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null)

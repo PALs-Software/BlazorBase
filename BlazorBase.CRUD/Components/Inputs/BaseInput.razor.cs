@@ -36,7 +36,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         [Parameter] public DataType? InputPresentationDataType { get; set; } = null;
         [Parameter] public List<ValidationAttribute> AdditionalValidationAttributes { get; set; } = null;
         [Parameter] public ValidationTranslationResource ValidationTranslationResource { get; set; } = null;
-        
+
         [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalInputAttributes { get; set; }
         #region Events
@@ -44,7 +44,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
-        
+
         #endregion
 
         #endregion
@@ -79,48 +79,44 @@ namespace BlazorBase.CRUD.Components.Inputs
 
         protected override async Task OnInitializedAsync()
         {
-            await InvokeAsync(() =>
+            Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
+
+            if (ReadOnly == null)
+                IsReadOnly = Property.IsReadOnlyInGUI();
+            else
+                IsReadOnly = ReadOnly.Value;
+
+            RenderType = DisplayItem?.DisplayPropertyType ?? Property.PropertyType;
+            CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
+            PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
+
+            var dict = new Dictionary<object, object>()
             {
-                Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
+                [typeof(IStringLocalizer)] = ModelLocalizer,
+                [typeof(BaseService)] = Service
+            };
 
-                if (ReadOnly == null)
-                    IsReadOnly = Property.IsReadOnlyInGUI();
-                else
-                    IsReadOnly = ReadOnly.Value;
+            var propertyNameTranslation = ModelLocalizer[Property.Name].ToString();
+            if (String.IsNullOrEmpty(propertyNameTranslation))
+                propertyNameTranslation = Property.Name;
 
-                RenderType = DisplayItem?.DisplayPropertyType ?? Property.PropertyType;
-                CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
-                PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
+            PropertyValidationContext = new ValidationContext(Model, ServiceProvider, dict)
+            {
+                MemberName = Property.Name,
+                DisplayName = propertyNameTranslation
+            };
 
-                var dict = new Dictionary<object, object>()
-                {
-                    [typeof(IStringLocalizer)] = ModelLocalizer,
-                    [typeof(BaseService)] = Service
-                };
+            if (Property.TryGetAttribute(out ForeignKeyAttribute foreignKey))
+                ForeignKeyProperty = Model.GetUnproxiedType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
 
-                var propertyNameTranslation = ModelLocalizer[Property.Name].ToString();
-                if (String.IsNullOrEmpty(propertyNameTranslation))
-                    propertyNameTranslation = Property.Name;
+            if (Property.TryGetAttribute(out PresentationRulesAttribute presentationRules))
+                PresentationRules = presentationRules;
 
-                PropertyValidationContext = new ValidationContext(Model, ServiceProvider, dict)
-                {
-                    MemberName = Property.Name,
-                    DisplayName = propertyNameTranslation
-                };
+            SetInputType();
+            SetInputAttributes();
+            SetCurrentValueAsString(Property.GetValue(Model));
 
-                if (Property.TryGetAttribute(out ForeignKeyAttribute foreignKey))
-                    ForeignKeyProperty = Model.GetUnproxiedType().GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
-
-                if (Property.TryGetAttribute(out PresentationRulesAttribute presentationRules))
-                    PresentationRules = presentationRules;
-
-                SetInputType();
-                SetInputAttributes();
-                SetCurrentValueAsString(Property.GetValue(Model));
-
-                ValidatePropertyValue();
-            });
-
+            await ValidatePropertyValueAsync();
             await RaiseOnFormatPropertyEventsAsync();
         }
 
@@ -151,10 +147,9 @@ namespace BlazorBase.CRUD.Components.Inputs
             LastValueConversionFailed = false;
             SetCurrentValueAsString(Property.GetValue(Model));
 
-            ValidatePropertyValue();
-
             InvokeAsync(async () =>
             {
+                await ValidatePropertyValueAsync();
                 await RaiseOnFormatPropertyEventsAsync();
                 StateHasChanged();
             });
@@ -164,7 +159,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         {
             if (newValue == null || newValue.GetType() == converType || converType == typeof(object))
                 return true;
-                        
+
             if (newValue is decimal decimalNewValue)
                 newValue = decimalNewValue.ToString(CultureInfo.InvariantCulture);
             else if (newValue is double doubleNewValue)
@@ -229,7 +224,7 @@ namespace BlazorBase.CRUD.Components.Inputs
                 newValue = args.NewValue;
 
                 Property.SetValue(Model, newValue);
-                var valid = ValidatePropertyValue();
+                var valid = await ValidatePropertyValueAsync();
 
                 if (valid)
                     await ReloadForeignProperties(newValue);
@@ -262,19 +257,38 @@ namespace BlazorBase.CRUD.Components.Inputs
 
         #region Validation
 
-        public bool ValidatePropertyValue()
+        public async Task<bool> ValidatePropertyValueAsync()
         {
             if (LastValueConversionFailed)
                 return false;
 
-            if (Model.TryValidateProperty(out List<ValidationResult> validationResults, PropertyValidationContext, Property, AdditionalValidationAttributes, ValidationTranslationResource))
+            bool isValid = true;
+            string errorMessage = String.Empty;
+            var eventServices = GetEventServices();
+            var onBeforeArgs = new OnBeforeValidatePropertyArgs(Model, Property.Name, eventServices);
+            await Model.OnBeforeValidateProperty(onBeforeArgs);
+            if (onBeforeArgs.IsHandled)
             {
-                SetValidation(showValidation: false);
-                return true;
+                isValid = onBeforeArgs.IsValid;
+                errorMessage = onBeforeArgs.ErrorMessage;
+            }
+            else
+            {
+                isValid = Model.TryValidateProperty(out List<ValidationResult> validationResults, PropertyValidationContext, Property, AdditionalValidationAttributes, ValidationTranslationResource);
+                errorMessage = String.Join(", ", validationResults.Select(results => results.ErrorMessage));
             }
 
-            SetValidation(feedback: String.Join(", ", validationResults.Select(results => results.ErrorMessage)));
-            return false;
+            var onAfterArgs = new OnAfterValidatePropertyArgs(Model, Property.Name, eventServices, isValid, errorMessage);
+            await Model.OnAfterValidateProperty(onAfterArgs);
+            isValid = onAfterArgs.IsValid;
+            errorMessage = onAfterArgs.ErrorMessage;
+
+            if (isValid)
+                SetValidation(showValidation: false);
+            else
+                SetValidation(feedback: errorMessage);
+
+            return isValid;
         }
 
         public void SetValidation(bool showValidation = true, bool isValid = false, string feedback = "")

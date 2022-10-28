@@ -66,6 +66,27 @@ namespace BlazorBase.CRUD.EventArguments
     public record OnAfterCardSaveChangesArgs(IBaseModel Model, bool IsNavigationProperty, EventServices EventServices);
     public record OnAfterMoveEntryUpArgs(IBaseModel Model, EventServices EventServices);
     public record OnAfterMoveEntryDownArgs(IBaseModel Model, EventServices EventServices);
+
+    #endregion
+
+    #region Validation
+    public record OnBeforeValidatePropertyArgs(IBaseModel Model, string PropertyName, EventServices EventServices)
+    {
+        public bool IsValid { get; set; }
+        public bool IsHandled { get; set; }
+        public string ErrorMessage { get; set; }
+    }
+    public record OnAfterValidatePropertyArgs(IBaseModel Model, string PropertyName, EventServices EventServices)
+    {
+        public OnAfterValidatePropertyArgs(IBaseModel model, string propertyName, EventServices eventServices, bool isValid, string errorMessage) : this(model, propertyName, eventServices)
+        {
+            IsValid = isValid;
+            ErrorMessage = errorMessage;
+        }
+
+        public bool IsValid { get; set; }
+        public string ErrorMessage { get; set; }
+    }
     #endregion
 
     #region List Property Event Args

@@ -88,8 +88,6 @@ namespace BlazorBase.CRUD.Components.List
         {
             await InvokeAsync(() =>
             {
-                EventServices = GetEventServices();
-
                 ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
                 DisplayOptions = Property.GetCustomAttribute<BaseListPartDisplayOptionsAttribute>() ?? new BaseListPartDisplayOptionsAttribute();
 
@@ -97,6 +95,7 @@ namespace BlazorBase.CRUD.Components.List
 
                 IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
                 ModelLocalizer = StringLocalizerFactory.Create(Property.PropertyType.GenericTypeArguments[0]);
+                EventServices = GetEventServices();
 
                 if (ReadOnly == null)
                     IsReadOnly = Property.IsReadOnlyInGUI();
@@ -399,20 +398,20 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         #region Validation
-        public virtual bool ListPartIsValid()
+        public virtual async Task<bool> ListPartIsValidAsync()
         {
             var valid = true;
 
             foreach (var input in BaseInputs)
-                if (!input.ValidatePropertyValue())
+                if (!await input.ValidatePropertyValueAsync())
                     valid = false;
 
             foreach (var input in BaseSelectListInputs)
-                if (!input.ValidatePropertyValue())
+                if (!await input.ValidatePropertyValueAsync())
                     valid = false;
 
             foreach (var basePropertyListPartInput in BasePropertyListPartInputs)
-                if (!basePropertyListPartInput.ValidatePropertyValue())
+                if (!await basePropertyListPartInput.ValidatePropertyValueAsync())
                     valid = false;
 
             foreach (var item in Entries)
