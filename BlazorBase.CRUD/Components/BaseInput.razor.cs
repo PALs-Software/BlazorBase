@@ -167,7 +167,7 @@ namespace BlazorBase.CRUD.Components
 
         protected bool ConvertValueIfNeeded(ref object newValue)
         {
-            if (newValue == null || newValue.GetType() == RenderType)
+            if (newValue == null || newValue.GetType() == RenderType || (newValue is IBaseModel baseModel && baseModel.GetUnproxiedType() == RenderType))
                 return true;
 
             if (BaseParser.TryParseValueFromString(RenderType, newValue.ToString(), out object parsedValue, out string errorMessage))
