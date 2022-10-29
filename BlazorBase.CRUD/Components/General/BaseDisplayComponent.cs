@@ -200,7 +200,6 @@ namespace BlazorBase.CRUD.Components.General
                 foreach (var entry in entries)
                     AddEntryToForeignKeyList(entry as IBaseModel, primaryKeys, displayKeyProperties);
 
-                primaryKeys = primaryKeys.OrderBy(entry => entry.Value).ToList();
                 CachedForeignKeys.Add(foreignKeyType, primaryKeys);
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
             }
