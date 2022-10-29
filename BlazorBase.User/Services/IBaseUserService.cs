@@ -1,4 +1,5 @@
-﻿using BlazorBase.User.Models;
+﻿using BlazorBase.CRUD.Services;
+using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Identity;
 using System;
 
@@ -12,7 +13,11 @@ public interface IBaseUserService<TUser, TIdentityUser, TIdentityRole>
 {
     Task<bool> CurrentUserIsRoleAsync(string roleName);
 
-    Task<TUser> GetCurrentUserAsync();
+    Task<TUser> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true);
+
+    Task<TUser> GetCurrentUserAsync(bool asNoTracking = true);
+
+    Task<TUser> GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking = true);
 
     Task<TUser> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true);
 }

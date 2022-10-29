@@ -35,21 +35,31 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return authState.User.IsInRole(roleName);
     }
 
-    public virtual async Task<TUser> GetCurrentUserAsync()
+    public virtual async Task<TUser> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true)
     {
         var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var userId = UserManager.GetUserId(authenticationState.User);
-        return await GetUserByApplicationUserIdAsync(userId);
+        return await GetUserByApplicationUserIdAsync(baseService, userId, asNoTracking);
     }
 
-    public virtual async Task<TUser> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true)
+    public virtual Task<TUser> GetCurrentUserAsync(bool asNoTracking = true)
+    {
+        return GetCurrentUserAsync(BaseService, asNoTracking);
+    }
+
+    public virtual async Task<TUser> GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking = true)
     {
         if (id == null)
             return null;
 
-        var users = await BaseService.GetDataAsync<TUser>(user => user.IdentityUserId == id, asNoTracking);
+        var users = await baseService.GetDataAsync<TUser>(user => user.IdentityUserId == id, asNoTracking);
 
         return users.FirstOrDefault();
+    }
+
+    public virtual Task<TUser> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true)
+    {
+        return GetUserByApplicationUserIdAsync(BaseService, id, asNoTracking);
     }
 
     public static async Task SeedUserRolesAsync(IServiceProvider serviceProvider)

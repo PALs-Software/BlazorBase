@@ -1,5 +1,6 @@
 ﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Components;
+using BlazorBase.CRUD.Components.Card;
+using BlazorBase.CRUD.Components.List;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
@@ -11,18 +12,15 @@ using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Models
@@ -33,6 +31,8 @@ namespace BlazorBase.CRUD.Models
         public event EventHandler<string> OnForcePropertyRepaint;
 
         public event EventHandler OnReloadEntityFromDatabase;
+
+        public event EventHandler OnRecalculateVisibilityStatesOfActions;
         #endregion
 
         public BaseModel()
@@ -56,8 +56,9 @@ namespace BlazorBase.CRUD.Models
         #region Configuration Properties
         [NotMapped] public virtual bool UserCanAddEntries { get; protected set; } = true;
         [NotMapped] public virtual bool UserCanEditEntries { get; protected set; } = true;
+        [NotMapped] public virtual bool UserCanOpenCardReadOnly { get; protected set; } = false;
         [NotMapped] public virtual bool UserCanDeleteEntries { get; protected set; } = true;
-        [NotMapped] public virtual Expression<Func<IBaseModel, bool>> DataLoadCondition { get; protected set; }
+        [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; protected set; }
         [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
         #endregion
 
@@ -137,6 +138,19 @@ namespace BlazorBase.CRUD.Models
         {
             OnReloadEntityFromDatabase?.Invoke(this, EventArgs.Empty);
         }
+
+        public void RecalculateVisibilityStatesOfActions()
+        {
+            OnRecalculateVisibilityStatesOfActions?.Invoke(this, EventArgs.Empty);
+        }
+
+        public async Task InvokeStateHasChangedAsync()
+        {
+            await InvokeAsync(() =>
+            {
+                StateHasChanged();
+            });
+        }
         #endregion
 
         #region Events
@@ -189,22 +203,34 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Validation Methods
+        public virtual Task OnBeforeValidateProperty(OnBeforeValidatePropertyArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterValidateProperty(OnAfterValidatePropertyArgs args) { return Task.CompletedTask; }
+
         public bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext)
         {
             validationResults = new List<ValidationResult>();
             return Validator.TryValidateObject(this, validationContext, validationResults, true);
         }
 
-        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo)
+        public record ValidationTranslationResource(System.Resources.ResourceManager ResourceManager, Type ResourceType);
+        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null)
         {
             validationResults = new List<ValidationResult>();
-            var attributes = propertyInfo.GetCustomAttributes<Attribute>().OfType<ValidationAttribute>();
+            var attributes = propertyInfo.GetCustomAttributes<Attribute>().OfType<ValidationAttribute>().ToList();
+
+            if (additionalValidationAttributes != null)
+                attributes.AddRange(additionalValidationAttributes);
+
             foreach (var attribute in attributes.Where(attribute => attribute.ErrorMessage == null))
             {
                 var attributeName = attribute.GetType().Name;
-                if (ValidationAttributesTranslations.ResourceManager.GetString(attributeName) != null)
+
+                if (translationResource == null)
+                    translationResource = new ValidationTranslationResource(ValidationAttributesTranslations.ResourceManager, typeof(ValidationAttributesTranslations));
+
+                if (translationResource.ResourceManager.GetString(attributeName) != null)
                 {
-                    attribute.ErrorMessageResourceType = typeof(ValidationAttributesTranslations);
+                    attribute.ErrorMessageResourceType = translationResource.ResourceType;
                     attribute.ErrorMessageResourceName = attributeName;
                 }
             }
@@ -245,9 +271,10 @@ namespace BlazorBase.CRUD.Models
             builder.OpenComponent(0, typeof(BaseList<>).MakeGenericType(GetType()));
             builder.AddAttribute(1, "UserCanAddEntries", UserCanAddEntries);
             builder.AddAttribute(2, "UserCanEditEntries", UserCanEditEntries);
-            builder.AddAttribute(3, "UserCanDeleteEntries", UserCanDeleteEntries);
-            builder.AddAttribute(4, "DataLoadCondition", DataLoadCondition);
-            builder.AddAttribute(5, "ComponentModelInstance", this);
+            builder.AddAttribute(3, "UserCanOpenCardReadOnly", UserCanOpenCardReadOnly);
+            builder.AddAttribute(4, "UserCanDeleteEntries", UserCanDeleteEntries);
+            builder.AddAttribute(5, "DataLoadConditions", DataLoadConditions);
+            builder.AddAttribute(6, "ComponentModelInstance", this);
             builder.CloseComponent();
         }
 

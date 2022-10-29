@@ -19,7 +19,7 @@ public static class BlazorBaseUserConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole, TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
+    public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole, TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
         where TUserService : class, IBaseUserService<TUser, TIdentityUser, TIdentityRole>
         where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
         where TIdentityUser : IdentityUser, new()
@@ -35,10 +35,10 @@ public static class BlazorBaseUserConfiguration
             .AddSingleton(configureOptions)
             .AddSingleton<IBlazorBaseUserOptions, TOptions>()
             .AddSingleton<IBaseUser, TUser>()
-            .AddTransient<TUserService>();
+            .AddTransient<TUserService>()
         
 
-        serviceCollection.AddControllers();
+        .AddControllers().AddApplicationPart(typeof(UserLoginController).Assembly).AddControllersAsServices();
 
         var options = new TOptions();
         configureOptions.Invoke(options);

@@ -1,0 +1,19 @@
+﻿<BarItem @attributes="AdditionalAttributes">
+    <BarDropdown Visible="DropDownIsVisible" VisibleChanged="DropDownVisibleChanged">
+        <BarDropdownToggle>
+            <BarIcon IconName="@MenuIcon" />
+            @MenuName
+        </BarDropdownToggle>
+
+        <BarDropdownMenu>
+            @foreach (var navigationEntry in NavigationEntries)
+            {
+                <BarDropdownItem To="@navigationEntry.Link">
+                    <BarIcon Class="@($"fa-fw {@navigationEntry.Icon}")" />
+                    @navigationEntry.Name
+                </BarDropdownItem>
+            }
+        </BarDropdownMenu>
+    </BarDropdown>
+</BarItem>
+

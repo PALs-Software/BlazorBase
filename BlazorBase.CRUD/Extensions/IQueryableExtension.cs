@@ -11,13 +11,15 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.Extensions
 {
     public static class IQueryableExtension
     {
         static MethodInfo LikeMethodInfo = typeof(DbFunctionsExtensions).GetMethod("Like", new Type[] { typeof(DbFunctions), typeof(string), typeof(string) });
+        static MethodInfo StringContainsMethodInfo = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
+        static MethodInfo ToStringMethodInfo = typeof(object).GetMethod("ToString");
         static Expression EFFunctionsConstant = Expression.Constant(EF.Functions);
         static Expression EmptyStringConstant = Expression.Constant(String.Empty);
         static Expression NullConstant = Expression.Constant(null);
@@ -44,12 +46,12 @@ namespace BlazorBase.CRUD.Extensions
             return source.ThenByDescending(CreateKeySelectExpression<T>(propertyPath));
         }
 
-        public static IQueryable<T> Where<T>(this IQueryable<T> source, DisplayItem displayItem)
+        public static IQueryable<T> Where<T>(this IQueryable<T> source, DisplayItem displayItem, bool useEfFilters = true)
         {
             if (displayItem.FilterType != FilterType.IsNull && displayItem.FilterType != FilterType.IsEmpty && String.IsNullOrEmpty(displayItem.FilterValue?.ToString()))
                 return source;
 
-            return source.Where(CreateFilterExpression<T>(displayItem));
+            return source.Where(CreateFilterExpression<T>(displayItem, useEfFilters));
         }
 
         private static Expression<Func<T, object>> CreateKeySelectExpression<T>(string propertyPath)
@@ -72,7 +74,7 @@ namespace BlazorBase.CRUD.Extensions
         }
 
 
-        private static Expression<Func<TModel, bool>> CreateFilterExpression<TModel>(DisplayItem displayItem)
+        private static Expression<Func<TModel, bool>> CreateFilterExpression<TModel>(DisplayItem displayItem, bool useEfFilters = true)
         {
             var filterValue = displayItem.FilterValue;
             var filterType = displayItem.FilterType;
@@ -97,7 +99,10 @@ namespace BlazorBase.CRUD.Extensions
                     }
                 }
                 else if ((filterType == FilterType.Like) && (filterValue is string || filterValue is Guid || filterValue is Guid?))
-                    filterValue = filterValue?.ToString()?.Replace(" ", "%");
+                    if (useEfFilters)
+                        filterValue = filterValue?.ToString()?.Replace(" ", "%");
+                    else
+                        filterValue = filterValue?.ToString();
             }
 
             ConstantExpression constant = null;
@@ -119,11 +124,34 @@ namespace BlazorBase.CRUD.Extensions
                         filterValue = filterValue.ToString();
                         Thread.CurrentThread.CurrentCulture = savedCulture;
                     }
+                   
+                    if (useEfFilters)
+                    {
+                        var propertyAsObject = Expression.Convert(property, typeof(object));
+                        var propertyAsString = Expression.Convert(propertyAsObject, typeof(string));
 
-                    var propertyAsObject = Expression.Convert(property, typeof(object));
-                    var propertyAsString = Expression.Convert(propertyAsObject, typeof(string));
-                    var filter = Expression.Constant($"%{filterValue}%");
-                    body = Expression.Call(LikeMethodInfo, EFFunctionsConstant, propertyAsString, filter);
+                        var filter = Expression.Constant($"%{filterValue}%");
+                        body = Expression.Call(LikeMethodInfo, EFFunctionsConstant, propertyAsString, filter);
+                    }
+                    else
+                    {
+                        var propertyAsString = Expression.Call(property, ToStringMethodInfo);
+
+                        List<Expression> partExpressions = new();
+                        foreach (var filterPart in (filterValue as string).Split(" "))
+                        {
+                            if (String.IsNullOrEmpty(filterPart))
+                                continue;
+
+                            var filter = Expression.Constant(filterPart, typeof(string));
+                            var ordinalIgnoreCase = Expression.Constant(StringComparison.OrdinalIgnoreCase, typeof(StringComparison));
+                            partExpressions.Add(Expression.Call(propertyAsString, StringContainsMethodInfo, filter, ordinalIgnoreCase));
+                        }
+
+                        body = partExpressions[0];
+                        for (int i = 1; i < partExpressions.Count; i++)
+                            body = Expression.AndAlso(body, partExpressions[i]);
+                    }
                     break;
                 case FilterType.Equal:
                     body = Expression.Equal(property, constant);
