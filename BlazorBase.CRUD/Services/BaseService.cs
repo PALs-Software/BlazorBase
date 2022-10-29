@@ -1,18 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BlazorBase.CRUD.EventArguments;
+using BlazorBase.CRUD.Extensions;
+using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Interfaces;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BlazorBase.CRUD.Extensions;
-using BlazorBase.CRUD.Models;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore.Metadata;
-using BlazorBase.CRUD.EventArguments;
+using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Services
 {
@@ -59,7 +59,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
-        {
+        {            
             return await DbContext.FindAsync(type, keyValues);
         }
 
@@ -193,6 +193,28 @@ namespace BlazorBase.CRUD.Services
 
             return guid;
         }
+
+        public virtual Guid GetNewPrimaryKey(Type type)
+        {
+            Guid guid;
+            do
+            {
+                guid = Guid.NewGuid();
+            } while (DbContext.Find(type, guid) != null);
+
+            return guid;
+        }
+
+        public async virtual Task<Guid> GetNewPrimaryKeyAsync(Type type)
+        {
+            Guid guid;
+            do
+            {
+                guid = Guid.NewGuid();
+            } while (await DbContext.FindAsync(type, guid) != null);
+
+            return guid;
+        }
         #endregion
 
         #region Count Data
@@ -230,7 +252,7 @@ namespace BlazorBase.CRUD.Services
             if (entry == null)
                 return false;
 
-            if (skipEntryAlreadyExistCheck && DbContext.Find<T>(entry.GetPrimaryKeys()) != null)
+            if ((!skipEntryAlreadyExistCheck) && DbContext.Find<T>(entry.GetPrimaryKeys()) != null)
                 return false;
 
             DbContext.Set<T>().Add(entry);
@@ -243,10 +265,23 @@ namespace BlazorBase.CRUD.Services
             if (entry == null)
                 return false;
 
-            if (skipEntryAlreadyExistCheck && await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) != null)
+            if ((!skipEntryAlreadyExistCheck) && await DbContext.Set<T>().FindAsync(entry.GetPrimaryKeys()) != null)
                 return false;
 
             DbContext.Set<T>().Add(entry);
+
+            return true;
+        }
+
+        public async virtual Task<bool> AddEntryAsync(Type type, IBaseModel entry, bool skipEntryAlreadyExistCheck = false)
+        {
+            if (entry == null)
+                return false;
+
+            if ((!skipEntryAlreadyExistCheck) && await GetAsync(type, entry.GetPrimaryKeys()) != null)
+                return false;
+
+            DbContext.Add(entry);
 
             return true;
         }
@@ -281,7 +316,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public virtual void RemoveRange(params object[] entriesToRemove)
-        {
+        {            
             DbContext.RemoveRange(entriesToRemove);
         }
 
@@ -364,6 +399,12 @@ namespace BlazorBase.CRUD.Services
         #endregion
 
         #region Other
+        public static void MigrateDatabase<TDbContext>(IApplicationBuilder app) where TDbContext: DbContext
+        {
+            using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
+            scope.ServiceProvider.GetRequiredService<TDbContext>().Database.Migrate();
+        }
+
         protected EventServices GetEventServices()
         {
             return new EventServices()

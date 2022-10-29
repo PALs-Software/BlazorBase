@@ -1,0 +1,11 @@
+﻿@layout BaseLayout
+@inherits LayoutComponentBase
+
+<AuthorizeView>
+    <Authorized>
+       @Body
+    </Authorized>
+    <NotAuthorized>
+        @Localizer["You are not authorized"]
+    </NotAuthorized>
+</AuthorizeView>

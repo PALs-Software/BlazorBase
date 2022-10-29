@@ -19,7 +19,7 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
     // -Klasse über ein Tool wie ResGen oder Visual Studio automatisch generiert.
     // Um einen Member hinzuzufügen oder zu entfernen, bearbeiten Sie die .ResX-Datei und führen dann ResGen
     // mit der /str-Option erneut aus, oder Sie erstellen Ihr VS-Projekt neu.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class ValidationAttributesTranslations {
@@ -61,7 +61,25 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Die Eigenschaft &quot;{0}&quot; muss zwischen {1} und {2} liegen ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is required ähnelt.
+        /// </summary>
+        public static string DisallowEmptyGuidAttribute {
+            get {
+                return ResourceManager.GetString("DisallowEmptyGuidAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is not a valid e-mail address ähnelt.
+        /// </summary>
+        public static string EmailAddressAttribute {
+            get {
+                return ResourceManager.GetString("EmailAddressAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field must be between {1} and {2} ähnelt.
         /// </summary>
         public static string RangeAttribute {
             get {
@@ -70,7 +88,16 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Die Eigenschaft &quot;{0}&quot; ist erforderlich ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field must match the regular expression &quot;{1}&quot; ähnelt.
+        /// </summary>
+        public static string RegularExpressionAttribute {
+            get {
+                return ResourceManager.GetString("RegularExpressionAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field is required ähnelt.
         /// </summary>
         public static string RequiredAttribute {
             get {
@@ -79,7 +106,7 @@ namespace BlazorBase.CRUD.Resources.ValidationAttributes {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Die Eigenschaft &quot;{0}&quot; darf nur maximal {1} Zeichen lang sein ähnelt.
+        ///   Sucht eine lokalisierte Zeichenfolge, die The &quot;{0}&quot; field may only be a maximum of {1} characters long ähnelt.
         /// </summary>
         public static string StringLengthAttribute {
             get {

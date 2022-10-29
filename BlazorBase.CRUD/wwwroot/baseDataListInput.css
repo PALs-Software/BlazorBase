@@ -1,0 +1,27 @@
+﻿datalist {
+    position: absolute;
+    max-height: 10em;
+    border: 0 none;
+    overflow-x: auto;
+    overflow-y: auto;
+    background-color: var(--bs-body-bg);
+    z-index: 1;
+}
+
+    datalist option {
+        font-size: .9em;
+        padding: 0.3em 1em;
+        color: var(--bs-body-color);
+        cursor: pointer;
+    }
+
+        datalist option:hover, datalist option:focus {
+            color: var(--bs-body-color);
+            background-color: var(--table-hover-background);
+            outline: 0 none;
+        }
+
+
+.input-data-list input::-webkit-calendar-picker-indicator {
+    display: none !important;
+}

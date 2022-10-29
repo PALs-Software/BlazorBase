@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Components;
+﻿using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
@@ -14,7 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.Files.Components
 {
@@ -27,7 +27,7 @@ namespace BlazorBase.Files.Components
 
         #region Inject
         [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; }
-        [Inject] protected BlazorBaseFileOptions Options { get; set; }
+        [Inject] protected IBlazorBaseFileOptions Options { get; set; }
         #endregion
 
         #region Member
@@ -67,7 +67,7 @@ namespace BlazorBase.Files.Components
                 var files = ((FileChangedEventArgs)fileChangedEventArgs).Files;
                 if (files.Length == 0)
                     return;
-                
+
                 var args = new OnBeforePropertyChangedArgs(Model, Property.Name, fileChangedEventArgs, oldValue, eventServices);
                 await OnBeforePropertyChanged.InvokeAsync(args);
                 await Model.OnBeforePropertyChanged(args);
@@ -78,24 +78,22 @@ namespace BlazorBase.Files.Components
                 if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
                     throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
 
-                new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
-
-                newFile = Activator.CreateInstance(Property.PropertyType) as BaseFile;
+                newFile = Activator.CreateInstance(RenderType) as BaseFile;
                 newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
                 newFile.FileSize = file.Size;
                 newFile.BaseFileType = Path.GetExtension(file.Name);
-                newFile.MimeFileType = mimeFileType;
+                newFile.MimeFileType = GetMimeTypeOfFile(file);
 
                 if (Model is BaseFile baseFile)
                 {
                     if (baseFile.TempFileId == Guid.Empty)
                     {
-                        var tempFileStorePath = BlazorBaseFileOptions.Instance.TempFileStorePath;
+                        var tempFileStorePath = Options.TempFileStorePath;
                         string tempFilePath;
                         do
                         {
                             newFile.TempFileId = Guid.NewGuid();
-                            tempFilePath = Path.Join(tempFileStorePath, newFile.TempFileId.ToString());
+                            tempFilePath = Path.Join(tempFileStorePath, newFile.GetTemporaryFileNameWithExtension());
                         } while (File.Exists(tempFilePath));
                     }
                     else
@@ -171,7 +169,7 @@ namespace BlazorBase.Files.Components
             if (!Directory.Exists(Options.TempFileStorePath))
                 Directory.CreateDirectory(Options.TempFileStorePath);
 
-            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.TempFileId.ToString()));
+            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.GetTemporaryFileNameWithExtension()));
             await file.WriteToStreamAsync(fileStream);
             fileStream.Position = 0;
 
@@ -200,5 +198,11 @@ namespace BlazorBase.Files.Components
             await Model.OnAfterPropertyChanged(onAfterArgs);
         }
 
+
+        protected virtual string GetMimeTypeOfFile(IFileEntry file)
+        {
+            new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
+            return mimeFileType ?? "application/octet-stream";
+        }
     }
 }

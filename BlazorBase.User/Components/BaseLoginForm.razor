@@ -1,0 +1,54 @@
+﻿@using BlazorBase.User.Controller
+
+<div class="login-form"
+     style="@(ShowImageOfTheDayAsBackgroundImage ? $"background-image: url({ImageOfTheDayUrl});" : "")">
+    <div class="container text-center login-container">
+        <div class="login-container-form-row row align-items-center">
+            <div class="col">
+                <h2 class="h2 text-center pb-5">@WebsiteName</h2>
+
+                <EditForm Model="@LoginData" OnValidSubmit="@HandleValidSubmit" class="login-container-form form-signin mx-auto">
+
+                    <div class="login-feedback validation-message">@Feedback</div>                                        
+                    <DataAnnotationsValidator />
+
+                    <form id="action-login-form" action="@Options.LoginControllerPath" method="post">
+                        <input name="returnUrl" type="hidden" @bind-value="ReturnUrl" />
+                        <InputText @bind-Value="LoginData.Email" autocomplete="username" name="Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
+                        <ValidationMessage For="@(() => LoginData.Email)" />
+                        <div class="form-group">
+                            <InputText @bind-Value="LoginData.Password" autocomplete="current-password" name="Password" type="password" class="form-control" placeholder="@Localizer["Password"]" />
+                            <ValidationMessage For="@(() => LoginData.Password)" />
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox">
+                                <label>
+                                    <input name="RememberMe" type="checkbox" value="true" checked >
+                                    @Localizer["Remember me"]
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+
+                    <Button Class="login-button btn-block" Size="Size.Large" Color="@ButtonColor" Type="ButtonType.Submit">@Localizer["Log in"]</Button>
+                </EditForm>
+            </div>
+        </div>
+        <div class="login-container-logo-row row align-items-end">
+            <div class="col">
+                @if (Logo is not null)
+                {
+                    @Logo
+                }
+                else @if (!String.IsNullOrEmpty(LogoHref) && !String.IsNullOrEmpty(LogoSrc))
+                {
+                    <a href="@LogoHref" target="_blank">
+                        <figure class="figure" style="height: @(LogoHeight)px; width: @(LogoWidth)px">
+                            <img src="@LogoSrc" class="figure-img img-fluid">
+                        </figure>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,7 @@
 ﻿using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
-using BlazorBase.Modules;
+using BlazorBase.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -20,7 +20,7 @@ namespace BlazorBase.MessageHandling.Components
         #endregion
 
         #region Injects
-        [Inject] protected ErrorHandler ErrorHandler { get; set; }
+        [Inject] protected BaseErrorHandler ErrorHandler { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         [Inject] protected IStringLocalizer<MessageGenerator> MessageGeneratorLocalizer { get; set; }
         [Inject] protected IStringLocalizer<DateSpanDialogGenerator> Localizer { get; set; }
@@ -48,6 +48,7 @@ namespace BlazorBase.MessageHandling.Components
             DateTime? fromDate = null,
             DateTime? toDate = null,
             DateInputMode dateInputMode = DateInputMode.Date,
+            bool useAsDatePicker = false,
             string fromDateCaption = null,
             string toDateCaption = null,
             MessageType messageType = MessageType.Information,
@@ -66,6 +67,7 @@ namespace BlazorBase.MessageHandling.Components
                     fromDate,
                     toDate,
                     dateInputMode,
+                    useAsDatePicker,
                     fromDateCaption,
                     toDateCaption,
                     messageType,

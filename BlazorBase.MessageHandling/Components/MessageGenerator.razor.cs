@@ -1,7 +1,7 @@
 ﻿using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
-using BlazorBase.Modules;
+using BlazorBase.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
@@ -19,7 +19,7 @@ namespace BlazorBase.MessageHandling.Components
         #endregion
 
         #region Injects
-        [Inject] protected ErrorHandler ErrorHandler { get; set; }
+        [Inject] protected BaseErrorHandler ErrorHandler { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         [Inject] protected IStringLocalizer<MessageGenerator> Localizer { get; set; }
         #endregion

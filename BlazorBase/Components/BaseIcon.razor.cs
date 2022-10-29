@@ -6,12 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.Components
-{
-    public partial class BaseIcon : BaseComponent
-    {
-        [Parameter] public object IconName { get; set; }
+namespace BlazorBase.Components;
 
-        [Parameter] public IconStyle IconStyle { get; set; }
-    }
+public partial class BaseIcon : BaseComponent
+{
+    [Parameter] public object IconName { get; set; }
+
+    [Parameter] public IconStyle IconStyle { get; set; }
 }
