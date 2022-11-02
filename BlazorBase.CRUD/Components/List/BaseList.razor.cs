@@ -86,6 +86,7 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
+        [Parameter] public RenderFragment AdditionalHeaderButtons { get; set; }
 
         #region Style
         [Parameter] public string TableClass { get; set; }
