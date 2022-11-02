@@ -14,6 +14,11 @@
     @InvalidSummaryFeedback
 </Alert>
 
+@if(AdditionalHeaderButtons != null)
+{
+    @AdditionalHeaderButtons;
+}
+
 <table class="table table-hover @TableClass">
     <thead>
         <tr>
