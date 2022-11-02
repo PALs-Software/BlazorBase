@@ -1,4 +1,6 @@
 ﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Services;
 using Blazorise;
@@ -7,13 +9,11 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.List
 {
     public partial class BaseListFilter : BaseDisplayComponent
     {
@@ -84,7 +84,7 @@ namespace BlazorBase.CRUD.Components
 
         protected ComponentBase AddToComponents { set { Components.Add(value); } }
         protected List<ComponentBase> Components = new();
-                
+
         #endregion
 
         #region Init

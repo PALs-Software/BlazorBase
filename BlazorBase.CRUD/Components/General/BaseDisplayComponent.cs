@@ -10,6 +10,7 @@ using BlazorBase.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Concurrent;
@@ -18,10 +19,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.General
 {
     public class BaseDisplayComponent : ComponentBase
     {
@@ -191,7 +191,12 @@ namespace BlazorBase.CRUD.Components
                     continue;
                 }
 
-                var entries = await service.GetDataAsync(foreignKeyType);
+                dynamic query = service.DbContext.Set(foreignKeyType);
+                query = EntityFrameworkQueryableExtensions.AsNoTracking(query);
+                for (int i = 0; i < displayKeyProperties.Count; i++)
+                    query = i == 0 ? IQueryableExtension.OrderBy(query, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(query, displayKeyProperties[i].Name);
+                var entries = await EntityFrameworkQueryableExtensions.ToListAsync(query);
+
                 foreach (var entry in entries)
                     AddEntryToForeignKeyList(entry as IBaseModel, primaryKeys, displayKeyProperties);
 
@@ -277,7 +282,7 @@ namespace BlazorBase.CRUD.Components
         {
             var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
             model.OnGetPropertyCaption(args);
-            
+
             return caption = args.Caption;
         }
 

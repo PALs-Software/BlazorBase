@@ -273,6 +273,19 @@ namespace BlazorBase.CRUD.Services
             return true;
         }
 
+        public async virtual Task<bool> AddEntryAsync(Type type, IBaseModel entry, bool skipEntryAlreadyExistCheck = false)
+        {
+            if (entry == null)
+                return false;
+
+            if ((!skipEntryAlreadyExistCheck) && await GetAsync(type, entry.GetPrimaryKeys()) != null)
+                return false;
+
+            DbContext.Add(entry);
+
+            return true;
+        }
+
         public virtual void UpdateEntry<T>(T entry) where T : class
         {
             DbContext.Set<T>().Update(entry);

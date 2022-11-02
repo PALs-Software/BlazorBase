@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="DisallowEmptyGuidAttribute" xml:space="preserve">
+    <value>The "{0}" field is required</value>
+  </data>
   <data name="EmailAddressAttribute" xml:space="preserve">
     <value>The "{0}" field is not a valid e-mail address</value>
   </data>
   <data name="RangeAttribute" xml:space="preserve">
     <value>The "{0}" field must be between {1} and {2}</value>
+  </data>
+  <data name="RegularExpressionAttribute" xml:space="preserve">
+    <value>The "{0}" field must match the regular expression "{1}"</value>
   </data>
   <data name="RequiredAttribute" xml:space="preserve">
     <value>The "{0}" field is required</value>

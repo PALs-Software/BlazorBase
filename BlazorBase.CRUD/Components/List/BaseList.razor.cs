@@ -1,5 +1,4 @@
-﻿using BlazorBase.Components;
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
@@ -10,10 +9,7 @@ using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using BlazorBase.CRUD.EventArguments;
@@ -23,9 +19,10 @@ using Blazorise;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
-using BlazorBase.Modules;
+using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Card;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.List
 {
     public partial class BaseList<TModel> : BaseDisplayComponent, IDisposable where TModel : class, IBaseModel, new()
     {
@@ -73,7 +70,7 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string ExplainText { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
-        [Parameter] public Expression<Func<IBaseModel, bool>> DataLoadCondition { get; set; }
+        [Parameter] public List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; set; }
 
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
@@ -89,6 +86,11 @@ namespace BlazorBase.CRUD.Components
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
+
+        #region Style
+        [Parameter] public string TableClass { get; set; }
+        #endregion
+
         #endregion
 
         #region Injects
@@ -278,15 +280,26 @@ namespace BlazorBase.CRUD.Components
         protected virtual async Task NavigateToEntryAsync(params object[] primaryKeys)
         {
             var entry = await Service.GetAsync<TModel>(primaryKeys);
-            if (entry != null && (DataLoadCondition == null || DataLoadCondition.Compile()(entry))) //Check if user is allowed to see this entry
+
+            if (entry == null)
             {
-                if (UserCanOpenCardReadOnly)
-                    await ViewEntryAsync(entry, false);
-                else if (UserCanEditEntries)
-                    await EditEntryAsync(entry, false);
-            }
-            else
                 ChangeUrlToList();
+                return;
+            }
+
+            if (DataLoadConditions != null)
+                foreach (var dataLoadCondition in DataLoadConditions) //Check all data load conditions if user is allowed to see this entry
+                    if (dataLoadCondition != null && !dataLoadCondition.Compile()(entry))
+                    {
+                        ChangeUrlToList();
+                        return;
+                    }
+
+            if (UserCanOpenCardReadOnly)
+                await ViewEntryAsync(entry, false);
+            else if (UserCanEditEntries)
+                await EditEntryAsync(entry, false);
+
         }
 
         protected virtual void ChangeUrlToEntry(TModel entry)
@@ -340,8 +353,10 @@ namespace BlazorBase.CRUD.Components
                         query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
                 }
 
-            if (DataLoadCondition != null)
-                query = query.Where(DataLoadCondition).Cast<TModel>();
+            if (DataLoadConditions != null)
+                foreach (var dataLoadCondition in DataLoadConditions)
+                    if (dataLoadCondition != null)
+                        query = query.Where(dataLoadCondition).Cast<TModel>();
 
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)

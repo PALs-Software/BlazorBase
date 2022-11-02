@@ -1,6 +1,4 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.Extensions;
+﻿using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
@@ -11,7 +9,7 @@ using Microsoft.Extensions.Localization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.Files.Components
 {

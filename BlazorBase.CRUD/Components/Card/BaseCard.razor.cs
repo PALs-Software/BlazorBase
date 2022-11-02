@@ -1,4 +1,7 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Inputs;
+using BlazorBase.CRUD.Components.List;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
@@ -18,7 +21,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.Card
 {
     public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : class, IBaseModel, new()
     {
@@ -212,7 +215,7 @@ namespace BlazorBase.CRUD.Components
         {
             ResetInvalidFeedback();
 
-            if (!CardIsValid())
+            if (!await CardIsValidAsync())
                 return false;
 
             var success = true;
@@ -330,24 +333,24 @@ namespace BlazorBase.CRUD.Components
             return Service.HasUnsavedChanges();
         }
 
-        protected virtual bool CardIsValid()
+        protected virtual async Task<bool> CardIsValidAsync()
         {
             var valid = true;
 
             foreach (var input in BaseInputs)
-                if (!input.ValidatePropertyValue())
+                if (!await input.ValidatePropertyValueAsync())
                     valid = false;
 
             foreach (var input in BaseSelectListInputs)
-                if (!input.ValidatePropertyValue())
+                if (!await input.ValidatePropertyValueAsync())
                     valid = false;
 
             foreach (var listPart in BaseListParts)
-                if (!listPart.ListPartIsValid())
+                if (!await listPart.ListPartIsValidAsync())
                     valid = false;
 
             foreach (var basePropertyCardInput in BasePropertyCardInputs)
-                if (!basePropertyCardInput.ValidatePropertyValue())
+                if (!await basePropertyCardInput.ValidatePropertyValueAsync())
                     valid = false;
 
             if (!Model.TryValidate(out List<ValidationResult> validationResults, ValidationContext))

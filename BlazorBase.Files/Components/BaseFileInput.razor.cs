@@ -1,9 +1,8 @@
-﻿using BlazorBase.CRUD.Components;
+﻿using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
-using BlazorBase.Files.Controller;
 using BlazorBase.Files.Models;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
@@ -15,7 +14,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.Files.Components
 {

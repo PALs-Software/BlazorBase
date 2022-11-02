@@ -19,7 +19,7 @@ public static class BlazorBaseUserConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole, TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
+    public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole, TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
         where TUserService : class, IBaseUserService<TUser, TIdentityUser, TIdentityRole>
         where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
         where TIdentityUser : IdentityUser, new()

@@ -5,7 +5,7 @@ using BlazorBase.CRUD.Models;
 using System.Threading.Tasks;
 using Blazorise.Components;
 
-namespace BlazorBase.CRUD.Components
+namespace BlazorBase.CRUD.Components.Inputs
 {
     public partial class BaseSelectListInput : BaseInput
     {
