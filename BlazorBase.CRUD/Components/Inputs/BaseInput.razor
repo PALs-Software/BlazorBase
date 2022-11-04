@@ -26,6 +26,14 @@
     {
         <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
     }
+    else if(RenderType == typeof(TimeSpan))
+    {
+        <TimeEdit TValue="TimeSpan" Time="(TimeSpan)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+    }
+    else if(RenderType == typeof(TimeSpan?))
+    {
+        <TimeEdit TValue="TimeSpan?" Time="(TimeSpan?)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+    }
     else if (RenderType == typeof(DateTime?))
     {
         <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
