@@ -9,7 +9,7 @@ using Microsoft.Extensions.Localization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.Files.Components
 {

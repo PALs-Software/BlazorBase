@@ -1,0 +1,70 @@
+﻿@typeparam TModel
+
+<div class="base-card">
+    <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
+        <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+            <ModalHeader>
+                <ModalTitle>
+                    @if (ViewMode)
+                    {
+                        <span>@Localizer["View {0}", SingleDisplayName]</span>
+                    }
+                    else
+                    {
+                        <span>@Localizer["Edit {0}", SingleDisplayName]</span>
+                        <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
+                    }
+                </ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                <BaseCard @ref="BaseCard"
+                          TModel="TModel"
+                          SingleDisplayName="@SingleDisplayName"
+                          Embedded="true"
+                          ShowActions="ShowActions"
+                          ShowEntryByStart="ShowEntryByStart"
+                          ComponentModelInstance="ComponentModelInstance"
+                          EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"
+                          OnCreateNewEntryInstance="(args) => OnCreateNewEntryInstance.InvokeAsync(args)"
+                          OnBeforeAddEntry="(args) => OnBeforeAddEntry.InvokeAsync(args)"
+                          OnAfterAddEntry="(args) => OnAfterAddEntry.InvokeAsync(args)"
+                          OnBeforeUpdateEntry="(args) => OnBeforeUpdateEntry.InvokeAsync(args)"
+                          OnAfterUpdateEntry="(args) => OnAfterUpdateEntry.InvokeAsync(args)"
+                          OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)"
+                          OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)"
+                          OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)"
+                          OnBeforeSaveChanges="(args) => OnBeforeSaveChanges.InvokeAsync(args)"
+                          OnAfterSaveChanges="(args) => OnAfterSaveChanges.InvokeAsync(args)"
+                          OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                          OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                          OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                          OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                          OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                          OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                          OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                          OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+                          OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+                          OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
+            </ModalBody>
+            @if (!String.IsNullOrEmpty(ExplainText))
+            {
+                <ModalFooter Style="justify-content:flex-start">
+                    @foreach (var item in ExplainText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None))
+                    {
+                        @item
+                        <br />
+                    }
+                </ModalFooter>
+            }
+            <ModalFooter>
+                <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Close"]</Button>
+                @if (!ViewMode)
+                {
+                    <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
+                    <Button Color="Color.Primary" Clicked="SaveAndCloseModalAsync">@Localizer["Save & Close"]</Button>
+                }
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
+</div>

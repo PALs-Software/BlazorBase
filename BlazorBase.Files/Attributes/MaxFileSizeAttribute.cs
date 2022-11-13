@@ -1,11 +1,4 @@
-﻿using BlazorBase.CRUD.Enums;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+﻿using System;
 
 namespace BlazorBase.Files.Attributes
 {

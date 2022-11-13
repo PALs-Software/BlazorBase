@@ -13,7 +13,7 @@
                 <CloseButton />
             </ModalHeader>
             <ModalBody>
-                @MarkupStringValidator.GetWhiteListedMarkupString(@modalInfo.Value.Args.Message)
+                @BaseMarkupStringValidator.GetWhiteListedMarkupString(@modalInfo.Value.Args.Message)
             </ModalBody>
             <ModalFooter>
                 @if (modalInfo.Value.Args is ShowConfirmDialogArgs args)

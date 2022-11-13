@@ -1,43 +1,80 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.Translation;
+using BlazorBase.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD
+namespace BlazorBase.CRUD;
+public static class BlazorBaseCRUDConfiguration
 {
-    public static class BlazorBaseCRUDConfiguration
+    /// <summary>
+    /// Register blazor base crud and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
+        where TOptions : class, IBlazorBaseCRUDOptions
+        where TDbContextImplementation : DbContext
     {
-        /// <summary>
-        /// Register blazor base crud and configures the default behaviour.
-        /// </summary>
-        /// <param name="serviceCollection"></param>
-        /// <param name="configureOptions"></param>
-        /// <returns></returns>
-        public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Action<BlazorBaseCRUDOptions> configureOptions = null) where TDbContextImplementation : DbContext
+        // If options handler is not defined we will get an exception so
+        // we need to initialize and empty action.
+        if (configureOptions == null)
+            configureOptions = (e) => { };
+
+        serviceCollection.AddSingleton(configureOptions)
+        .AddSingleton<IBlazorBaseCRUDOptions, TOptions>()
+        .AddSingleton<BaseParser>()
+        .AddTransient<BaseService>()
+        .AddTransient<DbContext, TDbContextImplementation>()
+        .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
+
+        .AddBlazorBaseMessageHandling();
+
+        return serviceCollection;
+    }
+
+    /// <summary>
+    /// Register blazor base crud and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Action<IBlazorBaseCRUDOptions> configureOptions = null)
+        where TDbContextImplementation : DbContext
+    {
+        return AddBlazorBaseCRUD<BlazorBaseCRUDOptions, TDbContextImplementation>(serviceCollection, configureOptions);
+    }
+
+    /// <summary>
+    /// Register blazor base crud and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
+        where TOptions : class, IBlazorBaseCRUDOptions
+        where TDbContextImplementation : DbContext
+    {
+        return AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(serviceCollection, options =>
         {
-            // If options handler is not defined we will get an exception so
-            // we need to initialize and empty action.
-            if (configureOptions == null)
-                configureOptions = (e) => { };
+            options.OptionsImportMode = BaseOptionsImportMode.Database;
+            options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
+        });
+    }
 
-            serviceCollection.AddSingleton(configureOptions)
-            .AddSingleton<BlazorBaseCRUDOptions>()
-            .AddSingleton<BaseParser>()
-            .AddTransient<BaseService>()
-            .AddTransient<DbContext, TDbContextImplementation>()
-            .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
-
-            .AddBlazorBaseMessageHandling();
-            
-            return serviceCollection;
-        }
+    /// <summary>
+    /// Register blazor base crud and configures the default behaviour.
+    /// </summary>
+    /// <param name="serviceCollection"></param>
+    /// <param name="configureOptions"></param>
+    /// <returns></returns>
+    public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
+        where TDbContextImplementation : DbContext
+    {
+        return AddBlazorBaseCRUD<BlazorBaseCRUDOptions, TDbContextImplementation>(serviceCollection, optionsImportFromDatabaseEntryType);
     }
 }

@@ -1,0 +1,53 @@
+﻿@typeparam TModel
+
+@using BlazorBase.Components
+
+<Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
+    <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+        <ModalHeader>
+            @if (!HideTitle)
+            {
+                <ModalTitle>
+                    @Title
+                </ModalTitle>
+            }
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            @if (CurrentlyVisible)
+            {
+                <BaseList TModel="TModel"
+                      UserCanAddEntries="false"
+                      UserCanDeleteEntries="false"
+                      UserCanEditEntries="false"
+                      UserCanOpenCardReadOnly="false"
+                      DontRenderCard="true"
+                      DataLoadConditions="DataLoadConditions"
+                      HideTitle="true"
+                      TableClass="table-responsive">
+
+                    <AdditionalRowButtons>
+                        @if (!HideSelectButton)
+                        {
+                            <Button Color="Color.Primary" Clicked="() => SelectEntry(context)">@(@SelectButtonText ?? @SelectListLocalizer["Select"])</Button>
+
+                            @if (AdditionalActions != null && !RenderAdditionalActionsOutsideOfButtonGroup)
+                            {
+                                @AdditionalActions(context)
+                            }
+                        }
+
+                        @if (AdditionalActions != null && RenderAdditionalActionsOutsideOfButtonGroup)
+                        {
+                            @AdditionalActions(context)
+                        }
+                    </AdditionalRowButtons>
+
+                </BaseList>
+            }
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="HideModal">@SelectListLocalizer["Abort"]</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>

@@ -11,6 +11,19 @@ namespace BlazorBase.CRUD.Services
 {
     public class BaseParser
     {
+        public static List<Type> DecimalTypes { get; } = new List<Type>(){
+            typeof(decimal),
+            typeof(decimal?),
+            typeof(double),
+            typeof(double?),
+            typeof(float),
+            typeof(float?),
+            typeof(int),
+            typeof(int?),
+            typeof(long),
+            typeof(long?)
+        };
+
         protected IStringLocalizer<BaseParser> Localizer { get; set; }
 
         public BaseParser(IStringLocalizer<BaseParser> localizer)
@@ -42,8 +55,6 @@ namespace BlazorBase.CRUD.Services
                     outputValue = Convert.ChangeType(Guid.Parse(inputValue), conversionType);
                 else if (conversionType == typeof(DateTimeOffset))
                     outputValue = Convert.ChangeType(DateTimeOffset.Parse(inputValue), conversionType);
-                else if (conversionType == typeof(DateTime))
-                    outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.CurrentUICulture);
                 else
                     outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.InvariantCulture);
 
