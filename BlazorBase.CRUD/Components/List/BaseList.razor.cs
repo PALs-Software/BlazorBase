@@ -223,6 +223,7 @@ namespace BlazorBase.CRUD.Components.List
             builder.AddAttribute(2, "Property", displayItem.Property);
             builder.AddAttribute(3, "Service", Service);
             builder.AddAttribute(4, "ModelLocalizer", ModelLocalizer);
+            builder.AddAttribute(5, "DisplayItem", displayItem);
 
             builder.CloseComponent();
         };

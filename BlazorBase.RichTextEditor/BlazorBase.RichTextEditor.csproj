@@ -2,26 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-
+  
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.46" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="6.0.10" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Enums\" />
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\BlazorBase.CRUD\BlazorBase.CRUD.csproj" />
+    <ProjectReference Include="..\BlazorBase.Files\BlazorBase.Files.csproj" />
     <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
     <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>

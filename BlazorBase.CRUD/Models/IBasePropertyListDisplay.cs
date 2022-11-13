@@ -16,7 +16,7 @@ namespace BlazorBase.CRUD.Models
         [Parameter] PropertyInfo Property { get; set; }
         [Parameter] BaseService Service { get; set; }
         [Parameter] IStringLocalizer ModelLocalizer { get; set; }
-
+        [Parameter] DisplayItem DisplayItem { get; set; }
         #endregion
 
         Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices);
