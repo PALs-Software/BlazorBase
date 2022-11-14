@@ -8,13 +8,11 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
+using static BlazorBase.CRUD.Models.BaseModel;
 
 namespace BlazorBase.CRUD.Models
 {
@@ -24,6 +22,8 @@ namespace BlazorBase.CRUD.Models
         event EventHandler<string> OnForcePropertyRepaint;
 
         event EventHandler OnReloadEntityFromDatabase;
+
+        event EventHandler OnRecalculateVisibilityStatesOfActions;
         #endregion
 
         #region Attribute Methods
@@ -43,6 +43,8 @@ namespace BlazorBase.CRUD.Models
         #region CRUD Methods
         void ForcePropertyRepaint(string propertyName);
         void ReloadEntityFromDatabase();
+
+        void RecalculateVisibilityStatesOfActions();
         #endregion
 
         #region Base Model Events
@@ -91,8 +93,11 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Validation Methods
+        Task OnBeforeValidateProperty(OnBeforeValidatePropertyArgs args);
+        Task OnAfterValidateProperty(OnAfterValidatePropertyArgs args);
+
         bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
-        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo);
+        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null);
         bool CheckIfModelIsInAddingMode(BaseService baseService);
         #endregion
 
@@ -103,8 +108,9 @@ namespace BlazorBase.CRUD.Models
         #region ComponentBase        
         bool UserCanAddEntries { get; }
         bool UserCanEditEntries { get; }
+        bool UserCanOpenCardReadOnly { get; }
         bool UserCanDeleteEntries { get; }
-        Expression<Func<IBaseModel, bool>> DataLoadCondition { get; }
+        List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; }
         bool ShowOnlySingleEntry { get; }
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
         List<string> PropertyNamesToRemoveFromListView { get; set; }
@@ -135,6 +141,13 @@ namespace BlazorBase.CRUD.Models
                 return $"{caption.Value}{Environment.NewLine}{Environment.NewLine}{tooltip.Value}";
 
             return caption.Value;
+        }
+
+        static bool GetFieldHelpCaption(IStringLocalizer modelLocalizer, DisplayItem displayItem, out string caption)
+        {
+            caption = modelLocalizer[$"{displayItem.Property.Name}_FieldHelp"];
+
+            return caption != $"{displayItem.Property.Name}_FieldHelp";
         }
         #endregion
     }

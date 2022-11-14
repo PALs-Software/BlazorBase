@@ -14,10 +14,8 @@
     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
         <Fields>
             <Field Horizontal="true">
-                <FieldLabel ColumnSize="ColumnSize.Is4">
-                    <div title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
+                <FieldLabel ColumnSize="ColumnSize.Is4" Class="text-truncate" title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
                         @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
-                    </div>
                 </FieldLabel>
                 <FieldBody ColumnSize="ColumnSize.Is8">
                     <div class="@InputClass">

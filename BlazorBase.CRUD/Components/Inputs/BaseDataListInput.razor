@@ -1,0 +1,11 @@
+﻿<div class="input-data-list @Class">    
+    <input id="@Id" list="input-data-list-@Id" class="form-control" name="input-@Id" autocomplete="off" placeholder="@PlaceHolder" title="@Title" spellcheck="false" @bind="@CurrentInputValue"/>
+
+    <datalist id="input-data-list-@Id">
+        @foreach (var data in Data)
+        {
+            <option value="@data.Value" label="@data.Text" />
+        }
+    </datalist>
+
+</div>

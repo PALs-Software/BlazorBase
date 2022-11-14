@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.Models
 {
@@ -30,7 +30,7 @@ namespace BlazorBase.CRUD.Models
 
         Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices);
 
-        bool ValidatePropertyValue();
+        Task<bool> ValidatePropertyValueAsync();
 
         void SetValidation(bool showValidation, bool isValid, string feedback);
     }

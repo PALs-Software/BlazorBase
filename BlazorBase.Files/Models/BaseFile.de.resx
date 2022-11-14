@@ -150,6 +150,9 @@
   <data name="MimeFileType" xml:space="preserve">
     <value>MIME-Typ</value>
   </data>
+  <data name="The file &quot;{0}&quot; can not be copied, because file with the id &quot;{1}&quot; can not be found on the hard disk. Maybe the file was deleted on the disk, but not the file entry." xml:space="preserve">
+    <value>Die Datei "{0}" kann nicht kopiert werden, da die Datei mit der Id "{1}" nicht auf der Festplatte gefunden werden kann. Vielleicht wurde die Datei auf der Festplatte gelöscht, aber nicht der Dateieintrag.</value>
+  </data>
   <data name="The file exceed the maximum allowed file size of {0} bytes" xml:space="preserve">
     <value>Die Datei überschreitet die maximal zulässige Dateigröße von {0} Bytes</value>
   </data>

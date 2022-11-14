@@ -1,57 +1,105 @@
 ﻿using BlazorBase.Files.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.IO;
 using System.Linq;
-using System.Web;
+using System.Threading.Tasks;
 
 namespace BlazorBase.Files.Controller
 {
     [Authorize]
-    [Route("api/[controller]/[action]")]
     [ApiController]
+    [Route("api/[controller]/[action]")]
     public class BaseFileController : ControllerBase
     {
-        //Needed because iis rejects + in a url (also if its encoded with HttpUtility) because of double escaping. (For example by serving svg files -> image/svg+xml)
-        //And UrlPathEncode cause other troubles
-        //Its securer to escape this special char here instead of allowing "allowDoubleEscaping" in the iis
-        public static readonly string PlusEscapeSequence = "[%PLUS%]";
-        public static readonly string SpaceEscapeSequence = "[%SPACE%]";
+        #region Injects
+        protected IBlazorBaseFileOptions Options { get; set; }
+        #endregion
 
-        protected BlazorBaseFileOptions Options { get; set; }
+        protected static DateTime NextCheckIfOldTemporaryFilesMustBeDeleted = DateTime.MinValue;
 
-        public BaseFileController(BlazorBaseFileOptions options)
+        public BaseFileController(IBlazorBaseFileOptions options)
         {
             Options = options;
         }
 
-        [HttpGet("{contentType}/{id}")]
-        public IActionResult GetFile(string contentType, string id)
+        [HttpGet("{id}/{fileName}")]
+        public virtual async Task<IActionResult> GetFile(string id, string fileName)
         {
             if (!Guid.TryParse(id, out Guid result))
                 return BadRequest("Id is not valid");
 
-            return PhysicalFile(Path.Join(Options.FileStorePath, result.ToString()), DecodeUrl(contentType));
+            if (!await AccessToFileIsGrantedAsync(result))
+                return Unauthorized();
+
+            var filePath = Directory.EnumerateFiles(Options.FileStorePath, $"{result}.*").FirstOrDefault();
+            if (filePath == null || !System.IO.File.Exists(filePath))
+                return BadRequest("File does not exist");
+
+            var mimeType = GetMimeTypeOfFile(Path.GetFileName(filePath));
+            if (mimeType == "video/mp4")
+                return DownloadVideoWithRangeProcessing(filePath, fileName);
+
+            return PhysicalFile(filePath, mimeType);
         }
 
-        [HttpGet("{contentType}/{temporaryFileId}")]
-        public IActionResult GetTemporaryFile(string contentType, string temporaryFileId)
+        [HttpGet("{temporaryFileId}/{fileName}")]
+        public virtual async Task<IActionResult> GetTemporaryFile(string temporaryFileId, string fileName)
         {
             if (!Guid.TryParse(temporaryFileId, out Guid result))
                 return BadRequest("Id is not valid");
 
-            return PhysicalFile(Path.Join(Options.TempFileStorePath, result.ToString()), DecodeUrl(contentType));
+            if (!await AccessToTemporaryFileIsGrantedAsync(result))
+                return Unauthorized();
+
+            var filePath = Directory.EnumerateFiles(Options.TempFileStorePath, $"{result}.*").FirstOrDefault();
+            if (filePath == null || !System.IO.File.Exists(filePath))
+                return BadRequest("File does not exist");
+
+            DeleteOldTemporaryFiles();
+            var mimeType = GetMimeTypeOfFile(Path.GetFileName(filePath));
+            if (mimeType == "video/mp4")
+                return DownloadVideoWithRangeProcessing(filePath, fileName);
+
+            return PhysicalFile(filePath, mimeType);
         }
 
-        public static string EncodeUrl(string input)
+        protected IActionResult DownloadVideoWithRangeProcessing(string videoFilePath, string fileName)
         {
-            return HttpUtility.UrlEncode(input.Replace(" ", SpaceEscapeSequence).Replace("+", PlusEscapeSequence));
+            var stream = new FileStream(videoFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 65536, FileOptions.Asynchronous | FileOptions.SequentialScan);
+            return File(stream, "application/octet-stream", fileName, true); //enableRangeProcessing = true
         }
 
-        public static string DecodeUrl(string input)
+        protected virtual Task<bool> AccessToFileIsGrantedAsync(Guid fileId) { return Task.FromResult(true); }
+        protected virtual Task<bool> AccessToTemporaryFileIsGrantedAsync(Guid temporaryFileId) { return Task.FromResult(true); }
+
+        protected virtual void DeleteOldTemporaryFiles()
         {
-            return HttpUtility.UrlDecode(input).Replace(SpaceEscapeSequence, " ").Replace(PlusEscapeSequence, "+");
+            if (!Options.AutomaticallyDeleteOldTemporaryFiles)
+                return;
+
+            if (
+                NextCheckIfOldTemporaryFilesMustBeDeleted > DateTime.Now ||
+                String.IsNullOrEmpty(Options.TempFileStorePath) ||
+                !Directory.Exists(Options.TempFileStorePath) ||
+                Options.TempFileStorePath.ToLower().Replace("/", "").Replace(@"\", "").Replace(@":", "") == "c")
+                return;
+
+            NextCheckIfOldTemporaryFilesMustBeDeleted = DateTime.Now.AddSeconds(Options.DeleteTemporaryFilesOlderThanXSeconds);
+
+            var dirInfo = new DirectoryInfo(Options.TempFileStorePath);
+
+            var files = dirInfo.GetFiles().Where(fileInfo => fileInfo.CreationTime < DateTime.Now.Subtract(TimeSpan.FromSeconds(Options.DeleteTemporaryFilesOlderThanXSeconds)));
+            foreach (var fileInfo in files)
+                try { fileInfo.Delete(); } catch (Exception) { throw; }
+        }
+
+        protected virtual string GetMimeTypeOfFile(string fileName)
+        {
+            new FileExtensionContentTypeProvider().TryGetContentType(fileName, out string mimeFileType);
+            return mimeFileType ?? "application/octet-stream";
         }
     }
 }

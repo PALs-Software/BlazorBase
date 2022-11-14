@@ -18,6 +18,7 @@ namespace BlazorBase.MessageHandling.Models
             DateTime? fromDate = null,
             DateTime? toDate = null,
             DateInputMode dateInputMode = DateInputMode.Date,
+            bool useAsSingleDatePicker = false,
             string fromDateCaption = null,
             string toDateCaption = null,
             MessageType messageType = MessageType.Information,
@@ -33,6 +34,7 @@ namespace BlazorBase.MessageHandling.Models
             FromDate = fromDate;
             ToDate = toDate;
             DateInputMode = dateInputMode;
+            UseAsSingleDatePicker = useAsSingleDatePicker;
             FromDateCaption = fromDateCaption;
             ToDateCaption = toDateCaption;
         }
@@ -40,6 +42,7 @@ namespace BlazorBase.MessageHandling.Models
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
         public DateInputMode DateInputMode { get; set; }
+        public bool UseAsSingleDatePicker { get; set; }
         public string FromDateCaption { get; set; }
         public string ToDateCaption { get; set; }
 

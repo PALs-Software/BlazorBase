@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Components;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Components;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.BaseDisplayComponent;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.RichTextEditor.Components
 {
