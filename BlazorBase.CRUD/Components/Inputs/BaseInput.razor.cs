@@ -162,7 +162,7 @@ namespace BlazorBase.CRUD.Components.Inputs
 
         protected virtual bool ConvertValueIfNeeded(ref object newValue, Type converType, bool doOnlyConversion = false)
         {
-            if (newValue == null || newValue.GetType() == RenderType || converType == typeof(object) || (newValue is IBaseModel baseModel && baseModel.GetUnproxiedType() == RenderType))
+            if (newValue == null || newValue.GetType() == converType || converType == typeof(object) || (newValue is IBaseModel baseModel && baseModel.GetUnproxiedType() == RenderType))
                 return true;
 
             if (newValue is decimal decimalNewValue)
@@ -460,6 +460,8 @@ namespace BlazorBase.CRUD.Components.Inputs
                 return @double.ToString("0.00##", CultureInfo.InvariantCulture);
             else if (value is float @float)
                 return @float.ToString("0.00##", CultureInfo.InvariantCulture);
+            else if (value is Guid @guid)
+                return @guid.ToString();
             else
                 throw new InvalidOperationException($"Unsupported type {value.GetType()}");
         }
