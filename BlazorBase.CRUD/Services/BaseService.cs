@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Services
@@ -115,6 +114,18 @@ namespace BlazorBase.CRUD.Services
             return Task.FromResult(query.ToList());
         }
 
+        public virtual Task<List<M>> GetDataAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false) where T : class
+        {
+            var query = DbContext.Set<T>().Where(dataLoadCondition);
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            var selectQuery = query.Select(dataSelectCondition);
+
+            return Task.FromResult(selectQuery.ToList());
+        }
+
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, int index, int count, bool asNoTracking = false) where T : class
         {
             var query = DbContext.Set<T>().Where(dataLoadCondition).Skip(index).Take(count);
@@ -123,6 +134,18 @@ namespace BlazorBase.CRUD.Services
                 query = query.AsNoTracking();
 
             return Task.FromResult(query.ToList());
+        }
+
+        public virtual Task<List<M>> GetDataAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, int index, int count, bool asNoTracking = false) where T : class
+        {
+            var query = DbContext.Set<T>().Where(dataLoadCondition);
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            var selectQuery = query.Select(dataSelectCondition).Skip(index).Take(count);
+
+            return Task.FromResult(selectQuery.ToList());
         }
 
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<IBaseModel, bool>> dataLoadCondition, bool asNoTracking = false) where T : class, IBaseModel

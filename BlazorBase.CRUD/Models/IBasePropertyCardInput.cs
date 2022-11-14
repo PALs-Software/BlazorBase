@@ -18,6 +18,7 @@ namespace BlazorBase.CRUD.Models
         [Parameter] bool? ReadOnly { get; set; }
         [Parameter] BaseService Service { get; set; }
         [Parameter] IStringLocalizer ModelLocalizer { get; set; }
+        [Parameter] DisplayItem DisplayItem { get; set; }
 
         #region Events
         [Parameter] EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
@@ -32,5 +33,11 @@ namespace BlazorBase.CRUD.Models
         Task<bool> ValidatePropertyValueAsync();
 
         void SetValidation(bool showValidation, bool isValid, string feedback);
+
+        Task<bool> InputHasAdditionalContentChanges();
+
+        Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args);
+
+        Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
     }
 }

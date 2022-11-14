@@ -2,12 +2,16 @@
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 using static BlazorBase.CRUD.Models.BaseModel;
 
 namespace BlazorBase.CRUD.Models
@@ -67,6 +71,7 @@ namespace BlazorBase.CRUD.Models
         Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args);
         Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args);
         Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args);
+        Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args);
         Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
         Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args);
         Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args);
@@ -115,6 +120,34 @@ namespace BlazorBase.CRUD.Models
         Type GetUnproxiedType();
         void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames);
         void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null);
+        #endregion
+
+        #region Caption Methods
+        static string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        {
+            var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
+            model.OnGetPropertyCaption(args);
+
+            return args.Caption;
+        }
+
+        static string GetPropertyTooltip(IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        {
+            var caption = modelLocalizer[displayItem.Property.Name];
+            var tooltip = modelLocalizer[$"{displayItem.Property.Name}_Tooltip"];
+
+            if (tooltip.Value != $"{displayItem.Property.Name}_Tooltip")
+                return $"{caption.Value}{Environment.NewLine}{Environment.NewLine}{tooltip.Value}";
+
+            return caption.Value;
+        }
+
+        static bool GetFieldHelpCaption(IStringLocalizer modelLocalizer, DisplayItem displayItem, out string caption)
+        {
+            caption = modelLocalizer[$"{displayItem.Property.Name}_FieldHelp"];
+
+            return caption != $"{displayItem.Property.Name}_FieldHelp";
+        }
         #endregion
     }
 }

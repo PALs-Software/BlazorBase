@@ -1,4 +1,6 @@
-﻿@typeparam TModel
+﻿@using BlazorBase.CRUD.Models
+
+@typeparam TModel
 @inherits BaseDisplayComponent
 
 <div class="base-card">
@@ -50,27 +52,27 @@
                                 else if (displayItem.IsListProperty)
                                 {
                                     <BaseListPart @ref="AddToBaseListParts"
-                                  Model="Model"
-                                  Property="displayItem.Property"
-                                  Service="Service"
-                                  ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
-                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
-                                  OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
-                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
+                                        Model="Model"
+                                        Property="displayItem.Property"
+                                        Service="Service"
+                                        ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
+                                        OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                                        OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                                        OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                                        OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                                        OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                                        OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                                        OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                                        OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+                                        OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+                                        OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
                                 }
                                 else
                                 {
                                     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
                                         <Fields>
                                             <Field Horizontal="true">
-                                                <FieldLabel ColumnSize="ColumnSize.Is4" Class="text-truncate" title="@GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem, out string propertyCaption)">@propertyCaption</FieldLabel>
+                                                <FieldLabel ColumnSize="ColumnSize.Is4" Class="text-truncate" title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem)">@IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)</FieldLabel>
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
@@ -89,7 +91,7 @@
                                                         <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
 
-                                                    @if(GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
+                                                    @if(IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
                                                     {
                                                         <FieldHelp>@fieldHelpCaption</FieldHelp>
                                                     }                                                    

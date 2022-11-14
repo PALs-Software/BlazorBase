@@ -183,6 +183,7 @@ namespace BlazorBase.CRUD.Models
         public virtual Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args) { return Task.CompletedTask; }
         public virtual Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterMoveEntryDown(OnAfterMoveEntryDownArgs args) { return Task.CompletedTask; }
@@ -343,6 +344,13 @@ namespace BlazorBase.CRUD.Models
             return type;
         }
 
+        #endregion
+
+        #region MISC
+        public override string ToString()
+        {
+            return GetPrimaryKeysAsString();
+        }
         #endregion
     }
 }

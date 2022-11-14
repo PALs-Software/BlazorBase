@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.Modules;
 using BlazorBase.Services;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
@@ -57,6 +58,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         #endregion
 
         #region Members
+        protected bool SkipCustomSetParametersAsync = false;
         protected string InputClass;
         protected string FeedbackClass;
         protected string Feedback;
@@ -124,6 +126,9 @@ namespace BlazorBase.CRUD.Components.Inputs
         {
             await base.SetParametersAsync(parameters);
 
+            if (SkipCustomSetParametersAsync)
+                return;
+
             if (Property == null || Model == null)
                 return;
 
@@ -157,7 +162,7 @@ namespace BlazorBase.CRUD.Components.Inputs
 
         protected virtual bool ConvertValueIfNeeded(ref object newValue, Type converType, bool doOnlyConversion = false)
         {
-            if (newValue == null || newValue.GetType() == converType || converType == typeof(object))
+            if (newValue == null || newValue.GetType() == RenderType || converType == typeof(object) || (newValue is IBaseModel baseModel && baseModel.GetUnproxiedType() == RenderType))
                 return true;
 
             if (newValue is decimal decimalNewValue)
@@ -186,7 +191,7 @@ namespace BlazorBase.CRUD.Components.Inputs
             return false;
         }
 
-        protected async virtual Task OnValueChangedAsync(object newValue)
+        protected async virtual Task OnValueChangedAsync(object newValue, bool setCurrentValueAsString = true)
         {
             if (IsReadOnly)
                 return;
@@ -233,7 +238,8 @@ namespace BlazorBase.CRUD.Components.Inputs
                 await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
                 await Model.OnAfterPropertyChanged(onAfterArgs);
 
-                SetCurrentValueAsString(newValue);
+                if(setCurrentValueAsString)
+                    SetCurrentValueAsString(newValue);
             }
             catch (Exception e)
             {

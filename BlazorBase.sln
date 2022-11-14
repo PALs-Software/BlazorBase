@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.0.32014.148
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.CRUD", "BlazorBase.CRUD\BlazorBase.CRUD.csproj", "{512C5572-55DA-40B3-A428-1B83BB7A2906}"
 EndProject
@@ -23,6 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.CRUD.NumberSerie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.MessageHandling", "BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj", "{80A753EF-11BC-4BCB-8A70-525686D0E758}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.RichTextEditor", "BlazorBase.RichTextEditor\BlazorBase.RichTextEditor.csproj", "{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}"
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Mailing", "BlazorBase.Mailing\BlazorBase.Mailing.csproj", "{E051A659-2321-4BEF-B760-2359A77927EC}"
 EndProject
 Global
@@ -63,6 +64,10 @@ Global
 		{80A753EF-11BC-4BCB-8A70-525686D0E758}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{80A753EF-11BC-4BCB-8A70-525686D0E758}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{80A753EF-11BC-4BCB-8A70-525686D0E758}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E051A659-2321-4BEF-B760-2359A77927EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E051A659-2321-4BEF-B760-2359A77927EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E051A659-2321-4BEF-B760-2359A77927EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -80,6 +85,7 @@ Global
 		{A4C81894-82DD-4C39-91D3-FA3494B0206A} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 		{D3DD7397-8242-4F26-81A7-98DAC6FEBFC3} = {6911352E-71F1-4E13-B05F-00360AD5848E}
 		{80A753EF-11BC-4BCB-8A70-525686D0E758} = {DB570994-9245-4729-9B12-A02CCED2F12F}
+		{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 		{E051A659-2321-4BEF-B760-2359A77927EC} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
