@@ -35,7 +35,7 @@
                             @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                             @oncontextmenu:preventDefault="true"
                             Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)"
-		            title="@(Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty)">
+		                    title="@(Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty)">
 
 
                             <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower()">
