@@ -515,10 +515,10 @@ namespace BlazorBase.CRUD.Components.Inputs
             var parameters = method?.GetParameters();
 
             if (method == null ||
-                parameters.Length != 4 ||
+                parameters.Length != 3 ||
                 parameters[0].ParameterType != typeof(PropertyInfo) ||
                 parameters[1].ParameterType != typeof(IBaseModel) ||
-                parameters[3].ParameterType != typeof(EventServices) ||
+                parameters[2].ParameterType != typeof(EventServices) ||
                 method.ReturnType != typeof(Task<bool>) ||
                 !method.IsStatic)
                 throw new CRUDException($"The signature of the allow access callback method {allowUserPasswordAccess.AllowAccessCallbackMethodName} in the class {Property.ReflectedType.Name}, does not match the following signature: public static [async] Task<bool> TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, EventServices eventServices)");
