@@ -4,7 +4,7 @@
 {
     @if (IsReadOnly)
     {
-        <input type="text" value="@(Data.Where(entry => entry.Key == @Property.GetValue(Model)?.ToString()).FirstOrDefault().Value?.ToString() ?? String.Empty)" disabled class="form-control @InputClass" />
+        <input type="text" value="@DisplayForeignKey()" disabled class="form-control @InputClass" />
     }
     else
     {
