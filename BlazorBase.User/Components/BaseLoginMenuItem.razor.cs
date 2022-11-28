@@ -6,8 +6,16 @@ using System;
 namespace BlazorBase.User.Components;
 public partial class BaseLoginMenuItem : ComponentBase
 {
+    #region Injects
+    
     [Inject] protected IStringLocalizer<BaseLoginMenuItem> Localizer { get; set; }
     [Inject] protected IBlazorBaseUserOptions Options { get; set; }
+
+    #endregion
+
+    #region Parameters
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    #endregion
 
     public string Greeting { get; set; }
 

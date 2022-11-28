@@ -3,6 +3,7 @@
 
         <BarItem>
             <BarLink To="@Options.ManageUserPath">@Greeting @context.User.Identity.Name!</BarLink>
+            @ChildContent
             <BarLink To="javascript:$('#logout-form').submit()">@Localizer["Log out"]</BarLink>
             <form id="logout-form" method="post" action="@Options.LogoutControllerPath"></form>
         </BarItem>
@@ -13,6 +14,8 @@
         <BarItem>
             <BarLink To="@Options.LoginPath">@Localizer["Log in"]</BarLink>
         </BarItem>
+
+        @ChildContent
 
     </NotAuthorized>
 </AuthorizeView>

@@ -132,6 +132,9 @@ namespace BlazorBase.CRUD.Components.List
         {
             await InvokeAsync(() =>
             {
+                if (ComponentModelInstance == null)
+                    ComponentModelInstance = new TModel();
+
                 EventServices = GetEventServices(Service);
 
                 TModelType = typeof(TModel);
@@ -364,6 +367,14 @@ namespace BlazorBase.CRUD.Components.List
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)
                     query = query.Where(displayItem);
+
+            if (ComponentModelInstance != null)
+            {
+                var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
+                ComponentModelInstance.OnGuiLoadData(args);
+                if (args.ListLoadQuery != null)
+                    query = args.ListLoadQuery.Cast<TModel>();
+            }
 
             return query;
         }

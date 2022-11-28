@@ -40,9 +40,11 @@ namespace BlazorBase.CRUD.Components.Inputs
         [Parameter] public DataType? InputPresentationDataType { get; set; } = null;
         [Parameter] public List<ValidationAttribute> AdditionalValidationAttributes { get; set; } = null;
         [Parameter] public ValidationTranslationResource ValidationTranslationResource { get; set; } = null;
+        [Parameter] public bool UserCanViewPasswords { get; set; } = false;
 
         [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalInputAttributes { get; set; }
+
         #region Events
         [Parameter] public EventCallback<OnFormatPropertyArgs> OnFormatProperty { get; set; }
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
@@ -515,15 +517,16 @@ namespace BlazorBase.CRUD.Components.Inputs
             var parameters = method?.GetParameters();
 
             if (method == null ||
-                parameters.Length != 3 ||
+                parameters.Length != 4 ||
                 parameters[0].ParameterType != typeof(PropertyInfo) ||
                 parameters[1].ParameterType != typeof(IBaseModel) ||
                 parameters[2].ParameterType != typeof(EventServices) ||
+                parameters[3].ParameterType != typeof(bool) ||
                 method.ReturnType != typeof(Task<bool>) ||
                 !method.IsStatic)
-                throw new CRUDException($"The signature of the allow access callback method {allowUserPasswordAccess.AllowAccessCallbackMethodName} in the class {Property.ReflectedType.Name}, does not match the following signature: public static [async] Task<bool> TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, EventServices eventServices)");
+                throw new CRUDException($"The signature of the allow access callback method {allowUserPasswordAccess.AllowAccessCallbackMethodName} in the class {Property.ReflectedType.Name}, does not match the following signature: public static [async] Task<bool> TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, EventServices eventServices, bool readOnly)");
 
-            var result = await (method.Invoke(null, new object[] { Property, Model, GetEventServices() }) as Task<bool>);
+            var result = await (method.Invoke(null, new object[] { Property, Model, GetEventServices(), ReadOnly }) as Task<bool>);
             return result;
         }
 
