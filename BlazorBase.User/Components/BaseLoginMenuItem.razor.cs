@@ -14,6 +14,8 @@ public partial class BaseLoginMenuItem : ComponentBase
     #endregion
 
     #region Parameters
+    [Parameter] public bool UserManageEnabled { get; set; } = true;
+
     [Parameter] public RenderFragment ChildContent { get; set; }
     #endregion
 
