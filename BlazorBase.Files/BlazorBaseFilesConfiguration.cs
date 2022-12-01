@@ -36,7 +36,7 @@ public static class BlazorBaseFilesConfiguration
             configureOptions = (e) => { };
 
         serviceCollection.AddSingleton(configureOptions)
-        .AddSingleton<IBlazorBaseFileOptions, TOptions>()
+        .AddTransient<IBlazorBaseFileOptions, TOptions>()
 
         .AddTransient<IBasePropertyCardInput, BaseFileInput>()
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
@@ -59,32 +59,4 @@ public static class BlazorBaseFilesConfiguration
         return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions);
     }
 
-    /// <summary>
-    /// Register blazor base file handling and configures the default behaviour.
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="configureOptions"></param>
-    /// <returns></returns>
-
-    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
-        where TOptions : class, IBlazorBaseFileOptions
-    {
-        return AddBlazorBaseFiles<TOptions>(serviceCollection, options =>
-        {
-            options.OptionsImportMode = BaseOptionsImportMode.Database;
-            options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
-        });
-    }
-
-    /// <summary>
-    /// Register blazor base file handling and configures the default behaviour.
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="configureOptions"></param>
-    /// <returns></returns>
-
-    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
-    {
-        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, optionsImportFromDatabaseEntryType);
-    }
 }

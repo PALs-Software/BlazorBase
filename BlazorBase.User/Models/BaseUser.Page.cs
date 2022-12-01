@@ -61,7 +61,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
                             VisibleInGUITypes = new GUIType[] { GUIType.Card },
                             Action = async (eventServices, model) =>
                             {
-                                if (model is not BaseUser user)
+                                if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
                                     return;
 
                                 await TestModelIsInValidStateForCallingActionAsync(eventServices);

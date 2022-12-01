@@ -12,7 +12,8 @@ public class BlazorBaseCRUDOptions : IBlazorBaseCRUDOptions
     #endregion
 
     #region Properties
+    
     public BaseOptionsImportMode OptionsImportMode { get; set; }
-    public Type OptionsImportFromDatabaseEntryType { get; set; } = default!;
+
     #endregion
 }
