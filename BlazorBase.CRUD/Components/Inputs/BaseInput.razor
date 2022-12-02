@@ -1,5 +1,6 @@
 ﻿@using System.ComponentModel.DataAnnotations;
 @using BlazorBase.CRUD.Services;
+@using Blazorise.Icons.FontAwesome;
 
 <div>
     @if (Model != null)
@@ -12,7 +13,28 @@
             }
             else
             {
-                <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass" />
+                @if (IsPasswordInput && AllowUserPasswordAccess != null)
+                {
+                    <Addons>
+                        <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
+                        <Addon AddonType="AddonType.End">
+                            <Button Color="Color.Secondary" Clicked="OnViewPasswordClicked">
+                                @if (PasswordViewEnabled)
+                                {
+                                    <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.EyeSlash" />
+                                }
+                                else
+                                {
+                                    <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.Eye" />
+                                }
+                            </Button>
+                        </Addon>
+                    </Addons>
+                }
+                else
+                {
+                    <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
+                }
             }
         }
         else if (RenderType == typeof(bool))

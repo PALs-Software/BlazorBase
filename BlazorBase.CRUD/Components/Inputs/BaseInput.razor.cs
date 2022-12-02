@@ -10,6 +10,7 @@ using BlazorBase.Modules;
 using BlazorBase.Services;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
@@ -19,6 +20,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Security;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 using static BlazorBase.CRUD.Models.BaseModel;
@@ -37,9 +40,11 @@ namespace BlazorBase.CRUD.Components.Inputs
         [Parameter] public DataType? InputPresentationDataType { get; set; } = null;
         [Parameter] public List<ValidationAttribute> AdditionalValidationAttributes { get; set; } = null;
         [Parameter] public ValidationTranslationResource ValidationTranslationResource { get; set; } = null;
+        [Parameter] public bool UserCanViewPasswords { get; set; } = false;
 
         [Parameter(CaptureUnmatchedValues = true)]
         public Dictionary<string, object> AdditionalInputAttributes { get; set; }
+
         #region Events
         [Parameter] public EventCallback<OnFormatPropertyArgs> OnFormatProperty { get; set; }
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
@@ -75,6 +80,16 @@ namespace BlazorBase.CRUD.Components.Inputs
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
         protected string CurrentValueAsString;
         protected string InputType;
+
+        #endregion
+
+        #region Password
+
+        protected bool IsPasswordInput;
+        protected bool PasswordViewEnabled;
+        protected AllowUserPasswordAccessAttribute AllowUserPasswordAccess;
+        public const string PasswordPlaceholder = "&%PASSWORD!PLACEHOLDER&%";
+
         #endregion
 
         #region Init
@@ -114,9 +129,21 @@ namespace BlazorBase.CRUD.Components.Inputs
             if (Property.TryGetAttribute(out PresentationRulesAttribute presentationRules))
                 PresentationRules = presentationRules;
 
+            if (PresentationDataType == DataType.Password && RenderType == typeof(string))
+            {
+                IsPasswordInput = true;
+                if (Property.TryGetAttribute(out AllowUserPasswordAccessAttribute allowUserPasswordAccess))
+                    AllowUserPasswordAccess = await CheckCanViewPasswordAsync(allowUserPasswordAccess) ? allowUserPasswordAccess : null;
+            }
+
             SetInputType();
             SetInputAttributes();
-            SetCurrentValueAsString(Property.GetValue(Model));
+
+            var currentValue = Property.GetValue(Model);
+            if (IsPasswordInput && currentValue is string currentValueAsString && !String.IsNullOrEmpty(currentValueAsString))
+                currentValue = PasswordPlaceholder;
+
+            SetCurrentValueAsString(currentValue);
 
             await ValidatePropertyValueAsync();
             await RaiseOnFormatPropertyEventsAsync();
@@ -138,7 +165,13 @@ namespace BlazorBase.CRUD.Components.Inputs
                 IsReadOnly = ReadOnly.Value;
 
             SetInputAttributes();
-            SetCurrentValueAsString(Property.GetValue(Model));
+
+            var currentValue = Property.GetValue(Model);
+            if (IsPasswordInput && currentValue is string currentValueAsString && !String.IsNullOrEmpty(currentValueAsString))
+                currentValue = PasswordViewEnabled ? currentValueAsString.DecryptStringToInsecureString() : PasswordPlaceholder;
+
+            SetCurrentValueAsString(currentValue);
+
             await RaiseOnFormatPropertyEventsAsync();
         }
         #endregion
@@ -228,6 +261,9 @@ namespace BlazorBase.CRUD.Components.Inputs
                 await Model.OnBeforePropertyChanged(args);
                 newValue = args.NewValue;
 
+                if (IsPasswordInput && newValue is string newValueAsString && !String.IsNullOrEmpty(newValueAsString))
+                    newValue = newValueAsString.EncryptString();
+
                 Property.SetValue(Model, newValue);
                 var valid = await ValidatePropertyValueAsync();
 
@@ -238,7 +274,10 @@ namespace BlazorBase.CRUD.Components.Inputs
                 await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);
                 await Model.OnAfterPropertyChanged(onAfterArgs);
 
-                if(setCurrentValueAsString)
+                if (IsPasswordInput && newValue is string newValueAsString2 && !String.IsNullOrEmpty(newValueAsString2))
+                    newValue = PasswordViewEnabled ? newValueAsString2.DecryptStringToInsecureString() : PasswordPlaceholder;
+
+                if (setCurrentValueAsString)
                     SetCurrentValueAsString(newValue);
             }
             catch (Exception e)
@@ -465,6 +504,74 @@ namespace BlazorBase.CRUD.Components.Inputs
             else
                 throw new InvalidOperationException($"Unsupported type {value.GetType()}");
         }
+        #endregion
+
+        #region Password
+
+        protected virtual async Task<bool> CheckCanViewPasswordAsync(AllowUserPasswordAccessAttribute allowUserPasswordAccess)
+        {
+            if (String.IsNullOrEmpty(allowUserPasswordAccess.AllowAccessCallbackMethodName))
+                return true;
+
+            var method = Property.ReflectedType.GetMethod(allowUserPasswordAccess.AllowAccessCallbackMethodName, BindingFlags.Static | BindingFlags.FlattenHierarchy | BindingFlags.Public);
+            var parameters = method?.GetParameters();
+
+            if (method == null ||
+                parameters.Length != 4 ||
+                parameters[0].ParameterType != typeof(PropertyInfo) ||
+                parameters[1].ParameterType != typeof(IBaseModel) ||
+                parameters[2].ParameterType != typeof(EventServices) ||
+                parameters[3].ParameterType != typeof(bool) ||
+                method.ReturnType != typeof(Task<bool>) ||
+                !method.IsStatic)
+                throw new CRUDException($"The signature of the allow access callback method {allowUserPasswordAccess.AllowAccessCallbackMethodName} in the class {Property.ReflectedType.Name}, does not match the following signature: public static [async] Task<bool> TheMethodName(PropertyInfo propertyInfo, IBaseModel cardModel, EventServices eventServices, bool readOnly)");
+
+            var result = await (method.Invoke(null, new object[] { Property, Model, GetEventServices(), ReadOnly }) as Task<bool>);
+            return result;
+        }
+
+        protected void OnInputFocusIn(FocusEventArgs args)
+        {
+            if (!IsPasswordInput || PasswordViewEnabled)
+                return;
+
+            if (CurrentValueAsString != PasswordPlaceholder)
+                return;
+
+            CurrentValueAsString = String.Empty;
+        }
+
+        protected void OnInputFocusOut(FocusEventArgs args)
+        {
+            if (!IsPasswordInput || PasswordViewEnabled)
+                return;
+
+            if (CurrentValueAsString != String.Empty)
+                return;
+
+            if (String.IsNullOrEmpty((string)Property.GetValue(Model)))
+                return;
+
+            CurrentValueAsString = PasswordPlaceholder;
+        }
+
+        protected void OnViewPasswordClicked()
+        {
+            PasswordViewEnabled = !PasswordViewEnabled;
+
+            if (PasswordViewEnabled)
+            {
+                InputType = "text";
+                var value = Property.GetValue(Model);
+                CurrentValueAsString = (value as string)?.DecryptStringToInsecureString();
+            }
+            else
+            {
+                InputType = "password";
+                CurrentValueAsString = PasswordPlaceholder;
+            }
+        }
+
         #endregion
 
     }

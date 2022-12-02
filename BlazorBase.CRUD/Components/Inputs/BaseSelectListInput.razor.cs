@@ -10,6 +10,8 @@ using Newtonsoft.Json;
 using System;
 using BlazorBase.CRUD.Extensions;
 using System.Globalization;
+using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
+using System.Linq;
 
 namespace BlazorBase.CRUD.Components.Inputs
 {
@@ -70,6 +72,18 @@ namespace BlazorBase.CRUD.Components.Inputs
 
             var entry = await Service.GetAsync(Property.PropertyType, primaryKeys);
             await OnValueChangedAsync(entry);
+        }
+
+        protected virtual string DisplayForeignKey()
+        {
+            var key = Property.GetValue(Model)?.ToString();
+            var primaryKeyAsJson = JsonConvert.SerializeObject(new object[] { key });
+            var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == primaryKeyAsJson);
+
+            if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
+                return key?.ToString() ?? String.Empty;
+            else
+                return foreignKeyPair.Value?.ToString() ?? String.Empty;
         }
     }
 }
