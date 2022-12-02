@@ -26,14 +26,11 @@ namespace BlazorBase.CRUD.Extensions
 
         public static string EncryptString(this SecureString input)
         {
-            var insecString = ToInsecureString(input) ?? string.Empty;
-            if (String.IsNullOrEmpty(insecString))
+            var insecureString = ToInsecureString(input);
+            if (String.IsNullOrEmpty(insecureString))
                 return String.Empty;
 
-#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
-            byte[] encryptedData = ProtectedData.Protect(Encoding.Unicode.GetBytes(ToInsecureString(input) ?? string.Empty), null, DataProtectionScope.CurrentUser);
-#pragma warning restore CA1416 // Plattformkompatibilität überprüfen
-            return Convert.ToBase64String(encryptedData);
+            return insecureString.EncryptString();
         }
     }
 }
