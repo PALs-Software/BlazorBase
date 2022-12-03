@@ -201,6 +201,13 @@ namespace BlazorBase.CRUD.Models
         public virtual Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args) { return Task.CompletedTask; }
         #endregion
+
+        #region Data Loading
+
+        public virtual void OnGuiLoadData(OnGuiLoadDataArgs args) { }
+
+        #endregion
+
         #endregion
 
         #region Validation Methods
@@ -328,7 +335,7 @@ namespace BlazorBase.CRUD.Models
             var sourceProperties = this.GetType().GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
             TransferPropertiesTo(target, sourceProperties.ToArray());
         }
-        
+
         public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null)
         {
             ObjectExtension.TransferPropertiesTo(this, target, sourceProperties);

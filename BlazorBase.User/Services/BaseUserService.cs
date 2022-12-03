@@ -47,6 +47,12 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return GetCurrentUserAsync(BaseService, asNoTracking);
     }
 
+    public virtual async Task<string> GetCurrentUserIdentityIdAsync()
+    {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        return UserManager.GetUserId(authenticationState.User);
+    }
+
     public virtual async Task<TUser> GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking = true)
     {
         if (id == null)

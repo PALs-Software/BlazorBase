@@ -21,6 +21,7 @@ namespace BlazorBase.CRUD.Services
         public DbContext DbContext { get; protected set; }
         public IServiceProvider ServiceProvider { get; }
         protected IMessageHandler MessageHandler { get; set; }
+
         public BaseService(DbContext context, IServiceProvider provider, IMessageHandler messageHandler)
         {
             DbContext = context;
@@ -58,7 +59,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
-        {            
+        {
             return await DbContext.FindAsync(type, keyValues);
         }
 
@@ -106,7 +107,7 @@ namespace BlazorBase.CRUD.Services
         public virtual Task<List<T>> GetDataAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false) where T : class
         {
             var query = DbContext.Set<T>().Where(dataLoadCondition);
-            
+
             if (asNoTracking)
                 query = query.AsNoTracking();
 
@@ -192,6 +193,42 @@ namespace BlazorBase.CRUD.Services
         {
             return DbContext.Set<T>();
         }
+
+        public IQueryable<T> FindAll<T>(IEnumerable<T> args) where T : class
+        {
+            var dbParameter = Expression.Parameter(typeof(T), typeof(T).Name);
+            var properties = DbContext.Model.FindEntityType(typeof(T)).FindPrimaryKey()?.Properties;
+
+            if (properties == null)
+                throw new ArgumentException($"{typeof(T).FullName} does not have a primary key specified.");
+            if (args == null)
+                throw new ArgumentNullException(nameof(args));
+            if (!args.Any())
+                return DbContext.Set<T>();
+
+            var aggregatedExpression = args.Select(entity =>
+            {
+                var entry = DbContext.Entry(entity);
+
+                return properties.Select(p =>
+                {
+                    var dbProp = dbParameter.Type.GetProperty(p.Name);
+                    var left = Expression.Property(dbParameter, dbProp);
+
+                    var argValue = entry.Property(p.Name).CurrentValue;
+                    var right = Expression.Constant(argValue);
+
+                    return Expression.Equal(left, right);
+                })
+                .Aggregate((acc, next) => Expression.AndAlso(acc, next));
+            })
+            .Aggregate((acc, next) => Expression.OrElse(acc, next));
+
+            var expression = Expression.Lambda<Func<T, bool>>(aggregatedExpression, dbParameter);
+
+            return DbContext.Set<T>().Where(expression);
+        }
+
         #endregion
 
         #region GetSpecialData
@@ -339,7 +376,7 @@ namespace BlazorBase.CRUD.Services
         }
 
         public virtual void RemoveRange(params object[] entriesToRemove)
-        {            
+        {
             DbContext.RemoveRange(entriesToRemove);
         }
 
@@ -422,7 +459,7 @@ namespace BlazorBase.CRUD.Services
         #endregion
 
         #region Other
-        public static void MigrateDatabase<TDbContext>(IApplicationBuilder app) where TDbContext: DbContext
+        public static void MigrateDatabase<TDbContext>(IApplicationBuilder app) where TDbContext : DbContext
         {
             using var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
             scope.ServiceProvider.GetRequiredService<TDbContext>().Database.Migrate();

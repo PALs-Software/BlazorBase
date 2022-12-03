@@ -123,7 +123,7 @@ namespace BlazorBase.Files.Models
                 return Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension());
         }
 
-        public async Task<byte[]> GetFileContentAsync()
+        public Task<byte[]> GetFileContentAsync()
         {
             if (String.IsNullOrEmpty(BaseFileType) || FileSize == 0 || String.IsNullOrEmpty(Hash))
                 return null;
@@ -132,7 +132,7 @@ namespace BlazorBase.Files.Models
             if (!File.Exists(path))
                 return null;
 
-            return await File.ReadAllBytesAsync(path);
+            return File.ReadAllBytesAsync(path);
         }
 
         public async Task<string> GetFileAsBase64StringAsync()

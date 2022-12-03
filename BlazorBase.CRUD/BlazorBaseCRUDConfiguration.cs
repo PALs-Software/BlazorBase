@@ -26,7 +26,7 @@ public static class BlazorBaseCRUDConfiguration
             configureOptions = (e) => { };
 
         serviceCollection.AddSingleton(configureOptions)
-        .AddSingleton<IBlazorBaseCRUDOptions, TOptions>()
+        .AddTransient<IBlazorBaseCRUDOptions, TOptions>()
         .AddSingleton<BaseParser>()
         .AddTransient<BaseService>()
         .AddTransient<DbContext, TDbContextImplementation>()
@@ -47,34 +47,5 @@ public static class BlazorBaseCRUDConfiguration
         where TDbContextImplementation : DbContext
     {
         return AddBlazorBaseCRUD<BlazorBaseCRUDOptions, TDbContextImplementation>(serviceCollection, configureOptions);
-    }
-
-    /// <summary>
-    /// Register blazor base crud and configures the default behaviour.
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="configureOptions"></param>
-    /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
-        where TOptions : class, IBlazorBaseCRUDOptions
-        where TDbContextImplementation : DbContext
-    {
-        return AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(serviceCollection, options =>
-        {
-            options.OptionsImportMode = BaseOptionsImportMode.Database;
-            options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
-        });
-    }
-
-    /// <summary>
-    /// Register blazor base crud and configures the default behaviour.
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="configureOptions"></param>
-    /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
-        where TDbContextImplementation : DbContext
-    {
-        return AddBlazorBaseCRUD<BlazorBaseCRUDOptions, TDbContextImplementation>(serviceCollection, optionsImportFromDatabaseEntryType);
     }
 }
