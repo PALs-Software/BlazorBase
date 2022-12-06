@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Resources;
-using BlazorBase.CRUD.Components;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Localization.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace BlazorBase.CRUD.Translation

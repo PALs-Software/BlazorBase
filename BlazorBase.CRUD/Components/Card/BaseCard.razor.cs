@@ -20,6 +20,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlazorBase.CRUD.Components.Card
 {
@@ -37,6 +38,7 @@ namespace BlazorBase.CRUD.Components.Card
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
+        [Parameter] public EventCallback<OnBeforeCardSaveChangesArgs> OnBeforeSaveChanges { get; set; }
 
         #region List Events
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
@@ -76,7 +78,7 @@ namespace BlazorBase.CRUD.Components.Card
         #region Member
         protected EventServices EventServices;
 
-        protected Snackbar Snackbar;      
+        protected Snackbar Snackbar;
 
         protected TModel Model = null;
         protected Type TModelType;
@@ -142,12 +144,13 @@ namespace BlazorBase.CRUD.Components.Card
              builder.AddAttribute(3, "ReadOnly", isReadonly);
              builder.AddAttribute(4, "Service", Service);
              builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
+             builder.AddAttribute(6, "DisplayItem", displayItem);
 
-             builder.AddAttribute(6, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
-             builder.AddAttribute(7, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
-             builder.AddAttribute(8, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
+             builder.AddAttribute(7, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
+             builder.AddAttribute(8, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
+             builder.AddAttribute(9, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
 
-             builder.AddComponentReferenceCapture(9, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
+             builder.AddComponentReferenceCapture(10, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
 
              builder.CloseComponent();
          };
@@ -167,7 +170,7 @@ namespace BlazorBase.CRUD.Components.Card
             BaseListParts.Clear();
             BasePropertyCardInputs.Clear();
             ResetInvalidFeedback();
-               
+
             if (AddingMode)
             {
                 Model = new TModel();
@@ -180,6 +183,9 @@ namespace BlazorBase.CRUD.Components.Card
 
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
+
+            var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
+            Model.OnGuiLoadData(onGuiLoadDataArgs);
 
             await PrepareForeignKeyProperties(Service, Model);
             await PrepareCustomLookupData(Model, EventServices);
@@ -199,7 +205,8 @@ namespace BlazorBase.CRUD.Components.Card
             await ReloadEntityFromDatabase();
         }
 
-        public virtual async Task ReloadEntityFromDatabase() {
+        public virtual async Task ReloadEntityFromDatabase()
+        {
             if (Model == null)
                 return;
 
@@ -257,6 +264,7 @@ namespace BlazorBase.CRUD.Components.Card
                     await Model.OnAfterUpdateEntry(onAfterArgs);
                 }
 
+                await InvokeOnBeforeSaveChangesEvents(EventServices);
                 await Service.SaveChangesAsync();
                 AddingMode = false;
                 await InvokeOnAfterSaveChangesEvents(EventServices);
@@ -300,10 +308,43 @@ namespace BlazorBase.CRUD.Components.Card
         #endregion
 
         #region Events
+
+        protected virtual async Task InvokeOnBeforeSaveChangesEvents(EventServices eventServices)
+        {
+            var onBeforeSaveChangesArgs = new OnBeforeCardSaveChangesArgs(Model, false, eventServices);
+            await OnBeforeSaveChanges.InvokeAsync(onBeforeSaveChangesArgs);
+
+            foreach (var basePropertyCardInput in BasePropertyCardInputs)
+                await basePropertyCardInput.OnBeforeCardSaveChanges(onBeforeSaveChangesArgs);
+
+            await Model.OnBeforeCardSaveChanges(onBeforeSaveChangesArgs);
+
+            onBeforeSaveChangesArgs = new OnBeforeCardSaveChangesArgs(Model, true, eventServices);
+            foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
+            {
+                if (property.IsListProperty())
+                {
+                    if (property.GetValue(Model) is IList list)
+                        foreach (IBaseModel item in list)
+                            if (item != null)
+                                await item.OnBeforeCardSaveChanges(onBeforeSaveChangesArgs);
+                }
+                else
+                {
+                    if (property.GetValue(Model) is IBaseModel value)
+                        await value.OnBeforeCardSaveChanges(onBeforeSaveChangesArgs);
+                }
+            }
+        }
+
         protected virtual async Task InvokeOnAfterSaveChangesEvents(EventServices eventServices)
         {
             var onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, false, eventServices);
             await OnAfterSaveChanges.InvokeAsync(onAfterSaveChangesArgs);
+
+            foreach (var basePropertyCardInput in BasePropertyCardInputs)
+                await basePropertyCardInput.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
+
             await Model.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
 
             onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, true, eventServices);
@@ -323,13 +364,16 @@ namespace BlazorBase.CRUD.Components.Card
                 }
             }
         }
-      
+
         #endregion
-       
 
         #region Validation
-        public bool HasUnsavedChanges()
+        public async Task<bool> HasUnsavedChangesAsync()
         {
+            foreach (var basePropertyCardInput in BasePropertyCardInputs)
+                if (await basePropertyCardInput.InputHasAdditionalContentChanges())
+                    return true;
+
             return Service.HasUnsavedChanges();
         }
 

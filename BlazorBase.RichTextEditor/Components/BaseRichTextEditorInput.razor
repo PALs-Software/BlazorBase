@@ -1,0 +1,38 @@
+﻿@using BlazorBase.CRUD.Models
+
+@inherits BlazorBase.CRUD.Components.Inputs.BaseInput
+
+@if (Model != null)
+{
+    <Column ColumnSize="ColumnSize.IsFull" Class="">
+        <Fields>
+            <Field Horizontal="false">
+                <FieldLabel ColumnSize="ColumnSize.Is12">
+                    <div title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
+                        @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
+                    </div>
+                </FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is12">
+                    <div>
+                        <BaseRichTextEditor @ref="BaseRichTextEditor"
+                                        BaseService="Service"
+                                        ConnectedModel="Model"
+                                        HideSaveButton="false"
+                                        OnContentChanged="OnContentChanged"
+                                        OnSave="() => OnBeforeCardSaveChanges(null)"
+                                        
+                                        ReadOnly="IsReadOnly">
+
+                            <EditorContent>@((MarkupString)CurrentValueAsString)</EditorContent>
+
+                        </BaseRichTextEditor>
+
+                        <div class="@FeedbackClass">
+                            @Feedback
+                        </div>
+                    </div>
+                </FieldBody>
+            </Field>
+        </Fields>
+    </Column>
+}

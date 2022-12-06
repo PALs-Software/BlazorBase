@@ -1,61 +1,85 @@
 ﻿@using System.ComponentModel.DataAnnotations;
 @using BlazorBase.CRUD.Services;
+@using Blazorise.Icons.FontAwesome;
 
-@if (Model != null)
-{
-    if (RenderType == typeof(string) || BaseParser.DecimalTypes.Contains(RenderType))
+<div>
+    @if (Model != null)
     {
-        if (PresentationDataType == DataType.MultilineText)
+        if (RenderType == typeof(string) || BaseParser.DecimalTypes.Contains(RenderType))
         {
-            <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
+            if (PresentationDataType == DataType.MultilineText)
+            {
+                <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
+            }
+            else
+            {
+                @if (IsPasswordInput && AllowUserPasswordAccess != null)
+                {
+                    <Addons>
+                        <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
+                        <Addon AddonType="AddonType.End">
+                            <Button Color="Color.Secondary" Clicked="OnViewPasswordClicked">
+                                @if (PasswordViewEnabled)
+                                {
+                                    <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.EyeSlash" />
+                                }
+                                else
+                                {
+                                    <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.Eye" />
+                                }
+                            </Button>
+                        </Addon>
+                    </Addons>
+                }
+                else
+                {
+                    <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
+                }
+            }
         }
-        else
+        else if (RenderType == typeof(bool))
         {
-            <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass" />
+            <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
         }
-    }
-    else if (RenderType == typeof(bool))
-    {
-        <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(bool?))
-    {
-        <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(DateTime))
-    {
-        <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
-    }
-    else if(RenderType == typeof(TimeSpan))
-    {
-        <TimeEdit TValue="TimeSpan" Time="(TimeSpan)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
-    }
-    else if(RenderType == typeof(TimeSpan?))
-    {
-        <TimeEdit TValue="TimeSpan?" Time="(TimeSpan?)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(DateTime?))
-    {
-        <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(DateTimeOffset))
-    {
-        <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(DateTimeOffset?))
-    {
-        <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(Guid))
-    {
-        <TextEdit Text="@(Property.GetValue(Model).ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
-    }
-    else if (RenderType == typeof(Guid?))
-    {
-        <TextEdit Text="@(Property.GetValue(Model)?.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
-    }
+        else if (RenderType == typeof(bool?))
+        {
+            <Check TValue="bool?" Checked="(bool?)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(DateTime))
+        {
+            <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(DateTime?))
+        {
+            <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(DateTimeOffset))
+        {
+            <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(DateTimeOffset?))
+        {
+            <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(TimeSpan))
+        {
+            <TimeEdit TValue="TimeSpan" Time="(TimeSpan)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(TimeSpan?))
+        {
+            <TimeEdit TValue="TimeSpan?" Time="(TimeSpan?)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(Guid))
+        {
+            <TextEdit Text="@(Property.GetValue(Model).ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (RenderType == typeof(Guid?))
+        {
+            <TextEdit Text="@(Property.GetValue(Model)?.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
 
-    <div class="@FeedbackClass">
-        @Feedback
-    </div>
-}
+        <div class="@FeedbackClass">
+            @Feedback
+        </div>
+    }
+</div>

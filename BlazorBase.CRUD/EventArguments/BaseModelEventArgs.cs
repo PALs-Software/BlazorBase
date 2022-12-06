@@ -1,6 +1,8 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using System.Collections.Generic;
+using System.Linq;
 using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.EventArguments
@@ -63,6 +65,7 @@ namespace BlazorBase.CRUD.EventArguments
         public bool AbortRemoving { get; set; }
     }
     public record OnAfterRemoveEntryArgs(IBaseModel Model, EventServices EventServices);
+    public record OnBeforeCardSaveChangesArgs(IBaseModel Model, bool IsNavigationProperty, EventServices EventServices);
     public record OnAfterCardSaveChangesArgs(IBaseModel Model, bool IsNavigationProperty, EventServices EventServices);
     public record OnAfterMoveEntryUpArgs(IBaseModel Model, EventServices EventServices);
     public record OnAfterMoveEntryDownArgs(IBaseModel Model, EventServices EventServices);
@@ -116,5 +119,15 @@ namespace BlazorBase.CRUD.EventArguments
     public record OnAfterRemoveListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
     public record OnAfterMoveListEntryUpArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
     public record OnAfterMoveListEntryDownArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
+    #endregion
+
+    #region Data Loading
+
+    public record OnGuiLoadDataArgs(GUIType GuiType, IBaseModel Model,  EventServices EventServices)
+    {
+        public OnGuiLoadDataArgs(GUIType guiType, IBaseModel model, IQueryable<IBaseModel> listLoadQuery, EventServices eventServices) : this(guiType, model, eventServices) => ListLoadQuery = listLoadQuery;
+        public IQueryable<IBaseModel> ListLoadQuery { get; set; }
+    };
+
     #endregion
 }

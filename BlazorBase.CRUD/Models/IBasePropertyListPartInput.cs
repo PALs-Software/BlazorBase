@@ -12,12 +12,15 @@ namespace BlazorBase.CRUD.Models
     public interface IBasePropertyListPartInput
     {
         #region Parameters
+#pragma warning disable BL0007 // Component parameters should be auto properties
 
         [Parameter] IBaseModel Model { get; set; }
+
         [Parameter] PropertyInfo Property { get; set; }
         [Parameter] bool? ReadOnly { get; set; }
         [Parameter] BaseService Service { get; set; }
         [Parameter] IStringLocalizer ModelLocalizer { get; set; }
+        [Parameter] DisplayItem DisplayItem { get; set; }
 
         #region Events
         [Parameter] EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
@@ -25,6 +28,7 @@ namespace BlazorBase.CRUD.Models
         [Parameter] EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
         #endregion
 
+#pragma warning restore BL0007 // Component parameters should be auto properties
         #endregion
 
         Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices);

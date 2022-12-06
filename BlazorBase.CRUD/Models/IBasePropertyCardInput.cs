@@ -13,17 +13,22 @@ namespace BlazorBase.CRUD.Models
     {
         #region Parameters
 
+#pragma warning disable BL0007 // Component parameters should be auto properties
+
         [Parameter] IBaseModel Model { get; set; }
         [Parameter] PropertyInfo Property { get; set; }
         [Parameter] bool? ReadOnly { get; set; }
         [Parameter] BaseService Service { get; set; }
         [Parameter] IStringLocalizer ModelLocalizer { get; set; }
+        [Parameter] DisplayItem DisplayItem { get; set; }
 
         #region Events
         [Parameter] EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
         #endregion
+
+#pragma warning restore BL0007 // Component parameters should be auto properties
 
         #endregion
 
@@ -32,5 +37,11 @@ namespace BlazorBase.CRUD.Models
         Task<bool> ValidatePropertyValueAsync();
 
         void SetValidation(bool showValidation, bool isValid, string feedback);
+
+        Task<bool> InputHasAdditionalContentChanges();
+
+        Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args);
+
+        Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
     }
 }

@@ -12,9 +12,11 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
@@ -67,6 +69,53 @@ namespace BlazorBase.CRUD.Components.General
             public Type DisplayPropertyType { get; set; }
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
+
+            public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
+            {
+                var property = typeof(T).GetProperty(propertyName);
+                return CreateFromProperty(property, defaultDisplayGroup);
+            }
+
+            public static DisplayItem CreateFromProperty(PropertyInfo property, string defaultDisplayGroup = null)
+            {
+                var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
+                if (attribute == null)
+                    throw new Exception($"The property \"{property.Name}\" has no visible attribut!\"");
+
+                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
+                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
+
+                if (property.IsForeignKey() && typeof(IBaseModel).IsAssignableFrom(property.PropertyType))
+                {
+                    var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+                    if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
+                    {
+                        return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                                property.IsKey(), property.IsListProperty(), dateInputMode,
+                                property.Name, property.PropertyType,
+                                false, attribute.SortDirection, false);
+                    }
+                }
+
+                (string DisplayPath, Type DisplayType) displayPathAndType;
+                bool sortAndFilterable;
+                if (customPropertyPath == null)
+                {
+                    displayPathAndType = property.GetDisplayPropertyPathAndType();
+                    sortAndFilterable = property.GetPropertyIsSortAndFilterable();
+                }
+                else
+                {
+                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
+                    sortAndFilterable = true;
+                }
+
+                return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                    property.IsKey(), property.IsListProperty(), dateInputMode,
+                    displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
+                    sortAndFilterable, attribute.SortDirection, sortAndFilterable);
+            }
         }
 
         #region Injects
@@ -103,32 +152,12 @@ namespace BlazorBase.CRUD.Components.General
 
             foreach (var property in VisibleProperties)
             {
-                var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).First() as VisibleAttribute;
-                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? BaseDisplayComponentLocalizer["General"] : attribute.DisplayGroup;
-                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
-                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
+                var displayItem = DisplayItem.CreateFromProperty(property, BaseDisplayComponentLocalizer["General"]);
 
-                if (!DisplayGroups.ContainsKey(attribute.DisplayGroup))
-                    DisplayGroups[attribute.DisplayGroup] = new DisplayGroup(attribute, new List<DisplayItem>());
+                if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup))
+                    DisplayGroups[displayItem.Attribute.DisplayGroup] = new DisplayGroup(displayItem.Attribute, new List<DisplayItem>());
 
-                (string DisplayPath, Type DisplayType) displayPathAndType;
-                bool sortAndFilterable;
-                if (customPropertyPath == null)
-                {
-                    displayPathAndType = property.GetDisplayPropertyPathAndType();
-                    sortAndFilterable = property.GetPropertyIsSortAndFilterable();
-                }
-                else
-                {
-                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
-                    sortAndFilterable = true;
-                }
-
-                DisplayGroups[attribute.DisplayGroup].DisplayItems.Add(
-                    new DisplayItem(property, attribute, property.IsReadOnlyInGUI(), property.IsKey(),
-                        property.IsListProperty(), dateInputMode, displayPathAndType.DisplayPath,
-                        displayPathAndType.DisplayType, sortAndFilterable, attribute.SortDirection, sortAndFilterable
-                ));
+                DisplayGroups[displayItem.Attribute.DisplayGroup].DisplayItems.Add(displayItem);
             }
 
             SortDisplayLists();
@@ -157,7 +186,11 @@ namespace BlazorBase.CRUD.Components.General
             {
                 var isReadonly = foreignKeyProperty.IsReadOnlyInGUI();
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                var foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                PropertyInfo foreignProperty;
+                if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
+                    foreignProperty = foreignKeyProperty;
+                else
+                    foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
                 var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
 
                 if (foreignKeyType == null)
@@ -207,12 +240,13 @@ namespace BlazorBase.CRUD.Components.General
 
         protected void AddEntryToForeignKeyList(IBaseModel model, List<KeyValuePair<string, string>> foreignKeyList, List<PropertyInfo> displayKeyProperties)
         {
-            var primaryKeysAsString = model.GetPrimaryKeysAsString();
+            var primaryKeys = model.GetPrimaryKeys();
+            var primaryKeysAsJson = JsonConvert.SerializeObject(model.GetPrimaryKeys());
 
             if (displayKeyProperties.Count == 0)
-                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsJson, String.Join(", ", primaryKeys)));
             else
-                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsJson, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
         }
 
         protected virtual async Task PrepareCustomLookupData(IBaseModel cardModel, EventServices eventServices)
@@ -276,22 +310,6 @@ namespace BlazorBase.CRUD.Components.General
                 query.Remove(keyProperty.Name);
 
             return query;
-        }
-
-        protected virtual string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem, out string caption)
-        {
-            var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
-            model.OnGetPropertyCaption(args);
-
-            return caption = args.Caption;
-        }
-
-
-        protected virtual bool GetFieldHelpCaption(IStringLocalizer modelLocalizer, DisplayItem displayItem, out string caption)
-        {
-            caption = modelLocalizer[$"{displayItem.Property.Name}_FieldHelp"];
-
-            return caption != $"{displayItem.Property.Name}_FieldHelp";
         }
 
         #region Feedback

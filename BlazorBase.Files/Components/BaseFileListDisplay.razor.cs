@@ -20,7 +20,9 @@ namespace BlazorBase.Files.Components
         [Parameter] public PropertyInfo Property { get; set; }
         [Parameter] public BaseService Service { get; set; }
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
+        [Parameter] public DisplayItem DisplayItem { get; set; }
         [Parameter] public GUIType IsDisplayedInGuiType { get; set; }
+
         #endregion
 
         #region Injects

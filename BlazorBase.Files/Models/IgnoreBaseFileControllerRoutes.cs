@@ -12,14 +12,14 @@ public class IgnoreBaseFileControllerRoutes
         this.next = next;
     }
 
-    public async Task Invoke(HttpContext context)
+    public Task Invoke(HttpContext context)
     {
         if (context.Request.Path.HasValue && context.Request.Path.Value.Contains("/api/BaseFile"))
         {
             context.Response.StatusCode = 404;
-            return;
+            return Task.CompletedTask;
         }
 
-        await next.Invoke(context);
+        return next.Invoke(context);
     }
 }

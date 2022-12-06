@@ -1,0 +1,3 @@
+﻿.blazor-base-rich-text-editor.readonly ::deep .ql-toolbar {
+    display: none;
+}

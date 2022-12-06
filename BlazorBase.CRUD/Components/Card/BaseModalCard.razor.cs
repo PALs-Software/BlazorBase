@@ -1,12 +1,15 @@
 ﻿using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Helper;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.Card
@@ -26,6 +29,7 @@ namespace BlazorBase.CRUD.Components.Card
         [Parameter] public EventCallback<OnBeforeConvertPropertyTypeArgs> OnBeforeConvertPropertyType { get; set; }
         [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
         [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
+        [Parameter] public EventCallback<OnBeforeCardSaveChangesArgs> OnBeforeSaveChanges { get; set; }
         [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
         #region List Events
@@ -43,16 +47,18 @@ namespace BlazorBase.CRUD.Components.Card
 
         #endregion
 
-        [Parameter]public string SingleDisplayName { get; set; }
+        [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string ExplainText { get; set; }
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
         [Parameter] public TModel ComponentModelInstance { get; set; }
+        [Parameter] public bool ShowActions { get; set; } = true;
 
         #endregion
 
         #region Injects
         [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
+        [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
         #endregion
 
@@ -65,6 +71,20 @@ namespace BlazorBase.CRUD.Components.Card
         protected BaseCard<TModel> BaseCard = default!;
         protected bool ContinueByUnsavedChanges = false;
         protected bool ViewMode = false;
+        #endregion
+
+        #region Init
+
+        protected override Task OnInitializedAsync()
+        {
+            if (String.IsNullOrEmpty(SingleDisplayName))
+                SingleDisplayName = ModelLocalizer[typeof(TModel).Name];
+            else
+                SingleDisplayName = ModelLocalizer[SingleDisplayName];
+
+            return base.OnInitializedAsync();
+        }
+
         #endregion
 
         public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, params object[] primaryKeys)
@@ -113,7 +133,8 @@ namespace BlazorBase.CRUD.Components.Card
 
         protected bool HasUnsavedChanges()
         {
-            if (!BaseCard.HasUnsavedChanges())
+            var result = AsyncHelper.RunSync(() => BaseCard.HasUnsavedChangesAsync());
+            if (!result)
                 return false;
 
             MessageHandler.ShowConfirmDialog(

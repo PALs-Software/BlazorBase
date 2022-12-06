@@ -31,7 +31,7 @@
                 @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                 {
                     <th>
-                        @GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem, out string propertyCaption)
+                        @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)
                     </th>
                 }
             }
