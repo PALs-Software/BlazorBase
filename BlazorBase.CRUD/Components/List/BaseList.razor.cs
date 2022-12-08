@@ -34,6 +34,7 @@ namespace BlazorBase.CRUD.Components.List
         #region Model
         [Parameter] public EventCallback OnCardClosed { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
+        [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -367,7 +368,7 @@ namespace BlazorBase.CRUD.Components.List
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)
                     query = query.Where(displayItem);
-
+                        
             if (ComponentModelInstance != null)
             {
                 var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
@@ -504,6 +505,10 @@ namespace BlazorBase.CRUD.Components.List
                                                     confirmButtonColor: Color.Danger,
                                                     onClosing: async (args, result) => await OnConfirmDialogClosedAsync(result, model));
             });
+        }
+
+        public virtual void HideCardModal() {
+            BaseModalCard.HideModal();
         }
 
         protected virtual async Task OnConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)

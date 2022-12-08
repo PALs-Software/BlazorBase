@@ -30,6 +30,7 @@ namespace BlazorBase.CRUD.Components.Card
 
         #region Events
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
+        [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -185,6 +186,7 @@ namespace BlazorBase.CRUD.Components.Card
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
 
             var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
+            await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
             Model.OnGuiLoadData(onGuiLoadDataArgs);
 
             await PrepareForeignKeyProperties(Service, Model);
