@@ -208,6 +208,8 @@ namespace BlazorBase.CRUD.Components.List
                     dateEdit.Date = null;
                 else if (component is BaseNumberFilterInput numberFilterInput)
                     numberFilterInput.Value = null;
+                else if (component is TimeEdit<TimeSpan?> timeEdit)
+                    timeEdit.Time = null;
 #pragma warning restore BL0005 // Component parameter should not be set outside of its component.
 
             await OnFilterChanged.InvokeAsync();

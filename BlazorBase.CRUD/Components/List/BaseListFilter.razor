@@ -77,6 +77,23 @@
 
                             <DateEdit @ref="AddToComponents" TValue="DateTime?" DateChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" InputMode="displayItem.DateInputMode" />
                         }
+                        else if (displayItem.DisplayPropertyType == typeof(TimeSpan) || displayItem.DisplayPropertyType == typeof(TimeSpan?))
+                        {
+                            if (displayItem.DisplayPropertyType == typeof(TimeSpan))
+                            {
+                                <Addon AddonType="AddonType.Start">
+                                    <SelectList @ref="AddToComponents" Data="@DateTimeFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+                                </Addon>
+                            }
+                            else
+                            {
+                                <Addon AddonType="AddonType.Start">
+                                    <SelectList @ref="AddToComponents" Data="@NullableDateTimeFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
+                                </Addon>
+                            }
+
+                            <TimeEdit @ref="AddToComponents" TValue="TimeSpan?" TimeChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" />
+                        }
                         else if (displayItem.DisplayPropertyType == typeof(Guid) || displayItem.DisplayPropertyType == typeof(Guid?))
                         {
                             if (displayItem.DisplayPropertyType == typeof(Guid))
