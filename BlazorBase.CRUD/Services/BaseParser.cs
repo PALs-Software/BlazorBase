@@ -55,6 +55,10 @@ namespace BlazorBase.CRUD.Services
                     outputValue = Convert.ChangeType(Guid.Parse(inputValue), conversionType);
                 else if (conversionType == typeof(DateTimeOffset))
                     outputValue = Convert.ChangeType(DateTimeOffset.Parse(inputValue), conversionType);
+                else if (conversionType == typeof(TimeSpan))
+                    outputValue = Convert.ChangeType(TimeSpan.Parse(inputValue), conversionType);
+                else if (conversionType == typeof(bool) && String.IsNullOrEmpty(inputValue))
+                    outputValue = isNullable ? null : false;
                 else
                     outputValue = Convert.ChangeType(inputValue, conversionType, CultureInfo.InvariantCulture);
 
