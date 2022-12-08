@@ -109,6 +109,8 @@ public class BaseMailService
 
     public bool DisplayErrorMessagesToUser { get; set; } = true;
 
+    public string? LastErrorMessage { get; protected set; } = null;
+
     #endregion
 
     public BaseMailService(IBlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
@@ -145,40 +147,43 @@ public class BaseMailService
     /// <returns>The task object representing the asynchronous operation</returns>
     public async Task<bool> SendMailAsync(List<string> receivers, string subject, string body, params string[] attachmentPathes)
     {
-        ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-        var client = new SmtpClient()
-        {
-            Host = MailingOptions.Server,
-            UseDefaultCredentials = MailingOptions.UseDefaultCredentials,
-            Port = MailingOptions.Port,
-            EnableSsl = MailingOptions.EnableSSL,
-        };
-        if (!MailingOptions.UseDefaultCredentials)
-            client.Credentials = new NetworkCredential(MailingOptions.Host, MailingOptions.HostPassword, MailingOptions.Domain);
-
-        var mailMessage = new MailMessage
-        {
-            From = new MailAddress(MailingOptions.SenderAddress),
-            Body = body,
-            Subject = subject,
-            IsBodyHtml = true
-        };
-
-        foreach (var item in attachmentPathes)
-            mailMessage.Attachments.Add(new Attachment(item));
-
-        foreach (var item in receivers)
-            if (!String.IsNullOrEmpty(item))
-                mailMessage.To.Add(item);
+        LastErrorMessage = null;
 
         try
         {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            var client = new SmtpClient()
+            {
+                Host = MailingOptions.Server,
+                UseDefaultCredentials = MailingOptions.UseDefaultCredentials,
+                Port = MailingOptions.Port,
+                EnableSsl = MailingOptions.EnableSSL,
+            };
+            if (!MailingOptions.UseDefaultCredentials)
+                client.Credentials = new NetworkCredential(MailingOptions.Host, MailingOptions.HostPassword, MailingOptions.Domain);
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(MailingOptions.SenderAddress),
+                Body = body,
+                Subject = subject,
+                IsBodyHtml = true
+            };
+
+            foreach (var item in attachmentPathes)
+                mailMessage.Attachments.Add(new Attachment(item));
+
+            foreach (var item in receivers)
+                if (!String.IsNullOrEmpty(item))
+                    mailMessage.To.Add(item);
+
             await client.SendMailAsync(mailMessage);
         }
         catch (Exception e)
         {
             var errorMessage = ErrorHandler.PrepareExceptionErrorMessage(e);
+            LastErrorMessage = errorMessage;
             Logger.LogError("Error sending email to {Receivers} with subject {Subject}:\n\n{ErrorMessage}", String.Join(";", receivers), subject, errorMessage);
 
             if (DisplayErrorMessagesToUser)

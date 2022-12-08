@@ -74,16 +74,20 @@ namespace BlazorBase.CRUD.Components.Inputs
             await OnValueChangedAsync(entry);
         }
 
-        protected virtual string DisplayForeignKey()
+        protected virtual string DisplaySelectValue()
         {
             var key = Property.GetValue(Model)?.ToString();
-            var primaryKeyAsJson = JsonConvert.SerializeObject(new object[] { key });
-            var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == primaryKeyAsJson);
+            if (key == null)
+                return String.Empty;
 
-            if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
+            if (IsForeignKeyProperty)
+                key = JsonConvert.SerializeObject(new object[] { key });
+            var dataKeyValuePair = Data.FirstOrDefault(entry => entry.Key == key);
+
+            if (dataKeyValuePair.Equals(default(KeyValuePair<string, string>)))
                 return key?.ToString() ?? String.Empty;
             else
-                return foreignKeyPair.Value?.ToString() ?? String.Empty;
+                return dataKeyValuePair.Value?.ToString() ?? String.Empty;
         }
     }
 }
