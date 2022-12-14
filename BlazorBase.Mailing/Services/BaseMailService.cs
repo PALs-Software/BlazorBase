@@ -1,10 +1,12 @@
 ﻿using BlazorBase.Mailing.Models;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.MessageHandling.Services;
 using BlazorBase.Models;
 using BlazorBase.Modules;
 using BlazorBase.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using System.Net;
@@ -20,9 +22,9 @@ public class BaseMailService<TTemplateLocalizer> : BaseMailService
     protected readonly IStringLocalizer<TTemplateLocalizer> TemplateLocalizer;
     #endregion
 
-    public BaseMailService(IBlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
-                    IStringLocalizer<BaseMailService> localizer, IHttpContextAccessor httpContextAccessor,
-                    IStringLocalizer<TTemplateLocalizer> templateLocalizer, ILogger<BaseMailService> logger) : base(options, messageHandler, errorHandler, localizer, httpContextAccessor, logger)
+    public BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider serviceProvider, BaseErrorHandler errorHandler,
+                    IStringLocalizer<BaseMailService> localizer,
+                    IStringLocalizer<TTemplateLocalizer> templateLocalizer, ILogger<BaseMailService> logger) : base(options, serviceProvider, errorHandler, localizer, logger)
     {
         TemplateLocalizer = templateLocalizer;
     }
@@ -97,10 +99,9 @@ public class BaseMailService
     #region Injects
 
     protected readonly IBlazorBaseMailingOptions MailingOptions;
-    protected readonly IMessageHandler MessageHandler;
+    protected readonly IServiceProvider ServiceProvider;
     protected readonly BaseErrorHandler ErrorHandler;
     protected readonly IStringLocalizer<BaseMailService> Localizer;
-    protected readonly IHttpContextAccessor HttpContextAccessor;
     protected readonly ILogger<BaseMailService> Logger;
 
     #endregion
@@ -113,14 +114,13 @@ public class BaseMailService
 
     #endregion
 
-    public BaseMailService(IBlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
-                       IStringLocalizer<BaseMailService> localizer, IHttpContextAccessor httpContextAccessor, ILogger<BaseMailService> logger)
+    public BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider serviceProvider, BaseErrorHandler errorHandler,
+                       IStringLocalizer<BaseMailService> localizer, ILogger<BaseMailService> logger)
     {
         MailingOptions = options;
-        MessageHandler = messageHandler;
+        ServiceProvider = serviceProvider;
         ErrorHandler = errorHandler;
         Localizer = localizer;
-        HttpContextAccessor = httpContextAccessor;
         Logger = logger;
     }
 
@@ -187,7 +187,10 @@ public class BaseMailService
             Logger.LogError("Error sending email to {Receivers} with subject {Subject}:\n\n{ErrorMessage}", String.Join(";", receivers), subject, errorMessage);
 
             if (DisplayErrorMessagesToUser)
-                MessageHandler.ShowMessage(Localizer["Error sending email to {0} with subject {1}", String.Join(";", receivers), subject], errorMessage, MessageType.Error);
+            {
+                var messageHandler = ServiceProvider.GetRequiredService<IMessageHandler>();
+                messageHandler.ShowMessage(Localizer["Error sending email to {0} with subject {1}", String.Join(";", receivers), subject], errorMessage, MessageType.Error);
+            }
 
             return false;
         }
