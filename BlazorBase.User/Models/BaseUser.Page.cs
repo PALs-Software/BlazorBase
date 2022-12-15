@@ -89,10 +89,10 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         var messageId = eventServices.MessageHandler.ShowLoadingMessage(eventServices.Localizer["Sending e-mail..."]);
 
         var serviceProvider = eventServices.ServiceProvider;
-        var userManager = serviceProvider.GetService<UserManager<TIdentityUser>>();
-        var accessor = serviceProvider.GetService<IHttpContextAccessor>();
-        var linkGenerator = serviceProvider.GetService<LinkGenerator>();
-        var mailService = serviceProvider.GetService<BaseMailService<UserMailTemplate>>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<TIdentityUser>>();
+        var accessor = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+        var linkGenerator = serviceProvider.GetRequiredService<LinkGenerator>();
+        var mailService = serviceProvider.GetRequiredService<BaseMailService<UserMailTemplate>>();
 
         var user = await userManager.FindByIdAsync(IdentityUserId);
         var code = await userManager.GeneratePasswordResetTokenAsync(user);
