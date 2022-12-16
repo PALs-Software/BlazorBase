@@ -18,7 +18,7 @@
                             <Addon AddonType="AddonType.Start">
                                 <SelectList @ref="AddToComponents" Data="@NullableTextFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
                             </Addon>
-                            <TextEdit @ref="AddToComponents" TextChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" />
+                            <BaseTextFilterInput @ref="AddToComponents" OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" />
                         }
                         else if (TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
                         {
@@ -58,7 +58,7 @@
                                     <SelectList @ref="AddToComponents" Data="@NullableBoolFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
                                 </Addon>
                             }
-                            <SelectList @ref="AddToComponents" Data="@BoolSelectListData" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await BooleanFilterChangedAsync(displayItem, v)" Class="form-control"/>
+                            <SelectList @ref="AddToComponents" Data="@BoolSelectListData" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await BooleanFilterChangedAsync(displayItem, v)" Class="form-control" />
                         }
                         else if (displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))
                         {
@@ -108,8 +108,7 @@
                                     <SelectList @ref="AddToComponents" Data="@NullableGuidFilterTypes" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterTypeChangedAsync(displayItem, v)" />
                                 </Addon>
                             }
-
-                            <TextEdit @ref="AddToComponents" TextChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" />
+                            <BaseTextFilterInput @ref="AddToComponents" OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" />
                         }
                         else if (displayItem.DisplayPropertyType.IsEnum)
                         {
