@@ -14,7 +14,6 @@ namespace BlazorBase.Mailing.Models
 
         #region Properties
         public BaseOptionsImportMode OptionsImportMode { get; set; }
-        public Type OptionsImportFromDatabaseEntryType { get; set; } = default!;
 
         public string WebsiteName { get; set; } = default!;
 

@@ -22,7 +22,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         #endregion
 
         #region Member
-        protected string InitialSelectedValue;
+        protected string SelectedValueAsString;
         protected SelectList<KeyValuePair<string, string>, string> SelectList = default;
         protected bool IsForeignKeyProperty = false;
         protected bool InputReferencesBaseModelWithMultiplePrimaryKeys = false;
@@ -34,22 +34,16 @@ namespace BlazorBase.CRUD.Components.Inputs
         {
             await base.OnInitializedAsync();
 
-            InitialSelectedValue = Property.GetValue(Model)?.ToString();
-
             var foreignKey = Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
             IsForeignKeyProperty = foreignKey != null;
 
             if (IsForeignKeyProperty && foreignKey.Name.Contains(","))
             {
-                var value = Property.GetValue(Model);
-                if (value != null)
-                    InitialSelectedValue = JsonConvert.SerializeObject(((IBaseModel)value).GetPrimaryKeys());
-
                 ForeignKeyProperties = Property.PropertyType.GetKeyProperties();
                 InputReferencesBaseModelWithMultiplePrimaryKeys = true;
             }
-            else if (IsForeignKeyProperty)
-                InitialSelectedValue = JsonConvert.SerializeObject(new object[] { InitialSelectedValue });
+
+            UpdateSelectedValueFromModel();
         }
 
         protected async virtual Task OnSelectedValueChangedAsync(string selectedValue)
@@ -57,6 +51,7 @@ namespace BlazorBase.CRUD.Components.Inputs
             if (!IsForeignKeyProperty || selectedValue == null)
             {
                 await OnValueChangedAsync(selectedValue);
+                UpdateSelectedValueFromModel();
                 return;
             }
 
@@ -64,6 +59,7 @@ namespace BlazorBase.CRUD.Components.Inputs
             if (!InputReferencesBaseModelWithMultiplePrimaryKeys)
             {
                 await OnValueChangedAsync(primaryKeys[0]);
+                UpdateSelectedValueFromModel();
                 return;
             }
 
@@ -72,18 +68,42 @@ namespace BlazorBase.CRUD.Components.Inputs
 
             var entry = await Service.GetAsync(Property.PropertyType, primaryKeys);
             await OnValueChangedAsync(entry);
+            UpdateSelectedValueFromModel();
         }
 
-        protected virtual string DisplayForeignKey()
+        protected virtual string DisplaySelectValue()
         {
-            var key = Property.GetValue(Model)?.ToString();
-            var primaryKeyAsJson = JsonConvert.SerializeObject(new object[] { key });
-            var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == primaryKeyAsJson);
+            var key = Property.GetValue(Model);
+            if (key == null)
+                return String.Empty;
 
-            if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
+            string searchKey;
+            if (IsForeignKeyProperty)
+                searchKey = JsonConvert.SerializeObject(new object[] { key });
+            else
+                searchKey = key.ToString();
+
+            var dataKeyValuePair = Data.FirstOrDefault(entry => entry.Key == searchKey);
+
+            if (dataKeyValuePair.Equals(default(KeyValuePair<string, string>)))
                 return key?.ToString() ?? String.Empty;
             else
-                return foreignKeyPair.Value?.ToString() ?? String.Empty;
+                return dataKeyValuePair.Value?.ToString() ?? String.Empty;
+        }
+
+        protected void UpdateSelectedValueFromModel()
+        {
+            SelectedValueAsString = null;
+            var value = Property.GetValue(Model);
+            if (InputReferencesBaseModelWithMultiplePrimaryKeys)
+            {
+                if (value != null)
+                    SelectedValueAsString = JsonConvert.SerializeObject(((IBaseModel)value).GetPrimaryKeys());
+            }
+            else if (IsForeignKeyProperty)
+                SelectedValueAsString = JsonConvert.SerializeObject(new object[] { SelectedValueAsString });
+            else
+                SelectedValueAsString = value?.ToString();
         }
     }
 }

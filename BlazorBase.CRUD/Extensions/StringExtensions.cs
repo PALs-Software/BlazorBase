@@ -9,11 +9,6 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class StringExtension
     {
-        public static string EncryptString(this string input)
-        {
-            return input.ToSecureString().EncryptString();
-        }
-
         public static SecureString ToSecureString(this string input)
         {
             var secure = new SecureString();
@@ -23,6 +18,17 @@ namespace BlazorBase.CRUD.Extensions
 
             secure.MakeReadOnly();
             return secure;
+        }
+
+        public static string EncryptString(this string input)
+        {
+            if (String.IsNullOrEmpty(input))
+                return input;
+
+#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
+            byte[] encryptedData = ProtectedData.Protect(Encoding.Unicode.GetBytes(input), null, DataProtectionScope.CurrentUser);
+#pragma warning restore CA1416 // Plattformkompatibilität überprüfen
+            return Convert.ToBase64String(encryptedData);
         }
 
         public static SecureString DecryptString(this string encryptedData)
@@ -43,7 +49,11 @@ namespace BlazorBase.CRUD.Extensions
 
         public static string? DecryptStringToInsecureString(this string encryptedData)
         {
-            return encryptedData.DecryptString().ToInsecureString();
+#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
+            byte[] decryptedData = ProtectedData.Unprotect(Convert.FromBase64String(encryptedData), null, DataProtectionScope.CurrentUser);
+#pragma warning restore CA1416 // Plattformkompatibilität überprüfen
+
+            return Encoding.Unicode.GetString(decryptedData);
         }
 
         public static string CreateSHA512Hash(this string input)

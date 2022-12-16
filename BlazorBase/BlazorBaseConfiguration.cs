@@ -22,7 +22,7 @@ public static class BlazorBaseConfiguration
 
         serviceCollection
             .AddSingleton(configureOptions)
-            .AddSingleton<IBlazorBaseOptions, TOptions>()
+            .AddTransient<IBlazorBaseOptions, TOptions>()
             .AddSingleton<BaseErrorHandler>()
             .AddLocalization();
 
@@ -39,33 +39,4 @@ public static class BlazorBaseConfiguration
     {
         return AddBlazorBase<BlazorBaseOptions>(serviceCollection, configureOptions);
     }
-
-    /// <summary>
-    /// Register blazor base and configures the default behaviour.
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="configureOptions"></param>
-    /// <returns></returns>
-    public static IServiceCollection AddBlazorBase<TOptions>(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
-        where TOptions : class, IBlazorBaseOptions
-    {
-        return AddBlazorBase<TOptions>(serviceCollection, options =>
-        {
-            options.OptionsImportMode = BaseOptionsImportMode.Database;
-            options.OptionsImportFromDatabaseEntryType = optionsImportFromDatabaseEntryType;
-        });
-    }
-
-    /// <summary>
-    /// Register blazor base and configures the default behaviour.
-    /// </summary>
-    /// <param name="serviceCollection"></param>
-    /// <param name="configureOptions"></param>
-    /// <returns></returns>
-    public static IServiceCollection AddBlazorBase(this IServiceCollection serviceCollection, Type optionsImportFromDatabaseEntryType)
-    {
-        return AddBlazorBase<BlazorBaseOptions>(serviceCollection, optionsImportFromDatabaseEntryType);
-    }
-
-    
 }

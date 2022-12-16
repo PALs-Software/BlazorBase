@@ -20,13 +20,11 @@ namespace BlazorBase.CRUD.Services
     {
         public DbContext DbContext { get; protected set; }
         public IServiceProvider ServiceProvider { get; }
-        protected IMessageHandler MessageHandler { get; set; }
 
-        public BaseService(DbContext context, IServiceProvider provider, IMessageHandler messageHandler)
+        public BaseService(DbContext context, IServiceProvider provider)
         {
             DbContext = context;
             ServiceProvider = provider;
-            MessageHandler = messageHandler;
         }
 
         public async Task RefreshDbContextAsync()
@@ -472,7 +470,7 @@ namespace BlazorBase.CRUD.Services
                 ServiceProvider = ServiceProvider,
                 Localizer = null,
                 BaseService = this,
-                MessageHandler = MessageHandler
+                MessageHandler = null
             };
         }
         #endregion
