@@ -202,8 +202,8 @@ namespace BlazorBase.CRUD.Components.List
             foreach (var component in Components)
                 if (component is SelectList<KeyValuePair<string, string>, string> selectList)
                     selectList.SelectedValue = selectList.Data.First().Key;
-                else if (component is TextEdit textEdit)
-                    textEdit.Text = String.Empty;
+                else if (component is BaseTextFilterInput textFilterInput)
+                    textFilterInput.Value = null;
                 else if (component is DateEdit<DateTime?> dateEdit)
                     dateEdit.Date = null;
                 else if (component is BaseNumberFilterInput numberFilterInput)
