@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Net.Http;
 using BlazorBase.RichTextEditor.Models;
+using System.Net;
 
 namespace BlazorBase.RichTextEditor.Components
 {
@@ -198,6 +199,7 @@ namespace BlazorBase.RichTextEditor.Components
             foreach (var image in externalImages)
             {
                 string srcValue = image.GetAttributeValue("src", null);
+                srcValue = WebUtility.HtmlDecode(srcValue);
                 byte[] imageData = null;
                 try
                 {
