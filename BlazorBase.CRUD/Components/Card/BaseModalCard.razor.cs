@@ -20,6 +20,7 @@ namespace BlazorBase.CRUD.Components.Card
 
         #region Events
         [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
+        [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback OnCardClosed { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }

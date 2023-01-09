@@ -4,11 +4,11 @@
 {
     @if (IsReadOnly)
     {
-        <input type="text" value="@(Data.Where(entry => entry.Key == @Property.GetValue(Model)?.ToString()).FirstOrDefault().Value?.ToString() ?? String.Empty)" disabled class="form-control @InputClass" />
+        <input type="text" value="@DisplaySelectValue()" disabled class="form-control @InputClass" />
     }
     else
     {
-        <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="InitialSelectedValue" SelectedValueChanged="(x) => OnSelectedValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
+        <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="SelectedValueAsString" SelectedValueChanged="(x) => OnSelectedValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
     }
 
     <div class="@FeedbackClass">

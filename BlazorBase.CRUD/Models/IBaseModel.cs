@@ -8,6 +8,7 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -90,6 +91,12 @@ namespace BlazorBase.CRUD.Models
         Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args);
         #endregion
 
+        #region Data Loading
+
+        void OnGuiLoadData(OnGuiLoadDataArgs args);
+
+        #endregion
+
         #endregion
 
         #region Validation Methods
@@ -114,7 +121,7 @@ namespace BlazorBase.CRUD.Models
         bool ShowOnlySingleEntry { get; }
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
         #endregion
-
+               
         #region Helper Methods
         void ClearPropertyValues();
         Type GetUnproxiedType();

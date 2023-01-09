@@ -138,7 +138,7 @@
   </data>
   <data name="SetupUser_Body" xml:space="preserve">
     <value>&lt;p style="line-height: 18px; font-family: verdana; font-size: 12px;"&gt;Sehr geehrte*r {1},&lt;/p&gt;
-&lt;p style="line-height: 18px; font-family: verdana; font-size: 12px;"&gt;Willkommen bei der Webseite {1}. Sie können sich jetzt auf unserer Webseite anmelden.&lt;/p&gt;
+&lt;p style="line-height: 18px; font-family: verdana; font-size: 12px;"&gt;Willkommen bei der Webseite {0}. Sie können sich jetzt auf unserer Webseite anmelden.&lt;/p&gt;
 &lt;p style="line-height: 18px; font-family: verdana; font-size: 12px;"&gt;Klicken Sie auf den Link unten um das Passwort zurückzusetzen:
     &lt;br&gt;&lt;a href="{2}"&gt;{2}&lt;/a&gt;
 &lt;/p&gt;

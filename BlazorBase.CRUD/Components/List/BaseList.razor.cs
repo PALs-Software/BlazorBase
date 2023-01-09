@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Card;
+using Newtonsoft.Json;
 
 namespace BlazorBase.CRUD.Components.List
 {
@@ -33,6 +34,7 @@ namespace BlazorBase.CRUD.Components.List
         #region Model
         [Parameter] public EventCallback OnCardClosed { get; set; }
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
+        [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -86,6 +88,7 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
+        [Parameter] public RenderFragment AdditionalHeaderButtons { get; set; }
 
         #region Style
         [Parameter] public string TableClass { get; set; }
@@ -130,6 +133,9 @@ namespace BlazorBase.CRUD.Components.List
         {
             await InvokeAsync(() =>
             {
+                if (ComponentModelInstance == null)
+                    ComponentModelInstance = new TModel();
+
                 EventServices = GetEventServices(Service);
 
                 TModelType = typeof(TModel);
@@ -362,6 +368,14 @@ namespace BlazorBase.CRUD.Components.List
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)
                     query = query.Where(displayItem);
+                        
+            if (ComponentModelInstance != null)
+            {
+                var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
+                ComponentModelInstance.OnGuiLoadData(args);
+                if (args.ListLoadQuery != null)
+                    query = args.ListLoadQuery.Cast<TModel>();
+            }
 
             return query;
         }
@@ -372,7 +386,9 @@ namespace BlazorBase.CRUD.Components.List
         protected virtual string DisplayForeignKey(DisplayItem displayItem, TModel model)
         {
             var key = displayItem.Property.GetValue(model)?.ToString();
-            var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == key);
+            var primaryKeyAsJson = JsonConvert.SerializeObject(new object[] { key });
+
+            var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == primaryKeyAsJson);
 
             if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
                 return key;
@@ -489,6 +505,10 @@ namespace BlazorBase.CRUD.Components.List
                                                     confirmButtonColor: Color.Danger,
                                                     onClosing: async (args, result) => await OnConfirmDialogClosedAsync(result, model));
             });
+        }
+
+        public virtual void HideCardModal() {
+            BaseModalCard.HideModal();
         }
 
         protected virtual async Task OnConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)

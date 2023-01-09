@@ -11,9 +11,9 @@ public class BlazorBaseOptions : IBlazorBaseOptions
     #endregion
 
     #region Properties
+
     public BaseOptionsImportMode OptionsImportMode { get; set; }
 
-    public Type OptionsImportFromDatabaseEntryType { get; set; }
     #endregion
 
 }

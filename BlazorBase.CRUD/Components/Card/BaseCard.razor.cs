@@ -20,6 +20,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlazorBase.CRUD.Components.Card
 {
@@ -29,6 +30,7 @@ namespace BlazorBase.CRUD.Components.Card
 
         #region Events
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
+        [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -134,7 +136,6 @@ namespace BlazorBase.CRUD.Components.Card
 
             return null;
         }
-
         protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
          {
              builder.OpenComponent(0, baseInputExtensionType);
@@ -170,7 +171,7 @@ namespace BlazorBase.CRUD.Components.Card
             BaseListParts.Clear();
             BasePropertyCardInputs.Clear();
             ResetInvalidFeedback();
-               
+
             if (AddingMode)
             {
                 Model = new TModel();
@@ -183,6 +184,10 @@ namespace BlazorBase.CRUD.Components.Card
 
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
+
+            var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
+            await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
+            Model.OnGuiLoadData(onGuiLoadDataArgs);
 
             await PrepareForeignKeyProperties(Service, Model);
             await PrepareCustomLookupData(Model, EventServices);
@@ -202,7 +207,8 @@ namespace BlazorBase.CRUD.Components.Card
             await ReloadEntityFromDatabase();
         }
 
-        public virtual async Task ReloadEntityFromDatabase() {
+        public virtual async Task ReloadEntityFromDatabase()
+        {
             if (Model == null)
                 return;
 
@@ -278,7 +284,6 @@ namespace BlazorBase.CRUD.Components.Card
 
             if (showSnackBar)
                 Snackbar.Show();
-
             return success;
         }
 
