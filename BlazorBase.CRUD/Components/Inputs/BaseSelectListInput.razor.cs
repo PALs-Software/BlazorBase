@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
 using System.Collections.Generic;
-using Blazorise;
 using BlazorBase.CRUD.Models;
 using System.Threading.Tasks;
 using Blazorise.Components;
@@ -10,8 +9,10 @@ using Newtonsoft.Json;
 using System;
 using BlazorBase.CRUD.Extensions;
 using System.Globalization;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 using System.Linq;
+using BlazorBase.CRUD.Components.SelectList;
+using Microsoft.Extensions.Localization;
+using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 
 namespace BlazorBase.CRUD.Components.Inputs
 {
@@ -21,14 +22,21 @@ namespace BlazorBase.CRUD.Components.Inputs
         [Parameter] public List<KeyValuePair<string, string>> Data { get; set; }
         #endregion
 
+        #region Injects
+        [Inject] protected IStringLocalizer<BaseSelectListInput> Localizer { get; set; }
+        #endregion
+
         #region Member
-        protected string SelectedValueAsString;
+        protected BaseTypeBasedSelectList BaseSelectList = null!;
+
+        protected string SelectedValue;
         protected SelectList<KeyValuePair<string, string>, string> SelectList = default;
         protected bool IsForeignKeyProperty = false;
         protected bool InputReferencesBaseModelWithMultiplePrimaryKeys = false;
         protected List<PropertyInfo> ForeignKeyProperties;
+        protected bool ForeignKeyIsOnBaseModel = false;
+        protected Type ForeignKeyBaseModelType;
         #endregion
-
 
         protected override async Task OnInitializedAsync()
         {
@@ -37,13 +45,34 @@ namespace BlazorBase.CRUD.Components.Inputs
             var foreignKey = Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
             IsForeignKeyProperty = foreignKey != null;
 
-            if (IsForeignKeyProperty && foreignKey.Name.Contains(","))
+            if (IsForeignKeyProperty)
             {
-                ForeignKeyProperties = Property.PropertyType.GetKeyProperties();
-                InputReferencesBaseModelWithMultiplePrimaryKeys = true;
+                ForeignKeyIsOnBaseModel = typeof(IBaseModel).IsAssignableFrom(Property.PropertyType);
+
+                if (ForeignKeyIsOnBaseModel && foreignKey.Name.Contains(","))
+                {
+                    ForeignKeyProperties = Property.PropertyType.GetKeyProperties();
+                    InputReferencesBaseModelWithMultiplePrimaryKeys = true;
+                }
+
+                if (ForeignKeyIsOnBaseModel)
+                    ForeignKeyBaseModelType = Property.PropertyType;
+                else
+                    ForeignKeyBaseModelType = Property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault()?.PropertyType;
             }
 
-            UpdateSelectedValueFromModel();
+            UpdateSelectedValue();
+        }
+
+        protected void UpdateSelectedValue()
+        {
+            var value = Property.GetValue(Model);
+            if (ForeignKeyIsOnBaseModel && value != null)
+                SelectedValue = JsonConvert.SerializeObject(((IBaseModel)value).GetPrimaryKeys());
+            else if (IsForeignKeyProperty)
+                SelectedValue = JsonConvert.SerializeObject(new object[] { value });
+            else
+                SelectedValue = value?.ToString();
         }
 
         protected async virtual Task OnSelectedValueChangedAsync(string selectedValue)
@@ -51,59 +80,60 @@ namespace BlazorBase.CRUD.Components.Inputs
             if (!IsForeignKeyProperty || selectedValue == null)
             {
                 await OnValueChangedAsync(selectedValue);
-                UpdateSelectedValueFromModel();
+                UpdateSelectedValue();
                 return;
             }
 
             var primaryKeys = JsonConvert.DeserializeObject<object[]>(selectedValue);
-            if (!InputReferencesBaseModelWithMultiplePrimaryKeys)
+            if (!InputReferencesBaseModelWithMultiplePrimaryKeys || !ForeignKeyIsOnBaseModel)
             {
                 await OnValueChangedAsync(primaryKeys[0]);
-                UpdateSelectedValueFromModel();
+                UpdateSelectedValue();
                 return;
             }
 
             for (int i = 0; i < primaryKeys.Length; i++)
                 primaryKeys[i] = Convert.ChangeType(primaryKeys[i], ForeignKeyProperties[i].PropertyType, CultureInfo.InvariantCulture);
 
-            var entry = await Service.GetAsync(Property.PropertyType, primaryKeys);
+            var entry = await Service.GetAsync(ForeignKeyBaseModelType, primaryKeys);
             await OnValueChangedAsync(entry);
-            UpdateSelectedValueFromModel();
+            UpdateSelectedValue();
         }
 
-        protected virtual string DisplaySelectValue()
+        protected virtual string DisplayForeignKey()
         {
-            var key = Property.GetValue(Model);
-            if (key == null)
-                return String.Empty;
+            var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == SelectedValue);
 
-            string searchKey;
-            if (IsForeignKeyProperty)
-                searchKey = JsonConvert.SerializeObject(new object[] { key });
+            if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
+                return SelectedValue ?? String.Empty;
             else
-                searchKey = key.ToString();
-
-            var dataKeyValuePair = Data.FirstOrDefault(entry => entry.Key == searchKey);
-
-            if (dataKeyValuePair.Equals(default(KeyValuePair<string, string>)))
-                return key?.ToString() ?? String.Empty;
-            else
-                return dataKeyValuePair.Value?.ToString() ?? String.Empty;
+                return foreignKeyPair.Value?.ToString() ?? String.Empty;
         }
 
-        protected void UpdateSelectedValueFromModel()
+        protected Task OpenForeignKeySelectListModal(object aboveEntry = null)
         {
-            SelectedValueAsString = null;
-            var value = Property.GetValue(Model);
-            if (InputReferencesBaseModelWithMultiplePrimaryKeys)
+            BaseSelectList.ShowModal(aboveEntry);
+
+            return Task.CompletedTask;
+        }
+
+        protected async Task AddEntryFromSelectListModalAsync(OnSelectListClosedArgs args)
+        {
+            if (args.SelectedModel == null)
+                return;
+
+            if (ForeignKeyIsOnBaseModel)
             {
-                if (value != null)
-                    SelectedValueAsString = JsonConvert.SerializeObject(((IBaseModel)value).GetPrimaryKeys());
+                var entry = await Service.GetAsync(ForeignKeyBaseModelType, args.SelectedModel.GetPrimaryKeys());
+                await OnValueChangedAsync(entry);
             }
-            else if (IsForeignKeyProperty)
-                SelectedValueAsString = JsonConvert.SerializeObject(new object[] { SelectedValueAsString });
             else
-                SelectedValueAsString = value?.ToString();
+            {
+                var primaryKeys = args.SelectedModel.GetPrimaryKeys();
+                await OnValueChangedAsync(primaryKeys[0]);
+            }
+
+            UpdateSelectedValue();
         }
     }
 }

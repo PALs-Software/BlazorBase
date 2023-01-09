@@ -1,11 +1,7 @@
 ﻿using BlazorBase.Mailing.Models;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
-using BlazorBase.MessageHandling.Services;
-using BlazorBase.Models;
-using BlazorBase.Modules;
 using BlazorBase.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
