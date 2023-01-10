@@ -30,6 +30,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         protected BaseTypeBasedSelectList BaseSelectList = null!;
 
         protected string SelectedValue;
+        protected string ReadOnlyDisplayValue;
         protected SelectList<KeyValuePair<string, string>, string> SelectList = default;
         protected bool IsForeignKeyProperty = false;
         protected bool InputReferencesBaseModelWithMultiplePrimaryKeys = false;
@@ -62,6 +63,17 @@ namespace BlazorBase.CRUD.Components.Inputs
             }
 
             UpdateSelectedValue();
+
+            if (IsReadOnly)
+                ReadOnlyDisplayValue = GetReadOnlyDisplayText();
+        }
+
+        protected override void OnParametersSet()
+        {
+            if (IsReadOnly)
+                ReadOnlyDisplayValue = GetReadOnlyDisplayText();
+
+            base.OnParametersSet();
         }
 
         protected void UpdateSelectedValue()
@@ -100,7 +112,7 @@ namespace BlazorBase.CRUD.Components.Inputs
             UpdateSelectedValue();
         }
 
-        protected virtual string DisplayForeignKey()
+        protected virtual string GetReadOnlyDisplayText()
         {
             var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == SelectedValue);
 
