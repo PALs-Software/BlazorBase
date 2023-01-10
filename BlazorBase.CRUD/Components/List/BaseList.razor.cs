@@ -377,6 +377,14 @@ namespace BlazorBase.CRUD.Components.List
                     query = args.ListLoadQuery.Cast<TModel>();
             }
 
+            if (ComponentModelInstance != null)
+            {
+                var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
+                ComponentModelInstance.OnGuiLoadData(args);
+                if (args.ListLoadQuery != null)
+                    query = args.ListLoadQuery.Cast<TModel>();
+            }
+
             return query;
         }
 
