@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.Files.Controller
 {
-    [Authorize]
+    
     [ApiController]
     [Route("api/[controller]/[action]")]
+    [Authorize(Policy = nameof(BaseFileController))]    
     public class BaseFileController : ControllerBase
     {
         #region Injects
@@ -34,11 +35,11 @@ namespace BlazorBase.Files.Controller
             if (!await AccessToFileIsGrantedAsync(result))
                 return Unauthorized();
 
-            var filePath = Directory.EnumerateFiles(Options.FileStorePath, $"{result}.*").FirstOrDefault();
+            var filePath = Directory.EnumerateFiles(Options.FileStorePath, $"{result}_*").FirstOrDefault();
             if (filePath == null || !System.IO.File.Exists(filePath))
                 return BadRequest("File does not exist");
 
-            var mimeType = GetMimeTypeOfFile(Path.GetFileName(filePath));
+            var mimeType = GetMimeTypeOfFileName(Path.GetFileName(filePath));
             if (mimeType == "video/mp4")
                 return DownloadVideoWithRangeProcessing(filePath, fileName);
 
@@ -54,12 +55,12 @@ namespace BlazorBase.Files.Controller
             if (!await AccessToTemporaryFileIsGrantedAsync(result))
                 return Unauthorized();
 
-            var filePath = Directory.EnumerateFiles(Options.TempFileStorePath, $"{result}.*").FirstOrDefault();
+            var filePath = Directory.EnumerateFiles(Options.TempFileStorePath, $"{result}_*").FirstOrDefault();
             if (filePath == null || !System.IO.File.Exists(filePath))
                 return BadRequest("File does not exist");
 
             DeleteOldTemporaryFiles();
-            var mimeType = GetMimeTypeOfFile(Path.GetFileName(filePath));
+            var mimeType = GetMimeTypeOfFileName(Path.GetFileName(filePath));
             if (mimeType == "video/mp4")
                 return DownloadVideoWithRangeProcessing(filePath, fileName);
 
@@ -96,10 +97,9 @@ namespace BlazorBase.Files.Controller
                 try { fileInfo.Delete(); } catch (Exception) { throw; }
         }
 
-        protected virtual string GetMimeTypeOfFile(string fileName)
+        protected virtual string GetMimeTypeOfFileName(string fileName)
         {
-            new FileExtensionContentTypeProvider().TryGetContentType(fileName, out string mimeFileType);
-            return mimeFileType ?? "application/octet-stream";
+            return fileName.Split("_")[1].Replace("'", "/");
         }
     }
 }

@@ -17,9 +17,11 @@ public class BlazorBaseUserOptions : IBlazorBaseUserOptions
     #region Properties
     public BaseOptionsImportMode OptionsImportMode { get; set; }
 
-    public string LoginPath { get; set; } = "User/Login";
+    public string LoginPath { get; set; } = "/User/Login";
     public string LoginControllerPath { get; set; } = UserLoginController.LoginPath;
     public string LogoutControllerPath { get; set; } = UserLoginController.LogoutPath;
+    public string IdentityAccessDeniedPath { get; set; } = "/User/AccessDenied";
+
     public string ManageUserPath { get; set; } = "User/Manage";
     public string WebsiteName { get; set; } = "BlazorBase";
     public bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; } = true;
