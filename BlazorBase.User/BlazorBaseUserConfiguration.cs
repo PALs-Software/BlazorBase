@@ -31,7 +31,7 @@ public static class BlazorBaseUserConfiguration
         // If options handler is not defined we will get an exception so
         // we need to initialize and empty action.
         if (configureOptions == null)
-            configureOptions = (e) => { e.LoginPath = "/User/Login"; };
+            configureOptions = (e) => { };
 
         serviceCollection
             .AddSingleton(configureOptions)
@@ -47,9 +47,10 @@ public static class BlazorBaseUserConfiguration
         var options = new TOptions();
         configureOptions.Invoke(options);
 
-        serviceCollection.ConfigureApplicationCookie(options =>
+        serviceCollection.ConfigureApplicationCookie(acOptions =>
         {
-            options.LoginPath = options.LoginPath;
+            acOptions.LoginPath = options.LoginPath;
+            acOptions.AccessDeniedPath = options.IdentityAccessDeniedPath;
         });
 
         return serviceCollection;

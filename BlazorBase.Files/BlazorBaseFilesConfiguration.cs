@@ -1,5 +1,6 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.Files.Components;
+using BlazorBase.Files.Controller;
 using BlazorBase.Files.Models;
 using BlazorBase.Models;
 using Microsoft.AspNetCore.Builder;
@@ -27,7 +28,7 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null, params string[] allowedUserAccessRoles)
         where TOptions : class, IBlazorBaseFileOptions
     {
         // If options handler is not defined we will get an exception so
@@ -42,6 +43,11 @@ public static class BlazorBaseFilesConfiguration
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
         .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
 
+        .AddAuthorization(options =>
+        {
+            options.AddPolicy(nameof(BaseFileController), policy => policy.RequireRole(allowedUserAccessRoles));
+        })
+
         .AddControllers().AddApplicationPart(typeof(Controller.BaseFileController).Assembly).AddControllersAsServices();
 
         return serviceCollection;
@@ -54,9 +60,9 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions> configureOptions = null, params string[] allowedUserAccessRoles)
     {
-        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions);
+        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions, allowedUserAccessRoles);
     }
 
 }
