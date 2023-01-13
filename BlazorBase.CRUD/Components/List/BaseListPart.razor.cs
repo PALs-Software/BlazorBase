@@ -63,6 +63,7 @@ namespace BlazorBase.CRUD.Components.List
         protected IStringLocalizer ModelLocalizer { get; set; }
         protected Type IStringModelLocalizerType { get; set; }
         protected IList Entries { get; set; }
+        protected Dictionary<object, bool> EntryIsInAddingMode { get; set; } = new();
         protected Type ModelListEntryType { get; set; }
 
         protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; }
@@ -70,6 +71,7 @@ namespace BlazorBase.CRUD.Components.List
         protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
 
         #region Property Infos
+
         protected bool IsReadOnly;
         protected List<BaseInput> BaseInputs = new List<BaseInput>();
         protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
@@ -80,7 +82,9 @@ namespace BlazorBase.CRUD.Components.List
         protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
 
         protected BaseTypeBasedSelectList BaseSelectList = null!;
+
         #endregion
+
         #endregion
 
         #region Init
@@ -195,6 +199,7 @@ namespace BlazorBase.CRUD.Components.List
             else
                 Entries.Add(newEntry);
 
+            EntryIsInAddingMode[newEntry] = true;
             SetSortIndex();
 
             await OnAfterAddEntryAsync(newEntry);
@@ -224,6 +229,7 @@ namespace BlazorBase.CRUD.Components.List
             else
                 Entries.Add(entryToAdd);
 
+            EntryIsInAddingMode[entryToAdd] = true;
             SetSortIndex();
 
             await OnAfterAddEntryAsync(entryToAdd, callAddEventOnListEntry: false);
@@ -397,6 +403,16 @@ namespace BlazorBase.CRUD.Components.List
 
         #endregion
 
+        #region Parent Events
+
+        public void OnAfterCardSaveChanges()
+        {
+            foreach (var entry in Entries)
+                EntryIsInAddingMode[entry] = false;
+        }
+
+        #endregion
+
         #region Validation
         public virtual async Task<bool> ListPartIsValidAsync()
         {
@@ -427,13 +443,14 @@ namespace BlazorBase.CRUD.Components.List
                     if (!baseModel.TryValidate(out List<ValidationResult> validationResults, validationContext))
                         valid = false;
                 }
-            }
+            }            
 
             return valid;
         }
         #endregion
 
-        #region Other       
+        #region MISC
+
         protected EventServices GetEventServices()
         {
             return new EventServices()
@@ -443,6 +460,14 @@ namespace BlazorBase.CRUD.Components.List
                 BaseService = Service,
                 MessageHandler = MessageHandler
             };
+        }
+
+        public bool CheckIfModelIsInAddingMode(object entry)
+        {
+            if (EntryIsInAddingMode.TryGetValue(entry, out bool isInAddingMode))
+                return isInAddingMode;
+
+            return false;
         }
         #endregion
     }

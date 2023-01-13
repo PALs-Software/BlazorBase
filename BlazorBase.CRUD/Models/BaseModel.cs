@@ -257,10 +257,6 @@ namespace BlazorBase.CRUD.Models
             return TryValidate(out validationResults, validationContext);
         }
 
-        public bool CheckIfModelIsInAddingMode(BaseService baseService)
-        {
-            return baseService.DbContext.Find(GetUnproxiedType(), GetPrimaryKeys()) != this;
-        }
         #endregion
 
         #region ComponentBase

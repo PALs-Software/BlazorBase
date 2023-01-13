@@ -40,7 +40,7 @@
     <tbody>
         @foreach (var entry in Entries)
         {
-            var modelIsInAddingMode = (entry as IBaseModel)?.CheckIfModelIsInAddingMode(Service) ?? false;
+            var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
             <tr>
                 <td class="text-center">
                     @if (!IsReadOnly)

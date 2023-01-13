@@ -105,7 +105,6 @@ namespace BlazorBase.CRUD.Models
 
         bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null);
-        bool CheckIfModelIsInAddingMode(BaseService baseService);
         #endregion
 
         #region PageActions

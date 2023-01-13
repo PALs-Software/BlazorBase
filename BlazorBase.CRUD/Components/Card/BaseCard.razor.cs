@@ -238,8 +238,7 @@ namespace BlazorBase.CRUD.Components.Card
                     if (args.AbortAdding)
                         return false;
 
-                    var dbEntry = Service.DbContext.Entry(Model);
-                    if (dbEntry.State != EntityState.Added && !await Service.AddEntryAsync(Model))
+                    if (!await Service.AddEntryAsync(Model))
                     {
                         ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
                         if (showSnackBar)
@@ -365,6 +364,9 @@ namespace BlazorBase.CRUD.Components.Card
                         await value.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
                 }
             }
+
+            foreach (var baseListPart in BaseListParts)
+                baseListPart.OnAfterCardSaveChanges();
         }
 
         #endregion
