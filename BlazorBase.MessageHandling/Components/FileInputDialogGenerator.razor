@@ -5,7 +5,7 @@
 {
     if (modalInfo.Value.Args is ShowFileInputDialogArgs args)
     {
-        <LoadingIndicator Visible="args.ShowLoadingIndicator">
+        <LoadingIndicator @key="modalInfo" Visible="args.ShowLoadingIndicator">
             @Localizer["Uploading file..."]
             <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
                 <ProgressBar Value="args.UploadProgress" Animated="true" Striped="true">
@@ -14,7 +14,7 @@
             </Progress>
         </LoadingIndicator>
 
-        <Modal @ref="modalInfo.Value.Modal" Visible="true" Closing="async (closingArgs) => await OnModalClosing(modalInfo.Value, closingArgs)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
+        <Modal @key="modalInfo" @ref="modalInfo.Value.Modal" Visible="true" Closing="async (closingArgs) => await OnModalClosing(modalInfo.Value, closingArgs)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
             <ModalContent Centered="true" Size="args.ModalSize">
                 <ModalHeader>
                     <ModalTitle>

@@ -41,7 +41,7 @@
         @foreach (var entry in Entries)
         {
             var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
-            <tr>
+            <tr @key="entry">
                 <td class="text-center">
                     @if (!IsReadOnly)
                     {
