@@ -3,7 +3,7 @@
 @using BlazorBase.CRUD.Extensions
 @using BlazorBase.CRUD.EventArguments
 
-<BasePageActions BaseModel="null" BaseModelType="ModelListEntryType" GUIType="Enums.GUIType.ListPart" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+<BasePageActions Source="this" BaseModel="null" BaseModelType="ModelListEntryType" GUIType="Enums.GUIType.ListPart" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
 
 <BaseTypeBasedSelectList @ref="BaseSelectList"
                          BaseModelType="ModelListEntryType"

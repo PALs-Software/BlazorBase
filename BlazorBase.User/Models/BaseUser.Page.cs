@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Components.PageActions.Models;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Extensions;
@@ -41,7 +42,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
                             Image = FontAwesomeIcons.Cogs,
                             Visible = eventServices => Task.FromResult(true),
                             VisibleInGUITypes = new GUIType[] { GUIType.Card },
-                            Action = async (eventServices, model) =>
+                            Action = async (source, eventServices, model) =>
                             {
                                 if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
                                     return;
@@ -59,7 +60,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
                             Image = FontAwesomeIcons.Unlock,
                             Visible = eventServices => Task.FromResult(true),
                             VisibleInGUITypes = new GUIType[] { GUIType.Card },
-                            Action = async (eventServices, model) =>
+                            Action = async (source, eventServices, model) =>
                             {
                                 if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
                                     return;
