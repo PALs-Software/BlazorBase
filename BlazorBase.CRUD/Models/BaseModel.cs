@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.List;
+using BlazorBase.CRUD.Components.PageActions.Models;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;

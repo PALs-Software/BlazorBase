@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Components.PageActions.Models;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
