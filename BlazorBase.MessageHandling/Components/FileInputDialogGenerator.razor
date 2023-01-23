@@ -5,7 +5,7 @@
 {
     if (modalInfo.Value.Args is ShowFileInputDialogArgs args)
     {
-        <LoadingIndicator @key="modalInfo" Visible="args.ShowLoadingIndicator">
+        <LoadingIndicator Visible="args.ShowLoadingIndicator">
             @Localizer["Uploading file..."]
             <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
                 <ProgressBar Value="args.UploadProgress" Animated="true" Striped="true">
