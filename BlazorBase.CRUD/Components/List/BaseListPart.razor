@@ -3,7 +3,7 @@
 @using BlazorBase.CRUD.Extensions
 @using BlazorBase.CRUD.EventArguments
 
-<BasePageActions BaseModel="null" BaseModelType="ModelListEntryType" GUIType="Enums.GUIType.ListPart" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+<BasePageActions Source="this" BaseModel="null" BaseModelType="ModelListEntryType" GUIType="Enums.GUIType.ListPart" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
 
 <BaseTypeBasedSelectList @ref="BaseSelectList"
                          BaseModelType="ModelListEntryType"
@@ -40,8 +40,8 @@
     <tbody>
         @foreach (var entry in Entries)
         {
-            var modelIsInAddingMode = (entry as IBaseModel)?.CheckIfModelIsInAddingMode(Service) ?? false;
-            <tr>
+            var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
+            <tr @key="entry">
                 <td class="text-center">
                     @if (!IsReadOnly)
                     {

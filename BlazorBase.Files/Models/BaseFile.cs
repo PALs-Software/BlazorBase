@@ -103,6 +103,9 @@ namespace BlazorBase.Files.Models
         public string GetFileNameWithExtension() => $"{Id}{BaseFileType}";
         public string GetTemporaryFileNameWithExtension() => $"{TempFileId}{BaseFileType}";
 
+        public string GetPhysicalFileName() => $"{Id}_{MimeFileType.Replace("/", "'")}";
+        public string GetPhysicalTemporaryFileName() => $"{TempFileId}_{MimeFileType.Replace("/", "'")}";
+
         public string GetFileLink(bool ignoreTemporaryLink = false)
         {
             if (String.IsNullOrEmpty(BaseFileType))
@@ -118,9 +121,9 @@ namespace BlazorBase.Files.Models
         {
             var options = BlazorBaseFileOptions.Instance;
             if (TempFileId == Guid.Empty)
-                return Path.Join(options.FileStorePath, GetFileNameWithExtension());
+                return Path.Join(options.FileStorePath, GetPhysicalFileName());
             else
-                return Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension());
+                return Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName());
         }
 
         public Task<byte[]> GetFileContentAsync()
@@ -168,9 +171,9 @@ namespace BlazorBase.Files.Models
                 if (!Directory.Exists(options.FileStorePath))
                     Directory.CreateDirectory(options.FileStorePath);
 
-                var tempFilePath = Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension());
+                var tempFilePath = Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName());
                 if (File.Exists(tempFilePath))
-                    File.Move(tempFilePath, Path.Join(options.FileStorePath, GetFileNameWithExtension()), true);
+                    File.Move(tempFilePath, Path.Join(options.FileStorePath, GetPhysicalFileName()), true);
 
                 TempFileId = Guid.Empty;
             });
@@ -184,7 +187,7 @@ namespace BlazorBase.Files.Models
                     return;
 
                 var options = BlazorBaseFileOptions.Instance;
-                var filePath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension()) : Path.Join(options.FileStorePath, GetFileNameWithExtension());
+                var filePath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName()) : Path.Join(options.FileStorePath, GetPhysicalFileName());
 
                 if (File.Exists(filePath))
                     File.Delete(filePath);
@@ -245,7 +248,7 @@ namespace BlazorBase.Files.Models
             do
             {
                 file.TempFileId = Guid.NewGuid();
-                tempFilePath = Path.Join(options.TempFileStorePath, file.GetTemporaryFileNameWithExtension());
+                tempFilePath = Path.Join(options.TempFileStorePath, file.GetPhysicalTemporaryFileName());
             } while (File.Exists(tempFilePath));
 
             await File.WriteAllBytesAsync(tempFilePath, fileContent);

@@ -3,7 +3,7 @@
 
 @foreach (var modalInfo in ModalInfos)
 {
-    <Modal @ref="modalInfo.Value.Modal" Visible="true" Closing="async (args) => await OnModalClosing(modalInfo.Value, args)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
+    <Modal @key="modalInfo" @ref="modalInfo.Value.Modal" Visible="true" Closing="async (args) => await OnModalClosing(modalInfo.Value, args)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
         <ModalContent Centered="true" Size="modalInfo.Value.Args.ModalSize">
             <ModalHeader>
                 <ModalTitle>

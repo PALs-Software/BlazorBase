@@ -4,7 +4,7 @@
 {
     @if (IsReadOnly)
     {
-        <input type="text" value="@DisplayForeignKey()" disabled class="form-control @InputClass" />
+        <input type="text" value="@ReadOnlyDisplayValue" disabled class="form-control @InputClass" />
     }
     else
     {

@@ -3,7 +3,7 @@
 
 @foreach (var loadingMessage in LoadingMessages)
 {
-    <LoadingIndicator Visible="true">
+    <LoadingIndicator @key="loadingMessage" Visible="true">
         @loadingMessage.Value.Message
 
         @if (loadingMessage.Value.LoadingChildContent != null)

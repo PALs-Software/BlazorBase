@@ -8,7 +8,7 @@
         <BarDropdownMenu>
             @foreach (var navigationEntry in NavigationEntries)
             {
-                <BarDropdownItem To="@navigationEntry.Link">
+                <BarDropdownItem @key="navigationEntry" To="@navigationEntry.Link">
                     <BarIcon Class="@($"fa-fw {@navigationEntry.Icon}")" />
                     @navigationEntry.Name
                 </BarDropdownItem>

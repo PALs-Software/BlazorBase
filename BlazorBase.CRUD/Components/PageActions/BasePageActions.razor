@@ -8,7 +8,7 @@
                     <Items>
                         @foreach (var group in VisiblePageActionGroups)
                         {
-                            <Tab Name="@group.Caption" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
+                            <Tab @key="group" Name="@group.Caption" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
                                 <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
                                 @ModelLocalizer[group.Caption ?? String.Empty]
                             </Tab>
@@ -18,10 +18,10 @@
                         <TabsContent Padding="Padding.Is2">
                             @foreach (var group in VisiblePageActionGroups)
                             {
-                                <TabPanel Name="@group.Caption">
+                                <TabPanel @key="group" Name="@group.Caption">
                                     @foreach (var action in group.PageActions)
                                     {
-                                        <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]" Margin="Margin.Is2.FromRight">
+                                        <Button @key="action" Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]" Margin="Margin.Is2.FromRight">
                                             <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
 
                                             @ModelLocalizer[action.Caption ?? String.Empty]
@@ -41,12 +41,17 @@
         {
             @foreach (var action in group.PageActions)
             {
-                <Button Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
+                <Button @key="action" Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
                     <BaseIcon IconName="@action.Image" />
 
                     @ModelLocalizer[action.Caption ?? String.Empty]
                 </Button>
             }
         }
+    }
+
+    @if (CurrentActionRenderFragment != null)
+    {
+        @CurrentActionRenderFragment
     }
 }

@@ -24,6 +24,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Update="Components\BaseAuthorizedLayout.razor.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Update="Enums\UserMailTemplate.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
