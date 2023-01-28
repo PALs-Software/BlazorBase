@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Services;
+﻿using BlazorBase.Backup.Controller;
+using BlazorBase.CRUD.Services;
 using BlazorBase.Files.Models;
 using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Components;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.JSInterop;
 using System.Data.SqlClient;
 using System.IO.Compression;
+using static BlazorBase.Backup.Controller.BlazorBaseBackupFileController;
 
 namespace BlazorBase.Backup.Components
 {
@@ -42,7 +44,7 @@ namespace BlazorBase.Backup.Components
                 CreateFileStoreBackup(archive, progressId);
             }
 
-            await VDMFileController.AddFileRequestAsync(JS, new FileRequest(archivePath, $"VDMBackup_{DateTime.Now:yy_MM_dd}.zip", System.Net.Mime.MediaTypeNames.Application.Zip, FileOptions.DeleteOnClose));
+            await BlazorBaseBackupFileController.AddFileRequestAsync(JS, new FileRequest(archivePath, $"WebsiteBackup_{DateTime.Now:yyyy_MM_dd}.zip", System.Net.Mime.MediaTypeNames.Application.Zip, FileOptions.DeleteOnClose));
 
             MessageHandler.CloseLoadingProgressMessage(progressId);
         }
