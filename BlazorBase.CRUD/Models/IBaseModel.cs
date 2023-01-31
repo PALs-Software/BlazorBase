@@ -109,7 +109,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region PageActions
-        List<PageActionGroup> GeneratePageActionGroups();
+        Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices);
         #endregion
 
         #region ComponentBase        
