@@ -24,56 +24,56 @@ namespace BlazorBase.User.Models;
 public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel where TIdentityUser : IdentityUser, new()
 {
     [SupportedOSPlatform("windows")]
-    public override List<PageActionGroup> GeneratePageActionGroups()
+    public override Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices)
     {
-        return new List<PageActionGroup>()
+        return Task.FromResult(new List<PageActionGroup>()
+        {
+            new PageActionGroup()
             {
-                new PageActionGroup()
+                Caption = PageActionGroup.DefaultGroups.Process,
+                Image = FontAwesomeIcons.Bolt,
+                VisibleInGUITypes = new GUIType[] { GUIType.Card },
+                PageActions = new List<PageAction>()
                 {
-                    Caption = PageActionGroup.DefaultGroups.Process,
-                    Image = FontAwesomeIcons.Bolt,
-                    VisibleInGUITypes = new GUIType[] { GUIType.Card },
-                    PageActions = new List<PageAction>()
+                    new PageAction()
                     {
-                        new PageAction()
+                        Caption = "Send account setup email",
+                        ToolTip = "Sends the user an email to set up his account with an password",
+                        Image = FontAwesomeIcons.Cogs,
+                        Visible = eventServices => Task.FromResult(true),
+                        VisibleInGUITypes = new GUIType[] { GUIType.Card },
+                        Action = async (source, eventServices, model) =>
                         {
-                            Caption = "Send account setup email",
-                            ToolTip = "Sends the user an email to set up his account with an password",
-                            Image = FontAwesomeIcons.Cogs,
-                            Visible = eventServices => Task.FromResult(true),
-                            VisibleInGUITypes = new GUIType[] { GUIType.Card },
-                            Action = async (source, eventServices, model) =>
-                            {
-                                if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
-                                    return;
+                            if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
+                                return;
 
-                                await TestModelIsInValidStateForCallingActionAsync(eventServices);
-                                if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.SetupUser))
-                                    eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Setup email"],
-                                                                            eventServices.Localizer["The setup email was sent successfully"]);
-                            }
-                        },
-                        new PageAction()
+                            await TestModelIsInValidStateForCallingActionAsync(eventServices);
+                            if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.SetupUser))
+                                eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Setup email"],
+                                                                        eventServices.Localizer["The setup email was sent successfully"]);
+                        }
+                    },
+                    new PageAction()
+                    {
+                        Caption = "Reset Password",
+                        ToolTip = "Sends the user an email to reset the password",
+                        Image = FontAwesomeIcons.Unlock,
+                        Visible = eventServices => Task.FromResult(true),
+                        VisibleInGUITypes = new GUIType[] { GUIType.Card },
+                        Action = async (source, eventServices, model) =>
                         {
-                            Caption = "Reset Password",
-                            ToolTip = "Sends the user an email to reset the password",
-                            Image = FontAwesomeIcons.Unlock,
-                            Visible = eventServices => Task.FromResult(true),
-                            VisibleInGUITypes = new GUIType[] { GUIType.Card },
-                            Action = async (source, eventServices, model) =>
-                            {
-                                if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
-                                    return;
+                            if (model is not BaseUser<TIdentityUser, TIdentityRole> user)
+                                return;
 
-                                await TestModelIsInValidStateForCallingActionAsync(eventServices);
-                                if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.ResetUserPassword))
-                                    eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Reset Password"],
-                                                                            eventServices.Localizer["The password reset email was sent successfully"]);
-                            }
+                            await TestModelIsInValidStateForCallingActionAsync(eventServices);
+                            if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.ResetUserPassword))
+                                eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Reset Password"],
+                                                                        eventServices.Localizer["The password reset email was sent successfully"]);
                         }
                     }
                 }
-            };
+            }
+        });
     }
 
     protected virtual async Task TestModelIsInValidStateForCallingActionAsync(EventServices services)

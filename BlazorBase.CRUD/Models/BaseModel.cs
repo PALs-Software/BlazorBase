@@ -301,7 +301,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region PageActions
-        public virtual List<PageActionGroup> GeneratePageActionGroups() { return null; }
+        public virtual Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices) { return Task.FromResult<List<PageActionGroup>>(null); }
         #endregion
 
         #region Helper Methods
