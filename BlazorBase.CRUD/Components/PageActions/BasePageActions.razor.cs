@@ -73,7 +73,7 @@ namespace BlazorBase.CRUD.Components.PageActions
                 instance = Activator.CreateInstance(BaseModelType) as IBaseModel;
 
             VisiblePageActionGroups.Clear();
-            PageActionGroups = instance!.GeneratePageActionGroups() ?? new List<PageActionGroup>();
+            PageActionGroups = (await instance!.GeneratePageActionGroupsAsync(EventServices)) ?? new List<PageActionGroup>();
             foreach (var group in PageActionGroups)
                 if (group.VisibleInGUITypes.Contains(GUIType) && await group.Visible(EventServices))
                     VisiblePageActionGroups.Add(group);
