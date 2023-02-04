@@ -99,7 +99,7 @@ namespace BlazorBase.Files.Controller
 
         protected virtual string GetMimeTypeOfFileName(string fileName)
         {
-            return fileName.Split("_")[1].Replace("'", "/");
+            return fileName.Split("_")[1].Replace("'", "/").Replace("^", ".");
         }
     }
 }

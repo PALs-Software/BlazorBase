@@ -10,7 +10,8 @@ public class AppSettings
 
     public static AppSettings? LoadAppSettings(string projectPath)
     {
-        var appSettingsJson = Path.Join(Path.GetDirectoryName(projectPath), "appsettings.json");
+        var appSettingsPath = Path.Join(Path.GetDirectoryName(projectPath), "appsettings.json");
+        var appSettingsJson = File.ReadAllText(appSettingsPath);
         return JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
     }
 }

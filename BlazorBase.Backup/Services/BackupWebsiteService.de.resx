@@ -117,7 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Create &amp; Download Website Backup" xml:space="preserve">
-    <value>Webseitenbackup erstellen &amp; herunterladen</value>
+  <data name="Cleanup" xml:space="preserve">
+    <value>Bereinigung</value>
+  </data>
+  <data name="Create Website Backup" xml:space="preserve">
+    <value>Webseitenbackup erstellen</value>
+  </data>
+  <data name="Creating Database Backup" xml:space="preserve">
+    <value>Datenbankbackup erstellen</value>
+  </data>
+  <data name="Creating File Backup" xml:space="preserve">
+    <value>Dateienbackup erstellen</value>
   </data>
 </root>

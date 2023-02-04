@@ -32,11 +32,14 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public bool ShowOnlyButtons { get; set; }
         #endregion
 
+        #region Injects
+        [Inject] protected IStringLocalizer<BasePageActions> Localizer { get; set; } = default!;
+        #endregion
+
         #region Member
         protected List<PageActionGroup> PageActionGroups { get; set; } = new();
         protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new();
         protected string? SelectedPageActionGroup { get; set; }
-
         public IBaseModel? OldBaseModel { get; set; }
 
         protected RenderFragment? CurrentActionRenderFragment = null;

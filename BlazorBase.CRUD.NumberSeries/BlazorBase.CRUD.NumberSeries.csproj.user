@@ -2,10 +2,7 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
-    <EmbeddedResource Update="Components\Card\BaseCard.razor.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
+    <EmbeddedResource Update="NoSeries.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>

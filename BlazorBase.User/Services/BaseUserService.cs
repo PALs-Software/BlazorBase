@@ -68,6 +68,13 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return GetUserByApplicationUserIdAsync(BaseService, id, asNoTracking);
     }
 
+    public static bool DatabaseHasNoUsers(IServiceProvider serviceProvider)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<TIdentityUser>>();
+        return !userManager.Users.Any();
+    }
+
     public static async Task SeedUserRolesAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateAsyncScope();
@@ -86,6 +93,7 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
     {
         using var scope = serviceProvider.CreateAsyncScope();
         var userManager = scope.ServiceProvider.GetService<UserManager<TIdentityUser>>();
+
         if (await userManager.FindByEmailAsync(email) != null)
             return;
 

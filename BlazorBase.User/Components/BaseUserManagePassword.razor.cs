@@ -1,6 +1,9 @@
-﻿using BlazorBase.User.Models;
+﻿using BlazorBase.User.Enums;
+using BlazorBase.User.Models;
+using BlazorBase.User.Services;
 using BlazorBase.User.ViewModels;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
@@ -26,6 +29,7 @@ public partial class BaseUserManagePassword : ComponentBase
     [Inject] protected IStringLocalizer<BaseLoginForm> Localizer { get; set; }
     [Inject] protected SignInManager<IdentityUser> SignInManager { get; set; }
     [Inject] protected UserManager<IdentityUser> UserManager { get; set; }
+    [Inject]  protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
     [Inject] protected ILogger<BaseLoginForm> Logger { get; set; }
     #endregion
 
@@ -38,7 +42,8 @@ public partial class BaseUserManagePassword : ComponentBase
     public async Task HandleValidSubmit()
     {
         Feedback = String.Empty;
-        var user = await UserManager.FindByEmailAsync("pal@acadon.de");
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await UserManager.GetUserAsync(authenticationState.User);
         if (user == null)
             return;
 

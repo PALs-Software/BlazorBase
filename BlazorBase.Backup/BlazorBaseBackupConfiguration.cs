@@ -1,4 +1,5 @@
 ﻿using BlazorBase.Backup.Controller;
+using BlazorBase.Backup.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorBase.Backup;
@@ -17,6 +18,8 @@ public static class BlazorBaseBackupConfiguration
         {
             options.AddPolicy(nameof(BlazorBaseBackupFileController), policy => policy.RequireRole(allowedUserAccessRoles));
         });
+
+        serviceCollection.AddTransient<BackupWebsiteService>();
 
         return serviceCollection;
     }
