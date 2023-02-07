@@ -368,7 +368,7 @@ namespace BlazorBase.CRUD.Components.List
             foreach (var group in DisplayGroups)
                 foreach (var displayItem in group.Value.DisplayItems)
                     query = query.Where(displayItem);
-                        
+
             if (ComponentModelInstance != null)
             {
                 var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
@@ -515,7 +515,8 @@ namespace BlazorBase.CRUD.Components.List
             });
         }
 
-        public virtual void HideCardModal() {
+        public virtual void HideCardModal()
+        {
             BaseModalCard.HideModal();
         }
 
@@ -529,14 +530,14 @@ namespace BlazorBase.CRUD.Components.List
 
             var eventServices = GetEventServices(baseService);
 
-            var beforeRemoveArgs = new OnBeforeRemoveEntryArgs(scopedModel, false, eventServices);
-            await OnBeforeRemoveEntry.InvokeAsync(beforeRemoveArgs);
-            await scopedModel.OnBeforeRemoveEntry(beforeRemoveArgs);
-            if (beforeRemoveArgs.AbortRemoving)
-                return;
-
             try
             {
+                var beforeRemoveArgs = new OnBeforeRemoveEntryArgs(scopedModel, false, eventServices);
+                await OnBeforeRemoveEntry.InvokeAsync(beforeRemoveArgs);
+                await scopedModel.OnBeforeRemoveEntry(beforeRemoveArgs);
+                if (beforeRemoveArgs.AbortRemoving)
+                    return;
+
                 await baseService.RemoveEntryAsync(scopedModel);
                 await baseService.SaveChangesAsync();
                 Entries.Remove(scopedModel);
