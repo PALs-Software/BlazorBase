@@ -70,7 +70,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         protected bool IsReadOnly;
         protected Type RenderType;
         protected DataType? PresentationDataType = null;
-        protected string CustomPropertyCssStyle;
+        protected CustomPropertyCssStyleAttribute CustomPropertyCssStyle;
         protected bool LastValueConversionFailed = false;
 
         protected ValidationContext PropertyValidationContext;
@@ -104,7 +104,7 @@ namespace BlazorBase.CRUD.Components.Inputs
                 IsReadOnly = ReadOnly.Value;
 
             RenderType = DisplayItem?.DisplayPropertyType ?? Property.PropertyType;
-            CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>()?.Style;
+            CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>();
             PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
             var dict = new Dictionary<object, object>()
@@ -412,8 +412,8 @@ namespace BlazorBase.CRUD.Components.Inputs
         {
             InputAttributes.Clear();
 
-            if (!String.IsNullOrEmpty(CustomPropertyCssStyle))
-                InputAttributes.Add("style", CustomPropertyCssStyle);
+            if (CustomPropertyCssStyle != null && !String.IsNullOrEmpty(CustomPropertyCssStyle.InputStyle))
+                InputAttributes.Add("style", CustomPropertyCssStyle.InputStyle);
 
             if (Property.TryGetAttribute(out PlaceholderTextAttribute placeholderAttribute))
                 InputAttributes.Add("placeholder", placeholderAttribute.Placeholder);

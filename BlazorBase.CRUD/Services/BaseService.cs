@@ -293,10 +293,17 @@ namespace BlazorBase.CRUD.Services
         #endregion
 
         #region Any
+
+        public virtual Task<bool> AnyAsync<T>() where T : class, IBaseModel
+        {
+            return DbContext.Set<T>().AnyAsync();
+        }
+
         public virtual Task<bool> AnyAsync<T>(Expression<Func<T, bool>> condition) where T : class, IBaseModel
         {
             return DbContext.Set<T>().AnyAsync(condition);
         }
+
         #endregion
 
         #region Change Data
