@@ -13,7 +13,6 @@ public class BaseListPartDisplayOptionsAttribute : Attribute
         ShowDeleteButton = showDeleteButton;
     }
 
-
     public bool ShowAddButton { get; set; } = true;
     public bool ShowAddExistingEntryButton { get; set; } = true;
     public bool ShowDeleteButton { get; set; } = true;

@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Attributes
+namespace BlazorBase.CRUD.Attributes;
+
+public class CustomPropertyCssStyleAttribute : Attribute
 {
-    public class CustomPropertyCssStyleAttribute : Attribute
-    {
-        public string Style { get; set; }
-    }
+    public string PropertyStyle { get; set; }
+    public string InputStyle { get; set; }    
 }

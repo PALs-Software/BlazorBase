@@ -24,11 +24,11 @@
     <PackageReference Include="Blazorise.RichTextEdit" Version="0.9.3.6" />
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.0" />
   </ItemGroup>
@@ -61,6 +61,9 @@
     </EmbeddedResource>
     <EmbeddedResource Update="Components\List\BaseList.razor.resx">
       <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Components\PageActions\BasePageActions.razor.de.resx">
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
       <LastGenOutput>ValidationAttributesTranslations.de.Designer.cs</LastGenOutput>

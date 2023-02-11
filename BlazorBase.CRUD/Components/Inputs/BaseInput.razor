@@ -2,7 +2,7 @@
 @using BlazorBase.CRUD.Services;
 @using Blazorise.Icons.FontAwesome;
 
-<div>
+<div style="@CustomPropertyCssStyle?.PropertyStyle">
     @if (Model != null)
     {
         if (RenderType == typeof(string) || BaseParser.DecimalTypes.Contains(RenderType))

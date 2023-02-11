@@ -32,11 +32,14 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public bool ShowOnlyButtons { get; set; }
         #endregion
 
+        #region Injects
+        [Inject] protected IStringLocalizer<BasePageActions> Localizer { get; set; } = default!;
+        #endregion
+
         #region Member
         protected List<PageActionGroup> PageActionGroups { get; set; } = new();
         protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new();
         protected string? SelectedPageActionGroup { get; set; }
-
         public IBaseModel? OldBaseModel { get; set; }
 
         protected RenderFragment? CurrentActionRenderFragment = null;
@@ -73,7 +76,7 @@ namespace BlazorBase.CRUD.Components.PageActions
                 instance = Activator.CreateInstance(BaseModelType) as IBaseModel;
 
             VisiblePageActionGroups.Clear();
-            PageActionGroups = instance!.GeneratePageActionGroups() ?? new List<PageActionGroup>();
+            PageActionGroups = (await instance!.GeneratePageActionGroupsAsync(EventServices)) ?? new List<PageActionGroup>();
             foreach (var group in PageActionGroups)
                 if (group.VisibleInGUITypes.Contains(GUIType) && await group.Visible(EventServices))
                     VisiblePageActionGroups.Add(group);

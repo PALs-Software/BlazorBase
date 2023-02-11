@@ -1,19 +1,18 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Models.IBaseModel;
 
 namespace BlazorBase.CRUD.NumberSeries
 {
     [Route("/NoSeries")]
+    [Authorize(Policy = nameof(NoSeries))]
     public class NoSeries : BaseModel
     {
         [Key]

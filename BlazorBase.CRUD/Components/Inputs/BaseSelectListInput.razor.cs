@@ -13,6 +13,7 @@ using System.Linq;
 using BlazorBase.CRUD.Components.SelectList;
 using Microsoft.Extensions.Localization;
 using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
+using BlazorBase.CRUD.Attributes;
 
 namespace BlazorBase.CRUD.Components.Inputs
 {
@@ -37,13 +38,16 @@ namespace BlazorBase.CRUD.Components.Inputs
         protected List<PropertyInfo> ForeignKeyProperties;
         protected bool ForeignKeyIsOnBaseModel = false;
         protected Type ForeignKeyBaseModelType;
+
+        protected BaseInputDisplayOptionsAttribute BaseInputDisplayOptions;
         #endregion
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
 
-            var foreignKey = Property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+            var foreignKey = Property.GetCustomAttribute<ForeignKeyAttribute>();
+            BaseInputDisplayOptions = Property.GetCustomAttribute<BaseInputDisplayOptionsAttribute>();
             IsForeignKeyProperty = foreignKey != null;
 
             if (IsForeignKeyProperty)

@@ -1,30 +1,20 @@
-﻿using System;
+﻿using BlazorBase.Models;
+using System;
 
-namespace BlazorBase.RichTextEditor.Models
+namespace BlazorBase.RichTextEditor.Models;
+
+public class BlazorBaseRichTextEditorOptions: IBlazorBaseRichTextEditorOptions
 {
-    public class BlazorBaseRichTextEditorOptions
+    #region Constructors
+    public BlazorBaseRichTextEditorOptions(IServiceProvider serviceProvider, Action<BlazorBaseRichTextEditorOptions> configureOptions)
     {
-        #region Members
-
-        protected readonly IServiceProvider ServiceProvider;
-
-        protected readonly Action<BlazorBaseRichTextEditorOptions> ConfigureOptions;
-
-        #endregion
-
-        #region Properties
-        public Type ImageFileType { get; set; }
-        #endregion
-
-
-        #region Constructors
-        public BlazorBaseRichTextEditorOptions(IServiceProvider serviceProvider, Action<BlazorBaseRichTextEditorOptions> configureOptions)
-        {
-            ServiceProvider = serviceProvider;
-            ConfigureOptions = configureOptions;
-
-            ConfigureOptions?.Invoke(this);
-        }
-        #endregion
+        (this as IBlazorBaseRichTextEditorOptions).ImportOptions(serviceProvider, configureOptions);
     }
+    #endregion
+
+    #region Properties
+    public Type ImageFileType { get; set; }
+    public BaseOptionsImportMode OptionsImportMode { get; set; }
+    #endregion
+
 }

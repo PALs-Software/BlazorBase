@@ -1,4 +1,6 @@
-﻿@if (VisiblePageActionGroups != null && VisiblePageActionGroups.Count > 0)
+﻿@using BlazorBase.CRUD.Components.PageActions.Models
+
+@if (VisiblePageActionGroups != null && VisiblePageActionGroups.Count > 0)
 {
     @if (!ShowOnlyButtons)
     {
@@ -10,7 +12,14 @@
                         {
                             <Tab @key="group" Name="@group.Caption" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
                                 <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
-                                @ModelLocalizer[group.Caption ?? String.Empty]
+                                @if (group.Caption == PageActionGroup.DefaultGroups.Process || group.Caption == PageActionGroup.DefaultGroups.RelatedInformations)
+                                {
+                                    @Localizer[group.Caption]
+                                }
+                                else
+                                {
+                                    @ModelLocalizer[group.Caption ?? String.Empty]
+                                }
                             </Tab>
                         }
                     </Items>
