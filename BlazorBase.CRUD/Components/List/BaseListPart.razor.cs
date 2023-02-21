@@ -138,9 +138,9 @@ namespace BlazorBase.CRUD.Components.List
                 IsReadOnly = ReadOnly.Value;
         }
 
-        private void Model_OnForcePropertyRepaint(object sender, string propertyName)
+        private void Model_OnForcePropertyRepaint(object sender, string[] propertyNames)
         {
-            if (propertyName != Property.Name)
+            if (!propertyNames.Contains(Property.Name))
                 return;
 
             InvokeAsync(() => StateHasChanged());

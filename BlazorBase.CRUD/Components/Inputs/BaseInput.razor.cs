@@ -177,9 +177,9 @@ namespace BlazorBase.CRUD.Components.Inputs
         #endregion
 
         #region Events        
-        private void Model_OnForcePropertyRepaint(object sender, string propertyName)
+        private void Model_OnForcePropertyRepaint(object sender, string[] propertyNames)
         {
-            if (propertyName != Property.Name)
+            if (!propertyNames.Contains(Property.Name))
                 return;
 
             LastValueConversionFailed = false;

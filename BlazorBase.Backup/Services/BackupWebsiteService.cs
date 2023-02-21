@@ -34,7 +34,7 @@ public class BackupWebsiteService
     {
         var progressId = MessageHandler.ShowLoadingProgressMessage(
             message: Localizer["Create Website Backup"],
-            progressText: Localizer["Cleanup"],
+            progressText: Localizer["Cleanup "],
             showProgressInText: true
         );
 
@@ -61,7 +61,7 @@ public class BackupWebsiteService
         MessageHandler.UpdateLoadingProgressMessage(
             id: progressId,
             message: Localizer["Create Website Backup"],
-            progressText: Localizer["Creating Database Backup"],
+            progressText: Localizer["Creating Database Backup "],
             currentProgress: 10
         );
 
@@ -106,7 +106,7 @@ public class BackupWebsiteService
         MessageHandler.UpdateLoadingProgressMessage(
             id: progressId,
             message: Localizer["Create Website Backup"],
-            progressText: Localizer["Creating File Backup"],
+            progressText: Localizer["Creating File Backup "],
             currentProgress: 20
         );
 
@@ -118,7 +118,7 @@ public class BackupWebsiteService
             MessageHandler.UpdateLoadingProgressMessage(
                 id: progressId,
                 message: Localizer["Create Website Backup"],
-                progressText: Localizer["Creating File Backup"],
+                progressText: Localizer["Creating File Backup "],
                 currentProgress: 21 + (int)((double)i / files.Length * 0.78 * 100)
             );
         }

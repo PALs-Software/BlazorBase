@@ -29,7 +29,7 @@ namespace BlazorBase.CRUD.Models
     public class BaseModel : ComponentBase, IBaseModel
     {
         #region Events
-        public event EventHandler<string> OnForcePropertyRepaint;
+        public event EventHandler<string[]> OnForcePropertyRepaint;
 
         public event EventHandler OnReloadEntityFromDatabase;
 
@@ -130,9 +130,9 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region CRUD Methods
-        public void ForcePropertyRepaint(string propertyName)
+        public void ForcePropertyRepaint(params string[] propertyNames)
         {
-            OnForcePropertyRepaint?.Invoke(this, propertyName);
+            OnForcePropertyRepaint?.Invoke(this, propertyNames);
         }
 
         public void ReloadEntityFromDatabase()
