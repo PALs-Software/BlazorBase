@@ -117,46 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Email" xml:space="preserve">
-    <value>E-Mail</value>
+  <data name="Process" xml:space="preserve">
+    <value>Prozess</value>
   </data>
-  <data name="IdentityRole" xml:space="preserve">
-    <value>Rolle</value>
-  </data>
-  <data name="Reset Password" xml:space="preserve">
-    <value>Passwort zurücksetzen</value>
-  </data>
-  <data name="Send account setup email" xml:space="preserve">
-    <value>Konto Einrichtungsmail senden</value>
-  </data>
-  <data name="Sending e-mail..." xml:space="preserve">
-    <value>E-Mail senden...</value>
-  </data>
-  <data name="Sends the user an email to reset the password" xml:space="preserve">
-    <value>Sendet dem Benutzer eine E-Mail zum Zurücksetzen des Kennworts</value>
-  </data>
-  <data name="Sends the user an email to set up his account with an password" xml:space="preserve">
-    <value>Sendet dem Benutzer eine E-Mail, um sein Konto mit einem Passwort einzurichten</value>
-  </data>
-  <data name="Setup email" xml:space="preserve">
-    <value>Einrichtungsmail</value>
-  </data>
-  <data name="The password reset email was sent successfully" xml:space="preserve">
-    <value>Die E-Mail zum Zurücksetzen des Passworts wurde erfolgreich gesendet</value>
-  </data>
-  <data name="The setup email was sent successfully" xml:space="preserve">
-    <value>Die Einrichtungsmail wurde erfolgreich gesendet</value>
-  </data>
-  <data name="The user card cannot be saved to call actions: {0}" xml:space="preserve">
-    <value>Die Benutzerkarte kann nicht für Aktion gespeichert werden: {0}</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>Benutzer</value>
-  </data>
-  <data name="UserName" xml:space="preserve">
-    <value>Benutzername</value>
-  </data>
-  <data name="User_Plural" xml:space="preserve">
-    <value>Benutzer</value>
+  <data name="Related Informations" xml:space="preserve">
+    <value>Zugehörige Informationen</value>
   </data>
 </root>

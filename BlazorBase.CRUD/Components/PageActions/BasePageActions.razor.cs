@@ -32,7 +32,12 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public bool ShowOnlyButtons { get; set; }
         #endregion
 
-        #region Member
+        #region Injects
+        [Inject] public IStringLocalizer<PageActionGroup> PageActionGroupLocalizer { get; set; } = null!;
+        #endregion
+
+        #region Members
+
         protected List<PageActionGroup> PageActionGroups { get; set; } = new();
         protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new();
         protected string? SelectedPageActionGroup { get; set; }
@@ -40,6 +45,7 @@ namespace BlazorBase.CRUD.Components.PageActions
         public IBaseModel? OldBaseModel { get; set; }
 
         protected RenderFragment? CurrentActionRenderFragment = null;
+
         #endregion
 
         #region Init
