@@ -12,9 +12,9 @@
                         {
                             <Tab @key="group" Name="@group.Caption" title="@ModelLocalizer[group.ToolTip ?? String.Empty]">
                                 <BaseIcon IconName="@group.Image" Margin="Margin.Is2.FromRight" />
-                                @if (group.Caption == PageActionGroup.DefaultGroups.Process || group.Caption == PageActionGroup.DefaultGroups.RelatedInformations)
+                                @if ((group.Caption == PageActionGroup.DefaultGroups.Process || group.Caption == PageActionGroup.DefaultGroups.RelatedInformations) && group.Caption == ModelLocalizer[group.Caption])
                                 {
-                                    @Localizer[group.Caption]
+                                    @PageActionGroupLocalizer[group.Caption]
                                 }
                                 else
                                 {

@@ -62,9 +62,6 @@
     <EmbeddedResource Update="Components\List\BaseList.razor.resx">
       <Generator></Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Components\PageActions\BasePageActions.razor.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
       <LastGenOutput>ValidationAttributesTranslations.de.Designer.cs</LastGenOutput>
       <Generator>PublicResXFileCodeGenerator</Generator>
