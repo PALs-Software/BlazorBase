@@ -13,16 +13,9 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Enums\" />
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
     <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
