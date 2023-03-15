@@ -105,13 +105,18 @@ namespace BlazorBase.CRUD.Models
             return query;
         }
 
-        public string GetDisplayKey()
+        public string GetDisplayKey(string seperator)
         {
             var displayKeyProperties = GetType().GetDisplayKeyProperties();
             if (displayKeyProperties.Count == 0)
-                return String.Join(", ", GetPrimaryKeys());
+                return String.Join(seperator, GetPrimaryKeys());
             else
                 return GetDisplayKeyKeyValuePair(displayKeyProperties);
+        }
+
+        public string GetDisplayKey()
+        {
+            return GetDisplayKey(", ");
         }
 
         public string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties)
@@ -329,7 +334,7 @@ namespace BlazorBase.CRUD.Models
             var sourceProperties = this.GetType().GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
             TransferPropertiesTo(target, sourceProperties.ToArray());
         }
-        
+
         public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null)
         {
             ObjectExtension.TransferPropertiesTo(this, target, sourceProperties);

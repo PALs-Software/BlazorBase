@@ -10,11 +10,11 @@
         <Heading Margin="Margin.Is2.FromTop">
             @if (ViewMode)
             {
-                <span>@Localizer["View {0}", SingleDisplayName]</span>
+                <span>@Title</span>
             }
             else
             {
-                <span>@Localizer["Edit {0}", SingleDisplayName]</span>
+                <span>@Title</span>
                 <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
             }
         </Heading>
@@ -22,6 +22,8 @@
 
     @if (Model != null && ModelLoaded)
     {
+        <PageTitle>@PageTitle | @BlazorBaseOptions.ShortWebsiteName</PageTitle>
+
         if (ShowActions)
         {
             <BasePageActions BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.Card" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
@@ -52,20 +54,20 @@
                                 else if (displayItem.IsListProperty)
                                 {
                                     <BaseListPart @ref="AddToBaseListParts"
-                                        Model="Model"
-                                        Property="displayItem.Property"
-                                        Service="Service"
-                                        ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
-                                        OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                                        OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                                        OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                                        OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                                        OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                                        OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                                        OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                        OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
-                                        OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
-                                        OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
+                                  Model="Model"
+                                  Property="displayItem.Property"
+                                  Service="Service"
+                                  ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
+                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
+                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
+                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
+                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
+                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
+                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
+                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
+                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
+                                  OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
+                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
                                 }
                                 else if (ComponentModelInstance == null || !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(displayItem.Property.Name))
                                 {
@@ -91,10 +93,10 @@
                                                         <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
 
-                                                    @if(IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
+                                                    @if (IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
                                                     {
                                                         <FieldHelp>@fieldHelpCaption</FieldHelp>
-                                                    }                                                    
+                                                    }
                                                 </FieldBody>
                                             </Field>
                                         </Fields>

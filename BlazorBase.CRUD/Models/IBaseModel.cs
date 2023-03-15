@@ -37,6 +37,8 @@ namespace BlazorBase.CRUD.Models
 
         string GetDisplayKey();
 
+        string GetDisplayKey(string seperator);
+
         string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties);
         #endregion
 
