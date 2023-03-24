@@ -36,6 +36,10 @@
                                             @ModelLocalizer[action.Caption ?? String.Empty]
                                         </Button>
                                     }
+                                    @if (AdditionalPageActions != null)
+                                    {
+                                        @AdditionalPageActions(group)
+                                    }
                                 </TabPanel>
                             }
                         </TabsContent>

@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Card;
 using Newtonsoft.Json;
+using BlazorBase.CRUD.Components.PageActions.Models;
 
 namespace BlazorBase.CRUD.Components.List
 {
@@ -88,7 +89,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
-        [Parameter] public RenderFragment AdditionalHeaderButtons { get; set; }
+
+        [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
 
         #region Style
         [Parameter] public string TableClass { get; set; }

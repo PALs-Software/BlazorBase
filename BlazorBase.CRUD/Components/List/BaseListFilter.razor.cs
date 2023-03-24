@@ -25,6 +25,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public Dictionary<string, DisplayGroup> ListDisplayGroups { get; set; } = new();
 
         [Parameter] public RenderFragment ChildContent { get; set; }
+
+        [Parameter] public string Class { get; set; }
         #endregion
 
         #region Injects

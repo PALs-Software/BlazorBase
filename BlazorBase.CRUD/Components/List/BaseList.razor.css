@@ -4,3 +4,44 @@
     -ms-flex-wrap: wrap;
     flex-wrap: nowrap;
 }
+
+td {
+    white-space: nowrap;
+}
+
+.root-base-list-table-header-item {
+    padding: 0px;
+}
+
+.base-list-table-header {
+    background-color: var(--bs-body-bg);
+    position: sticky;
+    top: 0px;
+    z-index: 2;
+}
+
+::deep .sticky-border {
+    position: relative;
+    border: hidden;
+}
+
+    ::deep .sticky-border th:after,
+    ::deep .sticky-border th:before {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 100%;
+    }
+
+    ::deep .sticky-border th:after {
+        bottom: 0;
+        border-bottom: 2px solid var(--table-border-color);
+    }
+
+.base-list-table-header-column {
+    max-width: var(--base-list-table-header-column-max-width, 200px);
+}
+
+.base-list-table-cell {
+    max-width: var(--base-list-table-cell-max-width, 200px);
+}

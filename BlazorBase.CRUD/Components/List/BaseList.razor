@@ -1,170 +1,194 @@
 ﻿@using BlazorBase.CRUD.Models
+@using Blazorise.Icons.FontAwesome;
 
 @typeparam TModel
 @inherits BaseDisplayComponent
 
-@if (!HideTitle)
-{
-    <Heading Margin="Margin.Is2.FromTop">
-        @PluralDisplayName
-    </Heading>
-}
+<div class="base-list base-list-@(TModelType.Name)">
+    <table class="base-list-table table table-hover @TableClass">
+        <thead class="base-list-table-header">
+            <tr class="sticky-border">
+                <th class="root-base-list-table-header-item" colspan="100">
+                    @if (!HideTitle)
+                    {
+                        <Heading Margin="Margin.Is2.FromTop">
+                            @PluralDisplayName
+                        </Heading>
+                    }
 
-<BasePageActions Source="this" BaseModel="ComponentModelInstance" BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+                    <BasePageActions Source="this" BaseModel="ComponentModelInstance"
+                                     BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices"
+                                     ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
+                                     AdditionalPageActions="AdditionalHeaderPageActions" />
 
-<Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
-    @InvalidSummaryFeedback
-</Alert>
-
-@if(AdditionalHeaderButtons != null)
-{
-    @AdditionalHeaderButtons;
-}
-
-<table class="table table-hover @TableClass">
-    <thead>
-        <tr>
-            <th class="th-actions">
-                @if (UserCanAddEntries)
-                {
-                    <Button Color="Color.Success" Clicked="AddEntryAsync"><Icon Name="IconName.Add" /></Button>
-                }
-            </th>
-            @foreach (var displayGroup in DisplayGroups)
-            {
-                @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
-                {
-                    <th @onclick="async () => await OnSortClicked(displayItem, false)"
-                        @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
-                        @oncontextmenu:preventDefault="true"
-                        Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)"
-                        title="@(Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty)">
-
-                        <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower()">
-			                @IBaseModel.GetPropertyCaption(EventServices, new TModel(), ModelLocalizer, displayItem)
-
-                            @if (displayItem.SortDirection != Enums.SortDirection.None)
-                            {
-                                <Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
-                            }
-                        </div>
-                    </th>
-                }
-            }
-        </tr>
-        @if (Filterable)
-        {
-            <BaseListFilter ListDisplayGroups="DisplayGroups"
-                        OnFilterChanged="OnFilterChangedAsync" />
-        }
-    </thead>
-    <tbody>
-        <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList">
-            <tr>
-                <td>
-                    <Buttons>
-                        @if (UserCanEditEntries)
-                        {
-                            <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Icon Name="IconName.Edit" /></Button>
-                        }
-                        @if (UserCanOpenCardReadOnly)
-                        {
-                            <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Icon Name="IconName.Search" /></Button>
-                        }
-                        @if (UserCanDeleteEntries)
-                        {
-                            <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Icon Name="IconName.Delete" /></Button>
-                        }
-
-                        @if (AdditionalRowButtons != null)
-                        {
-                            @AdditionalRowButtons(context)
-                        }
-                    </Buttons>
-                </td>
-
+                    <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+                        @InvalidSummaryFeedback
+                    </Alert>
+                </th>
+            </tr>
+            <tr class="sticky-border">
+                <th class="th-actions">
+                    @if (UserCanAddEntries)
+                    {
+                        <Button Color="Color.Success" Clicked="AddEntryAsync"><Blazorise.Icon Name="IconName.Add" /></Button>
+                    }
+                </th>
                 @foreach (var displayGroup in DisplayGroups)
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <td class="base-list-table-cell-@displayItem.Property.Name.ToLower()">
-                            @{
-                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
-                                if (renderFragment != null)
+                        <th class="base-list-table-header-column"
+                    @onclick="async () => await OnSortClicked(displayItem, false)"
+                    @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
+                    @oncontextmenu:preventDefault="true"
+                    Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)"
+                    title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
+
+                            <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
+                                <span class="text-truncate">
+                                    @IBaseModel.GetPropertyCaption(EventServices, new TModel(), ModelLocalizer, displayItem)
+                                </span>
+
+
+                                @if (displayItem.SortDirection != Enums.SortDirection.None)
                                 {
-                                    @renderFragment
+                                    <Blazorise.Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
                                 }
-                                else
-                                {
-                                    @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
-                                    {
-                                        @DisplayForeignKey(displayItem, context)
-                                    }
-                                    else if (displayItem.Property.PropertyType.IsEnum)
-                                    {
-                                        @DisplayEnum(displayItem, context)
-                                    }
-                                    else
-                                    {
-                                        if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
-                                        {
-                                            if (displayItem.DateInputMode == DateInputMode.Date)
-                                            {
-                                                @(((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString())
-                                            }
-                                            else
-                                            {
-                                                @(((DateTime?)displayItem.Property.GetValue(context))?.ToString())
-                                            }
-                                        }
-                                        else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
-                                        {
-                                            if (displayItem.Property.GetValue(context) != null)
-                                            {
-                                                <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
-                                            }
-                                        }
-                                        else
-                                        {
-                                            @displayItem.Property.GetValue(context)
-                                        }
-                                    }
-                                }
-                            }
-                        </td>
+                            </div>
+                        </th>
                     }
                 }
             </tr>
-        </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
-    </tbody>
-</table>
+            @if (Filterable)
+            {
+                <BaseListFilter ListDisplayGroups="DisplayGroups" OnFilterChanged="OnFilterChangedAsync" Class="sticky-border" />
+            }
+        </thead>
+        <tbody>
+            <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
+                <tr>
+                    <td>
+                        <Buttons>
+                            @if (UserCanEditEntries)
+                            {
+                                <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
+                            }
+                            @if (UserCanOpenCardReadOnly)
+                            {
+                                <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
+                            }
+                            @if (UserCanDeleteEntries)
+                            {
+                                <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
+                            }
 
-@if (!DontRenderCard)
-{
-    <BaseModalCard @ref="BaseModalCard"
-               TModel="TModel"
-               SingleDisplayName="@SingleDisplayName"
-               ExplainText="@ExplainText"
-               ComponentModelInstance="ComponentModelInstance"
-               OnCardClosed="OnCardClosedAsync"
-               OnCreateNewEntryInstance="OnCreateNewEntryInstance"
-               OnGuiLoadData="OnGuiLoadData"
-               OnBeforeAddEntry="OnBeforeAddEntry"
-               OnAfterAddEntry="OnAfterAddEntry"
-               OnBeforeUpdateEntry="OnBeforeUpdateEntry"
-               OnAfterUpdateEntry="OnAfterUpdateEntry"
-               OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
-               OnBeforePropertyChanged="OnBeforePropertyChanged"
-               OnAfterPropertyChanged="OnAfterPropertyChanged"
-               OnAfterSaveChanges="OnAfterSaveChanges"
-               OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-               OnBeforeAddListEntry="OnBeforeAddListEntry"
-               OnAfterAddListEntry="OnAfterAddListEntry"
-               OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-               OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-               OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-               OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-               OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-               OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-               OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
-}
+                            @if (AdditionalRowButtons != null)
+                            {
+                                @AdditionalRowButtons(context)
+                            }
+                        </Buttons>
+                    </td>
+
+                    @foreach (var displayGroup in DisplayGroups)
+                    {
+                        @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                        {
+                            <td class="base-list-table-cell text-truncate base-list-table-cell-@displayItem.Property.Name.ToLower()">
+                                @{
+                                    var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
+                                    if (renderFragment != null)
+                                    {
+                                        @renderFragment
+                                    }
+                                    else
+                                    {
+                                        @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                        {
+                                            var currentValue = @DisplayForeignKey(displayItem, context);
+
+                                            <span title="@currentValue">
+                                                @currentValue
+                                            </span>
+                                        }
+                                        else if (displayItem.Property.PropertyType.IsEnum)
+                                        {
+                                            var currentValue = @DisplayEnum(displayItem, context);
+
+                                            <span title="@currentValue">
+                                                @currentValue
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                                            {
+                                                string currentValue;
+                                                if (displayItem.DateInputMode == DateInputMode.Date)
+                                                {
+                                                    currentValue = ((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString();
+                                                }
+                                                else
+                                                {
+                                                    currentValue = ((DateTime?)displayItem.Property.GetValue(context))?.ToString();
+                                                }
+
+                                                <span title="@currentValue">
+                                                    @currentValue
+                                                </span>
+                                            }
+                                            else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
+                                            {
+                                                if (displayItem.Property.GetValue(context) != null)
+                                                {
+                                                    <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var currentValue = @displayItem.Property.GetValue(context)?.ToString();
+
+                                                <span title="@currentValue">
+                                                    @currentValue
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                        }
+                    }
+                </tr>
+            </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
+        </tbody>
+    </table>
+
+    @if (!DontRenderCard)
+    {
+        <BaseModalCard @ref="BaseModalCard"
+                   TModel="TModel"
+                   SingleDisplayName="@SingleDisplayName"
+                   ExplainText="@ExplainText"
+                   ComponentModelInstance="ComponentModelInstance"
+                   OnCardClosed="OnCardClosedAsync"
+                   OnCreateNewEntryInstance="OnCreateNewEntryInstance"
+                   OnGuiLoadData="OnGuiLoadData"
+                   OnBeforeAddEntry="OnBeforeAddEntry"
+                   OnAfterAddEntry="OnAfterAddEntry"
+                   OnBeforeUpdateEntry="OnBeforeUpdateEntry"
+                   OnAfterUpdateEntry="OnAfterUpdateEntry"
+                   OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
+                   OnBeforePropertyChanged="OnBeforePropertyChanged"
+                   OnAfterPropertyChanged="OnAfterPropertyChanged"
+                   OnAfterSaveChanges="OnAfterSaveChanges"
+                   OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
+                   OnBeforeAddListEntry="OnBeforeAddListEntry"
+                   OnAfterAddListEntry="OnAfterAddListEntry"
+                   OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
+                   OnAfterRemoveListEntry="OnAfterRemoveListEntry"
+                   OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
+                   OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
+                   OnAfterListPropertyChanged="OnAfterListPropertyChanged"
+                   OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
+                   OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
+    }
+</div>

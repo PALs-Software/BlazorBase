@@ -22,7 +22,6 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public EventCallback<Exception> OnPageActionInvoked { get; set; }
         #endregion
 
-
         [Parameter] public object? Source { get; set; }
         [Parameter] public IBaseModel? BaseModel { get; set; }
         [Parameter] public Type BaseModelType { get; set; } = default!;
@@ -30,6 +29,8 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
         [Parameter] public GUIType GUIType { get; set; }
         [Parameter] public bool ShowOnlyButtons { get; set; }
+
+        [Parameter] public RenderFragment<PageActionGroup>? AdditionalPageActions { get; set; } = null!;
         #endregion
 
         #region Injects
@@ -38,7 +39,6 @@ namespace BlazorBase.CRUD.Components.PageActions
 
         #region Members
 
-        protected List<PageActionGroup> PageActionGroups { get; set; } = new();
         protected List<PageActionGroup> VisiblePageActionGroups { get; set; } = new();
         protected string? SelectedPageActionGroup { get; set; }
         public IBaseModel? OldBaseModel { get; set; }
@@ -78,8 +78,8 @@ namespace BlazorBase.CRUD.Components.PageActions
                 instance = Activator.CreateInstance(BaseModelType) as IBaseModel;
 
             VisiblePageActionGroups.Clear();
-            PageActionGroups = (await instance!.GeneratePageActionGroupsAsync(EventServices)) ?? new List<PageActionGroup>();
-            foreach (var group in PageActionGroups)
+            var pageActionGroups = (await instance!.GeneratePageActionGroupsAsync(EventServices)) ?? new List<PageActionGroup>();
+            foreach (var group in pageActionGroups)
                 if (group.VisibleInGUITypes.Contains(GUIType) && await group.Visible(EventServices))
                     VisiblePageActionGroups.Add(group);
 
@@ -88,7 +88,7 @@ namespace BlazorBase.CRUD.Components.PageActions
                     if (!pageAction.VisibleInGUITypes.Contains(GUIType) || pageAction.ShowAsRowButtonInList != ShowOnlyButtons || !await pageAction.Visible(EventServices))
                         group.PageActions.Remove(pageAction);
 
-            VisiblePageActionGroups.RemoveAll(group => group.PageActions.Count == 0);
+            VisiblePageActionGroups.RemoveAll(group => group.PageActions.Count == 0 && !group.PreventAutoRemovingByEmptyPageActions);
             SelectedPageActionGroup = VisiblePageActionGroups.FirstOrDefault()?.Caption;
         }
 

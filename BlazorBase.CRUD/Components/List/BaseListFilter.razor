@@ -1,7 +1,7 @@
 ﻿@inherits BaseDisplayComponent
 @using BlazorBase.CRUD.Helper
 
-<tr>
+<tr class="base-list-filter @Class">
     <th class="th-actions">
         <Button Color="Color.Success" title="@BaseListFilterLocalizer["Reset all filters"]" Clicked="ResetAllFiltersAsync"><Icon Name="IconName.Clear" /></Button>
     </th>
