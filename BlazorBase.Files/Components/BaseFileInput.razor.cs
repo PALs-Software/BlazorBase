@@ -113,7 +113,7 @@ namespace BlazorBase.Files.Components
                         do
                         {
                             newFile.TempFileId = Guid.NewGuid();
-                            tempFilePath = Path.Join(tempFileStorePath, newFile.GetTemporaryFileNameWithExtension());
+                            tempFilePath = Path.Join(tempFileStorePath, newFile.GetPhysicalTemporaryFileName());
                         } while (File.Exists(tempFilePath));
                     }
                     else
@@ -189,7 +189,7 @@ namespace BlazorBase.Files.Components
             if (!Directory.Exists(Options.TempFileStorePath))
                 Directory.CreateDirectory(Options.TempFileStorePath);
 
-            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.GetTemporaryFileNameWithExtension()));
+            using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.GetPhysicalTemporaryFileName()));
             await file.WriteToStreamAsync(fileStream);
             fileStream.Position = 0;
 

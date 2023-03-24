@@ -1,14 +1,5 @@
-﻿using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.NumberSeries;
-using BlazorBase.CRUD.Services;
-using Microsoft.EntityFrameworkCore;
+﻿using BlazorBase.CRUD.NumberSeries;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD
 {
@@ -20,9 +11,15 @@ namespace BlazorBase.CRUD
         /// <param name="serviceCollection"></param>
         /// <param name="configureOptions"></param>
         /// <returns></returns>
-        public static IServiceCollection AddBlazorBaseNumberSeries(this IServiceCollection serviceCollection)
+        public static IServiceCollection AddBlazorBaseNumberSeries(this IServiceCollection serviceCollection, params string[] allowedUserAccessRoles)
         {
             serviceCollection.AddSingleton<NoSeriesService>();
+
+            serviceCollection.AddAuthorization(options =>
+            {
+                options.AddPolicy(nameof(NoSeries), policy => policy.RequireRole(allowedUserAccessRoles));
+            });
+
             return serviceCollection;
         }
     }

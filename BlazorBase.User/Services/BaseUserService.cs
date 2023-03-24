@@ -47,6 +47,12 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return GetCurrentUserAsync(BaseService, asNoTracking);
     }
 
+    public virtual async Task<string> GetCurrentUserIdentityIdAsync()
+    {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        return UserManager.GetUserId(authenticationState.User);
+    }
+
     public virtual async Task<TUser> GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking = true)
     {
         if (id == null)
@@ -62,10 +68,15 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return GetUserByApplicationUserIdAsync(BaseService, id, asNoTracking);
     }
 
+    public static bool DatabaseHasNoUsers(IServiceProvider serviceProvider)
+    {
+        var userManager = serviceProvider.GetRequiredService<UserManager<TIdentityUser>>();
+        return !userManager.Users.Any();
+    }
+
     public static async Task SeedUserRolesAsync(IServiceProvider serviceProvider)
     {
-        using var scope = serviceProvider.CreateAsyncScope();
-        var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+        var roleManager = serviceProvider.GetService<RoleManager<IdentityRole>>();
         var userRoles = Enum.GetNames<TIdentityRole>();
 
         foreach (var role in userRoles)
@@ -78,8 +89,8 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
 
     public static async Task SeedUserAsync(IServiceProvider serviceProvider, string username, string email, string initPassword, TIdentityRole role)
     {
-        using var scope = serviceProvider.CreateAsyncScope();
-        var userManager = scope.ServiceProvider.GetService<UserManager<TIdentityUser>>();
+        var userManager = serviceProvider.GetRequiredService<UserManager<TIdentityUser>>();
+
         if (await userManager.FindByEmailAsync(email) != null)
             return;
 
@@ -90,18 +101,18 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
             EmailConfirmed = true
         };
 
-        var result = userManager.CreateAsync(identityUser, initPassword).Result;
+        var result = await userManager.CreateAsync(identityUser, initPassword);
 
         if (result.Succeeded)
         {
-            result = userManager.AddToRoleAsync(identityUser, role.ToString()).Result;
+            result = await userManager.AddToRoleAsync(identityUser, role.ToString());
             if (!result.Succeeded)
                 throw new Exception(result.GetErrorMessage());
         }
         else
             throw new Exception(result.GetErrorMessage());
 
-        var baseService = scope.ServiceProvider.GetService<BaseService>();
+        var baseService = serviceProvider.GetRequiredService<BaseService>();
         var user = new TUser
         {
             Id = baseService.GetNewPrimaryKey<TUser>(),

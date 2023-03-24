@@ -26,7 +26,7 @@
 
         if (ShowActions)
         {
-            <BasePageActions BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.Card" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+            <BasePageActions Source="this" BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.Card" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
         }
 
         <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
@@ -58,16 +58,17 @@
                                   Property="displayItem.Property"
                                   Service="Service"
                                   ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
-                                  OnCreateNewListEntryInstance="(args) => OnCreateNewListEntryInstance.InvokeAsync(args)"
-                                  OnBeforeAddListEntry="(args) => OnBeforeAddListEntry.InvokeAsync(args)"
-                                  OnAfterAddListEntry="(args) => OnAfterAddListEntry.InvokeAsync(args)"
-                                  OnBeforeRemoveListEntry="(args) => OnBeforeRemoveListEntry.InvokeAsync(args)"
-                                  OnAfterRemoveListEntry="(args) => OnAfterRemoveListEntry.InvokeAsync(args)"
-                                  OnBeforeConvertListPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(args)"
-                                  OnBeforeListPropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(args)"
-                                  OnAfterListPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(args)"
-                                  OnAfterMoveListEntryUp="(args) => OnAfterMoveListEntryUp.InvokeAsync(args)"
-                                  OnAfterMoveListEntryDown="(args) => OnAfterMoveListEntryDown.InvokeAsync(args)" />
+                                  OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
+                                  OnBeforeAddListEntry="OnBeforeAddListEntry"
+                                  OnAfterAddListEntry="OnAfterAddListEntry"
+                                  OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
+                                  OnAfterRemoveListEntry="OnAfterRemoveListEntry"
+                                  OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
+                                  OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
+                                  OnAfterListPropertyChanged="OnAfterListPropertyChanged"
+                                  OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
+                                  OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
+
                                 }
                                 else if (ComponentModelInstance == null || !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(displayItem.Property.Name))
                                 {

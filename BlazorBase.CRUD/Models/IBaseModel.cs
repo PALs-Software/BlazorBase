@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Components.PageActions.Models;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
@@ -8,6 +9,7 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -19,7 +21,7 @@ namespace BlazorBase.CRUD.Models
     public interface IBaseModel
     {
         #region Events
-        event EventHandler<string> OnForcePropertyRepaint;
+        event EventHandler<string[]> OnForcePropertyRepaint;
 
         event EventHandler OnReloadEntityFromDatabase;
 
@@ -43,7 +45,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region CRUD Methods
-        void ForcePropertyRepaint(string propertyName);
+        void ForcePropertyRepaint(params string[] propertyNames);
         void ReloadEntityFromDatabase();
 
         void RecalculateVisibilityStatesOfActions();
@@ -92,6 +94,12 @@ namespace BlazorBase.CRUD.Models
         Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args);
         #endregion
 
+        #region Data Loading
+
+        void OnGuiLoadData(OnGuiLoadDataArgs args);
+
+        #endregion
+
         #endregion
 
         #region Validation Methods
@@ -100,11 +108,10 @@ namespace BlazorBase.CRUD.Models
 
         bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
         bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null);
-        bool CheckIfModelIsInAddingMode(BaseService baseService);
         #endregion
 
         #region PageActions
-        List<PageActionGroup> GeneratePageActionGroups();
+        Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices);
         #endregion
 
         #region ComponentBase        
@@ -117,7 +124,7 @@ namespace BlazorBase.CRUD.Models
         Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
         List<string> PropertyNamesToRemoveFromListView { get; set; }
         #endregion
-
+               
         #region Helper Methods
         void ClearPropertyValues();
         Type GetUnproxiedType();

@@ -23,8 +23,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.CRUD.NumberSerie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.MessageHandling", "BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj", "{80A753EF-11BC-4BCB-8A70-525686D0E758}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.RichTextEditor", "BlazorBase.RichTextEditor\BlazorBase.RichTextEditor.csproj", "{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.RichTextEditor", "BlazorBase.RichTextEditor\BlazorBase.RichTextEditor.csproj", "{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Mailing", "BlazorBase.Mailing\BlazorBase.Mailing.csproj", "{E051A659-2321-4BEF-B760-2359A77927EC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Backup", "BlazorBase.Backup\BlazorBase.Backup.csproj", "{6DAF7CFE-CA95-4CBB-BD8A-39930A1A7556}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Restore", "BlazorBase.Restore\BlazorBase.Restore.csproj", "{4E71EDB6-F646-43A5-B248-9DF1D91306E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.DataUpgrade", "BlazorBase.DataUpgrade\BlazorBase.DataUpgrade.csproj", "{4B9A7699-9A24-4587-81C6-5CDDD6155DDF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -72,6 +79,18 @@ Global
 		{E051A659-2321-4BEF-B760-2359A77927EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E051A659-2321-4BEF-B760-2359A77927EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E051A659-2321-4BEF-B760-2359A77927EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DAF7CFE-CA95-4CBB-BD8A-39930A1A7556}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DAF7CFE-CA95-4CBB-BD8A-39930A1A7556}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DAF7CFE-CA95-4CBB-BD8A-39930A1A7556}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DAF7CFE-CA95-4CBB-BD8A-39930A1A7556}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E71EDB6-F646-43A5-B248-9DF1D91306E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E71EDB6-F646-43A5-B248-9DF1D91306E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E71EDB6-F646-43A5-B248-9DF1D91306E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E71EDB6-F646-43A5-B248-9DF1D91306E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4B9A7699-9A24-4587-81C6-5CDDD6155DDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B9A7699-9A24-4587-81C6-5CDDD6155DDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B9A7699-9A24-4587-81C6-5CDDD6155DDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B9A7699-9A24-4587-81C6-5CDDD6155DDF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +106,9 @@ Global
 		{80A753EF-11BC-4BCB-8A70-525686D0E758} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 		{AF37BBCE-AB9A-413C-A1CA-EFFDFC761BBC} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 		{E051A659-2321-4BEF-B760-2359A77927EC} = {DB570994-9245-4729-9B12-A02CCED2F12F}
+		{6DAF7CFE-CA95-4CBB-BD8A-39930A1A7556} = {DB570994-9245-4729-9B12-A02CCED2F12F}
+		{4E71EDB6-F646-43A5-B248-9DF1D91306E9} = {DB570994-9245-4729-9B12-A02CCED2F12F}
+		{4B9A7699-9A24-4587-81C6-5CDDD6155DDF} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F9C395A-A326-4362-81F4-AF9526CBEE16}

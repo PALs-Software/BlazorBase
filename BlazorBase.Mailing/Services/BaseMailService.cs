@@ -1,11 +1,10 @@
 ﻿using BlazorBase.Mailing.Models;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
-using BlazorBase.Models;
-using BlazorBase.Modules;
 using BlazorBase.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Mail;
 using System.Runtime.Versioning;
@@ -19,9 +18,9 @@ public class BaseMailService<TTemplateLocalizer> : BaseMailService
     protected readonly IStringLocalizer<TTemplateLocalizer> TemplateLocalizer;
     #endregion
 
-    public BaseMailService(BlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
-                    IStringLocalizer<BaseMailService> localizer, IHttpContextAccessor httpContextAccessor,
-                    IStringLocalizer<TTemplateLocalizer> templateLocalizer) : base(options, messageHandler, errorHandler, localizer, httpContextAccessor)
+    public BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider serviceProvider, BaseErrorHandler errorHandler,
+                    IStringLocalizer<BaseMailService> localizer,
+                    IStringLocalizer<TTemplateLocalizer> templateLocalizer, ILogger<BaseMailService> logger) : base(options, serviceProvider, errorHandler, localizer, logger)
     {
         TemplateLocalizer = templateLocalizer;
     }
@@ -94,21 +93,31 @@ public class BaseMailService<TTemplateLocalizer> : BaseMailService
 public class BaseMailService
 {
     #region Injects
+
     protected readonly IBlazorBaseMailingOptions MailingOptions;
-    protected readonly IMessageHandler MessageHandler;
+    protected readonly IServiceProvider ServiceProvider;
     protected readonly BaseErrorHandler ErrorHandler;
     protected readonly IStringLocalizer<BaseMailService> Localizer;
-    protected readonly IHttpContextAccessor HttpContextAccessor;
+    protected readonly ILogger<BaseMailService> Logger;
+
     #endregion
 
-    public BaseMailService(IBlazorBaseMailingOptions options, IMessageHandler messageHandler, BaseErrorHandler errorHandler,
-                       IStringLocalizer<BaseMailService> localizer, IHttpContextAccessor httpContextAccessor)
+    #region Properties
+
+    public bool DisplayErrorMessagesToUser { get; set; } = true;
+
+    public string? LastErrorMessage { get; protected set; } = null;
+
+    #endregion
+
+    public BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider serviceProvider, BaseErrorHandler errorHandler,
+                       IStringLocalizer<BaseMailService> localizer, ILogger<BaseMailService> logger)
     {
         MailingOptions = options;
-        MessageHandler = messageHandler;
+        ServiceProvider = serviceProvider;
         ErrorHandler = errorHandler;
         Localizer = localizer;
-        HttpContextAccessor = httpContextAccessor;
+        Logger = logger;
     }
 
     /// <summary>
@@ -134,41 +143,51 @@ public class BaseMailService
     /// <returns>The task object representing the asynchronous operation</returns>
     public async Task<bool> SendMailAsync(List<string> receivers, string subject, string body, params string[] attachmentPathes)
     {
-        ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-
-        var client = new SmtpClient()
-        {
-            Host = MailingOptions.Server,
-            UseDefaultCredentials = MailingOptions.UseDefaultCredentials,
-            Port = MailingOptions.Port,
-            EnableSsl = MailingOptions.EnableSSL,
-        };
-        if (!MailingOptions.UseDefaultCredentials)
-            client.Credentials = new NetworkCredential(MailingOptions.Host, MailingOptions.HostPassword, MailingOptions.Domain);
-
-        var mailMessage = new MailMessage
-        {
-            From = new MailAddress(MailingOptions.SenderAddress),
-            Body = body,
-            Subject = subject,
-            IsBodyHtml = true
-        };
-
-        foreach (var item in attachmentPathes)
-            mailMessage.Attachments.Add(new Attachment(item));
-
-        foreach (var item in receivers)
-            if (!String.IsNullOrEmpty(item))
-                mailMessage.To.Add(item);
+        LastErrorMessage = null;
 
         try
         {
+            ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+
+            var client = new SmtpClient()
+            {
+                Host = MailingOptions.Server,
+                UseDefaultCredentials = MailingOptions.UseDefaultCredentials,
+                Port = MailingOptions.Port,
+                EnableSsl = MailingOptions.EnableSSL,
+            };
+            if (!MailingOptions.UseDefaultCredentials)
+                client.Credentials = new NetworkCredential(MailingOptions.Host, MailingOptions.HostPassword, MailingOptions.Domain);
+
+            var mailMessage = new MailMessage
+            {
+                From = new MailAddress(MailingOptions.SenderAddress),
+                Body = body,
+                Subject = subject,
+                IsBodyHtml = true
+            };
+
+            foreach (var item in attachmentPathes)
+                mailMessage.Attachments.Add(new Attachment(item));
+
+            foreach (var item in receivers)
+                if (!String.IsNullOrEmpty(item))
+                    mailMessage.To.Add(item);
+
             await client.SendMailAsync(mailMessage);
         }
         catch (Exception e)
         {
             var errorMessage = ErrorHandler.PrepareExceptionErrorMessage(e);
-            MessageHandler.ShowMessage(Localizer["Error sending email to {0} with subject {1}", String.Join(";", receivers), subject], errorMessage, MessageType.Error);
+            LastErrorMessage = errorMessage;
+            Logger.LogError("Error sending email to {Receivers} with subject {Subject}:\n\n{ErrorMessage}", String.Join(";", receivers), subject, errorMessage);
+
+            if (DisplayErrorMessagesToUser)
+            {
+                var messageHandler = ServiceProvider.GetRequiredService<IMessageHandler>();
+                messageHandler.ShowMessage(Localizer["Error sending email to {0} with subject {1}", String.Join(";", receivers), subject], errorMessage, MessageType.Error);
+            }
+
             return false;
         }
 

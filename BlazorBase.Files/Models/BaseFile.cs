@@ -18,6 +18,7 @@ using System.Reflection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.DependencyInjection;
 using System.Web;
+using Microsoft.Extensions.Options;
 
 namespace BlazorBase.Files.Models
 {
@@ -103,6 +104,9 @@ namespace BlazorBase.Files.Models
         public string GetFileNameWithExtension() => $"{Id}{BaseFileType}";
         public string GetTemporaryFileNameWithExtension() => $"{TempFileId}{BaseFileType}";
 
+        public string GetPhysicalFileName() => $"{Id}_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
+        public string GetPhysicalTemporaryFileName() => $"{TempFileId}_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
+
         public string GetFileLink(bool ignoreTemporaryLink = false)
         {
             if (String.IsNullOrEmpty(BaseFileType))
@@ -118,12 +122,12 @@ namespace BlazorBase.Files.Models
         {
             var options = BlazorBaseFileOptions.Instance;
             if (TempFileId == Guid.Empty)
-                return Path.Join(options.FileStorePath, GetFileNameWithExtension());
+                return Path.Join(options.FileStorePath, GetPhysicalFileName());
             else
-                return Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension());
+                return Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName());
         }
 
-        public async Task<byte[]> GetFileContentAsync()
+        public Task<byte[]> GetFileContentAsync()
         {
             if (String.IsNullOrEmpty(BaseFileType) || FileSize == 0 || String.IsNullOrEmpty(Hash))
                 return null;
@@ -132,7 +136,7 @@ namespace BlazorBase.Files.Models
             if (!File.Exists(path))
                 return null;
 
-            return await File.ReadAllBytesAsync(path);
+            return File.ReadAllBytesAsync(path);
         }
 
         public async Task<string> GetFileAsBase64StringAsync()
@@ -152,7 +156,7 @@ namespace BlazorBase.Files.Models
             {
                 var localizer = eventServices.ServiceProvider.GetService<IStringLocalizer<T>>();
                 throw new Exception(localizer["The file \"{0}\" can not be copied, because file with the id \"{1}\" can not be found on the hard disk. Maybe the file was deleted on the disk, but not the file entry.", FileName, Id]);
-            }                
+            }
 
             return await CreateFileAsync<T>(eventServices, FileName, BaseFileType, MimeFileType, fileContent);
         }
@@ -168,9 +172,15 @@ namespace BlazorBase.Files.Models
                 if (!Directory.Exists(options.FileStorePath))
                     Directory.CreateDirectory(options.FileStorePath);
 
-                var tempFilePath = Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension());
+                var tempFilePath = Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName());
                 if (File.Exists(tempFilePath))
-                    File.Move(tempFilePath, Path.Join(options.FileStorePath, GetFileNameWithExtension()), true);
+                {
+                    var oldFilesWithOtherMimeTypes = Directory.EnumerateFiles(options.FileStorePath, $"{Id}_*");
+                    foreach (var oldFilePath in oldFilesWithOtherMimeTypes)
+                        File.Delete(oldFilePath);
+
+                    File.Move(tempFilePath, Path.Join(options.FileStorePath, GetPhysicalFileName()), true);
+                }
 
                 TempFileId = Guid.Empty;
             });
@@ -184,7 +194,7 @@ namespace BlazorBase.Files.Models
                     return;
 
                 var options = BlazorBaseFileOptions.Instance;
-                var filePath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, GetTemporaryFileNameWithExtension()) : Path.Join(options.FileStorePath, GetFileNameWithExtension());
+                var filePath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName()) : Path.Join(options.FileStorePath, GetPhysicalFileName());
 
                 if (File.Exists(filePath))
                     File.Delete(filePath);
@@ -209,7 +219,7 @@ namespace BlazorBase.Files.Models
         }
 
         public static async Task<TBaseFile> CreateFileAsync<TBaseFile>(EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent) where TBaseFile : BaseFile, new()
-        {           
+        {
             var file = new TBaseFile()
             {
                 FileName = fileName,
@@ -219,7 +229,7 @@ namespace BlazorBase.Files.Models
                 Hash = ComputeSha256Hash(fileContent)
             };
 
-            return (TBaseFile) await FinishCreateFileTaskAsync(file, eventServices, fileContent);
+            return (TBaseFile)await FinishCreateFileTaskAsync(file, eventServices, fileContent);
         }
         public static async Task<BaseFile> CreateFileAsync(Type FileType, EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent)
         {
@@ -245,7 +255,7 @@ namespace BlazorBase.Files.Models
             do
             {
                 file.TempFileId = Guid.NewGuid();
-                tempFilePath = Path.Join(options.TempFileStorePath, file.GetTemporaryFileNameWithExtension());
+                tempFilePath = Path.Join(options.TempFileStorePath, file.GetPhysicalTemporaryFileName());
             } while (File.Exists(tempFilePath));
 
             await File.WriteAllBytesAsync(tempFilePath, fileContent);

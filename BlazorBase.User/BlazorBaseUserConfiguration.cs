@@ -1,4 +1,6 @@
-﻿using BlazorBase.User.Controller;
+﻿using BlazorBase.Mailing.Services;
+using BlazorBase.User.Controller;
+using BlazorBase.User.Enums;
 using BlazorBase.User.Models;
 using BlazorBase.User.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -29,23 +31,26 @@ public static class BlazorBaseUserConfiguration
         // If options handler is not defined we will get an exception so
         // we need to initialize and empty action.
         if (configureOptions == null)
-            configureOptions = (e) => { e.LoginPath = "/User/Login"; };
+            configureOptions = (e) => { };
 
         serviceCollection
             .AddSingleton(configureOptions)
-            .AddSingleton<IBlazorBaseUserOptions, TOptions>()
+            .AddTransient<IBlazorBaseUserOptions, TOptions>()
             .AddSingleton<IBaseUser, TUser>()
             .AddTransient<TUserService>()
-        
 
         .AddControllers().AddApplicationPart(typeof(UserLoginController).Assembly).AddControllersAsServices();
+
+        if (OperatingSystem.IsWindows())
+            serviceCollection.AddTransient<BaseMailService<UserMailTemplate>>();
 
         var options = new TOptions();
         configureOptions.Invoke(options);
 
-        serviceCollection.ConfigureApplicationCookie(options =>
+        serviceCollection.ConfigureApplicationCookie(acOptions =>
         {
-            options.LoginPath = options.LoginPath;
+            acOptions.LoginPath = options.LoginPath;
+            acOptions.AccessDeniedPath = options.IdentityAccessDeniedPath;
         });
 
         return serviceCollection;

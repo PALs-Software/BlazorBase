@@ -14,7 +14,7 @@
             </Progress>
         </LoadingIndicator>
 
-        <Modal @ref="modalInfo.Value.Modal" Visible="true" Closing="async (closingArgs) => await OnModalClosing(modalInfo.Value, closingArgs)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
+        <Modal @key="modalInfo" @ref="modalInfo.Value.Modal" Visible="true" Closing="async (closingArgs) => await OnModalClosing(modalInfo.Value, closingArgs)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
             <ModalContent Centered="true" Size="args.ModalSize">
                 <ModalHeader>
                     <ModalTitle>

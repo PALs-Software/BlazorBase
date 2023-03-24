@@ -18,7 +18,6 @@ public class BlazorBaseFileOptions : IBlazorBaseFileOptions
     #region Properties
 
     public BaseOptionsImportMode OptionsImportMode { get; set; }
-    public Type OptionsImportFromDatabaseEntryType { get; set; } = default!;
 
     public Type FileImplementationType { get; set; } = typeof(BaseFile);
     public string ControllerRoute { get; set; } = "api/BaseFile";

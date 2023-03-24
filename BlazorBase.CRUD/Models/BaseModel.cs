@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.List;
+using BlazorBase.CRUD.Components.PageActions.Models;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
@@ -28,7 +29,7 @@ namespace BlazorBase.CRUD.Models
     public class BaseModel : ComponentBase, IBaseModel
     {
         #region Events
-        public event EventHandler<string> OnForcePropertyRepaint;
+        public event EventHandler<string[]> OnForcePropertyRepaint;
 
         public event EventHandler OnReloadEntityFromDatabase;
 
@@ -135,9 +136,9 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region CRUD Methods
-        public void ForcePropertyRepaint(string propertyName)
+        public void ForcePropertyRepaint(params string[] propertyNames)
         {
-            OnForcePropertyRepaint?.Invoke(this, propertyName);
+            OnForcePropertyRepaint?.Invoke(this, propertyNames);
         }
 
         public void ReloadEntityFromDatabase()
@@ -207,6 +208,13 @@ namespace BlazorBase.CRUD.Models
         public virtual Task OnAfterMoveListEntryDown(OnAfterMoveListEntryDownArgs args) { return Task.CompletedTask; }
         public virtual Task OnAfterMoveListEntryUp(OnAfterMoveListEntryUpArgs args) { return Task.CompletedTask; }
         #endregion
+
+        #region Data Loading
+
+        public virtual void OnGuiLoadData(OnGuiLoadDataArgs args) { }
+
+        #endregion
+
         #endregion
 
         #region Validation Methods
@@ -256,10 +264,6 @@ namespace BlazorBase.CRUD.Models
             return TryValidate(out validationResults, validationContext);
         }
 
-        public bool CheckIfModelIsInAddingMode(BaseService baseService)
-        {
-            return baseService.DbContext.Find(GetUnproxiedType(), GetPrimaryKeys()) != this;
-        }
         #endregion
 
         #region ComponentBase
@@ -303,7 +307,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region PageActions
-        public virtual List<PageActionGroup> GeneratePageActionGroups() { return null; }
+        public virtual Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices) { return Task.FromResult<List<PageActionGroup>>(null); }
         #endregion
 
         #region Helper Methods

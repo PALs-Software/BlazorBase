@@ -123,9 +123,6 @@
   <data name="IdentityRole" xml:space="preserve">
     <value>Rolle</value>
   </data>
-  <data name="Process" xml:space="preserve">
-    <value>Prozess</value>
-  </data>
   <data name="Reset Password" xml:space="preserve">
     <value>Passwort zurücksetzen</value>
   </data>

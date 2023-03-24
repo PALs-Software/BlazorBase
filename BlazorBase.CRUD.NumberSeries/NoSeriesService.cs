@@ -1,7 +1,5 @@
 ﻿using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Linq;

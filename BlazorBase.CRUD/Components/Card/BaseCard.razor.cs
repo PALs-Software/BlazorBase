@@ -11,7 +11,6 @@ using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Models;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
@@ -33,6 +32,7 @@ namespace BlazorBase.CRUD.Components.Card
         [Parameter] public EventCallback<string> OnTitleCalculated { get; set; }
 
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
+        [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
         [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -142,7 +142,6 @@ namespace BlazorBase.CRUD.Components.Card
 
             return null;
         }
-
         protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
          {
              builder.OpenComponent(0, baseInputExtensionType);
@@ -191,6 +190,10 @@ namespace BlazorBase.CRUD.Components.Card
 
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
+
+            var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
+            await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
+            Model.OnGuiLoadData(onGuiLoadDataArgs);
 
             await PrepareForeignKeyProperties(Service, Model);
             await PrepareCustomLookupData(Model, EventServices);
@@ -243,8 +246,7 @@ namespace BlazorBase.CRUD.Components.Card
                     if (args.AbortAdding)
                         return false;
 
-                    var dbEntry = Service.DbContext.Entry(Model);
-                    if (dbEntry.State != EntityState.Added && !await Service.AddEntryAsync(Model))
+                    if (!await Service.AddEntryAsync(Model))
                     {
                         ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
                         if (showSnackBar)
@@ -290,7 +292,6 @@ namespace BlazorBase.CRUD.Components.Card
 
             if (showSnackBar)
                 Snackbar.Show();
-
             return success;
         }
 
@@ -380,6 +381,9 @@ namespace BlazorBase.CRUD.Components.Card
                         await value.OnAfterCardSaveChanges(onAfterSaveChangesArgs);
                 }
             }
+
+            foreach (var baseListPart in BaseListParts)
+                baseListPart.OnAfterCardSaveChanges();
         }
 
         #endregion
