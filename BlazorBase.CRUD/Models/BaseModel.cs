@@ -61,7 +61,6 @@ namespace BlazorBase.CRUD.Models
         [NotMapped] public virtual bool UserCanDeleteEntries { get; protected set; } = true;
         [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; protected set; }
         [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
-        [NotMapped] public virtual List<string> PropertyNamesToRemoveFromListView { get; set; } = new List<string>();
         #endregion
 
         #region Attribute Methods

@@ -54,23 +54,22 @@
                                 else if (displayItem.IsListProperty)
                                 {
                                     <BaseListPart @ref="AddToBaseListParts"
-                                  Model="Model"
-                                  Property="displayItem.Property"
-                                  Service="Service"
-                                  ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
-                                  OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-                                  OnBeforeAddListEntry="OnBeforeAddListEntry"
-                                  OnAfterAddListEntry="OnAfterAddListEntry"
-                                  OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-                                  OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-                                  OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-                                  OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-                                  OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-                                  OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-                                  OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
-
+                                        Model="Model"
+                                        Property="displayItem.Property"
+                                        Service="Service"
+                                        ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
+                                        OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
+                                        OnBeforeAddListEntry="OnBeforeAddListEntry"
+                                        OnAfterAddListEntry="OnAfterAddListEntry"
+                                        OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
+                                        OnAfterRemoveListEntry="OnAfterRemoveListEntry"
+                                        OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
+                                        OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
+                                        OnAfterListPropertyChanged="OnAfterListPropertyChanged"
+                                        OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
+                                        OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
                                 }
-                                else if (ComponentModelInstance == null || !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(displayItem.Property.Name))
+                                else
                                 {
                                     <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
                                         <Fields>
@@ -94,10 +93,10 @@
                                                         <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
 
-                                                    @if (IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
+                                                    @if(IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
                                                     {
                                                         <FieldHelp>@fieldHelpCaption</FieldHelp>
-                                                    }
+                                                    }                                                    
                                                 </FieldBody>
                                             </Field>
                                         </Fields>

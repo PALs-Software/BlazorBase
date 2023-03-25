@@ -19,7 +19,9 @@ namespace BlazorBase.CRUD.Components.Inputs
 {
     public partial class BaseSelectListInput : BaseInput
     {
+        #region Parameter
         [Parameter] public List<KeyValuePair<string, string>> Data { get; set; }
+        #endregion
 
         #region Injects
         [Inject] protected IStringLocalizer<BaseSelectListInput> Localizer { get; set; }

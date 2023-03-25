@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -40,8 +41,7 @@ namespace BlazorBase.CRUD.Components.General
         public class DisplayItem
         {
             public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
-                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable, bool isVisible)
-
+                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
             {
                 Property = property;
                 Attribute = attribute;
@@ -54,7 +54,6 @@ namespace BlazorBase.CRUD.Components.General
                 IsSortable = isSortable;
                 SortDirection = sortDirection;
                 IsFilterable = isFilterable;
-                IsVisible = isVisible;
             }
 
             public PropertyInfo Property { get; set; }
@@ -70,7 +69,6 @@ namespace BlazorBase.CRUD.Components.General
             public Type DisplayPropertyType { get; set; }
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
-            public bool IsVisible { get; set; }
 
             public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
             {
@@ -96,7 +94,7 @@ namespace BlazorBase.CRUD.Components.General
                         return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
                                 property.IsKey(), property.IsListProperty(), dateInputMode,
                                 property.Name, property.PropertyType,
-                                false, attribute.SortDirection, false, true);
+                                false, attribute.SortDirection, false);
                     }
                 }
 
@@ -116,7 +114,7 @@ namespace BlazorBase.CRUD.Components.General
                 return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
                     property.IsKey(), property.IsListProperty(), dateInputMode,
                     displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
-                    sortAndFilterable, attribute.SortDirection, sortAndFilterable, true);
+                    sortAndFilterable, attribute.SortDirection, sortAndFilterable);
             }
         }
 
@@ -159,9 +157,6 @@ namespace BlazorBase.CRUD.Components.General
                 if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup))
                     DisplayGroups[displayItem.Attribute.DisplayGroup] = new DisplayGroup(displayItem.Attribute, new List<DisplayItem>());
 
-                if (componentModelInstance != null)
-                    displayItem.IsVisible = !componentModelInstance.PropertyNamesToRemoveFromListView.Contains(property.Name);
-
                 DisplayGroups[displayItem.Attribute.DisplayGroup].DisplayItems.Add(displayItem);
             }
 
@@ -191,7 +186,11 @@ namespace BlazorBase.CRUD.Components.General
             {
                 var isReadonly = foreignKeyProperty.IsReadOnlyInGUI();
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                var foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                PropertyInfo foreignProperty;
+                if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
+                    foreignProperty = foreignKeyProperty;
+                else
+                    foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
                 var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
 
                 if (foreignKeyType == null)
@@ -241,12 +240,13 @@ namespace BlazorBase.CRUD.Components.General
 
         protected void AddEntryToForeignKeyList(IBaseModel model, List<KeyValuePair<string, string>> foreignKeyList, List<PropertyInfo> displayKeyProperties)
         {
-            var primaryKeysAsString = model.GetPrimaryKeysAsString();
+            var primaryKeys = model.GetPrimaryKeys();
+            var primaryKeysAsJson = JsonConvert.SerializeObject(model.GetPrimaryKeys());
 
             if (displayKeyProperties.Count == 0)
-                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, primaryKeysAsString));
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsJson, String.Join(", ", primaryKeys)));
             else
-                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsString, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
+                foreignKeyList.Add(new KeyValuePair<string, string>(primaryKeysAsJson, model?.GetDisplayKeyKeyValuePair(displayKeyProperties)));
         }
 
         protected virtual async Task PrepareCustomLookupData(IBaseModel cardModel, EventServices eventServices)

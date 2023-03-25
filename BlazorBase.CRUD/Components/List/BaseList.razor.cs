@@ -86,8 +86,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public bool Sortable { get; set; } = true;
         [Parameter] public bool Filterable { get; set; } = true;
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
-        [Parameter] public string MaxHeight { get; set; } = "";
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
+
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
         [Parameter] public RenderFragment AdditionalHeaderButtons { get; set; }
 
@@ -116,7 +116,6 @@ namespace BlazorBase.CRUD.Components.List
         protected List<TModel> Entries = new();
         protected Type TModelType;
 
-        protected BaseFilterModalCard<TModel> BaseFilterModalCard = default!;
         protected BaseModalCard<TModel> BaseModalCard = default!;
         protected Virtualize<TModel> VirtualizeList = default!;
 
@@ -465,15 +464,6 @@ namespace BlazorBase.CRUD.Components.List
 
         #region CRUD
 
-        public virtual void ChangeContentFilter()
-        {
-            //var args = new OnBeforeOpenAddModalArgs(false, EventServices);
-            //await OnBeforeOpenAddModal.InvokeAsync(args);
-            //if (args.IsHandled)
-            //    return;
-
-            BaseFilterModalCard.ShowModal();
-        }
         public virtual async Task AddEntryAsync()
         {
             var args = new OnBeforeOpenAddModalArgs(false, EventServices);
@@ -573,16 +563,6 @@ namespace BlazorBase.CRUD.Components.List
             ChangeUrlToList();
 
             await OnCardClosed.InvokeAsync();
-        }
-
-        protected virtual Task OnFilterCardClosedAsync()
-        {
-            if (ComponentModelInstance == null)
-                ComponentModelInstance = new TModel();
-            foreach (var item in DisplayGroups.Values.SelectMany(x=>x.DisplayItems))
-               item.IsVisible = !ComponentModelInstance.PropertyNamesToRemoveFromListView.Contains(item.Property.Name);
-
-            return Task.CompletedTask;
         }
         #endregion
 
