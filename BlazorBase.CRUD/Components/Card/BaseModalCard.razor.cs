@@ -72,6 +72,8 @@ namespace BlazorBase.CRUD.Components.Card
         protected BaseCard<TModel> BaseCard = default!;
         protected bool ContinueByUnsavedChanges = false;
         protected bool ViewMode = false;
+
+        protected string Title = String.Empty;
         #endregion
 
         #region Init
@@ -159,6 +161,12 @@ namespace BlazorBase.CRUD.Components.Card
             HideModal();
 
             return Task.CompletedTask;
+        }
+
+        protected void OnTitleCalculated(string title)
+        {
+            Title = title;
+            InvokeAsync(StateHasChanged);
         }
     }
 }

@@ -34,8 +34,10 @@ namespace BlazorBase.Files.Components
         protected bool ShowLoadingIndicator = false;
         protected int UploadProgress = 0;
         protected FileEdit FileEdit = default;
+        protected BaseFileModal BaseFileModal = default!;
         protected bool FileEditIsResetting = false;
         protected EventServices EventServices;
+
         #endregion
 
         protected override async Task OnInitializedAsync()

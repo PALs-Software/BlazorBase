@@ -14,6 +14,9 @@ public class BlazorBaseOptions : IBlazorBaseOptions
 
     public BaseOptionsImportMode OptionsImportMode { get; set; }
 
+    public string WebsiteName { get; set; }
+    public string ShortWebsiteName { get; set; }
+
     #endregion
 
 }

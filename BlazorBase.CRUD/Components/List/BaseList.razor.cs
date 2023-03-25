@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Card;
+using BlazorBase.Models;
 using Newtonsoft.Json;
 using BlazorBase.CRUD.Components.PageActions.Models;
 
@@ -107,6 +108,7 @@ namespace BlazorBase.CRUD.Components.List
         [Inject] protected NavigationManager NavigationManager { get; set; }
         [Inject] protected BaseParser BaseParser { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; }
 
         #endregion
 

@@ -8,9 +8,9 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.Models;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
@@ -20,7 +20,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BlazorBase.CRUD.Components.Card
 {
@@ -29,6 +28,9 @@ namespace BlazorBase.CRUD.Components.Card
         #region Parameter
 
         #region Events
+
+        [Parameter] public EventCallback<string> OnTitleCalculated { get; set; }
+
         [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
         [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
         [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
@@ -70,6 +72,7 @@ namespace BlazorBase.CRUD.Components.Card
         [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; }
         [Inject] protected IServiceProvider ServiceProvider { get; set; }
         [Inject] protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; }
         #endregion
 
         #region Properties
@@ -89,6 +92,9 @@ namespace BlazorBase.CRUD.Components.Card
         protected bool ViewMode;
 
         protected ValidationContext ValidationContext;
+
+        protected string Title = String.Empty;
+        protected string PageTitle = String.Empty;
         #endregion
 
         #region Property Infos
@@ -198,6 +204,8 @@ namespace BlazorBase.CRUD.Components.Card
                 [typeof(BaseService)] = Service
             });
 
+            CalculateTitle(addingMode: AddingMode);
+
             Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
             ModelLoaded = true;
         }
@@ -249,6 +257,7 @@ namespace BlazorBase.CRUD.Components.Card
                     var onAfterArgs = new OnAfterAddEntryArgs(Model, EventServices);
                     await OnAfterAddEntry.InvokeAsync(onAfterArgs);
                     await Model.OnAfterAddEntry(onAfterArgs);
+                    CalculateTitle(addingMode: false);
                 }
                 else
                 {
@@ -305,6 +314,14 @@ namespace BlazorBase.CRUD.Components.Card
         public async Task StateHasChangedAsync()
         {
             await InvokeAsync(() => StateHasChanged());
+        }
+
+        protected void CalculateTitle(bool addingMode)
+        {
+            Title = $"{Localizer[ViewMode ? "View {0}" : "Edit {0}", SingleDisplayName]}{(addingMode ? "" : $" • {@Model.GetDisplayKey("• ")}")}";
+            PageTitle = $"{(addingMode ? "" : $"{@Model.GetDisplayKey("• ")} • ")}{Localizer[ViewMode ? "View {0}" : "Edit {0}", SingleDisplayName]}";
+            
+            OnTitleCalculated.InvokeAsync(Title);
         }
         #endregion
 

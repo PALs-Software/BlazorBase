@@ -10,11 +10,11 @@
         <Heading Margin="Margin.Is2.FromTop">
             @if (ViewMode)
             {
-                <span>@Localizer["View {0}", SingleDisplayName]</span>
+                <span>@Title</span>
             }
             else
             {
-                <span>@Localizer["Edit {0}", SingleDisplayName]</span>
+                <span>@Title</span>
                 <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
             }
         </Heading>
@@ -22,6 +22,8 @@
 
     @if (Model != null && ModelLoaded)
     {
+        <PageTitle>@PageTitle | @BlazorBaseOptions.ShortWebsiteName</PageTitle>
+
         if (ShowActions)
         {
             <BasePageActions Source="this" BaseModel="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.Card" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />

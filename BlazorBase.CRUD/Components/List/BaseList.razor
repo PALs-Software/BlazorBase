@@ -5,6 +5,9 @@
 @inherits BaseDisplayComponent
 
 <div class="base-list base-list-@(TModelType.Name)">
+
+    <PageTitle>@PluralDisplayName | @BlazorBaseOptions.ShortWebsiteName</PageTitle>
+
     <table class="base-list-table table table-hover @TableClass">
         <thead class="base-list-table-header">
             <tr class="sticky-border">

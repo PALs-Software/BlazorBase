@@ -7,11 +7,11 @@
                 <ModalTitle>
                     @if (ViewMode)
                     {
-                        <span>@Localizer["View {0}", SingleDisplayName]</span>
+                        <span>@Title</span>
                     }
                     else
                     {
-                        <span>@Localizer["Edit {0}", SingleDisplayName]</span>
+                        <span>@Title</span>
                         <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
                     }
                 </ModalTitle>
@@ -26,6 +26,7 @@
                           ShowEntryByStart="ShowEntryByStart"
                           ComponentModelInstance="ComponentModelInstance"
                           EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"
+                          OnTitleCalculated="OnTitleCalculated"
                           OnCreateNewEntryInstance="OnCreateNewEntryInstance"
                           OnGuiLoadData="OnGuiLoadData"
                           OnBeforeAddEntry="OnBeforeAddEntry"

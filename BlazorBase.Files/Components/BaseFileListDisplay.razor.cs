@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
+using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Linq;
@@ -32,6 +33,7 @@ namespace BlazorBase.Files.Components
         #region Member
         protected bool DisplayShowFileButton;
         protected bool DisplayDownloadFileButton;
+        protected BaseFileModal BaseFileModal = default!;
         #endregion
 
         #region Init
