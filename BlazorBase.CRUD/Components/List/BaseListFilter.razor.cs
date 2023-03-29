@@ -74,6 +74,8 @@ namespace BlazorBase.CRUD.Components.List
             typeof(bool?),
             typeof(DateTime),
             typeof(DateTime?),
+            typeof(TimeSpan),
+            typeof(TimeSpan?),
             typeof(Guid),
             typeof(Guid?)
         };

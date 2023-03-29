@@ -49,6 +49,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public bool? ReadOnly { get; set; }
         [Parameter] public string SingleDisplayName { get; set; }
         [Parameter] public string PluralDisplayName { get; set; }
+
+        [Parameter] public bool StickyRowButtons { get; set; } = true;
         #endregion
 
         #region Injects

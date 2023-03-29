@@ -88,6 +88,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
+        [Parameter] public bool StickyRowButtons { get; set; } = true;
+
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
 
         [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
@@ -463,6 +465,16 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         #region CRUD
+
+        public virtual Task OnRowDoubleClicked(TModel entry)
+        {
+            if (UserCanEditEntries)
+                return EditEntryAsync(entry);
+            else if (UserCanOpenCardReadOnly)
+                return ViewEntryAsync(entry);
+
+            return Task.CompletedTask;
+        }
 
         public virtual async Task AddEntryAsync()
         {

@@ -5,3 +5,7 @@
 ::deep .form-control {
     min-width: 4.5rem;
 }
+
+.table thead .base-list-filter-actions {
+    vertical-align: top;
+}

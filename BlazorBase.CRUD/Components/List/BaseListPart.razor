@@ -3,113 +3,131 @@
 @using BlazorBase.CRUD.Extensions
 @using BlazorBase.CRUD.EventArguments
 
-<BasePageActions Source="this" BaseModel="null" BaseModelType="ModelListEntryType" GUIType="Enums.GUIType.ListPart" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+<div class="base-list-part base-list-part-@(ModelListEntryType.Name)">
+    <BaseTypeBasedSelectList @ref="BaseSelectList"
+                             BaseModelType="ModelListEntryType"
+                             Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
+                             OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
 
-<BaseTypeBasedSelectList @ref="BaseSelectList"
-                         BaseModelType="ModelListEntryType"
-                         Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
-                         OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
+    <table class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
+        <thead class="base-list-part-table-header">
+            <tr>
+                <th class="root-base-list-part-table-header-item" colspan="100">
+                    <BasePageActions Source="this"
+                                     BaseModel="null"
+                                     BaseModelType="ModelListEntryType"
+                                     GUIType="Enums.GUIType.ListPart"
+                                     EventServices="EventServices"
+                                     ModelLocalizer="ModelLocalizer"
+                                     OnPageActionInvoked="OnPageActionInvokedAsync" />
 
-<table class="table table-responsive table-hover table-sm">
-    <thead>
-        <tr>
-            <th style="@(ModelImplementedISortableItem ? "min-width:100px;" : String.Empty)">
-                @if (!IsReadOnly)
-                {
-                    @if (DisplayOptions.ShowAddButton)
-                    {
-                        <Button Color="Color.Success" Clicked="AddEntryAsync" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
-                    }
-                    @if (DisplayOptions.ShowAddExistingEntryButton)
-                    {
-                        <Button Color="Color.Primary" Clicked="AddExistingEntryAsync" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
-                    }
-                }
-            </th>
-            @foreach (var displayGroup in DisplayGroups)
-            {
-                @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
-                {
-                    <th>
-                        @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)
-                    </th>
-                }
-            }
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var entry in Entries)
-        {
-            var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
-            <tr @key="entry">
-                <td class="text-center">
+                </th>
+                <th class="bottom-border-line" />
+            </tr>
+            <tr>
+                <th class="base-list-part-actions text-center" style="@(ModelImplementedISortableItem ? "min-width:100px;" : String.Empty)">
                     @if (!IsReadOnly)
                     {
-                        <Buttons>
-                            @if (ModelImplementedISortableItem)
-                            {
-                                @if (DisplayOptions.ShowAddButton)
-                                {
-                                    <Button Color="Color.Success" Clicked="() => AddEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Add" /></Button>
-                                }
-                                @if (DisplayOptions.ShowAddExistingEntryButton)
-                                {
-                                    <Button Color="Color.Primary" Clicked="() => AddExistingEntryAsync(entry)" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
-                                }
-                            }
-                            @if (DisplayOptions.ShowDeleteButton)
-                            {
-                                <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
-                            }
-                            @if (ModelImplementedISortableItem)
-                            {
-                                <Buttons Orientation="Orientation.Vertical">
-                                    <Button Color="Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
-                                    <Button Color="Color.Secondary" Clicked="() => MoveEntryDownAsync(entry)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
-                                </Buttons>
-                            }
-                        </Buttons>
+                        @if (DisplayOptions.ShowAddButton)
+                        {
+                            <Button Color="Color.Success" Clicked="AddEntryAsync" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
+                        }
+                        @if (DisplayOptions.ShowAddExistingEntryButton)
+                        {
+                            <Button Color="Color.Primary" Clicked="AddExistingEntryAsync" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
+                        }
                     }
-                </td>
-
+                </th>
                 @foreach (var displayGroup in DisplayGroups)
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <td>
-                            @if (entry is IBaseModel baseEntry)
-                            {
-                                var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey, baseEntry).Result;
-                                if (renderFragment != null)
+                        <th class="base-list-part-table-header-column @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
+                            @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)
+                        </th>
+                    }
+                }
+                <th class="bottom-border-line" />
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in Entries)
+            {
+                var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
+                <tr @key="entry">
+                    <td class="base-list-part-row-buttons text-center">
+                        @if (!IsReadOnly)
+                        {
+                            <Buttons>
+                                @if (ModelImplementedISortableItem)
                                 {
-                                    @renderFragment
+                                    @if (DisplayOptions.ShowAddButton)
+                                    {
+                                        <Button Color="Color.Success" Clicked="() => AddEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Add" /></Button>
+                                    }
+                                    @if (DisplayOptions.ShowAddExistingEntryButton)
+                                    {
+                                        <Button Color="Color.Primary" Clicked="() => AddExistingEntryAsync(entry)" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
+                                    }
                                 }
-                                else if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
+                                @if (DisplayOptions.ShowDeleteButton)
                                 {
-                                    <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
                                 }
-                                else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                @if (ModelImplementedISortableItem)
                                 {
-                                    <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    <Buttons Orientation="Orientation.Vertical">
+                                        <Button Color="Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
+                                        <Button Color="Color.Secondary" Clicked="() => MoveEntryDownAsync(entry)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
+                                    </Buttons>
                                 }
-                                else if (displayItem.Property.PropertyType.IsEnum)
+                            </Buttons>
+                        }
+                    </td>
+
+                    @foreach (var displayGroup in DisplayGroups)
+                    {
+                        @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                        {
+                            <td class="base-list-part-table-cell base-list-part-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
+                                @if (entry is IBaseModel baseEntry)
                                 {
-                                    <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey, baseEntry).Result;
+                                    if (renderFragment != null)
+                                    {
+                                        @renderFragment
+                                    }
+                                    else if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
+                                    {
+                                        <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    }
+                                    else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                    {
+                                        <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    }
+                                    else if (displayItem.Property.PropertyType.IsEnum)
+                                    {
+                                        <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    }
+                                    else
+                                    {
+                                        <BaseInput @ref="AddToBaseInputs" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    }
                                 }
                                 else
                                 {
-                                    <BaseInput @ref="AddToBaseInputs" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="(args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnAfterPropertyChanged="(args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))" />
+                                    var currentValue = @displayItem.Property.GetValue(entry)?.ToString();
+                                    <span title="@currentValue">
+                                        @currentValue
+                                    </span>
                                 }
-                            }
-                            else
-                            {
-                                @displayItem.Property.GetValue(entry)
-                            }
 
-                        </td>
+                            </td>
+                        }
                     }
-                }
-            </tr>
-        }
-    </tbody>
-</table>
+                    <td class="bottom-border-line" />
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
