@@ -29,18 +29,18 @@ namespace BlazorBase.MessageHandling.Models
             FileFilter = fileFilter;
         }
 
-        public string FileInputCaption { get; set; } = null;
+        public string? FileInputCaption { get; set; } = null;
         public ulong? MaxFileSize { get; set; } = null;
-        public string FileFilter { get; set; } = null;
+        public string? FileFilter { get; set; } = null;
 
         public byte[] File{ get; set; } = null;
 
         public bool ShowLoadingIndicator { get; set; } = false;
         public int UploadProgress { get; set; } = 0;
 
-        public string InputClass { get; set; }
-        public string FeedbackClass { get; set; }
-        public string Feedback { get; set; }
+        public string? InputClass { get; set; }
+        public string? FeedbackClass { get; set; }
+        public string? Feedback { get; set; }
 
         public record FileInputDialogResult(byte[] File);
         public new Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult, Task> OnClosing { get; set; }

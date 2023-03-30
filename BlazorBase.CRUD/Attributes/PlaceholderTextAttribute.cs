@@ -8,6 +8,6 @@ namespace BlazorBase.CRUD.Attributes
         {
             Placeholder = placeholder;
         }
-        public string Placeholder { get; set; }
+        public string? Placeholder { get; set; }
     }
 }

@@ -78,7 +78,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         protected PresentationRulesAttribute PresentationRules { get; set; }
 
         protected Dictionary<string, object> InputAttributes = new Dictionary<string, object>();
-        protected string CurrentValueAsString;
+        protected string? CurrentValueAsString;
         protected string InputType;
 
         #endregion
@@ -107,7 +107,7 @@ namespace BlazorBase.CRUD.Components.Inputs
             CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>();
             PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
-            var dict = new Dictionary<object, object>()
+            var dict = new Dictionary<object, object?>()
             {
                 [typeof(IStringLocalizer)] = ModelLocalizer,
                 [typeof(BaseService)] = Service
@@ -177,7 +177,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         #endregion
 
         #region Events        
-        private void Model_OnForcePropertyRepaint(object sender, string[] propertyNames)
+        private void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
         {
             if (!propertyNames.Contains(Property.Name))
                 return;
@@ -224,7 +224,7 @@ namespace BlazorBase.CRUD.Components.Inputs
             return false;
         }
 
-        protected async virtual Task OnValueChangedAsync(object newValue, bool setCurrentValueAsString = true)
+        protected async virtual Task OnValueChangedAsync(object? newValue, bool setCurrentValueAsString = true)
         {
             if (IsReadOnly)
                 return;

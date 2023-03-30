@@ -102,7 +102,7 @@ namespace BlazorBase.MessageHandling.Components
         #region Update
         protected bool UpdateLoadingMessage(ShowLoadingMessageArgs args)
         {
-            if (!LoadingMessages.TryGetValue(args.Id, out ShowLoadingMessageArgs loadingMessage))
+            if (!LoadingMessages.TryGetValue(args.Id, out ShowLoadingMessageArgs? loadingMessage))
                 return false;
 
             loadingMessage.Message = args.Message;

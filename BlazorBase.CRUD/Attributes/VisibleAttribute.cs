@@ -32,7 +32,7 @@ namespace BlazorBase.CRUD.Attributes
 
         public GUIType[] HideInGUITypes { get; set; } = Array.Empty<GUIType>();
 
-        public string DisplayGroup { get; set; }
+        public string? DisplayGroup { get; set; }
 
         public int DisplayGroupOrder { get; set; }
 

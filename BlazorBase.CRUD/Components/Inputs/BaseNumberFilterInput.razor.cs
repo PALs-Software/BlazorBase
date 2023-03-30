@@ -12,8 +12,8 @@ namespace BlazorBase.CRUD.Components.Inputs
     {
         #region Parameter
         [Parameter] public EventCallback<ChangeEventArgs> OnInput { get; set; }
-        [Parameter] public string CultureName { get; set; } = CultureInfo.CurrentUICulture.Name;
-        [Parameter] public string Value { get; set; }
+        [Parameter] public string? CultureName { get; set; } = CultureInfo.CurrentUICulture.Name;
+        [Parameter] public string? Value { get; set; }
         [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> AdditionalInputAttributes { get; set; }
         #endregion
     }

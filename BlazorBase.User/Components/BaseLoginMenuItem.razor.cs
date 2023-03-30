@@ -19,7 +19,7 @@ public partial class BaseLoginMenuItem : ComponentBase
     [Parameter] public RenderFragment ChildContent { get; set; }
     #endregion
 
-    public string Greeting { get; set; }
+    public string? Greeting { get; set; }
 
     protected override void OnInitialized()
     {

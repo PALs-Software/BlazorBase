@@ -16,7 +16,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
@@ -27,96 +26,9 @@ namespace BlazorBase.CRUD.Components.General
 {
     public class BaseDisplayComponent : ComponentBase
     {
-        public class DisplayGroup
-        {
-            public DisplayGroup(VisibleAttribute groupAttribute, List<DisplayItem> displayItems)
-            {
-                GroupAttribute = groupAttribute;
-                DisplayItems = displayItems;
-            }
-            public VisibleAttribute GroupAttribute { get; set; }
-            public List<DisplayItem> DisplayItems { get; set; }
-        }
-
-        public class DisplayItem
-        {
-            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
-                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
-            {
-                Property = property;
-                Attribute = attribute;
-                IsReadOnly = isReadonly;
-                IsKey = isKey;
-                IsListProperty = isListProperty;
-                DateInputMode = dateInputMode;
-                DisplayPropertyPath = displayPropertyPath;
-                DisplayPropertyType = displayPropertyType;
-                IsSortable = isSortable;
-                SortDirection = sortDirection;
-                IsFilterable = isFilterable;
-            }
-
-            public PropertyInfo Property { get; set; }
-            public VisibleAttribute Attribute { get; set; }
-            public bool IsReadOnly { get; set; }
-            public bool IsKey { get; set; }
-            public bool IsListProperty { get; set; }
-            public DateInputMode DateInputMode { get; set; }
-            public Enums.SortDirection SortDirection { get; set; }
-            public FilterType FilterType { get; set; }
-            public object FilterValue { get; set; }
-            public string DisplayPropertyPath { get; set; }
-            public Type DisplayPropertyType { get; set; }
-            public bool IsSortable { get; set; }
-            public bool IsFilterable { get; set; }
-
-            public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
-            {
-                var property = typeof(T).GetProperty(propertyName);
-                return CreateFromProperty(property, defaultDisplayGroup);
-            }
-
-            public static DisplayItem CreateFromProperty(PropertyInfo property, string defaultDisplayGroup = null)
-            {
-                var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
-                if (attribute == null)
-                    throw new Exception($"The property \"{property.Name}\" has no visible attribut!\"");
-
-                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
-                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
-                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
-
-                if (property.IsForeignKey() && typeof(IBaseModel).IsAssignableFrom(property.PropertyType))
-                {
-                    var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                    if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
-                    {
-                        return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
-                                property.IsKey(), property.IsListProperty(), dateInputMode,
-                                property.Name, property.PropertyType,
-                                false, attribute.SortDirection, false);
-                    }
-                }
-
-                (string DisplayPath, Type DisplayType) displayPathAndType;
-                bool sortAndFilterable;
-                if (customPropertyPath == null)
-                {
-                    displayPathAndType = property.GetDisplayPropertyPathAndType();
-                    sortAndFilterable = property.GetPropertyIsSortAndFilterable();
-                }
-                else
-                {
-                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
-                    sortAndFilterable = true;
-                }
-
-                return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
-                    property.IsKey(), property.IsListProperty(), dateInputMode,
-                    displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
-                    sortAndFilterable, attribute.SortDirection, sortAndFilterable);
-            }
-        }
+        #region Parameter
+        [Parameter] public EventCallback<OnAfterGetVisiblePropertiesArgs> OnAfterGetVisibleProperties { get; set; }
+        #endregion
 
         #region Injects
         [Inject] protected BaseErrorHandler ErrorHandler { get; set; }
@@ -138,17 +50,23 @@ namespace BlazorBase.CRUD.Components.General
         protected bool ShowInvalidFeedback = false;
         #endregion
 
-        protected virtual List<PropertyInfo> GetVisibleProperties(Type modelType, GUIType guiType, IBaseModel componentModelInstance = null)
+        protected virtual async Task<List<PropertyInfo>> GetVisiblePropertiesAsync(Type modelType, GUIType guiType, IBaseModel componentModelInstance = null)
         {
+            var visibleProperties = new List<PropertyInfo>();
             if (componentModelInstance == null)
-                return modelType.GetVisibleProperties(guiType);
+                visibleProperties = modelType.GetVisibleProperties(guiType);
+            else
+                visibleProperties = componentModelInstance.GetVisibleProperties(guiType);
 
-            return componentModelInstance.GetVisibleProperties(guiType);
+            var args = new OnAfterGetVisiblePropertiesArgs(modelType, guiType, componentModelInstance, visibleProperties);
+            await OnAfterGetVisibleProperties.InvokeAsync(args);
+
+            return args.VisibleProperties;
         }
 
-        protected virtual void SetUpDisplayLists(Type modelType, GUIType guiType, IBaseModel componentModelInstance = null)
+        protected virtual async Task SetUpDisplayListsAsync(Type modelType, GUIType guiType, IBaseModel componentModelInstance = null)
         {
-            VisibleProperties = GetVisibleProperties(modelType, guiType, componentModelInstance);
+            VisibleProperties = await GetVisiblePropertiesAsync(modelType, guiType, componentModelInstance);
 
             foreach (var property in VisibleProperties)
             {
@@ -186,12 +104,15 @@ namespace BlazorBase.CRUD.Components.General
             {
                 var isReadonly = foreignKeyProperty.IsReadOnlyInGUI();
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-                PropertyInfo foreignProperty;
+                if (foreignKey == null)
+                    continue;
+
+                PropertyInfo? foreignProperty;
                 if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
                     foreignProperty = foreignKeyProperty;
                 else
-                    foreignProperty = foreignKeyProperty.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
-                var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
+                    foreignProperty = foreignKeyProperty.ReflectedType?.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+                var foreignKeyType = foreignProperty?.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
 
                 if (foreignKeyType == null)
                     throw new CRUDException(BaseDisplayComponentLocalizer["Can not find the foreign key property type in the class {0}, on the property {1}. This is a development error, maybe the foreign property name is spelled  wrong in the property attribute.", foreignKeyProperty.DeclaringType, foreignKeyProperty.Name]);
@@ -338,5 +259,96 @@ namespace BlazorBase.CRUD.Components.General
             });
         }
         #endregion
+
+        public class DisplayGroup
+        {
+            public DisplayGroup(VisibleAttribute groupAttribute, List<DisplayItem> displayItems)
+            {
+                GroupAttribute = groupAttribute;
+                DisplayItems = displayItems;
+            }
+            public VisibleAttribute GroupAttribute { get; set; }
+            public List<DisplayItem> DisplayItems { get; set; }
+        }
+
+        public class DisplayItem
+        {
+            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
+                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
+            {
+                Property = property;
+                Attribute = attribute;
+                IsReadOnly = isReadonly;
+                IsKey = isKey;
+                IsListProperty = isListProperty;
+                DateInputMode = dateInputMode;
+                DisplayPropertyPath = displayPropertyPath;
+                DisplayPropertyType = displayPropertyType;
+                IsSortable = isSortable;
+                SortDirection = sortDirection;
+                IsFilterable = isFilterable;
+            }
+
+            public PropertyInfo Property { get; set; }
+            public VisibleAttribute Attribute { get; set; }
+            public bool IsReadOnly { get; set; }
+            public bool IsKey { get; set; }
+            public bool IsListProperty { get; set; }
+            public DateInputMode DateInputMode { get; set; }
+            public Enums.SortDirection SortDirection { get; set; }
+            public FilterType FilterType { get; set; }
+            public object FilterValue { get; set; }
+            public string? DisplayPropertyPath { get; set; }
+            public Type DisplayPropertyType { get; set; }
+            public bool IsSortable { get; set; }
+            public bool IsFilterable { get; set; }
+
+            public static DisplayItem CreateFromProperty<T>(string propertyName, string defaultDisplayGroup = null)
+            {
+                var property = typeof(T).GetProperty(propertyName);
+                return CreateFromProperty(property, defaultDisplayGroup);
+            }
+
+            public static DisplayItem CreateFromProperty(PropertyInfo property, string defaultDisplayGroup = null)
+            {
+                var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
+                if (attribute == null)
+                    throw new Exception($"The property \"{property.Name}\" has no visible attribut!\"");
+
+                attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
+                var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+                var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
+
+                if (property.IsForeignKey() && typeof(IBaseModel).IsAssignableFrom(property.PropertyType))
+                {
+                    var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
+                    if (foreignKey.Name.Contains(",")) // Reference has more than one primary key
+                    {
+                        return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                                property.IsKey(), property.IsListProperty(), dateInputMode,
+                                property.Name, property.PropertyType,
+                                false, attribute.SortDirection, false);
+                    }
+                }
+
+                (string DisplayPath, Type DisplayType) displayPathAndType;
+                bool sortAndFilterable;
+                if (customPropertyPath == null)
+                {
+                    displayPathAndType = property.GetDisplayPropertyPathAndType();
+                    sortAndFilterable = property.GetPropertyIsSortAndFilterable();
+                }
+                else
+                {
+                    displayPathAndType = (customPropertyPath.Path, customPropertyPath.PathType);
+                    sortAndFilterable = true;
+                }
+
+                return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                    property.IsKey(), property.IsListProperty(), dateInputMode,
+                    displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
+                    sortAndFilterable, attribute.SortDirection, sortAndFilterable);
+            }
+        }
     }
 }

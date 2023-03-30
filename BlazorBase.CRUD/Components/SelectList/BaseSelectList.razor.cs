@@ -13,27 +13,27 @@ namespace BlazorBase.CRUD.Components.SelectList;
 public partial class BaseSelectList<TModel> : ComponentBase, IBaseSelectList where TModel : class, IBaseModel, new()
 {
     #region Parameters
-    [Parameter] public string Title { get; set; }
-    [Parameter] public string SelectButtonText { get; set; }
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? SelectButtonText { get; set; }
     [Parameter] public bool HideTitle { get; set; } = false;
     [Parameter] public bool HideSelectButton { get; set; } = false;
-    [Parameter] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; set; }
+    [Parameter] public virtual List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; set; }
     [Parameter] public bool RenderAdditionalActionsOutsideOfButtonGroup { get; set; } = false;
-    [Parameter] public RenderFragment<TModel> AdditionalActions { get; set; } = null;
+    [Parameter] public RenderFragment<TModel>? AdditionalActions { get; set; } = null;
     [Parameter] public EventCallback<OnSelectListClosedArgs> OnSelectListClosed { get; set; }
     #endregion
 
     #region Injects
-    [Inject] protected IStringLocalizer<BaseSelectList<TModel>> SelectListLocalizer { get; set; }
-    [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
+    [Inject] protected IStringLocalizer<BaseSelectList<TModel>> SelectListLocalizer { get; set; } = null!;
+    [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     #endregion
 
     #region Members
     protected bool CurrentlyVisible = false;
     protected Modal Modal = default!;
-    protected TModel SelectedEntry = null;
+    protected TModel? SelectedEntry = null;
 
-    protected object AdditionalData = null;
+    protected object? AdditionalData = null;
     #endregion
 
     #region Init
@@ -56,12 +56,12 @@ public partial class BaseSelectList<TModel> : ComponentBase, IBaseSelectList whe
         HideModal();
     }
 
-    public IBaseModel GetSelectedEntry()
+    public IBaseModel? GetSelectedEntry()
     {
         return SelectedEntry;
     }
 
-    public void ShowModal(object additionalData = null)
+    public void ShowModal(object? additionalData = null)
     {
         AdditionalData = additionalData;
         CurrentlyVisible = true;

@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using BlazorBase.CRUD.Components.PageActions.Interfaces;
+﻿using BlazorBase.CRUD.Components.PageActions.Interfaces;
 using BlazorBase.CRUD.Components.PageActions.Models;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;

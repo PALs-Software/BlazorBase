@@ -19,10 +19,10 @@ namespace BlazorBase.User.Components;
 public partial class BaseLoginForm : ComponentBase
 {
     #region Parameter
-    [Parameter] public string WebsiteName { get; set; }
+    [Parameter] public string? WebsiteName { get; set; }
     [Parameter] public RenderFragment Logo { get; set; }
-    [Parameter] public string LogoSrc { get; set; }
-    [Parameter] public string LogoHref { get; set; }
+    [Parameter] public string? LogoSrc { get; set; }
+    [Parameter] public string? LogoHref { get; set; }
     [Parameter] public int LogoHeight { get; set; } = 150;
     [Parameter] public int LogoWidth { get; set; } = 150;
 

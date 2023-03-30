@@ -47,8 +47,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public PropertyInfo Property { get; set; }
         [Parameter] public BaseService Service { get; set; }
         [Parameter] public bool? ReadOnly { get; set; }
-        [Parameter] public string SingleDisplayName { get; set; }
-        [Parameter] public string PluralDisplayName { get; set; }
+        [Parameter] public string? SingleDisplayName { get; set; }
+        [Parameter] public string? PluralDisplayName { get; set; }
         #endregion
 
         #region Injects
@@ -90,41 +90,38 @@ namespace BlazorBase.CRUD.Components.List
         #region Init
         protected override async Task OnInitializedAsync()
         {
-            await InvokeAsync(() =>
-            {
-                ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
-                DisplayOptions = Property.GetCustomAttribute<BaseListPartDisplayOptionsAttribute>() ?? new BaseListPartDisplayOptionsAttribute();
+            ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
+            DisplayOptions = Property.GetCustomAttribute<BaseListPartDisplayOptionsAttribute>() ?? new BaseListPartDisplayOptionsAttribute();
 
-                ModelImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
+            ModelImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
 
-                IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
-                ModelLocalizer = StringLocalizerFactory.Create(Property.PropertyType.GenericTypeArguments[0]);
-                EventServices = GetEventServices();
+            IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
+            ModelLocalizer = StringLocalizerFactory.Create(Property.PropertyType.GenericTypeArguments[0]);
+            EventServices = GetEventServices();
 
-                if (ReadOnly == null)
-                    IsReadOnly = Property.IsReadOnlyInGUI();
-                else
-                    IsReadOnly = ReadOnly.Value;
+            if (ReadOnly == null)
+                IsReadOnly = Property.IsReadOnlyInGUI();
+            else
+                IsReadOnly = ReadOnly.Value;
 
-                SetUpDisplayLists(ModelListEntryType, GUIType.ListPart);
+            await SetUpDisplayListsAsync(ModelListEntryType, GUIType.ListPart);
 
-                if (String.IsNullOrEmpty(SingleDisplayName))
-                    SingleDisplayName = ModelLocalizer[ModelListEntryType.Name];
-                if (String.IsNullOrEmpty(PluralDisplayName))
-                    PluralDisplayName = ModelLocalizer[$"{ModelListEntryType.Name}_Plural"];
+            if (String.IsNullOrEmpty(SingleDisplayName))
+                SingleDisplayName = ModelLocalizer[ModelListEntryType.Name];
+            if (String.IsNullOrEmpty(PluralDisplayName))
+                PluralDisplayName = ModelLocalizer[$"{ModelListEntryType.Name}_Plural"];
 
-                if (Property.GetValue(Model) == null)
-                    Property.SetValue(Model, CreateGenericListInstance());
+            if (Property.GetValue(Model) == null)
+                Property.SetValue(Model, CreateGenericListInstance());
 
-                BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyListPartInput>().ToList();
+            BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyListPartInput>().ToList();
 
-                dynamic entries = Property.GetValue(Model);
-                if (ModelImplementedISortableItem)
-                    entries.Sort(SortableItemComparer);
-                Entries = (IList)entries;
+            dynamic entries = Property.GetValue(Model)!;
+            if (ModelImplementedISortableItem)
+                entries.Sort(SortableItemComparer);
+            Entries = (IList)entries;
 
-                Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
-            });
+            Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
 
             await PrepareForeignKeyProperties(Service);
             await PrepareCustomLookupData(Model, EventServices);
@@ -138,7 +135,7 @@ namespace BlazorBase.CRUD.Components.List
                 IsReadOnly = ReadOnly.Value;
         }
 
-        private void Model_OnForcePropertyRepaint(object sender, string[] propertyNames)
+        private void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
         {
             if (!propertyNames.Contains(Property.Name))
                 return;
@@ -184,9 +181,9 @@ namespace BlazorBase.CRUD.Components.List
             return Activator.CreateInstance(constructedListType);
         }
 
-        protected async Task AddEntryAsync(object aboveEntry = null)
+        protected async Task AddEntryAsync(object? aboveEntry = null)
         {
-            var newEntry = Activator.CreateInstance(ModelListEntryType);
+            var newEntry = Activator.CreateInstance(ModelListEntryType)!;
             await OnCreateNewListEntryInstanceAsync(newEntry);
 
             var args = new HandledEventArgs();
@@ -205,7 +202,7 @@ namespace BlazorBase.CRUD.Components.List
             await OnAfterAddEntryAsync(newEntry);
         }
 
-        protected Task AddExistingEntryAsync(object aboveEntry = null)
+        protected Task AddExistingEntryAsync(object? aboveEntry = null)
         {
             BaseSelectList.ShowModal(aboveEntry);
 
@@ -315,7 +312,7 @@ namespace BlazorBase.CRUD.Components.List
             await newBaseEntry.OnCreateNewEntryInstance(onCreateNewEntryInstanceArgs);
         }
 
-        protected async Task OnBeforeAddEntryAsync(object newEntry, HandledEventArgs args, bool callAddEventOnListEntry = true)
+        protected async Task OnBeforeAddEntryAsync(object? newEntry, HandledEventArgs args, bool callAddEventOnListEntry = true)
         {
             var onBeforeAddListEntryArgs = new OnBeforeAddListEntryArgs(Model, newEntry, false, EventServices);
             await OnBeforeAddListEntry.InvokeAsync(onBeforeAddListEntryArgs);
@@ -434,7 +431,7 @@ namespace BlazorBase.CRUD.Components.List
             {
                 if (item is IBaseModel baseModel)
                 {
-                    var validationContext = new ValidationContext(item, ServiceProvider, new Dictionary<object, object>()
+                    var validationContext = new ValidationContext(item, ServiceProvider, new Dictionary<object, object?>()
                     {
                         [typeof(IStringLocalizer)] = ModelLocalizer,
                         [typeof(BaseService)] = Service
@@ -443,7 +440,7 @@ namespace BlazorBase.CRUD.Components.List
                     if (!baseModel.TryValidate(out List<ValidationResult> validationResults, validationContext))
                         valid = false;
                 }
-            }            
+            }
 
             return valid;
         }

@@ -25,7 +25,7 @@ namespace BlazorBase.MessageHandling.Models
             ShowProgressInText = showProgressInText;
         }
 
-        public string ProgressText { get; set; }
+        public string? ProgressText { get; set; }
         public int CurrentProgress { get; set; }
         public bool ShowProgressInText { get; set; }
     }

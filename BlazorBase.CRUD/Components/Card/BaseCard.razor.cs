@@ -58,7 +58,7 @@ namespace BlazorBase.CRUD.Components.Card
 
         #endregion
 
-        [Parameter] public string SingleDisplayName { get; set; }
+        [Parameter] public string? SingleDisplayName { get; set; }
         [Parameter] public bool Embedded { get; set; }
         [Parameter] public bool ShowEntryByStart { get; set; }
         [Parameter] public Func<EventServices, Task<IBaseModel>> EntryToBeShownByStart { get; set; }
@@ -113,19 +113,16 @@ namespace BlazorBase.CRUD.Components.Card
         #region Init
         protected override async Task OnInitializedAsync()
         {
-            await InvokeAsync(() =>
-            {
-                EventServices = GetEventServices();
+            EventServices = GetEventServices();
 
-                TModelType = typeof(TModel);
+            TModelType = typeof(TModel);
 
-                if (String.IsNullOrEmpty(SingleDisplayName))
-                    SingleDisplayName = ModelLocalizer[TModelType.Name];
+            if (String.IsNullOrEmpty(SingleDisplayName))
+                SingleDisplayName = ModelLocalizer[TModelType.Name];
 
-                BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyCardInput>().ToList();
+            BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyCardInput>().ToList();
 
-                SetUpDisplayLists(TModelType, GUIType.Card, ComponentModelInstance);
-            });
+            await SetUpDisplayListsAsync(TModelType, GUIType.Card, ComponentModelInstance);
 
             if (ShowEntryByStart)
             {
@@ -198,7 +195,7 @@ namespace BlazorBase.CRUD.Components.Card
             await PrepareForeignKeyProperties(Service, Model);
             await PrepareCustomLookupData(Model, EventServices);
 
-            ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object>()
+            ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object?>()
             {
                 [typeof(IStringLocalizer)] = ModelLocalizer,
                 [typeof(BaseService)] = Service
@@ -320,7 +317,7 @@ namespace BlazorBase.CRUD.Components.Card
         {
             Title = $"{Localizer[ViewMode ? "View {0}" : "Edit {0}", SingleDisplayName]}{(addingMode ? "" : $" • {@Model.GetDisplayKey("• ")}")}";
             PageTitle = $"{(addingMode ? "" : $"{@Model.GetDisplayKey("• ")} • ")}{Localizer[ViewMode ? "View {0}" : "Edit {0}", SingleDisplayName]}";
-            
+
             OnTitleCalculated.InvokeAsync(Title);
         }
         #endregion

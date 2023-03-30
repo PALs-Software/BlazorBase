@@ -15,12 +15,12 @@ namespace BlazorBase.RichTextEditor.Components
     public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput, IBasePropertyListPartInput
     {
         #region Member
-        protected EventServices EventServices;
-        protected BaseRichTextEditor BaseRichTextEditor;
+        protected EventServices? EventServices;
+        protected BaseRichTextEditor? BaseRichTextEditor;
         protected bool HasContentChanges = false;
         protected bool ChangesFromContentSaving = false;
         protected int InitCounter = 0;
-        protected string CurrentContentBuffer = null;
+        protected string? CurrentContentBuffer = null;
         #endregion
 
         protected override async Task OnInitializedAsync()
@@ -65,6 +65,9 @@ namespace BlazorBase.RichTextEditor.Components
 
         public async Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args)
         {
+            if (BaseRichTextEditor == null)
+                return;
+
             CurrentContentBuffer = await BaseRichTextEditor.GetContentAsync();
 
             HasContentChanges = false;

@@ -22,21 +22,21 @@ namespace BlazorBase.Files.Components
     {
         #region Parameters
         [Parameter] public ulong? MaxFileSize { get; set; } = null;
-        [Parameter] public string FileFilter { get; set; } = null;
+        [Parameter] public string? FileFilter { get; set; } = null;
         #endregion
 
         #region Inject
-        [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; }
-        [Inject] protected IBlazorBaseFileOptions Options { get; set; }
+        [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; } = null!;
+        [Inject] protected IBlazorBaseFileOptions Options { get; set; } = null!;
         #endregion
 
         #region Member
         protected bool ShowLoadingIndicator = false;
         protected int UploadProgress = 0;
-        protected FileEdit FileEdit = default;
-        protected BaseFileModal BaseFileModal = default!;
+        protected FileEdit? FileEdit;
+        protected BaseFileModal? BaseFileModal;
         protected bool FileEditIsResetting = false;
-        protected EventServices EventServices;
+        protected EventServices EventServices = new();
 
         #endregion
 
@@ -73,15 +73,15 @@ namespace BlazorBase.Files.Components
             return Task.FromResult(false);
         }
 
-        protected override async Task OnValueChangedAsync(object fileChangedEventArgs, bool setCurrentValueAsString = true)
+        protected override async Task OnValueChangedAsync(object? fileChangedEventArgs, bool setCurrentValueAsString = true)
         {
-            if (FileEditIsResetting)
+            if (FileEditIsResetting || fileChangedEventArgs == null || FileEdit == null)
                 return;
 
             var eventServices = GetEventServices();
             var oldValue = Property.GetValue(Model);
             bool valid = true;
-            BaseFile newFile = null;
+            BaseFile? newFile = null;
             try
             {
                 var files = ((FileChangedEventArgs)fileChangedEventArgs).Files;
@@ -98,7 +98,7 @@ namespace BlazorBase.Files.Components
                 if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
                     throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
 
-                newFile = Activator.CreateInstance(RenderType) as BaseFile;
+                newFile = (BaseFile)Activator.CreateInstance(RenderType)!;
                 newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
                 newFile.FileSize = file.Size;
                 newFile.BaseFileType = Path.GetExtension(file.Name);
@@ -178,7 +178,7 @@ namespace BlazorBase.Files.Components
             }
         }
 
-        protected async Task<string> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
+        protected async Task<string?> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
         {
             if (file.Size == 0)
                 return null;
@@ -220,7 +220,7 @@ namespace BlazorBase.Files.Components
 
         protected virtual string GetMimeTypeOfFile(IFileEntry file)
         {
-            new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
+            new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string? mimeFileType);
             return mimeFileType ?? "application/octet-stream";
         }
     }

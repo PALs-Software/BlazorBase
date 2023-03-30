@@ -19,14 +19,14 @@ namespace BlazorBase.MessageHandling.Models
             DateTime? toDate = null,
             DateInputMode dateInputMode = DateInputMode.Date,
             bool useAsSingleDatePicker = false,
-            string fromDateCaption = null,
-            string toDateCaption = null,
+            string? fromDateCaption = null,
+            string? toDateCaption = null,
             MessageType messageType = MessageType.Information,
-            Func<ModalClosingEventArgs, ConfirmDialogResult, DateSpanDialogResult, Task> onClosing = null,
-            object icon = null,
-            string confirmButtonText = null,
+            Func<ModalClosingEventArgs, ConfirmDialogResult, DateSpanDialogResult, Task>? onClosing = null,
+            object? icon = null,
+            string? confirmButtonText = null,
             Color confirmButtonColor = Color.Primary,
-            string abortButtonText = null,
+            string? abortButtonText = null,
             Color abortButtonColor = Color.Secondary,
             ModalSize modalSize = ModalSize.Large) : base(title, message, messageType, null, icon, confirmButtonText, confirmButtonColor, abortButtonText, abortButtonColor, modalSize)
         {
@@ -43,8 +43,8 @@ namespace BlazorBase.MessageHandling.Models
         public DateTime? ToDate { get; set; }
         public DateInputMode DateInputMode { get; set; }
         public bool UseAsSingleDatePicker { get; set; }
-        public string FromDateCaption { get; set; }
-        public string ToDateCaption { get; set; }
+        public string? FromDateCaption { get; set; }
+        public string? ToDateCaption { get; set; }
 
         public record DateSpanDialogResult(DateTime? FromDate, DateTime? ToDate);
         public new Func<ModalClosingEventArgs, ConfirmDialogResult, DateSpanDialogResult, Task> OnClosing { get; set; }

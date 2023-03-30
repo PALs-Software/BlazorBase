@@ -8,7 +8,7 @@ namespace BlazorBase.CRUD.Attributes
 {
     public class CustomSortAndFilterPropertyPathAttribute : Attribute
     {
-        public string Path { get; set; }
+        public string? Path { get; set; }
         public Type PathType { get; set; }
     }
 }

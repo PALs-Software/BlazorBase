@@ -5,7 +5,7 @@ using System.Reflection;
 namespace BlazorBase.Extensions;
 public static class ObjectExtension
 {
-    public static void TransferPropertiesTo(this object source, object target, PropertyInfo[] sourceProperties = null)
+    public static void TransferPropertiesTo(this object source, object target, PropertyInfo[]? sourceProperties = null)
     {
         if (sourceProperties == null)
             sourceProperties = source.GetType().GetProperties();
@@ -19,7 +19,7 @@ public static class ObjectExtension
                 (!sourceProperty.CanRead || !targetProperty.CanWrite) ||
                 (!targetProperty.PropertyType.IsAssignableFrom(sourceProperty.PropertyType)) ||
                 (targetProperty.GetSetMethod() == null) ||
-                ((targetProperty.GetSetMethod().Attributes & MethodAttributes.Static) != 0) ||
+                ((targetProperty.GetSetMethod()?.Attributes & MethodAttributes.Static) != 0) ||
                 typeof(ILazyLoader).IsAssignableFrom(sourceProperty.PropertyType))
                 continue;
 

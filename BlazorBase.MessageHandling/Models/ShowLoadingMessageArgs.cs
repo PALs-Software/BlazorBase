@@ -21,7 +21,7 @@ namespace BlazorBase.MessageHandling.Models
         }
 
         public Guid Id { get; set; }
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public RenderFragment LoadingChildContent { get; set; }
         public bool IsHandled { get; set; }
     }

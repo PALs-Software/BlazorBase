@@ -8,6 +8,6 @@ namespace BlazorBase.CRUD.Attributes
 {
     public class UseCustomLookupData : Attribute
     {
-        public string LookupDataSourceMethodName { get; set; }
+        public string? LookupDataSourceMethodName { get; set; }
     }
 }

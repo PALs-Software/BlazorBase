@@ -26,7 +26,7 @@ namespace BlazorBase.CRUD.Components.List
 
         [Parameter] public RenderFragment ChildContent { get; set; }
 
-        [Parameter] public string Class { get; set; }
+        [Parameter] public string? Class { get; set; }
         #endregion
 
         #region Injects
@@ -149,7 +149,7 @@ namespace BlazorBase.CRUD.Components.List
         #region Input Filtering
         protected async virtual Task FilterTypeChangedAsync(DisplayItem displayItem, string newFilterType)
         {
-            if (!Enum.TryParse(typeof(FilterType), newFilterType, out object filterType))
+            if (!Enum.TryParse(typeof(FilterType), newFilterType, out object? filterType))
                 return;
 
             displayItem.FilterType = (FilterType)filterType;
@@ -168,7 +168,7 @@ namespace BlazorBase.CRUD.Components.List
 
         protected async virtual Task BooleanFilterChangedAsync(DisplayItem displayItem, string newValue)
         {
-            if (!Enum.TryParse(typeof(BooleanValue), newValue, out object filterType))
+            if (!Enum.TryParse(typeof(BooleanValue), newValue, out object? filterType))
                 return;
 
             switch ((BooleanValue)filterType)

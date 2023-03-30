@@ -105,10 +105,10 @@ namespace BlazorBase.CRUD.Extensions
                         filterValue = filterValue?.ToString();
             }
 
-            ConstantExpression constant = null;
+            ConstantExpression? constant = null;
             Expression body;
             var parameter = Expression.Parameter(typeof(TModel));
-            var property = ResolvePropertyPath<TModel>(displayItem.DisplayPropertyPath, parameter);
+            var property = ResolvePropertyPath<TModel>(displayItem.DisplayPropertyPath ?? displayItem.Property.Name, parameter);
 
             if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?) &&
                 !(filterType == FilterType.Like && (displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))))

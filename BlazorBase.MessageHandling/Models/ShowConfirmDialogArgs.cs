@@ -14,11 +14,11 @@ namespace BlazorBase.MessageHandling.Models
         public ShowConfirmDialogArgs() { }
         public ShowConfirmDialogArgs(string title, string message, 
                                     MessageType messageType = MessageType.Information,
-                                    Func<ModalClosingEventArgs, ConfirmDialogResult, Task> onClosing = null,
-                                    object icon = null, 
-                                    string confirmButtonText = null,
+                                    Func<ModalClosingEventArgs, ConfirmDialogResult, Task>? onClosing = null,
+                                    object? icon = null, 
+                                    string? confirmButtonText = null,
                                     Color confirmButtonColor = Color.Primary,
-                                    string abortButtonText = null,
+                                    string? abortButtonText = null,
                                     Color abortButtonColor = Color.Secondary,
                                     ModalSize modalSize = ModalSize.Large) : base(title, message, messageType, null, icon, abortButtonText, abortButtonColor, modalSize)
         {
@@ -27,10 +27,10 @@ namespace BlazorBase.MessageHandling.Models
             OnClosing = onClosing;
         }
 
-        public string ConfirmButtonText { get; set; }
+        public string? ConfirmButtonText { get; set; }
         public Color ConfirmButtonColor { get; set; }
 
-        public new Func<ModalClosingEventArgs, ConfirmDialogResult, Task> OnClosing { get; set; }
+        public new Func<ModalClosingEventArgs, ConfirmDialogResult, Task>? OnClosing { get; set; }
 
     }
 }

@@ -11,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.Net.Http;
@@ -27,27 +26,27 @@ namespace BlazorBase.RichTextEditor.Components
         [Parameter] public bool ReadOnly { get; set; } = false;
         [Parameter] public bool SubmitOnEnter { get; set; } = false;
         [Parameter] public Blazorise.Placement ToolbarPosition { get; set; } = Blazorise.Placement.Top;
-        [Parameter] public BaseService BaseService { get; set; }
-        [Parameter] public IBaseModel ConnectedModel { get; set; }
-        [Parameter] public string BaseImageFileNames { get; set; } = String.Empty;
+        [Parameter] public BaseService BaseService { get; set; } = null!;
+        [Parameter] public IBaseModel ConnectedModel { get; set; } = null!;
+        [Parameter] public string? BaseImageFileNames { get; set; } = String.Empty;
         [Parameter] public bool HideSaveButton { get; set; } = false;
 
-        [Parameter] public RenderFragment AdditionalButtons { get; set; }
-        [Parameter] public RenderFragment EditorContent { get; set; }
+        [Parameter] public RenderFragment? AdditionalButtons { get; set; }
+        [Parameter] public RenderFragment? EditorContent { get; set; }
 
-        [Parameter] public string BackgroundColor { get; set; }
+        [Parameter] public string? BackgroundColor { get; set; }
 
         #region Events
-        public record OnSaveArgs(IBaseModel ConnectedModel, string Content) { public object AdditionalInformations { get; set; } }
+        public record OnSaveArgs(IBaseModel ConnectedModel, string Content) { public object? AdditionalInformations { get; set; } }
         [Parameter] public EventCallback<OnSaveArgs> OnSave { get; set; }
 
-        public record OnBeforeSaveArgs(IBaseModel ConnectedModel) { public object AdditionalInformations { get; set; } }
+        public record OnBeforeSaveArgs(IBaseModel ConnectedModel) { public object? AdditionalInformations { get; set; } }
         [Parameter] public EventCallback<OnBeforeSaveArgs> OnBeforeSave { get; set; }
 
-        public record OnBeforeModifyHtmlContentArgs(IBaseModel ConnectedModel, HtmlDocument HtmlDocument, bool IsHandled) { public object AdditionalInformations { get; set; } }
+        public record OnBeforeModifyHtmlContentArgs(IBaseModel ConnectedModel, HtmlDocument HtmlDocument, bool IsHandled) { public object? AdditionalInformations { get; set; } }
         [Parameter] public EventCallback<OnBeforeModifyHtmlContentArgs> OnBeforeModifyHtmlContent { get; set; }
 
-        public record OnAfterModifyHtmlContentArgs(IBaseModel ConnectedModel, HtmlDocument HtmlDocument) { public object AdditionalInformations { get; set; } }
+        public record OnAfterModifyHtmlContentArgs(IBaseModel ConnectedModel, HtmlDocument HtmlDocument) { public object? AdditionalInformations { get; set; } }
         [Parameter] public EventCallback<OnAfterModifyHtmlContentArgs> OnAfterModifyHtmlContent { get; set; }
 
         public record OnContentChangedArgs(IBaseModel ConnectedModel);
@@ -55,21 +54,21 @@ namespace BlazorBase.RichTextEditor.Components
         #endregion
         #endregion
 
-        #region Inject
-        [Inject] protected NavigationManager NavigationManager { get; set; }
-        [Inject] protected IServiceProvider ServiceProvider { get; set; }
-        [Inject] protected IStringLocalizer<BaseRichTextEditor> Localizer { get; set; }
-        [Inject] protected IMessageHandler MessageHandler { get; set; }
-        [Inject] protected BlazorBaseRichTextEditorOptions Options { get; set; }
+        #region Injects
+        [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
+        [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
+        [Inject] protected IStringLocalizer<BaseRichTextEditor> Localizer { get; set; } = null!;
+        [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
+        [Inject] protected BlazorBaseRichTextEditorOptions Options { get; set; } = null!;
         #endregion
 
         #region Properties
-        protected RichTextEdit RichTextEdit { get; set; }
+        protected RichTextEdit? RichTextEdit { get; set; }
         #endregion
 
         #region Member
-        protected string RootClass;
-        protected string Style;
+        protected string RootClass = String.Empty;
+        protected string Style = String.Empty;
         #endregion
 
         #region Init
@@ -86,8 +85,11 @@ namespace BlazorBase.RichTextEditor.Components
         #endregion
 
         #region Public Methods
-        public async Task<string> GetContentAsync(bool withoutPostProcessing = false)
+        public async Task<string?> GetContentAsync(bool withoutPostProcessing = false)
         {
+            if (RichTextEdit == null)
+                return null;
+
             var contentAsHtml = await RichTextEdit.GetHtmlAsync();
 
             if (withoutPostProcessing)
@@ -102,6 +104,9 @@ namespace BlazorBase.RichTextEditor.Components
         #region Actions
         protected async Task SaveAsync()
         {
+            if (RichTextEdit == null)
+                return;
+
             var args = new OnBeforeSaveArgs(ConnectedModel);
             await OnBeforeSave.InvokeAsync(args);
 
@@ -119,7 +124,7 @@ namespace BlazorBase.RichTextEditor.Components
         #endregion
 
         #region HtmlRework
-        protected async Task<string> ModifyHtmlContentAsync(string contentAsHtml, OnBeforeSaveArgs args = null)
+        protected async Task<string> ModifyHtmlContentAsync(string contentAsHtml, OnBeforeSaveArgs? args = null)
         {
             var document = new HtmlDocument();
             document.LoadHtml(contentAsHtml);
@@ -200,7 +205,7 @@ namespace BlazorBase.RichTextEditor.Components
             {
                 string srcValue = image.GetAttributeValue("src", null);
                 srcValue = WebUtility.HtmlDecode(srcValue);
-                byte[] imageData = null;
+                byte[]? imageData = null;
                 try
                 {
                     using HttpClient client = new();
@@ -212,7 +217,7 @@ namespace BlazorBase.RichTextEditor.Components
                     continue;
                 }
 
-                string mimeType = null;
+                string? mimeType = null;
                 try
                 {
                     using var memoryStream = new MemoryStream(imageData);

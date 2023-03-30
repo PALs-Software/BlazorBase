@@ -22,20 +22,20 @@ namespace BlazorBase.User.Components;
 public partial class BaseUserManagePassword : ComponentBase
 {
     #region Parameter
-   
+
     #endregion
 
     #region Inject
-    [Inject] protected IStringLocalizer<BaseLoginForm> Localizer { get; set; }
-    [Inject] protected SignInManager<IdentityUser> SignInManager { get; set; }
-    [Inject] protected UserManager<IdentityUser> UserManager { get; set; }
-    [Inject]  protected AuthenticationStateProvider AuthenticationStateProvider { get; set; }
-    [Inject] protected ILogger<BaseLoginForm> Logger { get; set; }
+    [Inject] protected IStringLocalizer<BaseLoginForm> Localizer { get; set; } = null!;
+    [Inject] protected SignInManager<IdentityUser> SignInManager { get; set; } = null!;
+    [Inject] protected UserManager<IdentityUser> UserManager { get; set; } = null!;
+    [Inject]  protected AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+    [Inject] protected ILogger<BaseLoginForm> Logger { get; set; } = null!;
     #endregion
 
     #region Properties
     protected ChangePasswordData Data { get; set; } = new();
-    protected string Feedback { get; set; }
+    protected string Feedback { get; set; } = String.Empty;
     #endregion
 
     #region Submit Login

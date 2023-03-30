@@ -1,10 +1,6 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace BlazorBase.CRUD.Extensions
 {

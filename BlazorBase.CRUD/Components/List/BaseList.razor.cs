@@ -71,10 +71,10 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         [Parameter] public bool HideTitle { get; set; } = false;
-        [Parameter] public string SingleDisplayName { get; set; }
-        [Parameter] public string ExplainText { get; set; }
-        [Parameter] public string PluralDisplayName { get; set; }
-        [Parameter] public List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; set; }
+        [Parameter] public string? SingleDisplayName { get; set; }
+        [Parameter] public string? ExplainText { get; set; }
+        [Parameter] public string? PluralDisplayName { get; set; }
+        [Parameter] public List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; set; }
 
         [Parameter] public bool UserCanAddEntries { get; set; } = true;
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
@@ -94,7 +94,7 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
 
         #region Style
-        [Parameter] public string TableClass { get; set; }
+        [Parameter] public string? TableClass { get; set; }
         #endregion
 
         #endregion
@@ -135,28 +135,25 @@ namespace BlazorBase.CRUD.Components.List
 
         protected override async Task OnInitializedAsync()
         {
-            await InvokeAsync(() =>
+            if (ComponentModelInstance == null)
+                ComponentModelInstance = new TModel();
+
+            EventServices = GetEventServices(Service);
+
+            TModelType = typeof(TModel);
+            await SetUpDisplayListsAsync(TModelType, GUIType.List, ComponentModelInstance);
+
+            SetDisplayNames();
+            PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+
+            ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;
+            if (UrlNavigationEnabled)
             {
-                if (ComponentModelInstance == null)
-                    ComponentModelInstance = new TModel();
+                LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
+                NavigationManager.LocationChanged += LocationEventHandler;
+            }
 
-                EventServices = GetEventServices(Service);
-
-                TModelType = typeof(TModel);
-                SetUpDisplayLists(TModelType, GUIType.List, ComponentModelInstance);
-
-                SetDisplayNames();
-                PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
-
-                ListNavigationBasePath = NavigationManager.ToAbsoluteUri(NavigationManager.Uri).AbsolutePath;
-                if (UrlNavigationEnabled)
-                {
-                    LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
-                    NavigationManager.LocationChanged += LocationEventHandler;
-                }
-
-                SetInitalSortOfPropertyColumns();
-            });
+            SetInitalSortOfPropertyColumns();
 
             await PrepareForeignKeyProperties(Service);
         }

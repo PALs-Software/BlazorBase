@@ -51,17 +51,17 @@ namespace BlazorBase.CRUD.Services
 
         #region GetData
 
-        public async virtual Task<T> GetAsync<T>(params object[] keyValues) where T : class
+        public async virtual Task<T?> GetAsync<T>(params object?[] keyValues) where T : class
         {
             return await DbContext.Set<T>().FindAsync(keyValues);
         }
 
-        public async virtual Task<object> GetAsync(Type type, params object[] keyValues)
+        public async virtual Task<object?> GetAsync(Type type, params object?[] keyValues)
         {
             return await DbContext.FindAsync(type, keyValues);
         }
 
-        public async virtual Task<T> GetWithAllNavigationPropertiesAsync<T>(params object[] keyValues) where T : class
+        public async virtual Task<T?> GetWithAllNavigationPropertiesAsync<T>(params object?[] keyValues) where T : class
         {
             var entry = await GetAsync<T>(keyValues);
             if (entry == null)
