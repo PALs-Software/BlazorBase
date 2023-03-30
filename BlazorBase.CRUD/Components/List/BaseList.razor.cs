@@ -22,6 +22,7 @@ using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Card;
 using Newtonsoft.Json;
+using BlazorBase.CRUD.Components.PageActions.Models;
 
 namespace BlazorBase.CRUD.Components.List
 {
@@ -87,8 +88,11 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
         [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
+        [Parameter] public bool StickyRowButtons { get; set; } = true;
+
         [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
-        [Parameter] public RenderFragment AdditionalHeaderButtons { get; set; }
+
+        [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
 
         #region Style
         [Parameter] public string TableClass { get; set; }
@@ -461,6 +465,16 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         #region CRUD
+
+        public virtual Task OnRowDoubleClicked(TModel entry)
+        {
+            if (UserCanEditEntries)
+                return EditEntryAsync(entry);
+            else if (UserCanOpenCardReadOnly)
+                return ViewEntryAsync(entry);
+
+            return Task.CompletedTask;
+        }
 
         public virtual async Task AddEntryAsync()
         {

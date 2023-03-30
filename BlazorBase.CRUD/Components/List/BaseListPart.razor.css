@@ -1,0 +1,33 @@
+﻿.base-list-part {
+    max-height: 50vh;
+    overflow: auto;
+    width: 100%;
+}
+
+.root-base-list-part-table-header-item {
+    padding: 0px;
+}
+
+.base-list-part-table-header {
+    background-color: var(--card-background);
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+}
+
+.base-list-part-with-sticky-row-buttons .base-list-part-row-buttons,
+::deep .base-list-part-with-sticky-row-buttons .base-list-part-actions {
+    position: sticky;
+    left: 0px;
+    z-index: 2;
+    background-color: var(--card-background);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--list-part-table-hover-background-color,#313131);
+}
+
+.base-list-part-with-sticky-row-buttons tr:hover .base-list-part-row-buttons {
+    color: var(--table-hover-color);
+    background-color: var(--list-part-table-hover-background-color,#313131);
+}

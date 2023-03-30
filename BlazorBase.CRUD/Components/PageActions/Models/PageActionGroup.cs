@@ -14,6 +14,7 @@ public class PageActionGroup
     public GUIType[] VisibleInGUITypes { get; set; } = new GUIType[] { GUIType.Card, GUIType.List, GUIType.ListPart };
     public Func<EventServices, Task<bool>> Visible { get; set; } = x => Task.FromResult(true);
     public List<PageAction> PageActions { get; set; } = new List<PageAction>();
+    public bool PreventAutoRemovingByEmptyPageActions { get; set; } = false;
 
     public static class DefaultGroups
     {

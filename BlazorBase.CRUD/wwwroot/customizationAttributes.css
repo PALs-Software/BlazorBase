@@ -1,0 +1,14 @@
+﻿
+
+@media (min-width: 768px) {
+    .base-list-sticky-column {
+        position: sticky;
+        z-index: 2;
+        background-color: var(--bs-body-bg);
+    }
+
+    tbody tr:hover .base-list-sticky-column {
+        color: var(--table-hover-color);
+        background-color: var(--table-hover-background);
+    }
+}
