@@ -1,5 +1,6 @@
 ﻿@using BlazorBase.CRUD.Models
-@using Blazorise.Icons.FontAwesome;
+@using Blazorise.Icons.FontAwesome
+@using BlazorBase.CRUD.Attributes
 
 @typeparam TModel
 @inherits BaseDisplayComponent
@@ -8,9 +9,9 @@
 
     <PageTitle>@PluralDisplayName | @BlazorBaseOptions.ShortWebsiteName</PageTitle>
 
-    <table class="base-list-table table table-hover @TableClass">
+    <table class="base-list-table table table-hover @TableClass @(StickyRowButtons ? "base-list-with-sticky-row-buttons" : "")">
         <thead class="base-list-table-header">
-            <tr class="sticky-border">
+            <tr>
                 <th class="root-base-list-table-header-item" colspan="100">
                     @if (!HideTitle)
                     {
@@ -28,9 +29,10 @@
                         @InvalidSummaryFeedback
                     </Alert>
                 </th>
+                <th class="bottom-border-line" />
             </tr>
-            <tr class="sticky-border">
-                <th class="th-actions">
+            <tr>
+                <th class="base-list-actions">
                     @if (UserCanAddEntries)
                     {
                         <Button Color="Color.Success" Clicked="AddEntryAsync"><Blazorise.Icon Name="IconName.Add" /></Button>
@@ -40,11 +42,11 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <th class="base-list-table-header-column"
+                        <th class="base-list-table-header-column @displayItem.CustomizationClasses"
                     @onclick="async () => await OnSortClicked(displayItem, false)"
                     @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                     @oncontextmenu:preventDefault="true"
-                    Style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty)"
+                    style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
                     title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
 
                             <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
@@ -61,6 +63,7 @@
                         </th>
                     }
                 }
+                <th class="bottom-border-line" />
             </tr>
             @if (Filterable)
             {
@@ -69,8 +72,8 @@
         </thead>
         <tbody>
             <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
-                <tr>
-                    <td>
+                <tr @ondblclick="() => OnRowDoubleClicked(context)">
+                    <td class="base-list-row-buttons">
                         <Buttons>
                             @if (UserCanEditEntries)
                             {
@@ -96,7 +99,7 @@
                     {
                         @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                         {
-                            <td class="base-list-table-cell text-truncate base-list-table-cell-@displayItem.Property.Name.ToLower()">
+                            <td class="base-list-table-cell text-truncate base-list-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
                                 @{
                                     var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
                                     if (renderFragment != null)
@@ -160,6 +163,7 @@
                             </td>
                         }
                     }
+                    <td class="bottom-border-line" />
                 </tr>
             </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
         </tbody>
