@@ -1,7 +1,7 @@
 ﻿@typeparam TModel
 
 <div class="base-card">
-    <Modal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
+    <Modal @ref="Modal" Class="modal-fullscreen" Closing="async (args) => await OnModalClosing(args)">
         <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
             <ModalHeader>
                 <ModalTitle>
@@ -25,7 +25,7 @@
                           ShowActions="ShowActions"
                           ShowEntryByStart="ShowEntryByStart"
                           ComponentModelInstance="ComponentModelInstance"
-                          EntryToBeShownByStart="(args) => EntryToBeShownByStart(args)"
+                          EntryToBeShownByStart="EntryToBeShownByStart"
                           OnTitleCalculated="OnTitleCalculated"
                           OnAfterGetVisibleProperties="GetVisiblePropertiesAsync"
                           OnCreateNewEntryInstance="OnCreateNewEntryInstance"

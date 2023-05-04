@@ -1,4 +1,5 @@
-﻿@using BlazorBase.CRUD.Models
+﻿@using BlazorBase.CRUD.EventArguments;
+@using BlazorBase.CRUD.Models
 
 @inherits BlazorBase.CRUD.Components.Inputs.BaseInput
 
@@ -20,10 +21,9 @@
                                         HideSaveButton="false"
                                         OnContentChanged="OnContentChanged"
                                         OnSave="() => OnBeforeCardSaveChanges(null)"
-                                        
                                         ReadOnly="IsReadOnly">
 
-                            <EditorContent>@((MarkupString)CurrentValueAsString)</EditorContent>
+                            <EditorContent>@((MarkupString)(CurrentValueAsString ?? String.Empty))</EditorContent>
 
                         </BaseRichTextEditor>
 

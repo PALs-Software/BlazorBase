@@ -125,7 +125,7 @@
                                         {
                                             if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
                                             {
-                                                string currentValue;
+                                                string? currentValue;
                                                 if (displayItem.DateInputMode == DateInputMode.Date)
                                                 {
                                                     currentValue = ((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString();

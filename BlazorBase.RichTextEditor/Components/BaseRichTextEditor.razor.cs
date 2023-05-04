@@ -167,6 +167,8 @@ namespace BlazorBase.RichTextEditor.Components
 
         protected async Task<int> ChangeBase64ImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
         {
+            ArgumentNullException.ThrowIfNull(Options.ImageFileType);
+
             var base64DataImages = images.Where(htmlNode =>
             {
                 string src = htmlNode.GetAttributeValue("src", null) ?? String.Empty;
@@ -195,6 +197,8 @@ namespace BlazorBase.RichTextEditor.Components
 
         protected async Task<int> ChangeExternalImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
         {
+            ArgumentNullException.ThrowIfNull(Options.ImageFileType);            
+
             var externalImages = images.Where(htmlNode =>
             {
                 string src = htmlNode.GetAttributeValue("src", null) ?? String.Empty;
@@ -264,13 +268,7 @@ namespace BlazorBase.RichTextEditor.Components
         #region MISC
         protected EventServices GetEventServices()
         {
-            return new EventServices()
-            {
-                BaseService = BaseService,
-                Localizer = Localizer,
-                MessageHandler = MessageHandler,
-                ServiceProvider = ServiceProvider
-            };
+            return new EventServices(ServiceProvider, Localizer, BaseService, MessageHandler);
         }
         #endregion
     }

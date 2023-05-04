@@ -20,7 +20,7 @@ public partial class BaseLoginForm : ComponentBase
 {
     #region Parameter
     [Parameter] public string? WebsiteName { get; set; }
-    [Parameter] public RenderFragment Logo { get; set; }
+    [Parameter] public RenderFragment? Logo { get; set; }
     [Parameter] public string? LogoSrc { get; set; }
     [Parameter] public string? LogoHref { get; set; }
     [Parameter] public int LogoHeight { get; set; } = 150;
@@ -33,24 +33,24 @@ public partial class BaseLoginForm : ComponentBase
     #endregion
 
     #region Inject
-    [Inject] protected IStringLocalizer<BaseLoginForm> Localizer { get; set; }
-    [Inject] protected SignInManager<IdentityUser> SignInManager { get; set; }
-    [Inject] protected UserManager<IdentityUser> UserManager { get; set; }
-    [Inject] protected ILogger<BaseLoginForm> Logger { get; set; }
-    [Inject] protected IJSRuntime JSRuntime { get; set; }
-    [Inject] protected NavigationManager NavigationManager { get; set; }
-    [Inject] protected IBlazorBaseUserOptions Options{ get; set; }
+    [Inject] protected IStringLocalizer<BaseLoginForm> Localizer { get; set; } = null!;
+    [Inject] protected SignInManager<IdentityUser> SignInManager { get; set; } = null!;
+    [Inject] protected UserManager<IdentityUser> UserManager { get; set; } = null!;
+    [Inject] protected ILogger<BaseLoginForm> Logger { get; set; } = null!;
+    [Inject] protected IJSRuntime JSRuntime { get; set; } = null!;
+    [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] protected IBlazorBaseUserOptions Options { get; set; } = null!;
     #endregion
 
     #region Properties
     protected static DateTime LastImageOfTheDayUrlPull { get; set; } = DateTime.MinValue;
-    protected static string ImageOfTheDayUrl { get; set; }
+    protected static string? ImageOfTheDayUrl { get; set; }
 
-    protected string AdditionalStyle { get; set; }
+    protected string? AdditionalStyle { get; set; }
 
     protected LoginData LoginData { get; set; } = new();
-    protected string ReturnUrl { get; set; }
-    protected string Feedback { get; set; }
+    protected string? ReturnUrl { get; set; }
+    protected string? Feedback { get; set; }
     #endregion
 
     #region Init
@@ -94,18 +94,18 @@ public partial class BaseLoginForm : ComponentBase
     #endregion
 
     #region Background Image
-    protected async Task<string> GetBingImageOfTheDayUrlAsync()
+    protected async Task<string?> GetBingImageOfTheDayUrlAsync()
     {
         var url = $"https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt={CultureInfo.Name}";
         var client = new HttpClient();
         var response = await client.GetAsync(new Uri(url));
         var result = JObject.Parse(await response.Content.ReadAsStringAsync());
-        if (!result.TryGetValue("images", out JToken token))
+        if (!result.TryGetValue("images", out JToken? token))
             return null;
 
         var images = token as JArray;
         var firstImage = images?.FirstOrDefault() as JObject;
-        if (firstImage is not null && firstImage.TryGetValue("url", out JToken imageUrl))
+        if (firstImage is not null && firstImage.TryGetValue("url", out JToken? imageUrl))
             return new Uri(new Uri("https://www.bing.com"), imageUrl.ToString()).ToString();
 
         return null;

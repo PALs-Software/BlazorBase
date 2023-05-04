@@ -11,7 +11,7 @@ namespace BlazorBase.Themes.Components
 {
     public partial class BaseThemeSelector
     {
-        [CascadingParameter] Theme Theme { get; set; }
+        [CascadingParameter] Theme Theme { get; set; } = null!;
 
         List<ThemeContrast> ThemeContrasts { get; set; } = new List<ThemeContrast>();
 

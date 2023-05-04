@@ -8,15 +8,15 @@ public partial class BaseLoginMenuItem : ComponentBase
 {
     #region Injects
     
-    [Inject] protected IStringLocalizer<BaseLoginMenuItem> Localizer { get; set; }
-    [Inject] protected IBlazorBaseUserOptions Options { get; set; }
+    [Inject] protected IStringLocalizer<BaseLoginMenuItem> Localizer { get; set; } = null!;
+    [Inject] protected IBlazorBaseUserOptions Options { get; set; } = null!;
 
     #endregion
 
     #region Parameters
     [Parameter] public bool UserManageEnabled { get; set; } = true;
 
-    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
     #endregion
 
     public string? Greeting { get; set; }

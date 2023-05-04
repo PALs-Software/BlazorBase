@@ -17,9 +17,9 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class IQueryableExtension
     {
-        static MethodInfo LikeMethodInfo = typeof(DbFunctionsExtensions).GetMethod("Like", new Type[] { typeof(DbFunctions), typeof(string), typeof(string) });
-        static MethodInfo StringContainsMethodInfo = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
-        static MethodInfo ToStringMethodInfo = typeof(object).GetMethod("ToString");
+        static MethodInfo LikeMethodInfo = typeof(DbFunctionsExtensions).GetMethod("Like", new Type[] { typeof(DbFunctions), typeof(string), typeof(string) })!;
+        static MethodInfo StringContainsMethodInfo = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) })!;
+        static MethodInfo ToStringMethodInfo = typeof(object).GetMethod("ToString")!;
         static Expression EFFunctionsConstant = Expression.Constant(EF.Functions);
         static Expression EmptyStringConstant = Expression.Constant(String.Empty);
         static Expression NullConstant = Expression.Constant(null);
@@ -121,7 +121,7 @@ namespace BlazorBase.CRUD.Extensions
                     {
                         var savedCulture = Thread.CurrentThread.CurrentCulture;
                         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                        filterValue = filterValue.ToString();
+                        filterValue = filterValue?.ToString();
                         Thread.CurrentThread.CurrentCulture = savedCulture;
                     }
                    
@@ -138,7 +138,7 @@ namespace BlazorBase.CRUD.Extensions
                         var propertyAsString = Expression.Call(property, ToStringMethodInfo);
 
                         List<Expression> partExpressions = new();
-                        foreach (var filterPart in (filterValue as string).Split(" "))
+                        foreach (var filterPart in ((string)filterValue!).Split(" "))
                         {
                             if (String.IsNullOrEmpty(filterPart))
                                 continue;
@@ -154,19 +154,19 @@ namespace BlazorBase.CRUD.Extensions
                     }
                     break;
                 case FilterType.Equal:
-                    body = Expression.Equal(property, constant);
+                    body = Expression.Equal(property, constant!);
                     break;
                 case FilterType.Greater:
-                    body = Expression.GreaterThan(property, constant);
+                    body = Expression.GreaterThan(property, constant!);
                     break;
                 case FilterType.GreaterOrEqual:
-                    body = Expression.GreaterThanOrEqual(property, constant);
+                    body = Expression.GreaterThanOrEqual(property, constant!);
                     break;
                 case FilterType.Less:
-                    body = Expression.LessThan(property, constant);
+                    body = Expression.LessThan(property, constant!);
                     break;
                 case FilterType.LessOrEqual:
-                    body = Expression.LessThanOrEqual(property, constant);
+                    body = Expression.LessThanOrEqual(property, constant!);
                     break;
                 case FilterType.IsEmpty:
                     if (displayItem.DisplayPropertyType == typeof(Guid))

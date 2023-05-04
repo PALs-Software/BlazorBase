@@ -36,7 +36,7 @@ namespace BlazorBase.Files.Components
         protected FileEdit? FileEdit;
         protected BaseFileModal? BaseFileModal;
         protected bool FileEditIsResetting = false;
-        protected EventServices EventServices = new();
+        protected EventServices EventServices = null!;
 
         #endregion
 
@@ -50,13 +50,7 @@ namespace BlazorBase.Files.Components
             if (FileFilter == null && Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) is FileInputFilterAttribute filterAttribute)
                 FileFilter = filterAttribute?.Filter ?? "*.";
 
-            EventServices = new EventServices()
-            {
-                ServiceProvider = ServiceProvider,
-                Localizer = ModelLocalizer,
-                BaseService = Service,
-                MessageHandler = MessageHandler
-            };
+            EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);            
         }
 
         public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)

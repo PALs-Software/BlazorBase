@@ -1,20 +1,18 @@
 ﻿using BlazorBase.CRUD.Services;
 using BlazorBase.MessageHandling.Interfaces;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.ViewModels
+namespace BlazorBase.CRUD.ViewModels;
+
+
+/// <summary>
+/// Collection of services which can be used in events
+/// </summary>
+/// <param name="ServiceProvider"></param>
+/// <param name="Localizer"></param>
+/// <param name="BaseService"></param>
+/// <param name="MessageHandler"></param>
+public record EventServices(IServiceProvider ServiceProvider, IStringLocalizer Localizer, BaseService BaseService, IMessageHandler MessageHandler)
 {
-    public class EventServices
-    {
-        public IServiceProvider ServiceProvider { get; init; }
-        public IStringLocalizer Localizer { get; init; }
-        public BaseService BaseService { get; init; }
-        public IMessageHandler MessageHandler { get; init; }
-    }
 }

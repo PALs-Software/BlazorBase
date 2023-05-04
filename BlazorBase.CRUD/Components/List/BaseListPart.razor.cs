@@ -43,30 +43,30 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public EventCallback<OnAfterMoveListEntryDownArgs> OnAfterMoveListEntryDown { get; set; }
         #endregion
 
-        [Parameter] public IBaseModel Model { get; set; }
-        [Parameter] public PropertyInfo Property { get; set; }
-        [Parameter] public BaseService Service { get; set; }
+        [Parameter] public IBaseModel Model { get; set; } = null!;
+        [Parameter] public PropertyInfo Property { get; set; } = null!;
+        [Parameter] public BaseService Service { get; set; } = null!;
         [Parameter] public bool? ReadOnly { get; set; }
         [Parameter] public string? SingleDisplayName { get; set; }
         [Parameter] public string? PluralDisplayName { get; set; }
         #endregion
 
         #region Injects
-        [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; }
-        [Inject] protected IServiceProvider ServiceProvider { get; set; }
-        [Inject] protected IMessageHandler MessageHandler { get; set; }
+        [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; } = null!;
+        [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
+        [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
         #endregion
 
         #region Members
-        protected EventServices EventServices;
+        protected EventServices EventServices = null!;
 
-        protected IStringLocalizer ModelLocalizer { get; set; }
-        protected Type IStringModelLocalizerType { get; set; }
-        protected IList Entries { get; set; }
+        protected IStringLocalizer ModelLocalizer { get; set; } = null!;
+        protected Type IStringModelLocalizerType { get; set; } = null!;
+        protected IList Entries { get; set; } = null!;
         protected Dictionary<object, bool> EntryIsInAddingMode { get; set; } = new();
-        protected Type ModelListEntryType { get; set; }
+        protected Type ModelListEntryType { get; set; } = null!;
 
-        protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; }
+        protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; } = new();
         protected bool ModelImplementedISortableItem { get; set; }
         protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
 
@@ -143,7 +143,7 @@ namespace BlazorBase.CRUD.Components.List
             InvokeAsync(() => StateHasChanged());
         }
 
-        protected async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly, IBaseModel model)
+        protected async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly, IBaseModel model)
         {
             foreach (var baseinput in BaseInputExtensions)
                 if (await baseinput.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
@@ -178,7 +178,7 @@ namespace BlazorBase.CRUD.Components.List
         {
             var listType = typeof(List<>);
             var constructedListType = listType.MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
-            return Activator.CreateInstance(constructedListType);
+            return Activator.CreateInstance(constructedListType)!;
         }
 
         protected async Task AddEntryAsync(object? aboveEntry = null)
@@ -215,6 +215,9 @@ namespace BlazorBase.CRUD.Components.List
                 return;
 
             var entryToAdd = await Service.GetAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
+            if (entryToAdd == null)
+                return;
+
             var handledEventArgs = new HandledEventArgs();
             await OnBeforeAddEntryAsync(entryToAdd, handledEventArgs, callAddEventOnListEntry: false);
             if (handledEventArgs.Handled)
@@ -294,7 +297,11 @@ namespace BlazorBase.CRUD.Components.List
                 return;
 
             for (int index = 0; index < Entries.Count; index++)
-                (Entries[index] as ISortableItem).SortIndex = index;
+            {
+                var entry = Entries[index];
+                if (entry != null)
+                    ((ISortableItem)entry).SortIndex = index;
+            }
         }
         #endregion
 
@@ -450,13 +457,7 @@ namespace BlazorBase.CRUD.Components.List
 
         protected EventServices GetEventServices()
         {
-            return new EventServices()
-            {
-                ServiceProvider = ServiceProvider,
-                Localizer = ModelLocalizer,
-                BaseService = Service,
-                MessageHandler = MessageHandler
-            };
+            return new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);
         }
 
         public bool CheckIfModelIsInAddingMode(object entry)

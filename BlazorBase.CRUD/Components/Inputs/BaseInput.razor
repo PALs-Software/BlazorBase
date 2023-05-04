@@ -39,7 +39,7 @@
         }
         else if (RenderType == typeof(bool))
         {
-            <Check TValue="bool" Checked="(bool)Property.GetValue(Model)" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+            <Check TValue="bool" Checked="(bool)Property.GetValue(Model)!" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="IsReadOnly" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(bool?))
         {
@@ -47,7 +47,7 @@
         }
         else if (RenderType == typeof(DateTime))
         {
-            <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+            <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(DateTime?))
         {
@@ -55,7 +55,7 @@
         }
         else if (RenderType == typeof(DateTimeOffset))
         {
-            <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
+            <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem.DateInputMode" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(DateTimeOffset?))
         {
@@ -63,7 +63,7 @@
         }
         else if (RenderType == typeof(TimeSpan))
         {
-            <TimeEdit TValue="TimeSpan" Time="(TimeSpan)Property.GetValue(Model)" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+            <TimeEdit TValue="TimeSpan" Time="(TimeSpan)Property.GetValue(Model)!" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(TimeSpan?))
         {
@@ -71,7 +71,7 @@
         }
         else if (RenderType == typeof(Guid))
         {
-            <TextEdit Text="@(Property.GetValue(Model).ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+            <TextEdit Text="@(Property.GetValue(Model)!.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(Guid?))
         {

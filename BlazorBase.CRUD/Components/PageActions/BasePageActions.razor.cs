@@ -28,7 +28,7 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public GUIType GUIType { get; set; }
         [Parameter] public bool ShowOnlyButtons { get; set; }
 
-        [Parameter] public RenderFragment<PageActionGroup>? AdditionalPageActions { get; set; } = null!;
+        [Parameter] public RenderFragment<PageActionGroup>? AdditionalPageActions { get; set; } = null;
         #endregion
 
         #region Injects

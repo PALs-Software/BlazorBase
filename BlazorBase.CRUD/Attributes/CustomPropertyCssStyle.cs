@@ -2,6 +2,7 @@
 
 namespace BlazorBase.CRUD.Attributes;
 
+[AttributeUsage(AttributeTargets.Property)]
 public class CustomPropertyCssStyleAttribute : Attribute
 {
     public string? PropertyStyle { get; set; }

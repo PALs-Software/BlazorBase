@@ -17,17 +17,17 @@ namespace BlazorBase.Files.Components
     public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDisplay
     {
         #region Parameters
-        [Parameter] public IBaseModel Model { get; set; }
-        [Parameter] public PropertyInfo Property { get; set; }
-        [Parameter] public BaseService Service { get; set; }
-        [Parameter] public IStringLocalizer ModelLocalizer { get; set; }
-        [Parameter] public DisplayItem DisplayItem { get; set; }
+        [Parameter] public IBaseModel Model { get; set; } = null!;
+        [Parameter] public PropertyInfo Property { get; set; } = null!;
+        [Parameter] public BaseService Service { get; set; } = null!;
+        [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
+        [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
         [Parameter] public GUIType IsDisplayedInGuiType { get; set; }
 
         #endregion
 
         #region Injects
-        [Inject] protected IStringLocalizer<BaseFileListDisplay> Localizer { get; set; }
+        [Inject] protected IStringLocalizer<BaseFileListDisplay> Localizer { get; set; } = null!;
         #endregion
 
         #region Member

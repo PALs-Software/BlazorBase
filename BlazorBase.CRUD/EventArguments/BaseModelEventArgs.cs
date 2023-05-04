@@ -26,7 +26,7 @@ namespace BlazorBase.CRUD.EventArguments
     }
     public record OnFormatPropertyArgs(IBaseModel Model, string PropertyName, Dictionary<string, object> InputAttributes, EventServices EventServices)
     {
-        public OnFormatPropertyArgs(IBaseModel model, string propertyName, Dictionary<string, object> inputAttributes, string feedbackClass, string inputClass, string feedback, EventServices eventServices) : this(model, propertyName, inputAttributes, eventServices)
+        public OnFormatPropertyArgs(IBaseModel model, string propertyName, Dictionary<string, object> inputAttributes, string? feedbackClass, string? inputClass, string? feedback, EventServices eventServices) : this(model, propertyName, inputAttributes, eventServices)
         {
             FeedbackClass = feedbackClass;
             InputClass = inputClass;
@@ -40,12 +40,12 @@ namespace BlazorBase.CRUD.EventArguments
     public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object? OldValue, EventServices EventServices)
     {
         public OnBeforeConvertPropertyTypeArgs(IBaseModel model, string propertyName, object? newValue, object? oldValue, EventServices eventServices) : this(model, propertyName, oldValue, eventServices) => NewValue = newValue;
-        public object NewValue { get; set; }
+        public object? NewValue { get; set; }
     }
     public record OnBeforePropertyChangedArgs(IBaseModel Model, string PropertyName, object? OldValue, EventServices EventServices)
     {
         public OnBeforePropertyChangedArgs(IBaseModel model, string propertyName, object? newValue, object? oldValue, EventServices eventServices) : this(model, propertyName, oldValue, eventServices) => NewValue = newValue;
-        public object NewValue { get; set; }
+        public object? NewValue { get; set; }
     }
     public record OnAfterPropertyChangedArgs(IBaseModel Model, string PropertyName, object? NewValue, object? OldValue, bool IsValid, EventServices EventServices);
     public record OnCreateNewEntryInstanceArgs(IBaseModel Model, EventServices EventServices);
@@ -83,7 +83,7 @@ namespace BlazorBase.CRUD.EventArguments
     }
     public record OnAfterValidatePropertyArgs(IBaseModel Model, string PropertyName, EventServices EventServices)
     {
-        public OnAfterValidatePropertyArgs(IBaseModel model, string propertyName, EventServices eventServices, bool isValid, string errorMessage) : this(model, propertyName, eventServices)
+        public OnAfterValidatePropertyArgs(IBaseModel model, string propertyName, EventServices eventServices, bool isValid, string? errorMessage) : this(model, propertyName, eventServices)
         {
             IsValid = isValid;
             ErrorMessage = errorMessage;
@@ -95,19 +95,19 @@ namespace BlazorBase.CRUD.EventArguments
     #endregion
 
     #region List Property Event Args
-    public record OnBeforeConvertListPropertyTypeArgs(IBaseModel Model, string PropertyName, object OldValue, EventServices EventServices)
+    public record OnBeforeConvertListPropertyTypeArgs(IBaseModel Model, string PropertyName, object? OldValue, EventServices EventServices)
     {
-        public OnBeforeConvertListPropertyTypeArgs(IBaseModel model, string propertyName, object newValue, object oldValue, EventServices eventServices) : this(model, propertyName, oldValue, eventServices) => NewValue = newValue;
-        public object NewValue { get; set; }
+        public OnBeforeConvertListPropertyTypeArgs(IBaseModel model, string propertyName, object? newValue, object? oldValue, EventServices eventServices) : this(model, propertyName, oldValue, eventServices) => NewValue = newValue;
+        public object? NewValue { get; set; }
     };
-    public record OnBeforeListPropertyChangedArgs(IBaseModel Model, string PropertyName, object OldValue, EventServices EventServices)
+    public record OnBeforeListPropertyChangedArgs(IBaseModel Model, string PropertyName, object? OldValue, EventServices EventServices)
     {
-        public OnBeforeListPropertyChangedArgs(IBaseModel model, string propertyName, object newValue, object oldValue, EventServices eventServices) : this(model, propertyName, oldValue, eventServices) => NewValue = newValue;
-        public object NewValue { get; set; }
+        public OnBeforeListPropertyChangedArgs(IBaseModel model, string propertyName, object? newValue, object? oldValue, EventServices eventServices) : this(model, propertyName, oldValue, eventServices) => NewValue = newValue;
+        public object? NewValue { get; set; }
     }
-    public record OnAfterListPropertyChangedArgs(IBaseModel Model, string PropertyName, object NewValue, object OldValue, bool IsValid, EventServices EventServices);
-    public record OnCreateNewListEntryInstanceArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
-    public record OnBeforeAddListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices)
+    public record OnAfterListPropertyChangedArgs(IBaseModel Model, string PropertyName, object? NewValue, object? OldValue, bool IsValid, EventServices EventServices);
+    public record OnCreateNewListEntryInstanceArgs(IBaseModel Model, object? ListEntry, EventServices EventServices);
+    public record OnBeforeAddListEntryArgs(IBaseModel Model, object? ListEntry, EventServices EventServices)
     {
         public OnBeforeAddListEntryArgs(IBaseModel model, object? listEntry, bool abortAdding, EventServices eventServices) : this(model, listEntry, eventServices) => AbortAdding = abortAdding;
         public bool AbortAdding { get; set; }
@@ -125,7 +125,7 @@ namespace BlazorBase.CRUD.EventArguments
 
     #region Property Event Args
 
-    public record OnAfterGetVisiblePropertiesArgs(Type ModelType, GUIType GuiType, IBaseModel ComponentModelInstance, List<PropertyInfo> VisibleProperties);
+    public record OnAfterGetVisiblePropertiesArgs(Type ModelType, GUIType GuiType, IBaseModel? ComponentModelInstance, List<PropertyInfo> VisibleProperties);
 
     #endregion
 
