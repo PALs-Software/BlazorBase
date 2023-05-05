@@ -25,7 +25,7 @@ public partial class BaseLoginForm : ComponentBase
     [Parameter] public string? LogoHref { get; set; }
     [Parameter] public int LogoHeight { get; set; } = 150;
     [Parameter] public int LogoWidth { get; set; } = 150;
-
+    [Parameter] public string? BackgroundImageSrc { get; set; }
     [Parameter] public CultureInfo CultureInfo { get; set; } = CultureInfo.CurrentUICulture;
 
     [Parameter] public Blazorise.Color ButtonColor { get; set; } = Blazorise.Color.Primary;
@@ -42,15 +42,16 @@ public partial class BaseLoginForm : ComponentBase
     [Inject] protected IBlazorBaseUserOptions Options { get; set; } = null!;
     #endregion
 
-    #region Properties
-    protected static DateTime LastImageOfTheDayUrlPull { get; set; } = DateTime.MinValue;
-    protected static string? ImageOfTheDayUrl { get; set; }
+    #region Members
+    protected static DateTime LastImageOfTheDayUrlPull = DateTime.MinValue;
+    protected static string? ImageOfTheDayUrl;
 
-    protected string? AdditionalStyle { get; set; }
+    protected string? LoginFormBackgroundImageUrl;
+    protected string? AdditionalStyle;
 
-    protected LoginData LoginData { get; set; } = new();
-    protected string? ReturnUrl { get; set; }
-    protected string? Feedback { get; set; }
+    protected LoginData LoginData = new();
+    protected string? ReturnUrl;
+    protected string? Feedback;
     #endregion
 
     #region Init
@@ -61,7 +62,12 @@ public partial class BaseLoginForm : ComponentBase
         if (query.TryGetValue("returnUrl", out StringValues value))
             ReturnUrl = value;
 
-        if (!ShowImageOfTheDayAsBackgroundImage)
+        if (!String.IsNullOrEmpty(BackgroundImageSrc))
+            LoginFormBackgroundImageUrl = BackgroundImageSrc;
+        else if (ShowImageOfTheDayAsBackgroundImage)
+            LoginFormBackgroundImageUrl = ImageOfTheDayUrl;
+
+        if (!ShowImageOfTheDayAsBackgroundImage || !String.IsNullOrEmpty(BackgroundImageSrc))
             return;
 
         if (!String.IsNullOrEmpty(ImageOfTheDayUrl) && LastImageOfTheDayUrlPull.Date == DateTime.Now.Date)
@@ -70,10 +76,12 @@ public partial class BaseLoginForm : ComponentBase
         LastImageOfTheDayUrlPull = DateTime.Now;
         ImageOfTheDayUrl = await GetBingImageOfTheDayUrlAsync();
     }
+
     #endregion
 
     #region Submit Login
-    public async Task HandleValidSubmit()
+
+    protected async Task HandleValidSubmit()
     {
         Feedback = String.Empty;
         var result = new SignInResult();

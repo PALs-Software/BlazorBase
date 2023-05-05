@@ -25,6 +25,7 @@ public class BlazorBaseUserOptions : IBlazorBaseUserOptions
     public string? WebsiteName { get; set; } = "BlazorBase";
 
     public bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; } = true;
+    public string? LoginBackgroundImageSrc { get; set; }
 
     #endregion
 }

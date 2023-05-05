@@ -10,4 +10,5 @@ public interface IBlazorBaseUserOptions : IBaseOptions
     string ManageUserPath { get; set; }
     string? WebsiteName { get; set; }
     bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; }
+    string? LoginBackgroundImageSrc { get; set; }
 }
