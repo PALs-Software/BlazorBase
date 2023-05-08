@@ -14,13 +14,17 @@
             <tr>
                 <th class="root-base-list-part-table-header-item" colspan="100">
                     <BasePageActions Source="this"
-                                     BaseModel="null"
+                                     BaseModel="Model"
+                                     InvokeActionParameter="SelectedEntry"
                                      BaseModelType="ModelListEntryType"
                                      GUIType="Enums.GUIType.ListPart"
                                      EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer"
                                      OnPageActionInvoked="OnPageActionInvokedAsync" />
 
+                    <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+                        @InvalidSummaryFeedback
+                    </Alert>
                 </th>
                 <th class="bottom-border-line" />
             </tr>
@@ -54,7 +58,7 @@
             @foreach (var entry in Entries)
             {
                 var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
-                <tr @key="entry">
+                <tr @key="entry" @onclick="() => OnRowSelected(entry)" class="@(entry == SelectedEntry ? "base-list-part-row-selected" : "")">
                     <td class="base-list-part-row-buttons text-center">
                         @if (!IsReadOnly)
                         {

@@ -67,6 +67,7 @@ namespace BlazorBase.CRUD.Components.List
         protected IList Entries { get; set; }
         protected Dictionary<object, bool> EntryIsInAddingMode { get; set; } = new();
         protected Type ModelListEntryType { get; set; }
+        protected object SelectedEntry = null;
 
         protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; }
         protected bool ModelImplementedISortableItem { get; set; }
@@ -179,6 +180,17 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         #region CRUD
+
+        public virtual Task OnRowSelected(object entry)
+        {
+            if (entry == SelectedEntry)
+                SelectedEntry = null;
+            else
+                SelectedEntry = entry;
+
+            return Task.CompletedTask;
+        }
+
         protected object CreateGenericListInstance()
         {
             var listType = typeof(List<>);

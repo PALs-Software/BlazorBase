@@ -49,7 +49,7 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
         #endregion
 
-        #region List Events
+        #region List Part Events
         [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
         [Parameter] public EventCallback<OnBeforeAddListEntryArgs> OnBeforeAddListEntry { get; set; }
         [Parameter] public EventCallback<OnAfterAddListEntryArgs> OnAfterAddListEntry { get; set; }
@@ -66,6 +66,7 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }
         [Parameter] public EventCallback<OnBeforeOpenEditModalArgs> OnBeforeOpenEditModal { get; set; }
         [Parameter] public EventCallback<OnBeforeOpenViewModalArgs> OnBeforeOpenViewModal { get; set; }
+        [Parameter] public EventCallback<OnAfterEntrySelectedArgs> OnAfterEntrySelected { get; set; }
         #endregion
 
         #endregion
@@ -118,6 +119,7 @@ namespace BlazorBase.CRUD.Components.List
         protected EventServices EventServices;
 
         protected List<TModel> Entries = new();
+        protected object[] SelectedEntryPrimaryKeys = null;
         protected Type TModelType;
 
         protected BaseModalCard<TModel> BaseModalCard = default!;
@@ -476,6 +478,16 @@ namespace BlazorBase.CRUD.Components.List
                 return ViewEntryAsync(entry);
 
             return Task.CompletedTask;
+        }
+
+        public virtual Task OnRowSelected(TModel entry)
+        {
+            if (entry.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true))
+                SelectedEntryPrimaryKeys = null;
+            else
+                SelectedEntryPrimaryKeys = entry.GetPrimaryKeys(useCache: true);
+
+            return OnAfterEntrySelected.InvokeAsync(new OnAfterEntrySelectedArgs(SelectedEntryPrimaryKeys == null ? null : entry, EventServices));
         }
 
         public virtual async Task AddEntryAsync()

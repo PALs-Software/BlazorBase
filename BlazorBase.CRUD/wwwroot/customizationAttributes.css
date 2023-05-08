@@ -7,6 +7,10 @@
         background-color: var(--bs-body-bg);
     }
 
+    .base-list-row-selected .base-list-sticky-column {
+        background-color: var(--table-row-selected-background);
+    }
+
     tbody tr:hover .base-list-sticky-column {
         color: var(--table-hover-color);
         background-color: var(--table-hover-background);

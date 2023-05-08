@@ -61,7 +61,7 @@ namespace BlazorBase.CRUD.Models
         [NotMapped] public virtual bool UserCanDeleteEntries { get; protected set; } = true;
 
         [NotMapped] public virtual bool StickyRowButtons { get; protected set; } = true;
-        
+
         [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; protected set; }
         [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
         #endregion
@@ -72,13 +72,20 @@ namespace BlazorBase.CRUD.Models
             return GetType().GetVisibleProperties(guiType);
         }
 
-        public object[] GetPrimaryKeys()
+        private object[] CachedPrimaryKeys = null;
+        public object[] GetPrimaryKeys(bool useCache = false)
         {
+            if (useCache && CachedPrimaryKeys != null)
+                return CachedPrimaryKeys;
+
             var keyProperties = GetKeyProperties();
 
             var keys = new object[keyProperties.Count];
             for (int i = 0; i < keyProperties.Count; i++)
                 keys[i] = keyProperties.ElementAt(i).GetValue(this);
+
+            if (useCache)
+                CachedPrimaryKeys = keys;
 
             return keys;
         }
@@ -135,6 +142,23 @@ namespace BlazorBase.CRUD.Models
 
             return String.Join(", ", displayKeyValues);
         }
+
+        public bool PrimaryKeysAreEqual(object[] secondModelsPrimaryKeys, bool useCache = false)
+        {
+            var primaryKeys = GetPrimaryKeys(useCache);
+            if (primaryKeys == null && secondModelsPrimaryKeys == null)
+                return true;
+
+            if (primaryKeys == null || secondModelsPrimaryKeys == null || primaryKeys.Length != secondModelsPrimaryKeys.Length)
+                return false;
+
+            for (int i = 0; i < primaryKeys.Length; i++)
+                if (primaryKeys[i].GetHashCode() != secondModelsPrimaryKeys[i].GetHashCode())
+                    return false;
+
+            return true;
+        }
+
         #endregion
 
         #region CRUD Methods
