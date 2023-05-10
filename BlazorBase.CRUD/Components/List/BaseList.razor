@@ -21,6 +21,7 @@
                     }
 
                     <BasePageActions Source="this" BaseModel="ComponentModelInstance"
+                                     InvokeActionParameter="SelectedEntryPrimaryKeys"
                                      BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
                                      AdditionalPageActions="AdditionalHeaderPageActions" />
@@ -72,7 +73,7 @@
         </thead>
         <tbody>
             <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
-                <tr @ondblclick="() => OnRowDoubleClicked(context)">
+                <tr @onclick="() => OnRowSelected(context)" @ondblclick="() => OnRowDoubleClicked(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
                     <td class="base-list-row-buttons">
                         <Buttons>
                             @if (UserCanEditEntries)

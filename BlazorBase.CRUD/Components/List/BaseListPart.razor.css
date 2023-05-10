@@ -31,3 +31,12 @@
     color: var(--table-hover-color);
     background-color: var(--list-part-table-hover-background-color,#313131);
 }
+
+.base-list-part-row-selected {
+    color: var(--list-part-table-row-selected-color, #000000);
+    background-color: var(--list-part-table-row-selected-background, #616161) !important;
+}
+
+.base-list-part-with-sticky-row-buttons .base-list-part-row-selected .base-list-part-row-buttons {
+    background-color: var(--list-part-table-row-selected-background, #616161) !important;
+}

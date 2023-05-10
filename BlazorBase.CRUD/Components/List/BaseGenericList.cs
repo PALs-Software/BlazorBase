@@ -16,7 +16,6 @@ using BlazorBase.CRUD.EventArguments;
 using BlazorBase.MessageHandling.Enum;
 using Blazorise;
 using System.Linq.Expressions;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Card;
@@ -59,6 +58,10 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Parameter] public EventCallback<OnAfterRemoveEntryArgs> OnAfterRemoveEntry { get; set; }
     #endregion
 
+    #region BaseList            
+    [Parameter] public EventCallback<OnAfterEntrySelectedArgs> OnAfterEntrySelected { get; set; }
+    #endregion
+
     #endregion
 
     #endregion
@@ -79,6 +82,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     protected EventServices EventServices;
 
     protected List<TModel> Entries = new();
+    protected object[] SelectedEntryPrimaryKeys = null;
     protected Type TModelType;
 
     protected BaseModalCard<TModel> BaseModalCard = default!;
@@ -314,6 +318,16 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #endregion
 
     #region CRUD
+
+    public virtual Task OnRowSelected(TModel entry)
+    {
+        if (entry.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true))
+            SelectedEntryPrimaryKeys = null;
+        else
+            SelectedEntryPrimaryKeys = entry.GetPrimaryKeys(useCache: true);
+
+        return OnAfterEntrySelected.InvokeAsync(new OnAfterEntrySelectedArgs(SelectedEntryPrimaryKeys == null ? null : entry, EventServices));
+    }
 
     public virtual async Task RemoveEntryAsync(TModel model)
     {
