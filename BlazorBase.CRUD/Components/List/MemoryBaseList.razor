@@ -75,19 +75,6 @@
                 <tr @ondblclick="() => OnRowDoubleClicked(context)">
                     <td class="base-list-row-buttons">
                         <Buttons>
-                            @if (UserCanEditEntries)
-                            {
-                                <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
-                            }
-                            @if (UserCanOpenCardReadOnly)
-                            {
-                                <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
-                            }
-                            @if (UserCanDeleteEntries)
-                            {
-                                <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
-                            }
-
                             @if (AdditionalRowButtons != null)
                             {
                                 @AdditionalRowButtons(context)
@@ -168,34 +155,4 @@
             </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
         </tbody>
     </table>
-
-    @if (!DontRenderCard)
-    {
-        <BaseModalCard @ref="BaseModalCard"
-                   TModel="TModel"
-                   SingleDisplayName="@SingleDisplayName"
-                   ExplainText="@ExplainText"
-                   ComponentModelInstance="ComponentModelInstance"
-                   OnCardClosed="OnCardClosedAsync"
-                   OnCreateNewEntryInstance="OnCreateNewEntryInstance"
-                   OnGuiLoadData="OnGuiLoadData"
-                   OnBeforeAddEntry="OnBeforeAddEntry"
-                   OnAfterAddEntry="OnAfterAddEntry"
-                   OnBeforeUpdateEntry="OnBeforeUpdateEntry"
-                   OnAfterUpdateEntry="OnAfterUpdateEntry"
-                   OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
-                   OnBeforePropertyChanged="OnBeforePropertyChanged"
-                   OnAfterPropertyChanged="OnAfterPropertyChanged"
-                   OnAfterSaveChanges="OnAfterSaveChanges"
-                   OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-                   OnBeforeAddListEntry="OnBeforeAddListEntry"
-                   OnAfterAddListEntry="OnAfterAddListEntry"
-                   OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-                   OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-                   OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-                   OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-                   OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-                   OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-                   OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
-    }
 </div>
