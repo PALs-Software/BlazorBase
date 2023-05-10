@@ -21,6 +21,7 @@
                     }
 
                     <BasePageActions Source="this" BaseModel="ComponentModelInstance"
+                                     InvokeActionParameter="SelectedEntryPrimaryKeys"
                                      BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
                                      AdditionalPageActions="AdditionalHeaderPageActions" />
@@ -32,11 +33,7 @@
                 <th class="bottom-border-line" />
             </tr>
             <tr>
-                <th class="base-list-actions">
-                    @if (UserCanAddEntries)
-                    {
-                        <Button Color="Color.Success" Clicked="AddEntryAsync"><Blazorise.Icon Name="IconName.Add" /></Button>
-                    }
+                <th class="base-list-actions">                  
                 </th>
                 @foreach (var displayGroup in DisplayGroups)
                 {
@@ -46,8 +43,8 @@
                     @onclick="async () => await OnSortClicked(displayItem, false)"
                     @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                     @oncontextmenu:preventDefault="true"
-                    style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
-                    title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
+                            style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
+                            title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
 
                             <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
                                 <span class="text-truncate">
@@ -72,9 +69,14 @@
         </thead>
         <tbody>
             <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
-                <tr @ondblclick="() => OnRowDoubleClicked(context)">
+                <tr @onclick="() => OnRowSelected(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
                     <td class="base-list-row-buttons">
-                        <Buttons>
+                        <Buttons>                      
+                            @if (UserCanDeleteEntries)
+                            {
+                                <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
+                            }
+
                             @if (AdditionalRowButtons != null)
                             {
                                 @AdditionalRowButtons(context)

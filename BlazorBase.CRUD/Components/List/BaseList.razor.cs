@@ -19,8 +19,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public bool UserCanEditEntries { get; set; } = true;
         [Parameter] public bool UserCanOpenCardReadOnly { get; set; } = false;
 
-        [Parameter] public bool ShowEntryByStart { get; set; }       
-        [Parameter] public bool DontRenderCard { get; set; }       
+        [Parameter] public bool ShowEntryByStart { get; set; }
+        [Parameter] public bool DontRenderCard { get; set; }
         [Parameter] public bool UrlNavigationEnabled { get; set; } = true;
 
         #region Events

@@ -195,7 +195,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (request.Count == 0)
             return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
 
-        var query = CreateLoadDataQuery();
+        var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
+        var query = CreateLoadDataQuery(baseService.Set<TModel>());
 
         var totalEntries = await query.CountAsync();
         Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
@@ -203,11 +204,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         return new ItemsProviderResult<TModel>(Entries, totalEntries);
     }
 
-    protected virtual IQueryable<TModel> CreateLoadDataQuery()
+    protected virtual IQueryable<TModel> CreateLoadDataQuery(IQueryable<TModel> query, bool useEFFilters = true)
     {
-        var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
-
-        var query = baseService.Set<TModel>();
         foreach (var sortedColumn in SortedColumns)
             foreach (var displayProperty in sortedColumn.DisplayPropertyPath.Split("|"))
             {
@@ -224,7 +222,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         foreach (var group in DisplayGroups)
             foreach (var displayItem in group.Value.DisplayItems)
-                query = query.Where(displayItem);
+                query = query.Where(displayItem, useEFFilters);
 
         if (ComponentModelInstance != null)
         {
