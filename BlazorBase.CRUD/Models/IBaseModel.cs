@@ -31,7 +31,7 @@ namespace BlazorBase.CRUD.Models
         #region Attribute Methods
         List<PropertyInfo> GetVisibleProperties(GUIType? guiType = null);
 
-        object[] GetPrimaryKeys();
+        object[] GetPrimaryKeys(bool useCache = false);        
 
         string GetPrimaryKeysAsString();
 
@@ -42,6 +42,8 @@ namespace BlazorBase.CRUD.Models
         string GetDisplayKey(string seperator);
 
         string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties);
+
+        bool PrimaryKeysAreEqual(object[] secondModelsPrimaryKeys, bool useCache = false);
         #endregion
 
         #region CRUD Methods
