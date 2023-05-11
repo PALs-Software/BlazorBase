@@ -15,7 +15,7 @@ namespace BlazorBase.CRUD.Components.Inputs
         #region Parameter
         [Parameter] public EventCallback<ChangeEventArgs> OnInput { get; set; }
         [Parameter] public string Value { get; set; }
-        [Parameter] public int InputDelay { get; set; } = 200;
+        [Parameter] public int InputDelay { get; set; } = 200;        
         [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> AdditionalInputAttributes { get; set; }
         #endregion
 

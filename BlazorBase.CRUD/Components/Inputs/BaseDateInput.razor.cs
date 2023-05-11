@@ -13,6 +13,7 @@ public partial class BaseDateInput
     [Parameter] public EventCallback<ChangeEventArgs> OnInput { get; set; }
     [Parameter] public DateTime? Value { get; set; }
     [Parameter] public int InputDelay { get; set; } = 200;
+    [Parameter] public bool ClearInputIfValueIsNull { get; set; } = true;
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalInputAttributes { get; set; }
     #endregion
 
@@ -32,13 +33,16 @@ public partial class BaseDateInput
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        CurrentValueAsString = Value?.ToString("yyyy-MM-dd");
+
+        if (ClearInputIfValueIsNull || Value != null)
+            CurrentValueAsString = Value?.ToString("yyyy-MM-dd");
     }
 
     protected void DelayOnInputEvent(ChangeEventArgs args)
     {
         Timer.Stop();
-        CurrentValueAsString = (string?)args.Value;
+        if (!String.IsNullOrEmpty((string?)args.Value))
+            CurrentValueAsString = (string?)args.Value;
         args.Value = ParseStringToDateTime(args.Value);
         LastChangeEventArgs = args;
         Timer.Start();
