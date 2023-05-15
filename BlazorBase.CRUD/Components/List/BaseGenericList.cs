@@ -206,13 +206,15 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     protected virtual IQueryable<TModel> CreateLoadDataQuery(IQueryable<TModel> query, bool useEFFilters = true)
     {
+        var hasAlreadyOrderByQuery = false;
         foreach (var sortedColumn in SortedColumns)
             foreach (var displayProperty in sortedColumn.DisplayPropertyPath.Split("|"))
             {
                 if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
-                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(displayProperty) : query.OrderBy(displayProperty);
+                    query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(displayProperty) : query.OrderBy(displayProperty);
                 else
-                    query = query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
+                    query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
+                hasAlreadyOrderByQuery = true;
             }
 
         if (DataLoadConditions != null)
