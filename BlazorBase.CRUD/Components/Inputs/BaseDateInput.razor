@@ -1,0 +1,4 @@
+﻿@*
+    Can not bind value over @bind-value because then if you change one part of the date in the input, the other parts will be deleted
+*@
+<input type="date" @oninput="DelayOnInputEvent" value="@CurrentValueAsString" class="form-control" @attributes="AdditionalInputAttributes" />
