@@ -119,6 +119,8 @@ namespace BlazorBase.CRUD.EventArguments
     public record OnAfterRemoveListEntryArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
     public record OnAfterMoveListEntryUpArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
     public record OnAfterMoveListEntryDownArgs(IBaseModel Model, object ListEntry, EventServices EventServices);
+    public record OnAfterEntrySelectedArgs(IBaseModel Model, EventServices EventServices);
+    
     #endregion
 
     #region Data Loading

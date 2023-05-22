@@ -33,11 +33,7 @@
                 <th class="bottom-border-line" />
             </tr>
             <tr>
-                <th class="base-list-actions">
-                    @if (UserCanAddEntries)
-                    {
-                        <Button Color="Color.Success" Clicked="AddEntryAsync"><Blazorise.Icon Name="IconName.Add" /></Button>
-                    }
+                <th class="base-list-actions">                  
                 </th>
                 @foreach (var displayGroup in DisplayGroups)
                 {
@@ -47,8 +43,8 @@
                     @onclick="async () => await OnSortClicked(displayItem, false)"
                     @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                     @oncontextmenu:preventDefault="true"
-                    style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
-                    title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
+                            style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
+                            title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
 
                             <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
                                 <span class="text-truncate">
@@ -73,17 +69,9 @@
         </thead>
         <tbody>
             <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
-                <tr @onclick="() => OnRowSelected(context)" @ondblclick="() => OnRowDoubleClicked(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
+                <tr @onclick="() => OnRowSelected(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
                     <td class="base-list-row-buttons">
-                        <Buttons>
-                            @if (UserCanEditEntries)
-                            {
-                                <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
-                            }
-                            @if (UserCanOpenCardReadOnly)
-                            {
-                                <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
-                            }
+                        <Buttons>                      
                             @if (UserCanDeleteEntries)
                             {
                                 <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
@@ -169,34 +157,4 @@
             </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
         </tbody>
     </table>
-
-    @if (!DontRenderCard)
-    {
-        <BaseModalCard @ref="BaseModalCard"
-                   TModel="TModel"
-                   SingleDisplayName="@SingleDisplayName"
-                   ExplainText="@ExplainText"
-                   ComponentModelInstance="ComponentModelInstance"
-                   OnCardClosed="OnCardClosedAsync"
-                   OnCreateNewEntryInstance="OnCreateNewEntryInstance"
-                   OnGuiLoadData="OnGuiLoadData"
-                   OnBeforeAddEntry="OnBeforeAddEntry"
-                   OnAfterAddEntry="OnAfterAddEntry"
-                   OnBeforeUpdateEntry="OnBeforeUpdateEntry"
-                   OnAfterUpdateEntry="OnAfterUpdateEntry"
-                   OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
-                   OnBeforePropertyChanged="OnBeforePropertyChanged"
-                   OnAfterPropertyChanged="OnAfterPropertyChanged"
-                   OnAfterSaveChanges="OnAfterSaveChanges"
-                   OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-                   OnBeforeAddListEntry="OnBeforeAddListEntry"
-                   OnAfterAddListEntry="OnAfterAddListEntry"
-                   OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-                   OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-                   OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-                   OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-                   OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-                   OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-                   OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
-    }
 </div>

@@ -37,16 +37,7 @@ td {
     background-color: var(--bs-body-bg);
 }
 
-.base-list-with-sticky-row-buttons .base-list-row-selected .base-list-row-buttons {
-    background-color: var(--table-row-selected-background, #616161);
-}
-
 .base-list-with-sticky-row-buttons tr:hover .base-list-row-buttons {
     color: var(--table-hover-color);
     background-color: var(--table-hover-background);
-}
-
-.base-list-row-selected {
-    color: var(--table-row-selected-color, #000000);
-    background-color: var(--table-row-selected-background, #616161);
 }
