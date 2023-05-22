@@ -160,8 +160,12 @@ namespace BlazorBase.CRUD.Components.List
                 return;
             }
 
-            if (DataLoadConditions != null)
-                foreach (var dataLoadCondition in DataLoadConditions) //Check all data load conditions if user is allowed to see this entry
+            var dataLoadConditions = DataLoadConditions;
+            if (args.UseCustomDataLoadConditionsForCheck)
+                dataLoadConditions = args.CustomDataLoadConditions;
+
+            if (dataLoadConditions != null)
+                foreach (var dataLoadCondition in dataLoadConditions) //Check all data load conditions if user is allowed to see this entry
                     if (dataLoadCondition != null && !dataLoadCondition.Compile()(entry))
                     {
                         ChangeUrlToList();
