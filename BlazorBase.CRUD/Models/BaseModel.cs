@@ -153,7 +153,7 @@ namespace BlazorBase.CRUD.Models
                 return false;
 
             for (int i = 0; i < primaryKeys.Length; i++)
-                if (primaryKeys[i].GetHashCode() != secondModelsPrimaryKeys[i].GetHashCode())
+                if (primaryKeys[i]?.GetHashCode() != secondModelsPrimaryKeys[i]?.GetHashCode())
                     return false;
 
             return true;
