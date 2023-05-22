@@ -37,4 +37,14 @@ namespace BlazorBase.CRUD.EventArguments
         public bool IsHandled { get; set; }
         public bool ChangeQueryUrl { get; set; }
     }
+
+    public record OnBeforeNavigateToEntryArgs(IBaseModel Model, bool IsFirstPageLoadNavigation, EventServices EventServices)
+    {
+        public OnBeforeNavigateToEntryArgs(bool isHandled, IBaseModel model, bool isFirstPageLoadNavigation, EventServices eventServices) : this(model, isFirstPageLoadNavigation, eventServices)
+        {
+            IsHandled = isHandled;
+        }
+
+        public bool IsHandled { get; set; }
+    }
 }

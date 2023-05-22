@@ -2,7 +2,6 @@
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -61,7 +60,12 @@ namespace BlazorBase.CRUD.Services
             return await DbContext.FindAsync(type, keyValues);
         }
 
-        public async virtual Task<T> GetWithAllNavigationPropertiesAsync<T>(params object[] keyValues) where T : class
+        public virtual Task<T> GetWithAllNavigationPropertiesAsync<T>(params object[] keyValues) where T : class
+        {
+            return GetWithAllNavigationPropertiesAsync<T>(new List<string>(), keyValues);
+        }
+
+        public async virtual Task<T> GetWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, params object[] keyValues) where T : class
         {
             var entry = await GetAsync<T>(keyValues);
             if (entry == null)
@@ -73,6 +77,9 @@ namespace BlazorBase.CRUD.Services
 
             foreach (var navigationProperty in navigationProperties)
             {
+                if (skipNavigationList.Contains(navigationProperty.Name))
+                    continue;
+
                 if (navigationProperty.IsCollection)
                     await DbContext.Entry(entry).Collection(navigationProperty.Name).LoadAsync();
                 else

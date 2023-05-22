@@ -56,6 +56,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public EventCallback<OnBeforeOpenAddModalArgs> OnBeforeOpenAddModal { get; set; }
         [Parameter] public EventCallback<OnBeforeOpenEditModalArgs> OnBeforeOpenEditModal { get; set; }
         [Parameter] public EventCallback<OnBeforeOpenViewModalArgs> OnBeforeOpenViewModal { get; set; }
+
+        [Parameter] public EventCallback<OnBeforeNavigateToEntryArgs> OnBeforeNavigateToEntry { get; set; }        
         #endregion
 
         #endregion
@@ -63,7 +65,7 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         #region Injects
-             
+
         [Inject] protected NavigationManager NavigationManager { get; set; }
 
         #endregion
@@ -93,7 +95,7 @@ namespace BlazorBase.CRUD.Components.List
             if (!firstRender)
                 return;
 
-            await ProcessQueryParameters();
+            await ProcessQueryParameters(isFirstPageLoadNavigation: true);
         }
 
         public virtual void Dispose()
@@ -116,7 +118,7 @@ namespace BlazorBase.CRUD.Components.List
 
         #region Navigation
 
-        protected virtual async Task ProcessQueryParameters()
+        protected virtual async Task ProcessQueryParameters(bool isFirstPageLoadNavigation = false)
         {
             var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
 
@@ -140,12 +142,17 @@ namespace BlazorBase.CRUD.Components.List
                     return;
                 }
 
-            await NavigateToEntryAsync(primaryKeys.ToArray());
+            await NavigateToEntryAsync(isFirstPageLoadNavigation, primaryKeys.ToArray());
         }
 
-        protected virtual async Task NavigateToEntryAsync(params object[] primaryKeys)
+        protected virtual async Task NavigateToEntryAsync(bool isFirstPageLoadNavigation, params object[] primaryKeys)
         {
             var entry = await Service.GetAsync<TModel>(primaryKeys);
+            var args = new OnBeforeNavigateToEntryArgs(entry, isFirstPageLoadNavigation, EventServices);
+            await OnBeforeNavigateToEntry.InvokeAsync(args);
+
+            if (args.IsHandled)
+                return;
 
             if (entry == null)
             {

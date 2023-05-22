@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Components.General;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.List;
 using BlazorBase.CRUD.Enums;
@@ -95,6 +96,8 @@ namespace BlazorBase.CRUD.Components.Card
 
         protected string Title = String.Empty;
         protected string PageTitle = String.Empty;
+
+        protected Dictionary<string, SkipExplicitNavigationLoadingOnCardOpenAttribute> SkipNavigationLoadingOnCardOpenProperties = new();
         #endregion
 
         #region Property Infos
@@ -125,6 +128,8 @@ namespace BlazorBase.CRUD.Components.Card
                 BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyCardInput>().ToList();
 
                 SetUpDisplayLists(TModelType, GUIType.Card, ComponentModelInstance);
+
+                SkipNavigationLoadingOnCardOpenProperties = TModelType.GetProperties().Where(entry => Attribute.IsDefined(entry, typeof(SkipExplicitNavigationLoadingOnCardOpenAttribute))).ToDictionary(entry => entry.Name, entry => entry.GetCustomAttribute<SkipExplicitNavigationLoadingOnCardOpenAttribute>());
             });
 
             if (ShowEntryByStart)
@@ -186,7 +191,7 @@ namespace BlazorBase.CRUD.Components.Card
                 await Model.OnCreateNewEntryInstance(args);
             }
             else
-                Model = await Service.GetWithAllNavigationPropertiesAsync<TModel>(primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
+                Model = await Service.GetWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
             if (Model == null)
                 throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys)]);
@@ -340,6 +345,9 @@ namespace BlazorBase.CRUD.Components.Card
             onBeforeSaveChangesArgs = new OnBeforeCardSaveChangesArgs(Model, true, eventServices);
             foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
             {
+                if (SkipNavigationLoadingOnCardOpenProperties.ContainsKey(property.Name) && SkipNavigationLoadingOnCardOpenProperties[property.Name].SkipCardSaveChangesEventsForThisPropertyToPreventLoading)
+                    continue;
+
                 if (property.IsListProperty())
                 {
                     if (property.GetValue(Model) is IList list)
@@ -368,6 +376,9 @@ namespace BlazorBase.CRUD.Components.Card
             onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, true, eventServices);
             foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
             {
+                if (SkipNavigationLoadingOnCardOpenProperties.ContainsKey(property.Name) && SkipNavigationLoadingOnCardOpenProperties[property.Name].SkipCardSaveChangesEventsForThisPropertyToPreventLoading)
+                    continue;
+
                 if (property.IsListProperty())
                 {
                     if (property.GetValue(Model) is IList list)
