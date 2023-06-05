@@ -3,6 +3,7 @@ using BlazorBase.CRUD.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,5 +37,12 @@ namespace BlazorBase.CRUD.EventArguments
 
         public bool IsHandled { get; set; }
         public bool ChangeQueryUrl { get; set; }
+    }
+
+    public record OnBeforeNavigateToEntryArgs(IBaseModel Model, bool IsFirstPageLoadNavigation, EventServices EventServices)
+    {
+        public bool IsHandled { get; set; }
+        public bool UseCustomDataLoadConditionsForCheck { get; set; }
+        public List<Expression<Func<IBaseModel, bool>>> CustomDataLoadConditions { get; set; }
     }
 }
