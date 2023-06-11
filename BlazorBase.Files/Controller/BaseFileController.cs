@@ -1,8 +1,9 @@
 ﻿using BlazorBase.Files.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.JSInterop;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -26,6 +27,8 @@ namespace BlazorBase.Files.Controller
             Options = options;
         }
 
+        #region Base File Download
+        
         [HttpGet("{id}/{fileName}")]
         public virtual async Task<IActionResult> GetFile(string id, string fileName)
         {
@@ -73,9 +76,49 @@ namespace BlazorBase.Files.Controller
             return File(stream, "application/octet-stream", fileName, true); //enableRangeProcessing = true
         }
 
+        #endregion
+
+        #region Binary Download
+
+        public record BinaryData(string Name, string MimeContentType, byte[] Data);
+        protected static ConcurrentDictionary<Guid, BinaryData> BinaryDataDownloadRequests { get; set; } = new ConcurrentDictionary<Guid, BinaryData>();
+
+        public static async Task<Guid> DownloadBinaryDataToClientAsync(IJSRuntime jsRuntime, BinaryData binaryData)
+        {
+            Guid guid;
+            while (!BinaryDataDownloadRequests.TryAdd(guid = Guid.NewGuid(), binaryData)) ;
+
+            var url = $"{BlazorBaseFileOptions.Instance.ControllerRoute}/DownloadBinaryData/{guid}";
+            await jsRuntime.InvokeVoidAsync("open", url, "_blank");
+
+            return guid;
+        }
+
+        [HttpGet("{binaryDataDownloadRequestId}")]
+        public virtual IActionResult DownloadBinaryData(Guid binaryDataDownloadRequestId)
+        {
+            if (!BinaryDataDownloadRequests.ContainsKey(binaryDataDownloadRequestId))
+                return BadRequest();
+
+            BinaryDataDownloadRequests.TryRemove(binaryDataDownloadRequestId, out BinaryData? binaryData);
+            if (binaryData == null)
+                return BadRequest();
+
+            return File(binaryData.Data, binaryData.MimeContentType, binaryData.Name);
+        }
+
+        #endregion
+
+
+        #region Access Controll
+
         protected virtual Task<bool> AccessToFileIsGrantedAsync(Guid fileId) { return Task.FromResult(true); }
         protected virtual Task<bool> AccessToTemporaryFileIsGrantedAsync(Guid temporaryFileId) { return Task.FromResult(true); }
+        
+        #endregion
 
+        #region MISC
+        
         protected virtual void DeleteOldTemporaryFiles()
         {
             if (!Options.AutomaticallyDeleteOldTemporaryFiles)
@@ -101,5 +144,7 @@ namespace BlazorBase.Files.Controller
         {
             return fileName.Split("_")[1].Replace("'", "/").Replace("^", ".");
         }
+
+        #endregion
     }
 }

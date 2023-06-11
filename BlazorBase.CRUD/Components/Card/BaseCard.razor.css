@@ -1,0 +1,3 @@
+﻿::deep .card-body:has(.base-list-part) {
+    padding-top: 0;
+}

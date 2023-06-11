@@ -49,6 +49,8 @@ namespace BlazorBase.CRUD.Components.List
         [Parameter] public bool? ReadOnly { get; set; }
         [Parameter] public string? SingleDisplayName { get; set; }
         [Parameter] public string? PluralDisplayName { get; set; }
+
+        [Parameter] public bool StickyRowButtons { get; set; } = true;
         #endregion
 
         #region Injects
@@ -65,6 +67,7 @@ namespace BlazorBase.CRUD.Components.List
         protected IList Entries { get; set; } = null!;
         protected Dictionary<object, bool> EntryIsInAddingMode { get; set; } = new();
         protected Type ModelListEntryType { get; set; } = null!;
+        protected object? SelectedEntry = null;
 
         protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; } = new();
         protected bool ModelImplementedISortableItem { get; set; }
@@ -174,6 +177,17 @@ namespace BlazorBase.CRUD.Components.List
         #endregion
 
         #region CRUD
+
+        public virtual Task OnRowSelected(object entry)
+        {
+            if (entry == SelectedEntry)
+                SelectedEntry = null;
+            else
+                SelectedEntry = entry;
+
+            return Task.CompletedTask;
+        }
+
         protected object CreateGenericListInstance()
         {
             var listType = typeof(List<>);

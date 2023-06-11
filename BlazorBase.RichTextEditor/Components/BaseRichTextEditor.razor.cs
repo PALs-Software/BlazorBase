@@ -158,7 +158,7 @@ namespace BlazorBase.RichTextEditor.Components
 
             var imageFileName = $"{BaseImageFileNames ?? String.Empty}";
             if (ConnectedModel != null)
-                imageFileName += $"{ConnectedModel.GetUnproxiedType().Name}_{String.Join("_", ConnectedModel.GetPrimaryKeys())}";
+                imageFileName += $"{ConnectedModel.GetUnproxiedType().Name}_{String.Join("_", ConnectedModel.GetPrimaryKeys() ?? Array.Empty<string>())}";
 
             ChangeInternalImagesWithBaseUrlToLocalFiles(images);
             internalImageCount = await ChangeBase64ImagesToLocalFilesAsync(images, eventServices, imageFileName, internalImageCount);

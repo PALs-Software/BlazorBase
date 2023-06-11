@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Components.General;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.List;
 using BlazorBase.CRUD.Enums;
@@ -95,6 +96,8 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
     protected string Title = String.Empty;
     protected string PageTitle = String.Empty;
+
+    protected Dictionary<string, SkipExplicitNavigationLoadingOnCardOpenAttribute> SkipNavigationLoadingOnCardOpenProperties = new();
     #endregion
 
     #region Property Infos
@@ -124,6 +127,8 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
         await SetUpDisplayListsAsync(TModelType, GUIType.Card, ComponentModelInstance);
 
+        SkipNavigationLoadingOnCardOpenProperties = TModelType.GetProperties().Where(entry => Attribute.IsDefined(entry, typeof(SkipExplicitNavigationLoadingOnCardOpenAttribute))).ToDictionary(entry => entry.Name, entry => entry.GetCustomAttribute<SkipExplicitNavigationLoadingOnCardOpenAttribute>()!);
+
         if (ShowEntryByStart)
         {
             IBaseModel? entry = null;
@@ -143,24 +148,24 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         return null;
     }
     protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
-     {
-         builder.OpenComponent(0, baseInputExtensionType);
+    {
+        builder.OpenComponent(0, baseInputExtensionType);
 
-         builder.AddAttribute(1, "Model", model);
-         builder.AddAttribute(2, "Property", displayItem.Property);
-         builder.AddAttribute(3, "ReadOnly", isReadonly);
-         builder.AddAttribute(4, "Service", Service);
-         builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
-         builder.AddAttribute(6, "DisplayItem", displayItem);
+        builder.AddAttribute(1, "Model", model);
+        builder.AddAttribute(2, "Property", displayItem.Property);
+        builder.AddAttribute(3, "ReadOnly", isReadonly);
+        builder.AddAttribute(4, "Service", Service);
+        builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
+        builder.AddAttribute(6, "DisplayItem", displayItem);
 
-         builder.AddAttribute(7, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
-         builder.AddAttribute(8, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
-         builder.AddAttribute(9, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
+        builder.AddAttribute(7, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertPropertyType.InvokeAsync(args)));
+        builder.AddAttribute(8, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforePropertyChanged.InvokeAsync(args)));
+        builder.AddAttribute(9, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterPropertyChanged.InvokeAsync(args)));
 
-         builder.AddComponentReferenceCapture(10, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
+        builder.AddComponentReferenceCapture(10, (input) => BasePropertyCardInputs.Add((IBasePropertyCardInput)input));
 
-         builder.CloseComponent();
-     };
+        builder.CloseComponent();
+    };
 
     #endregion
 
@@ -178,18 +183,20 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         BasePropertyCardInputs.Clear();
         ResetInvalidFeedback();
 
+        TModel? model;
         if (AddingMode)
         {
-            Model = new TModel();
-            var args = new OnCreateNewEntryInstanceArgs(Model, EventServices);
+            model = new TModel();
+            var args = new OnCreateNewEntryInstanceArgs(model, EventServices);
             await OnCreateNewEntryInstance.InvokeAsync(args);
-            await Model.OnCreateNewEntryInstance(args);
+            await model.OnCreateNewEntryInstance(args);
         }
         else
-            Model = (await Service.GetWithAllNavigationPropertiesAsync<TModel>(primaryKeys))!; //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
+            model = await Service.GetWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
-        if (Model == null)
+        if (model == null)
             throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys ?? new object())]);
+        Model = model;
 
         var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
         await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
@@ -341,6 +348,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         onBeforeSaveChangesArgs = new OnBeforeCardSaveChangesArgs(Model, true, eventServices);
         foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
         {
+            if (SkipNavigationLoadingOnCardOpenProperties.ContainsKey(property.Name) && SkipNavigationLoadingOnCardOpenProperties[property.Name].SkipCardSaveChangesEventsForThisPropertyToPreventLoading)
+                continue;
+
             if (property.IsListProperty())
             {
                 if (property.GetValue(Model) is IList list)
@@ -369,6 +379,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         onAfterSaveChangesArgs = new OnAfterCardSaveChangesArgs(Model, true, eventServices);
         foreach (PropertyInfo property in TModelType.GetIBaseModelProperties())
         {
+            if (SkipNavigationLoadingOnCardOpenProperties.ContainsKey(property.Name) && SkipNavigationLoadingOnCardOpenProperties[property.Name].SkipCardSaveChangesEventsForThisPropertyToPreventLoading)
+                continue;
+
             if (property.IsListProperty())
             {
                 if (property.GetValue(Model) is IList list)

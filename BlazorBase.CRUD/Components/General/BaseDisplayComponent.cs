@@ -70,7 +70,7 @@ namespace BlazorBase.CRUD.Components.General
 
             foreach (var property in VisibleProperties)
             {
-                var displayItem = DisplayItem.CreateFromProperty(property, BaseDisplayComponentLocalizer["General"]);
+                var displayItem = DisplayItem.CreateFromProperty(property, guiType, BaseDisplayComponentLocalizer["General"]);
 
                 if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup ?? String.Empty))
                     DisplayGroups[displayItem.Attribute.DisplayGroup ?? String.Empty] = new DisplayGroup(displayItem.Attribute, new List<DisplayItem>());
@@ -166,7 +166,7 @@ namespace BlazorBase.CRUD.Components.General
             var primaryKeysAsJson = JsonConvert.SerializeObject(model.GetPrimaryKeys());
 
             if (displayKeyProperties.Count == 0)
-                foreignKeyList.Add(new KeyValuePair<string?, string>(primaryKeysAsJson, String.Join(", ", primaryKeys)));
+                foreignKeyList.Add(new KeyValuePair<string?, string>(primaryKeysAsJson, String.Join(", ", primaryKeys ?? Array.Empty<string>())));
             else
                 foreignKeyList.Add(new KeyValuePair<string?, string>(primaryKeysAsJson, model?.GetDisplayKeyKeyValuePair(displayKeyProperties) ?? String.Empty));
         }
@@ -275,7 +275,7 @@ namespace BlazorBase.CRUD.Components.General
 
         public class DisplayItem
         {
-            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, bool isReadonly, bool isKey, bool isListProperty,
+            public DisplayItem(PropertyInfo property, VisibleAttribute attribute, GUIType guiType, bool isReadonly, bool isKey, bool isListProperty,
                 DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
             {
                 Property = property;
@@ -289,7 +289,35 @@ namespace BlazorBase.CRUD.Components.General
                 IsSortable = isSortable;
                 SortDirection = sortDirection;
                 IsFilterable = isFilterable;
+
+                CustomizationAttributes = property.GetCustomAttributes<CustomizationAttribute>().ToList();
+                FillCustomizationAttributesClasses(guiType);
+                FillCustomizationAttributesStyles(guiType);
             }
+
+            #region Customization Attributes
+
+            protected List<CustomizationAttribute> CustomizationAttributes { get; set; } = new();
+            public string? CustomizationClasses { get; protected set; } = null;
+            public string? CustomizationStyles { get; protected set; } = null;
+
+            protected void FillCustomizationAttributesClasses(GUIType guiType)
+            {
+                CustomizationClasses = String.Empty;
+                foreach (var attribute in CustomizationAttributes)
+                    if (attribute.ValidInGUITypes.Contains(guiType))
+                        CustomizationClasses += " " + attribute.GetClass(guiType);
+            }
+
+            protected void FillCustomizationAttributesStyles(GUIType guiType)
+            {
+                CustomizationStyles = String.Empty;
+                foreach (var attribute in CustomizationAttributes)
+                    if (attribute.ValidInGUITypes.Contains(guiType))
+                        CustomizationStyles += " " + attribute.GetStyle(guiType);
+            }
+
+            #endregion
 
             public PropertyInfo Property { get; set; }
             public VisibleAttribute Attribute { get; set; }
@@ -305,15 +333,15 @@ namespace BlazorBase.CRUD.Components.General
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
 
-            public static DisplayItem CreateFromProperty<T>(string propertyName, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, string? defaultDisplayGroup = null)
             {
                 var property = typeof(T).GetProperty(propertyName);
                 if (property == null)
                     throw new Exception($"The property with the given property name \"{propertyName}\" does not exists");
-                return CreateFromProperty(property, defaultDisplayGroup);
+                return CreateFromProperty(property, guiType, defaultDisplayGroup);
             }
 
-            public static DisplayItem CreateFromProperty(PropertyInfo property, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, string? defaultDisplayGroup = null)
             {
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
                 if (attribute == null)
@@ -328,7 +356,7 @@ namespace BlazorBase.CRUD.Components.General
                     var foreignKey = property.GetCustomAttribute<ForeignKeyAttribute>();
                     if (foreignKey != null && foreignKey.Name.Contains(",")) // Reference has more than one primary key
                     {
-                        return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                        return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(),
                                 property.IsKey(), property.IsListProperty(), dateInputMode,
                                 property.Name, property.PropertyType,
                                 false, attribute.SortDirection, false);
@@ -348,7 +376,7 @@ namespace BlazorBase.CRUD.Components.General
                     sortAndFilterable = true;
                 }
 
-                return new DisplayItem(property, attribute, property.IsReadOnlyInGUI(),
+                return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(),
                     property.IsKey(), property.IsListProperty(), dateInputMode,
                     displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
                     sortAndFilterable, attribute.SortDirection, sortAndFilterable);

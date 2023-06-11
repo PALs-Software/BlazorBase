@@ -60,6 +60,9 @@ namespace BlazorBase.CRUD.Models
         [NotMapped] public virtual bool UserCanEditEntries { get; protected set; } = true;
         [NotMapped] public virtual bool UserCanOpenCardReadOnly { get; protected set; } = false;
         [NotMapped] public virtual bool UserCanDeleteEntries { get; protected set; } = true;
+
+        [NotMapped] public virtual bool StickyRowButtons { get; protected set; } = true;
+
         [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; protected set; }
         [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
         #endregion
@@ -70,20 +73,27 @@ namespace BlazorBase.CRUD.Models
             return GetType().GetVisibleProperties(guiType);
         }
 
-        public object?[] GetPrimaryKeys()
+        private object?[]? CachedPrimaryKeys = null;
+        public object?[]? GetPrimaryKeys(bool useCache = false)
         {
+            if (useCache && CachedPrimaryKeys != null)
+                return CachedPrimaryKeys;
+
             var keyProperties = GetKeyProperties();
 
             var keys = new object?[keyProperties.Count];
             for (int i = 0; i < keyProperties.Count; i++)
                 keys[i] = keyProperties.ElementAt(i).GetValue(this);
 
+            if (useCache)
+                CachedPrimaryKeys = keys;
+
             return keys;
         }
 
         public string GetPrimaryKeysAsString()
         {
-            return String.Join(", ", GetPrimaryKeys());
+            return String.Join(", ", GetPrimaryKeys() ?? Array.Empty<string>());
         }
 
         public List<PropertyInfo> GetKeyProperties()
@@ -110,7 +120,7 @@ namespace BlazorBase.CRUD.Models
         {
             var displayKeyProperties = GetType().GetDisplayKeyProperties();
             if (displayKeyProperties.Count == 0)
-                return String.Join(seperator, GetPrimaryKeys());
+                return String.Join(seperator, GetPrimaryKeys() ?? Array.Empty<string>());
             else
                 return GetDisplayKeyKeyValuePair(displayKeyProperties);
         }
@@ -132,6 +142,22 @@ namespace BlazorBase.CRUD.Models
             }
 
             return String.Join(", ", displayKeyValues);
+        }
+
+        public bool PrimaryKeysAreEqual(object?[]? secondModelsPrimaryKeys, bool useCache = false)
+        {
+            var primaryKeys = GetPrimaryKeys(useCache);
+            if (primaryKeys == null && secondModelsPrimaryKeys == null)
+                return true;
+
+            if (primaryKeys == null || secondModelsPrimaryKeys == null || primaryKeys.Length != secondModelsPrimaryKeys.Length)
+                return false;
+
+            for (int i = 0; i < primaryKeys.Length; i++)
+                if (primaryKeys[i]?.GetHashCode() != secondModelsPrimaryKeys[i]?.GetHashCode())
+                    return false;
+
+            return true;
         }
         #endregion
 
@@ -284,8 +310,11 @@ namespace BlazorBase.CRUD.Models
             builder.AddAttribute(2, "UserCanEditEntries", UserCanEditEntries);
             builder.AddAttribute(3, "UserCanOpenCardReadOnly", UserCanOpenCardReadOnly);
             builder.AddAttribute(4, "UserCanDeleteEntries", UserCanDeleteEntries);
-            builder.AddAttribute(5, "DataLoadConditions", DataLoadConditions);
-            builder.AddAttribute(6, "ComponentModelInstance", this);
+
+            builder.AddAttribute(5, "StickyRowButtons", StickyRowButtons);
+
+            builder.AddAttribute(6, "DataLoadConditions", DataLoadConditions);
+            builder.AddAttribute(7, "ComponentModelInstance", this);
             builder.CloseComponent();
         }
 

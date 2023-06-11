@@ -1,15 +1,16 @@
 ﻿@inherits BaseDisplayComponent
+@using BlazorBase.CRUD.Attributes;
 @using BlazorBase.CRUD.Helper
 
 <tr class="base-list-filter @Class">
-    <th class="th-actions">
+    <th class="base-list-filter-actions">
         <Button Color="Color.Success" title="@BaseListFilterLocalizer["Reset all filters"]" Clicked="ResetAllFiltersAsync"><Icon Name="IconName.Clear" /></Button>
     </th>
     @foreach (var displayGroup in ListDisplayGroups)
     {
         @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
         {
-            <th>
+            <th class="@displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
                 @if (displayItem.IsFilterable && (AllowedFilterTypes.Contains(displayItem.DisplayPropertyType) || displayItem.DisplayPropertyType.IsEnum))
                 {
                     <Addons Class="flex-nowrap">
@@ -134,4 +135,6 @@
     }
 
     @ChildContent
+
+    <th class="bottom-border-line" />
 </tr>

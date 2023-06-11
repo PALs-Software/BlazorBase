@@ -74,6 +74,8 @@ public partial class BaseListFilter : BaseDisplayComponent
         typeof(bool?),
         typeof(DateTime),
         typeof(DateTime?),
+        typeof(TimeSpan),
+        typeof(TimeSpan?),
         typeof(Guid),
         typeof(Guid?)
     };

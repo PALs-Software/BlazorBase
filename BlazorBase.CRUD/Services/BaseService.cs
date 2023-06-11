@@ -65,7 +65,12 @@ public class BaseService : IDisposable
         return DbContext.FindAsync(type, keyValues);
     }
 
-    public async virtual Task<T?> GetWithAllNavigationPropertiesAsync<T>(params object?[]? keyValues) where T : class
+    public virtual Task<T?> GetWithAllNavigationPropertiesAsync<T>(params object?[]? keyValues) where T : class
+    {
+        return GetWithAllNavigationPropertiesAsync<T>(new List<string>(), keyValues);
+    }
+
+    public async virtual Task<T?> GetWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, params object?[]? keyValues) where T : class
     {
         var entry = await GetAsync<T>(keyValues);
         if (entry == null)
@@ -77,6 +82,9 @@ public class BaseService : IDisposable
 
         foreach (var navigationProperty in navigationProperties)
         {
+            if (skipNavigationList.Contains(navigationProperty.Name))
+                continue;
+
             if (navigationProperty.IsCollection)
                 await DbContext.Entry(entry).Collection(navigationProperty.Name).LoadAsync();
             else

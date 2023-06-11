@@ -149,7 +149,7 @@ public partial class BaseSelectListInput : BaseInput
         else
         {
             var primaryKeys = args.SelectedModel.GetPrimaryKeys();
-            await OnValueChangedAsync(primaryKeys[0]);
+            await OnValueChangedAsync(primaryKeys?[0]);
         }
 
         UpdateSelectedValue();
