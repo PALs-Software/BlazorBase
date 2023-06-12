@@ -1,4 +1,6 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿#nullable enable
+
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.EventArguments;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,36 +16,45 @@ public class ExtendedInformationBaseModel : BaseModel
 
     [Editable(false)]
     [Visible(DisplayGroup = "Information", DisplayGroupOrder = 9999, DisplayOrder = 150, Collapsed = true)]
-    public virtual string CreatedBy { get; set; }
+    public virtual string? CreatedBy { get; set; }
 
     [Editable(false)]
     [Visible(DisplayGroup = "Information", DisplayOrder = 250)]
-    public virtual string LastModifiedBy { get; set; }
+    public virtual string? LastModifiedBy { get; set; }
 
     #endregion
 
     public override async Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args)
     {
         await base.OnBeforeDbContextAddEntry(args);
-        await FillModifiedByWithCurrentUserNameAsync(args.EventServices.ServiceProvider);
+        var userName = await GetCurrentUserNameAsync(args.EventServices.ServiceProvider);
+        if (userName != null)
+            LastModifiedBy = CreatedBy = userName;
     }
 
     public override async Task OnBeforeDbContextModifyEntry(OnBeforeDbContextModifyEntryArgs args)
     {
         await base.OnBeforeDbContextModifyEntry(args);
-        await FillModifiedByWithCurrentUserNameAsync(args.EventServices.ServiceProvider);
+        var userName = await GetCurrentUserNameAsync(args.EventServices.ServiceProvider);
+        if (userName != null)
+            LastModifiedBy = userName;
     }
 
-    protected async Task FillModifiedByWithCurrentUserNameAsync(IServiceProvider serviceProvider)
+    protected async Task<string?> GetCurrentUserNameAsync(IServiceProvider serviceProvider)
     {
         var authService = serviceProvider.GetService<AuthenticationStateProvider>();
         if (authService == null)
-            return;
+            return null;
 
-        var authState = await authService.GetAuthenticationStateAsync();
-        if (String.IsNullOrEmpty(authState.User.Identity?.Name))
-            return;
+        try
+        {
+            var authState = await authService.GetAuthenticationStateAsync();
 
-        LastModifiedBy = authState.User.Identity.Name;
+            if (!String.IsNullOrEmpty(authState.User.Identity?.Name))
+                return authState.User.Identity.Name;
+        }
+        catch (Exception) { } // If GetAuthenticationStateAsync is called in a non-user session, such as through a Web service request, it throws an error
+
+        return null;
     }
 }
