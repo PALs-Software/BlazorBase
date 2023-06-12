@@ -122,7 +122,7 @@ namespace BlazorBase.MessageHandling.Components
                     fileInputArgs.OnClosing?.Invoke(
                         args,
                         modalInfo.ConfirmDialogResult ?? ConfirmDialogResult.Aborted,
-                        new FileInputDialogResult(fileInputArgs.File)
+                        fileInputArgs.DialogResult
                     ) ?? Task.CompletedTask
                 );
             }
@@ -165,7 +165,7 @@ namespace BlazorBase.MessageHandling.Components
                 if (maxFileSize != null && maxFileSize != 0 && (ulong)file.Size > maxFileSize)
                     throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", maxFileSize]);
 
-                fileInputArgs.File = await GetBytesFromFileStreamAsync(file);
+                fileInputArgs.DialogResult = new FileInputDialogResult(file.Name, file.Size, await GetBytesFromFileStreamAsync(file));
 
                 OnConfirmButtonClicked(modalInfo);
 
