@@ -59,7 +59,7 @@ namespace BlazorBase.RichTextEditor.Components
         [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
         [Inject] protected IStringLocalizer<BaseRichTextEditor> Localizer { get; set; } = null!;
         [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
-        [Inject] protected BlazorBaseRichTextEditorOptions Options { get; set; } = null!;
+        [Inject] protected IBlazorBaseRichTextEditorOptions Options { get; set; } = null!;
         #endregion
 
         #region Properties

@@ -38,9 +38,9 @@ public static class BlazorBaseRichTextEditorConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseRichTextEditor<ImageFile>(this IServiceCollection serviceCollection, Action<IBlazorBaseRichTextEditorOptions>? configureOptions = null)
+    public static IServiceCollection AddBlazorBaseRichTextEditor<ImageFile>(this IServiceCollection serviceCollection, Action<IBlazorBaseRichTextEditorOptions>? configureOptions = null) where ImageFile : BaseFile
     {
-        return AddBlazorBaseRichTextEditor<BlazorBaseRichTextEditorOptions>(serviceCollection, configureOptions);
+        return AddBlazorBaseRichTextEditor<ImageFile, BlazorBaseRichTextEditorOptions>(serviceCollection, configureOptions);
     }
 
 }

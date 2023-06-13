@@ -28,24 +28,24 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
 {
     #region Properties
     [Key]
-    public Guid Id { get; set; }
+    public virtual Guid Id { get; set; }
 
     [Visible]
     [Required]
     [EmailAddress]
-    public string Email { get; set; } = null!;
+    public virtual string Email { get; set; } = null!;
 
     [Visible]
     [Required]
     [DisplayKey]
-    public string UserName { get; set; } = null!;
+    public virtual string UserName { get; set; } = null!;
 
     [ForeignKey("IdentityUser")]
-    public string? IdentityUserId { get; set; }
+    public virtual string? IdentityUserId { get; set; }
     public virtual TIdentityUser? IdentityUser { get; set; }
 
     [Visible]
-    public TIdentityRole? IdentityRole { get; set; }
+    public virtual TIdentityRole? IdentityRole { get; set; }
     #endregion
 
     #region CRUD

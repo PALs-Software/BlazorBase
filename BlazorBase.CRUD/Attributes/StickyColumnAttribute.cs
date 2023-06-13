@@ -6,12 +6,7 @@ namespace BlazorBase.CRUD.Attributes;
 [AttributeUsage(AttributeTargets.Property)]
 public class StickyColumnAttribute : CustomizationAttribute
 {
-    public StickyColumnAttribute(string left)
-    {
-        Left = left;
-    }
-
-    public string Left { get; set; }
+    public string? Left { get; set; }
 
     public string? MinWidth { get; set; } = null;
 
