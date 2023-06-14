@@ -42,12 +42,12 @@ public class ExtendedInformationBaseModel : BaseModel
 
     protected async Task<string?> GetCurrentUserNameAsync(IServiceProvider serviceProvider)
     {
-        var authService = serviceProvider.GetService<AuthenticationStateProvider>();
-        if (authService == null)
-            return null;
-
         try
         {
+            var authService = serviceProvider.GetService<AuthenticationStateProvider>();
+            if (authService == null)
+                return null;
+
             var authState = await authService.GetAuthenticationStateAsync();
 
             if (!String.IsNullOrEmpty(authState.User.Identity?.Name))
