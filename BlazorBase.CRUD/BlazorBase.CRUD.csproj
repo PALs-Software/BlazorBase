@@ -24,6 +24,7 @@
     <PackageReference Include="Blazorise.RichTextEdit" Version="0.9.3.6" />
     <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.4" />
     <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
