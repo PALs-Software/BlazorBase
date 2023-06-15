@@ -1,20 +1,10 @@
-﻿using BlazorBase.User.Enums;
-using BlazorBase.User.Models;
-using BlazorBase.User.Services;
-using BlazorBase.User.ViewModels;
+﻿using BlazorBase.User.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
-using Microsoft.JSInterop;
-using Newtonsoft.Json.Linq;
 using System;
-using System.Globalization;
-using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace BlazorBase.User.Components;

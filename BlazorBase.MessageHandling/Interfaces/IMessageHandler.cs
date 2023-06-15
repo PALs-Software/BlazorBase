@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using static BlazorBase.MessageHandling.Models.ShowDateSpanDialogArgs;
 using static BlazorBase.MessageHandling.Models.ShowFileInputDialogArgs;
+using static BlazorBase.MessageHandling.Models.ShowTextInputDialogArgs;
 
 namespace BlazorBase.MessageHandling.Interfaces;
 
@@ -84,6 +85,24 @@ public interface IMessageHandler
         Color abortButtonColor = Color.Secondary,
         ModalSize modalSize = ModalSize.Large);
     public void ShowFileInputDialog(ShowFileInputDialogArgs args);
+    #endregion
+
+    #region Show Text Input Dialog
+    public delegate void ShowTextInputDialogHandler(ShowTextInputDialogArgs args);
+    public event ShowTextInputDialogHandler OnShowTextInputDialog;
+    public void ShowTextInputDialog(
+        string title,
+        string message,     
+        string? textInputCaption = null,
+        MessageType messageType = MessageType.Information,
+        Func<ModalClosingEventArgs, ConfirmDialogResult, TextInputDialogResult, Task>? onClosing = null,
+        object? icon = null,
+        string? confirmButtonText = null,
+        Color confirmButtonColor = Color.Primary,
+        string? abortButtonText = null,
+        Color abortButtonColor = Color.Secondary,
+        ModalSize modalSize = ModalSize.Large);
+    public void ShowTextInputDialog(ShowTextInputDialogArgs args);
     #endregion
 
     #region Show Loading Message
