@@ -38,7 +38,7 @@ namespace BlazorBase.CRUD.NumberSeries
 
         public bool NoSeriesAreEqualExceptOfDigits(string noSeries1, string noSeries2)
         {
-            if (noSeries1.Length != (noSeries2?.Length ?? -1))
+            if (noSeries2 == null || noSeries1.Length != noSeries2.Length)
                 return false;
 
             for (int i = 0; i < noSeries1.Length; i++)
@@ -70,6 +70,8 @@ namespace BlazorBase.CRUD.NumberSeries
 
         protected void IncreaseNo(NoSeries noSeries)
         {
+            ArgumentNullException.ThrowIfNullOrEmpty(noSeries.LastNoUsed);
+
             if (noSeries.LastNoUsedNumeric + 1 > noSeries.EndingNoNumeric)
                 throw new CRUDException(Localizer["The defined maximum of the no series is reached, please create a new number series"]);
 

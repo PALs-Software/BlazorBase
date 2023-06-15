@@ -33,18 +33,20 @@ namespace BlazorBase.Files.Models
         [Required]
         [DisplayKey]
         [Visible(DisplayOrder = 200)]
-        public string FileName { get; set; }
+        public string FileName { get; set; } = null!;
 
         [Visible(DisplayOrder = 300)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        [Editable(false)]
+        [Required]
+        [Editable(false)]        
         [Visible(DisplayOrder = 400)]
-        public string BaseFileType { get; set; }
+        public string BaseFileType { get; set; } = null!;
 
+        [Required]
         [Editable(false)]
         [Visible(DisplayOrder = 500)]
-        public string MimeFileType { get; set; }
+        public string MimeFileType { get; set; } = null!;
 
         [Editable(false)]
         [Visible(DisplayOrder = 600)]
@@ -52,7 +54,7 @@ namespace BlazorBase.Files.Models
 
         [Editable(false)]
         [Visible(DisplayOrder = 700)]
-        public string Hash { get; set; }
+        public string? Hash { get; set; }
 
         /// <summary>
         /// This property is only needed to show the file in the general base file list and card.
@@ -107,7 +109,7 @@ namespace BlazorBase.Files.Models
         public string GetPhysicalFileName() => $"{Id}_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
         public string GetPhysicalTemporaryFileName() => $"{TempFileId}_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
 
-        public string GetFileLink(bool ignoreTemporaryLink = false)
+        public string? GetFileLink(bool ignoreTemporaryLink = false)
         {
             if (String.IsNullOrEmpty(BaseFileType))
                 return null;
@@ -130,16 +132,16 @@ namespace BlazorBase.Files.Models
         public Task<byte[]> GetFileContentAsync()
         {
             if (String.IsNullOrEmpty(BaseFileType) || FileSize == 0 || String.IsNullOrEmpty(Hash))
-                return null;
+                return Task.FromResult(Array.Empty<byte>());
 
             string path = GetPhysicalFilePath();
             if (!File.Exists(path))
-                return null;
+                return Task.FromResult(Array.Empty<byte>());
 
             return File.ReadAllBytesAsync(path);
         }
 
-        public async Task<string> GetFileAsBase64StringAsync()
+        public async Task<string?> GetFileAsBase64StringAsync()
         {
             var content = await GetFileContentAsync();
             if (content == null)
@@ -154,7 +156,7 @@ namespace BlazorBase.Files.Models
 
             if (fileContent == null)
             {
-                var localizer = eventServices.ServiceProvider.GetService<IStringLocalizer<T>>();
+                var localizer = eventServices.ServiceProvider.GetRequiredService<IStringLocalizer<T>>();
                 throw new Exception(localizer["The file \"{0}\" can not be copied, because file with the id \"{1}\" can not be found on the hard disk. Maybe the file was deleted on the disk, but not the file entry.", FileName, Id]);
             }
 
@@ -204,6 +206,7 @@ namespace BlazorBase.Files.Models
         public async Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, BaseService service)
         {
             var property = model.GetType().GetProperty(propertyName);
+            ArgumentNullException.ThrowIfNull(property);
             await ClearFileFromPropertyAsync(model, property, service);
         }
 
@@ -233,7 +236,7 @@ namespace BlazorBase.Files.Models
         }
         public static async Task<BaseFile> CreateFileAsync(Type FileType, EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent)
         {
-            var file = (BaseFile)Activator.CreateInstance(FileType);
+            var file = (BaseFile)Activator.CreateInstance(FileType)!;
             file.FileName = fileName;
             file.FileSize = fileContent.Length;
             file.BaseFileType = baseFileType;

@@ -17,26 +17,8 @@ td {
     background-color: var(--bs-body-bg);
     position: sticky;
     top: 0px;
-    z-index: 2;
+    z-index: 10;
 }
-
-::deep .sticky-border {
-    position: relative;
-    border: hidden;
-}
-
-    ::deep .sticky-border th:after,
-    ::deep .sticky-border th:before {
-        content: '';
-        position: absolute;
-        left: 0;
-        width: 100%;
-    }
-
-    ::deep .sticky-border th:after {
-        bottom: 0;
-        border-bottom: 2px solid var(--table-border-color);
-    }
 
 .base-list-table-header-column {
     max-width: var(--base-list-table-header-column-max-width, 200px);
@@ -44,4 +26,27 @@ td {
 
 .base-list-table-cell {
     max-width: var(--base-list-table-cell-max-width, 200px);
+}
+
+.base-list-with-sticky-row-buttons .base-list-row-buttons,
+::deep .base-list-with-sticky-row-buttons .base-list-actions,
+::deep .base-list-with-sticky-row-buttons .base-list-filter-actions {
+    position: sticky;
+    left: 0px;
+    z-index: 2;
+    background-color: var(--bs-body-bg);
+}
+
+.base-list-with-sticky-row-buttons .base-list-row-selected .base-list-row-buttons {
+    background-color: var(--table-row-selected-background, #616161);
+}
+
+.base-list-with-sticky-row-buttons tr:hover .base-list-row-buttons {
+    color: var(--table-hover-color);
+    background-color: var(--table-hover-background);
+}
+
+.base-list-row-selected {
+    color: var(--table-row-selected-color, #000000);
+    background-color: var(--table-row-selected-background, #616161);
 }

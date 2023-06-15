@@ -1,63 +1,62 @@
-﻿using BlazorBase.CRUD.Services;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BlazorBase.DataUpgrade
+namespace BlazorBase.DataUpgrade;
+
+public class DataUpgradeService
 {
-    public class DataUpgradeService
+    #region Injects
+    protected readonly IServiceProvider ServiceProvider;
+    protected readonly DbContext DbContext;
+    #endregion
+
+    #region Init
+
+    public DataUpgradeService(IServiceProvider serviceProvider, DbContext dbContext)
     {
-        #region Injects
-        protected readonly IServiceProvider ServiceProvider;
-        protected readonly BaseService BaseService;
-        #endregion
+        ServiceProvider = serviceProvider;
+        DbContext = dbContext;
+    }
 
-        #region Init
+    #endregion
 
-        public DataUpgradeService(IServiceProvider serviceProvider, BaseService baseService)
+    public static Task StartDataUpgradeAsync(IServiceProvider serviceProvider)
+    {
+        var dataUpgradeService = serviceProvider.GetRequiredService<DataUpgradeService>();
+        return dataUpgradeService.StartDataUpgradeAsync();
+    }
+
+    public async Task StartDataUpgradeAsync()
+    {
+        var dataUpgradeSteps = ServiceProvider.GetServices<IDataUpgradeStep>();
+        foreach (var dataUpgradeStep in dataUpgradeSteps)
         {
-            ServiceProvider = serviceProvider;
-            BaseService = baseService;
+            if (await DataUpgradeStepAlreadyExecutedAsync(dataUpgradeStep))
+                continue;
+                            
+            dataUpgradeStep.Log($"Start data upgrade step {dataUpgradeStep.Id}", true);
+
+            await dataUpgradeStep.DataUpgradeProcedure();
+
+            dataUpgradeStep.Log($"Finished data upgrade step {dataUpgradeStep.Id}");
+            await SetDataUpgradeStepToExecutedAsync(dataUpgradeStep);
         }
+    }
 
-        #endregion
+    protected Task<bool> DataUpgradeStepAlreadyExecutedAsync(IDataUpgradeStep step)
+    {
+        return DbContext.Set<DataUpgradeEntry>().AnyAsync(entry => entry.Id == step.Id);
+    }
 
-        public static Task StartDataUpgradeAsync(IServiceProvider serviceProvider)
+    protected Task SetDataUpgradeStepToExecutedAsync(IDataUpgradeStep step)
+    {
+        DbContext.Set<DataUpgradeEntry>().Add(new DataUpgradeEntry()
         {
-            var dataUpgradeService = serviceProvider.GetRequiredService<DataUpgradeService>();
-            return dataUpgradeService.StartDataUpgradeAsync();
-        }
+            Id = step.Id,
+            Description = step.Description,
+            Log = step.LogText
+        });
 
-        public async Task StartDataUpgradeAsync()
-        {
-            var dataUpgradeSteps = ServiceProvider.GetServices<IDataUpgradeStep>();
-            foreach (var dataUpgradeStep in dataUpgradeSteps)
-            {
-                if (await DataUpgradeStepAlreadyExecutedAsync(dataUpgradeStep))
-                    continue;
-                                
-                dataUpgradeStep.Log($"Start data upgrade step {dataUpgradeStep.Id}", true);
-
-                await dataUpgradeStep.DataUpgradeProcedure();
-
-                dataUpgradeStep.Log($"Finished data upgrade step {dataUpgradeStep.Id}");
-                await SetDataUpgradeStepToExecutedAsync(dataUpgradeStep);
-            }
-        }
-
-        protected Task<bool> DataUpgradeStepAlreadyExecutedAsync(IDataUpgradeStep step)
-        {
-            return BaseService.AnyAsync<DataUpgradeEntry>(entry => entry.Id == step.Id);
-        }
-
-        protected Task SetDataUpgradeStepToExecutedAsync(IDataUpgradeStep step)
-        {
-            BaseService.AddEntry(new DataUpgradeEntry()
-            {
-                Id = step.Id,
-                Description = step.Description,
-                Log = step.LogText
-            }, skipEntryAlreadyExistCheck: true);
-
-            return BaseService.SaveChangesAsync();
-        }
+        return DbContext.SaveChangesAsync();
     }
 }

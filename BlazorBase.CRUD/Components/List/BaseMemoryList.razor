@@ -1,0 +1,160 @@
+﻿@using BlazorBase.CRUD.Models
+@using Blazorise.Icons.FontAwesome
+@using BlazorBase.CRUD.Attributes
+
+@typeparam TModel
+@inherits BaseGenericList<TModel>
+
+<div class="base-list base-list-@(TModelType.Name)">
+
+    <PageTitle>@PluralDisplayName | @BlazorBaseOptions.ShortWebsiteName</PageTitle>
+
+    <table class="base-list-table table table-hover @TableClass @(StickyRowButtons ? "base-list-with-sticky-row-buttons" : "")">
+        <thead class="base-list-table-header">
+            <tr>
+                <th class="root-base-list-table-header-item" colspan="100">
+                    @if (!HideTitle)
+                    {
+                        <Heading Margin="Margin.Is2.FromTop">
+                            @PluralDisplayName
+                        </Heading>
+                    }
+
+                    <BasePageActions Source="this" BaseModel="ComponentModelInstance"
+                                     InvokeActionParameter="SelectedEntryPrimaryKeys"
+                                     BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices"
+                                     ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
+                                     AdditionalPageActions="AdditionalHeaderPageActions" />
+
+                    <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+                        @InvalidSummaryFeedback
+                    </Alert>
+                </th>
+                <th class="bottom-border-line" />
+            </tr>
+            <tr>
+                <th class="base-list-actions">                  
+                </th>
+                @foreach (var displayGroup in DisplayGroups)
+                {
+                    @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                    {
+                        <th class="base-list-table-header-column @displayItem.CustomizationClasses"
+                    @onclick="async () => await OnSortClicked(displayItem, false)"
+                    @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
+                    @oncontextmenu:preventDefault="true"
+                            style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
+                            title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
+
+                            <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
+                                <span class="text-truncate">
+                                    @IBaseModel.GetPropertyCaption(EventServices, new TModel(), ModelLocalizer, displayItem)
+                                </span>
+
+
+                                @if (displayItem.SortDirection != Enums.SortDirection.None)
+                                {
+                                    <Blazorise.Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
+                                }
+                            </div>
+                        </th>
+                    }
+                }
+                <th class="bottom-border-line" />
+            </tr>
+            @if (Filterable)
+            {
+                <BaseListFilter ListDisplayGroups="DisplayGroups" OnFilterChanged="OnFilterChangedAsync" Class="sticky-border" />
+            }
+        </thead>
+        <tbody>
+            <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
+                <tr @onclick="() => OnRowSelected(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
+                    <td class="base-list-row-buttons">
+                        <Buttons>                      
+                            @if (UserCanDeleteEntries)
+                            {
+                                <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
+                            }
+
+                            @if (AdditionalRowButtons != null)
+                            {
+                                @AdditionalRowButtons(context)
+                            }
+                        </Buttons>
+                    </td>
+
+                    @foreach (var displayGroup in DisplayGroups)
+                    {
+                        @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
+                        {
+                            <td class="base-list-table-cell text-truncate base-list-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
+                                @{
+                                    var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
+                                    if (renderFragment != null)
+                                    {
+                                        @renderFragment
+                                    }
+                                    else
+                                    {
+                                        @if (ForeignKeyProperties.ContainsKey(displayItem.Property))
+                                        {
+                                            var currentValue = @DisplayForeignKey(displayItem, context);
+
+                                            <span title="@currentValue">
+                                                @currentValue
+                                            </span>
+                                        }
+                                        else if (displayItem.Property.PropertyType.IsEnum)
+                                        {
+                                            var currentValue = @DisplayEnum(displayItem, context);
+
+                                            <span title="@currentValue">
+                                                @currentValue
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
+                                            {
+                                                string? currentValue;
+                                                if (displayItem.DateInputMode == DateInputMode.Date)
+                                                {
+                                                    currentValue = ((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString();
+                                                }
+                                                else
+                                                {
+                                                    currentValue = ((DateTime?)displayItem.Property.GetValue(context))?.ToString();
+                                                }
+
+                                                <span title="@currentValue">
+                                                    @currentValue
+                                                </span>
+                                            }
+                                            else if (displayItem.Property.PropertyType == typeof(bool) || displayItem.Property.PropertyType == typeof(bool?))
+                                            {
+                                                if (displayItem.Property.GetValue(context) != null)
+                                                {
+                                                    <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var currentValue = @displayItem.Property.GetValue(context)?.ToString();
+
+                                                <span title="@currentValue">
+                                                    @currentValue
+                                                </span>
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                        }
+                    }
+                    <td class="bottom-border-line" />
+                </tr>
+            </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
+        </tbody>
+    </table>
+</div>

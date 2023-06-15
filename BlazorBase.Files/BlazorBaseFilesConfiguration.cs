@@ -28,7 +28,7 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null, params string[] allowedUserAccessRoles)
+    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null, params string[] allowedUserAccessRoles)
         where TOptions : class, IBlazorBaseFileOptions
     {
         // If options handler is not defined we will get an exception so
@@ -60,7 +60,7 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions> configureOptions = null, params string[] allowedUserAccessRoles)
+    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions>? configureOptions = null, params string[] allowedUserAccessRoles)
     {
         return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions, allowedUserAccessRoles);
     }

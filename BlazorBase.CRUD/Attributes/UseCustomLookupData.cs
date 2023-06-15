@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Attributes
+namespace BlazorBase.CRUD.Attributes;
+
+[AttributeUsage(AttributeTargets.Property)]
+public class UseCustomLookupData : Attribute
 {
-    public class UseCustomLookupData : Attribute
-    {
-        public string LookupDataSourceMethodName { get; set; }
-    }
+    public UseCustomLookupData(string lookupDataSourceMethodName) => LookupDataSourceMethodName = lookupDataSourceMethodName;
+    public string LookupDataSourceMethodName { get; set; }
 }

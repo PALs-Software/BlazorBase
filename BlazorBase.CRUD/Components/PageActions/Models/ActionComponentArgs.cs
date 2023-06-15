@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using BlazorBase.CRUD.Models;
+﻿using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 
 namespace BlazorBase.CRUD.Components.PageActions.Models

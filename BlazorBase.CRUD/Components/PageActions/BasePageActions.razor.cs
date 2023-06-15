@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using BlazorBase.CRUD.Components.PageActions.Interfaces;
+﻿using BlazorBase.CRUD.Components.PageActions.Interfaces;
 using BlazorBase.CRUD.Components.PageActions.Models;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
@@ -29,8 +27,9 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
         [Parameter] public GUIType GUIType { get; set; }
         [Parameter] public bool ShowOnlyButtons { get; set; }
+        [Parameter] public object? InvokeActionParameter { get; set; }
 
-        [Parameter] public RenderFragment<PageActionGroup>? AdditionalPageActions { get; set; } = null!;
+        [Parameter] public RenderFragment<PageActionGroup>? AdditionalPageActions { get; set; } = null;
         #endregion
 
         #region Injects
@@ -117,7 +116,7 @@ namespace BlazorBase.CRUD.Components.PageActions
             Exception? exception = null;
             try
             {
-                await (action.Action?.Invoke(Source, EventServices, BaseModel) ?? Task.CompletedTask);
+                await (action.Action?.Invoke(Source, EventServices, InvokeActionParameter) ?? Task.CompletedTask);
             }
             catch (Exception e)
             {

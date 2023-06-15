@@ -14,7 +14,7 @@ namespace BlazorBase.CRUD.Extensions
         /// </summary>
         public static IQueryable<object> Set(this DbContext context, Type type)
         {
-            return (IQueryable<object>)SetMethodInfo.MakeGenericMethod(type).Invoke(context, null);
+            return (IQueryable<object>)SetMethodInfo.MakeGenericMethod(type).Invoke(context, null)!;
         }
     }
 }

@@ -1,36 +1,35 @@
 ﻿@using BlazorBase.User.Controller
 
-<div class="login-form"
-     style="@(ShowImageOfTheDayAsBackgroundImage ? $"background-image: url({ImageOfTheDayUrl});" : "")">
+<div class="login-form" style="background-image: url(@LoginFormBackgroundImageUrl);">
     <div class="container text-center login-container">
         <div class="login-container-form-row row align-items-center">
             <div class="col">
                 <h2 class="h2 text-center pb-5">@WebsiteName</h2>
 
-                <EditForm Model="@LoginData" OnValidSubmit="@HandleValidSubmit" class="login-container-form form-signin mx-auto">
+                <EditForm Model="@LoginData" OnValidSubmit="@HandleValidSubmit" class="login-container-form form-signin mx-auto" id="base-login-form">
 
-                    <div class="login-feedback validation-message">@Feedback</div>                                        
+                    <div class="login-feedback validation-message">@Feedback</div>
                     <DataAnnotationsValidator />
 
                     <form id="action-login-form" action="@Options.LoginControllerPath" method="post">
                         <input name="returnUrl" type="hidden" @bind-value="ReturnUrl" />
-                        <InputText @bind-Value="LoginData.Email" autocomplete="username" name="Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
+                        <InputText @bind-Value="LoginData.Email" onkeydown="blazorBase.user.submitLoginFormOnEnter(event, 'base-login-button')" autofocus autocomplete="username" name="Email" class="form-control" placeholder="@Localizer["E-Mail"]" />
                         <ValidationMessage For="@(() => LoginData.Email)" />
                         <div class="form-group">
-                            <InputText @bind-Value="LoginData.Password" autocomplete="current-password" name="Password" type="password" class="form-control" placeholder="@Localizer["Password"]" />
+                            <InputText @bind-Value="LoginData.Password" onkeydown="blazorBase.user.submitLoginFormOnEnter(event, 'base-login-button')" autocomplete="current-password" name="Password" type="password" class="form-control" placeholder="@Localizer["Password"]" />
                             <ValidationMessage For="@(() => LoginData.Password)" />
                         </div>
                         <div class="form-group">
                             <div class="checkbox">
                                 <label>
-                                    <input name="RememberMe" type="checkbox" value="true" checked >
+                                    <input name="RememberMe" type="checkbox" value="true" checked>
                                     @Localizer["Remember me"]
                                 </label>
                             </div>
                         </div>
                     </form>
 
-                    <Button Class="login-button btn-block" Size="Size.Large" Color="@ButtonColor" Type="ButtonType.Submit">@Localizer["Log in"]</Button>
+                    <Button id="base-login-button" Class="login-button btn-block" Size="Size.Large" Color="@ButtonColor" Type="ButtonType.Submit">@Localizer["Log in"]</Button>
                 </EditForm>
             </div>
         </div>

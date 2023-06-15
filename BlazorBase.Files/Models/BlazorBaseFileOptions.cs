@@ -4,7 +4,7 @@ using System;
 namespace BlazorBase.Files.Models;
 public class BlazorBaseFileOptions : IBlazorBaseFileOptions
 {
-    public static BlazorBaseFileOptions Instance { get; private set; }
+    public static BlazorBaseFileOptions Instance { get; private set; } = null!;
 
     #region Constructors
     public BlazorBaseFileOptions(IServiceProvider serviceProvider, Action<BlazorBaseFileOptions> configureOptions)

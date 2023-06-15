@@ -8,13 +8,13 @@ namespace BlazorBase.Files.Components
     public partial class BaseFileModal
     {
         #region Parameters
-        [Parameter] public BaseFile BaseFile { get; set; } = null;
+        [Parameter] public BaseFile? BaseFile { get; set; } = null;
         [Parameter] public bool ShowFileButton { get; set; } = true;
         [Parameter] public bool ShowDownloadFileButton { get; set; } = true;
         #endregion
 
         #region Injects
-        [Inject] protected IStringLocalizer<BaseFileModal> Localizer { get; set; }
+        [Inject] protected IStringLocalizer<BaseFileModal> Localizer { get; set; } = null!;
 
         #endregion
 

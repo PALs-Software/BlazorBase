@@ -9,19 +9,19 @@ namespace BlazorBase.CRUD.Components.SelectList;
 public class BaseTypeBasedSelectList : ComponentBase, IBaseSelectList
 {
     #region Parameters
-    [Parameter] public Type BaseModelType { get; set; }
-    [Parameter] public string Title { get; set; }
-    [Parameter] public string SelectButtonText { get; set; }
+    [Parameter] public Type BaseModelType { get; set; } = null!;
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string? SelectButtonText { get; set; }
     [Parameter] public bool HideSelectButton { get; set; } = false;
     [Parameter] public EventCallback<OnSelectListClosedArgs> OnSelectListClosed { get; set; }
     #endregion
 
     #region Records
-    public record OnSelectListClosedArgs(ModalClosingEventArgs ModalClosingEventArgs, IBaseModel SelectedModel, object AdditionalData);
+    public record OnSelectListClosedArgs(ModalClosingEventArgs ModalClosingEventArgs, IBaseModel? SelectedModel, object? AdditionalData);
     #endregion
 
     #region Member
-    protected IBaseSelectList BaseSelectList;
+    protected IBaseSelectList? BaseSelectList;
     #endregion
 
     protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -39,18 +39,18 @@ public class BaseTypeBasedSelectList : ComponentBase, IBaseSelectList
         builder.CloseComponent();
     }
 
-    public void ShowModal(object additionalData = null)
+    public void ShowModal(object? additionalData = null)
     {
-        BaseSelectList.ShowModal(additionalData);
+        BaseSelectList?.ShowModal(additionalData);
     }
 
     public void HideModal()
     {
-        BaseSelectList.HideModal();
+        BaseSelectList?.HideModal();
     }
 
-    public IBaseModel GetSelectedEntry()
+    public IBaseModel? GetSelectedEntry()
     {
-        return BaseSelectList.GetSelectedEntry();
+        return BaseSelectList?.GetSelectedEntry();
     }
 }
