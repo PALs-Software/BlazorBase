@@ -36,7 +36,7 @@
                 <th class="base-list-actions">
                     @if (UserCanAddEntries)
                     {
-                        <Button Color="Color.Success" Clicked="AddEntryAsync"><Blazorise.Icon Name="IconName.Add" /></Button>
+                        <Button Color="Color.Success" Clicked="() => AddEntryAsync()"><Blazorise.Icon Name="IconName.Add" /></Button>
                     }
                 </th>
                 @foreach (var displayGroup in DisplayGroups)

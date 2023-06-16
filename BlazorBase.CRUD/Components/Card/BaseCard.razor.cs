@@ -170,7 +170,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #endregion
 
     #region Actions
-    public async Task ShowAsync(bool addingMode, bool viewMode, params object?[]? primaryKeys)
+    public async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, TModel? template = null)
     {
         await Service.RefreshDbContextAsync();
 
@@ -186,7 +186,11 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         TModel? model;
         if (AddingMode)
         {
-            model = new TModel();
+            if (template == null)
+                model = new TModel();
+            else
+                model = template;
+
             var args = new OnCreateNewEntryInstanceArgs(model, EventServices);
             await OnCreateNewEntryInstance.InvokeAsync(args);
             await model.OnCreateNewEntryInstance(args);

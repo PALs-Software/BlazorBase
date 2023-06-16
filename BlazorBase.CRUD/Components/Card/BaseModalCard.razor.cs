@@ -89,14 +89,14 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
 
     #endregion
 
-    public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, params object?[]? primaryKeys)
+    public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, object?[]? primaryKeys = null, TModel? template = null)
     {
         HideModal(); // Close modal to allow a currently open modal to be replaced with the new model to be displayed
 
         ContinueByUnsavedChanges = false;
         ViewMode = viewMode;
 
-        await (BaseCard?.ShowAsync(addingMode, viewMode, primaryKeys) ?? Task.CompletedTask);
+        await (BaseCard?.ShowAsync(addingMode, viewMode, primaryKeys, template) ?? Task.CompletedTask);
         Modal?.Show();
     }
 

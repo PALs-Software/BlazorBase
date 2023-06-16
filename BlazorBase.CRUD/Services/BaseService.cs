@@ -288,6 +288,30 @@ public class BaseService : IDisposable
     }
     #endregion
 
+    #region Load Data
+    
+    public async virtual Task<T?> ReloadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string> skipNavigationList) where T : class
+    {
+        var navigationProperties = DbContext.Model.FindEntityType(typeof(T))?.GetNavigations();
+        if (navigationProperties == null)
+            return entry;
+
+        foreach (var navigationProperty in navigationProperties)
+        {
+            if (skipNavigationList.Contains(navigationProperty.Name))
+                continue;
+
+            if (navigationProperty.IsCollection)
+                await DbContext.Entry(entry).Collection(navigationProperty.Name).LoadAsync();
+            else
+                await DbContext.Entry(entry).Reference(navigationProperty.Name).LoadAsync();
+        }
+
+        return entry;
+    }
+
+    #endregion
+
     #region Count Data
     public virtual Task<int> CountDataAsync<T>() where T : class
     {

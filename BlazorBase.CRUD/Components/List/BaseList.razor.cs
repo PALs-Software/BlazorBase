@@ -217,7 +217,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
         return Task.CompletedTask;
     }
 
-    public virtual async Task AddEntryAsync()
+    public virtual async Task AddEntryAsync(TModel? template = null)
     {
         var args = new OnBeforeOpenAddModalArgs(false, EventServices);
         await OnBeforeOpenAddModal.InvokeAsync(args);
@@ -225,7 +225,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             return;
 
         if (BaseModalCard != null)
-            await BaseModalCard.ShowModalAsync(addingMode: true);
+            await BaseModalCard.ShowModalAsync(addingMode: true, template: template);
     }
 
     public virtual async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
