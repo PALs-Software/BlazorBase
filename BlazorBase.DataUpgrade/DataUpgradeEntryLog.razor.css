@@ -1,0 +1,7 @@
+﻿.data-upgrade-entry-log {
+    font-family: monospace;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+    overflow: auto;
+    height: 50vh;
+}

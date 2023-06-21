@@ -33,12 +33,15 @@ public class DataUpgradeService
         {
             if (await DataUpgradeStepAlreadyExecutedAsync(dataUpgradeStep))
                 continue;
-                            
+
+            var startTime = DateTime.Now;
             dataUpgradeStep.Log($"Start data upgrade step {dataUpgradeStep.Id}", true);
 
             await dataUpgradeStep.DataUpgradeProcedure();
 
-            dataUpgradeStep.Log($"Finished data upgrade step {dataUpgradeStep.Id}");
+            var duration = DateTime.Now - startTime;
+            dataUpgradeStep.Log("");
+            dataUpgradeStep.Log($"Finished data upgrade step {dataUpgradeStep.Id}, execution took {duration:hh\\:mm\\:ss}");
             await SetDataUpgradeStepToExecutedAsync(dataUpgradeStep);
         }
     }
