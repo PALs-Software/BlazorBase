@@ -15,6 +15,10 @@
     <None Remove="Components\BaseListFilter.razor.css" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\blazorBase.crud.modal.js" />
+  </ItemGroup>
+
   
   <ItemGroup>
     <SupportedPlatform Include="browser" />
