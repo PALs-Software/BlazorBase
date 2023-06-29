@@ -92,8 +92,6 @@ namespace BlazorBase.CRUD.Components.Card
 
         public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, params object[] primaryKeys)
         {
-            HideModal(); // Close modal to allow a currently open modal to be replaced with the new model to be displayed
-
             ContinueByUnsavedChanges = false;
             ViewMode = viewMode;
 
