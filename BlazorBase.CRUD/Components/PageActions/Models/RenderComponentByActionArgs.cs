@@ -13,5 +13,5 @@ public class RenderComponentByActionArgs
 {
     public Type ComponentType { get; set; } = null!;
     public List<IActionComponentAttribute> Attributes { get; set; } = new();
-    public Func<object?, EventServices, IBaseModel?, Task>? OnComponentRemoved { get; set; } = null;
+    public Func<object?, EventServices, IBaseModel?, object?, Task>? OnComponentRemoved { get; set; } = null;
 }
