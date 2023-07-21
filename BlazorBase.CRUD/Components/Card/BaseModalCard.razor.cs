@@ -91,8 +91,6 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
 
     public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, object?[]? primaryKeys = null, TModel? template = null)
     {
-        HideModal(); // Close modal to allow a currently open modal to be replaced with the new model to be displayed
-
         ContinueByUnsavedChanges = false;
         ViewMode = viewMode;
 

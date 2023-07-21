@@ -33,7 +33,7 @@ public class ShowFileInputDialogArgs : ShowConfirmDialogArgs
     public ulong? MaxFileSize { get; set; } = null;
     public string? FileFilter { get; set; } = null;
 
-    public byte[]? File { get; set; } = null;
+    public FileInputDialogResult? DialogResult { get; set; } = null;
 
     public bool ShowLoadingIndicator { get; set; } = false;
     public int UploadProgress { get; set; } = 0;
@@ -42,6 +42,6 @@ public class ShowFileInputDialogArgs : ShowConfirmDialogArgs
     public string? FeedbackClass { get; set; }
     public string? Feedback { get; set; }
 
-    public record FileInputDialogResult(byte[]? File);
+    public record FileInputDialogResult(string FileName, long Size, byte[] File);
     public new Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult, Task>? OnClosing { get; set; }
 }
