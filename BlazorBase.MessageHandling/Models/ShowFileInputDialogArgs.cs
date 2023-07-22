@@ -15,7 +15,7 @@ public class ShowFileInputDialogArgs : ShowConfirmDialogArgs
         ulong? maxFileSize,
         string fileFilter,
         MessageType messageType = MessageType.Information,
-        Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult, Task>? onClosing = null,
+        Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult?, Task>? onClosing = null,
         object? icon = null,
         string? confirmButtonText = null,
         Color confirmButtonColor = Color.Primary,
@@ -42,6 +42,6 @@ public class ShowFileInputDialogArgs : ShowConfirmDialogArgs
     public string? FeedbackClass { get; set; }
     public string? Feedback { get; set; }
 
-    public record FileInputDialogResult(string FileName, long Size, byte[] File);
-    public new Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult, Task>? OnClosing { get; set; }
+    public record FileInputDialogResult(string FileName, long Size, byte[]? File);
+    public new Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult?, Task>? OnClosing { get; set; }
 }

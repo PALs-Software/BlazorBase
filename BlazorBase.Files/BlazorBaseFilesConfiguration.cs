@@ -2,7 +2,7 @@
 using BlazorBase.Files.Components;
 using BlazorBase.Files.Controller;
 using BlazorBase.Files.Models;
-using BlazorBase.Models;
+using BlazorBase.Files.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -42,6 +42,7 @@ public static class BlazorBaseFilesConfiguration
         .AddTransient<IBasePropertyCardInput, BaseFileInput>()
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
         .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
+        .AddSingleton<IImageService, MagickImageService>() // As System.Drawing.Common currently not supporting webp images (loading throws error) use third party library
 
         .AddAuthorization(options =>
         {

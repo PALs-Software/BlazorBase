@@ -101,11 +101,11 @@ namespace BlazorBase.CRUD.Models
             return GetType().GetKeyProperties();
         }
 
-        public Dictionary<string, string> GetNavigationQuery(string? baseQuery = null)
+        public Dictionary<string, string?> GetNavigationQuery(string? baseQuery = null)
         {
-            var query = new Dictionary<string, string>();
+            var query = new Dictionary<string, string?>();
             if (baseQuery != null)
-                query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => val.Value.ToString());
+                query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => (string?)val.Value.ToString());
 
             var keyProperties = GetKeyProperties();
 

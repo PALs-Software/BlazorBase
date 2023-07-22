@@ -100,9 +100,9 @@
     <PackageReference Include="Blazorise.Components" Version="0.9.3.6" />
     <PackageReference Include="Blazorise.DataGrid" Version="0.9.3.6" />
     <PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.9" />
   </ItemGroup>
 
   <ItemGroup>

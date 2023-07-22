@@ -185,6 +185,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
                     SortedColumns.Add(displayItem);
             }
     }
+
     #endregion
 
     #endregion
@@ -251,13 +252,13 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #region Display
     protected virtual string? DisplayForeignKey(DisplayItem displayItem, TModel model)
     {
-        var key = displayItem.Property.GetValue(model)?.ToString();
+        var key = displayItem.Property.GetValue(model);
         var primaryKeyAsJson = JsonConvert.SerializeObject(new object?[] { key });
 
         var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == primaryKeyAsJson);
 
         if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
-            return key;
+            return key?.ToString();
         else
             return foreignKeyPair.Value;
     }

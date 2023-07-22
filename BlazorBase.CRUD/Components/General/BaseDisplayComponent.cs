@@ -225,9 +225,9 @@ namespace BlazorBase.CRUD.Components.General
             return result;
         }
 
-        protected virtual Dictionary<string, string> RemoveNavigationQueryByType(Type type, string baseQuery)
+        protected virtual Dictionary<string, string?> RemoveNavigationQueryByType(Type type, string baseQuery)
         {
-            var query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => val.Value.ToString());
+            var query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => (string?)val.Value.ToString());
 
             var keyProperties = type.GetKeyProperties();
 
@@ -290,31 +290,39 @@ namespace BlazorBase.CRUD.Components.General
                 SortDirection = sortDirection;
                 IsFilterable = isFilterable;
 
-                CustomizationAttributes = property.GetCustomAttributes<CustomizationAttribute>().ToList();
+                CustomizationAttributes = property.GetCustomAttributes<BaseCustomizationAttribute>().ToList();
                 FillCustomizationAttributesClasses(guiType);
                 FillCustomizationAttributesStyles(guiType);
             }
 
             #region Customization Attributes
 
-            protected List<CustomizationAttribute> CustomizationAttributes { get; set; } = new();
-            public string? CustomizationClasses { get; protected set; } = null;
-            public string? CustomizationStyles { get; protected set; } = null;
+            protected List<BaseCustomizationAttribute> CustomizationAttributes { get; set; } = new();
+            public Dictionary<CustomizationLocation, string> CustomizationClasses { get; protected set; } = new();
+            public Dictionary<CustomizationLocation, string> CustomizationStyles { get; protected set; } = new();
 
             protected void FillCustomizationAttributesClasses(GUIType guiType)
             {
-                CustomizationClasses = String.Empty;
-                foreach (var attribute in CustomizationAttributes)
-                    if (attribute.ValidInGUITypes.Contains(guiType))
-                        CustomizationClasses += " " + attribute.GetClass(guiType);
+                foreach (var location in Enum.GetValues<CustomizationLocation>())
+                {
+                    CustomizationClasses[location] = String.Empty;
+
+                    foreach (var attribute in CustomizationAttributes)
+                        if (attribute.ValidInGUITypes.Contains(guiType))
+                            CustomizationClasses[location] += " " + attribute.GetClass(guiType, location);
+                }
             }
 
             protected void FillCustomizationAttributesStyles(GUIType guiType)
             {
-                CustomizationStyles = String.Empty;
-                foreach (var attribute in CustomizationAttributes)
-                    if (attribute.ValidInGUITypes.Contains(guiType))
-                        CustomizationStyles += " " + attribute.GetStyle(guiType);
+                foreach (var location in Enum.GetValues<CustomizationLocation>())
+                {
+                    CustomizationStyles[location] = String.Empty;
+
+                    foreach (var attribute in CustomizationAttributes)
+                        if (attribute.ValidInGUITypes.Contains(guiType))
+                            CustomizationStyles[location] += " " + attribute.GetStyle(guiType, location);
+                }
             }
 
             #endregion
@@ -350,6 +358,7 @@ namespace BlazorBase.CRUD.Components.General
                 attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
                 var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
                 var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
+                var defaultListFilter = property.GetCustomAttribute<DefaultListFilterAttribute>();
 
                 if (property.IsForeignKey() && typeof(IBaseModel).IsAssignableFrom(property.PropertyType))
                 {
@@ -359,7 +368,8 @@ namespace BlazorBase.CRUD.Components.General
                         return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(),
                                 property.IsKey(), property.IsListProperty(), dateInputMode,
                                 property.Name, property.PropertyType,
-                                false, attribute.SortDirection, false);
+                                false, attribute.SortDirection, false)
+                        { FilterType = defaultListFilter?.Type ?? FilterType.Like, FilterValue = defaultListFilter?.Value };
                     }
                 }
 
@@ -379,7 +389,8 @@ namespace BlazorBase.CRUD.Components.General
                 return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(),
                     property.IsKey(), property.IsListProperty(), dateInputMode,
                     displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
-                    sortAndFilterable, attribute.SortDirection, sortAndFilterable);
+                    sortAndFilterable, attribute.SortDirection, sortAndFilterable)
+                { FilterType = defaultListFilter?.Type ?? FilterType.Like, FilterValue = defaultListFilter?.Value };
             }
         }
     }

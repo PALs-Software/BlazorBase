@@ -116,6 +116,7 @@ namespace BlazorBase.CRUD.Extensions
 
             switch (filterType)
             {
+                case FilterType.NotLike:
                 case FilterType.Like:
                     if (TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
                     {
@@ -152,21 +153,40 @@ namespace BlazorBase.CRUD.Extensions
                         for (int i = 1; i < partExpressions.Count; i++)
                             body = Expression.AndAlso(body, partExpressions[i]);
                     }
+
+                    if (filterType == FilterType.NotLike)
+                        body = Expression.Not(body);
+
                     break;
                 case FilterType.Equal:
                     body = Expression.Equal(property, constant!);
                     break;
+                case FilterType.NotEqual:
+                    body = Expression.NotEqual(property, constant!);
+                    break;
                 case FilterType.Greater:
                     body = Expression.GreaterThan(property, constant!);
+                    break;
+                case FilterType.NotGreater:                    
+                    body = Expression.Not(Expression.GreaterThan(property, constant!));
                     break;
                 case FilterType.GreaterOrEqual:
                     body = Expression.GreaterThanOrEqual(property, constant!);
                     break;
+                case FilterType.NotGreaterOrEqual:
+                    body = Expression.Not(Expression.GreaterThanOrEqual(property, constant!));
+                    break;
                 case FilterType.Less:
                     body = Expression.LessThan(property, constant!);
                     break;
+                case FilterType.NotLess:
+                    body = Expression.Not(Expression.LessThan(property, constant!));
+                    break;
                 case FilterType.LessOrEqual:
                     body = Expression.LessThanOrEqual(property, constant!);
+                    break;
+                case FilterType.NotLessOrEqual:
+                    body = Expression.Not(Expression.LessThanOrEqual(property, constant!));
                     break;
                 case FilterType.IsEmpty:
                     if (displayItem.DisplayPropertyType == typeof(Guid))
@@ -176,8 +196,19 @@ namespace BlazorBase.CRUD.Extensions
                     else
                         body = Expression.Equal(property, EmptyStringConstant);
                     break;
+                case FilterType.NotEmpty:
+                    if (displayItem.DisplayPropertyType == typeof(Guid))
+                        body = Expression.NotEqual(property, EmptyGuid);
+                    else if (displayItem.DisplayPropertyType == typeof(Guid?))
+                        body = Expression.NotEqual(property, EmptyNullableGuid);
+                    else
+                        body = Expression.NotEqual(property, EmptyStringConstant);
+                    break;
                 case FilterType.IsNull:
                     body = Expression.Equal(property, NullConstant);
+                    break;
+                case FilterType.NotNull:
+                    body = Expression.NotEqual(property, NullConstant);
                     break;
                 default:
                     throw new Exception($"The Filter Type {displayItem.FilterType} is not supported");

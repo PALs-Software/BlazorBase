@@ -7,7 +7,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using BlazorBase.Files.Controller;
 using Microsoft.EntityFrameworkCore;
 using BlazorBase.CRUD.ViewModels;
 using System.Security.Cryptography;
@@ -17,8 +16,9 @@ using BlazorBase.CRUD.Services;
 using System.Reflection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.DependencyInjection;
-using System.Web;
-using Microsoft.Extensions.Options;
+using System.Drawing;
+using BlazorBase.Files.Services;
+using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace BlazorBase.Files.Models
 {
@@ -39,7 +39,7 @@ namespace BlazorBase.Files.Models
         public string? Description { get; set; }
 
         [Required]
-        [Editable(false)]        
+        [Editable(false)]
         [Visible(DisplayOrder = 400)]
         public string BaseFileType { get; set; } = null!;
 
@@ -109,15 +109,19 @@ namespace BlazorBase.Files.Models
         public string GetPhysicalFileName() => $"{Id}_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
         public string GetPhysicalTemporaryFileName() => $"{TempFileId}_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
 
-        public string? GetFileLink(bool ignoreTemporaryLink = false)
+        public string? GetFileLink(bool useThumbnailIfImage = false, bool ignoreTemporaryLink = false)
         {
             if (String.IsNullOrEmpty(BaseFileType))
                 return null;
 
+            string additionalParameters = String.Empty;
+            if (BlazorBaseFileOptions.Instance.UseImageThumbnails && useThumbnailIfImage && IsImage())
+                additionalParameters = $"thumbnail=true&";
+
             if (TempFileId == Guid.Empty || ignoreTemporaryLink)
-                return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetFile/{Id}/{Uri.EscapeDataString(FileName)}?hash={Hash}"; //Append Hash for basic browser file cache refresh notification
+                return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetFile/{Id}/{Uri.EscapeDataString(FileName)}?{additionalParameters}hash={Hash}"; //Append Hash for basic browser file cache refresh notification
             else
-                return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetTemporaryFile/{TempFileId}/{Uri.EscapeDataString(FileName)}?hash={Hash}";
+                return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetTemporaryFile/{TempFileId}/{Uri.EscapeDataString(FileName)}?{additionalParameters}hash={Hash}";
         }
 
         public string GetPhysicalFilePath()
@@ -177,11 +181,18 @@ namespace BlazorBase.Files.Models
                 var tempFilePath = Path.Join(options.TempFileStorePath, GetPhysicalTemporaryFileName());
                 if (File.Exists(tempFilePath))
                 {
-                    var oldFilesWithOtherMimeTypes = Directory.EnumerateFiles(options.FileStorePath, $"{Id}_*");
+                    var oldFilesWithOtherMimeTypes = Directory.EnumerateFiles(options.FileStorePath, $"{Id}*");
                     foreach (var oldFilePath in oldFilesWithOtherMimeTypes)
                         File.Delete(oldFilePath);
 
                     File.Move(tempFilePath, Path.Join(options.FileStorePath, GetPhysicalFileName()), true);
+                }
+
+                if (options.UseImageThumbnails && IsImage())
+                {
+                    var tempThumbnailFilePath = Path.Join(options.TempFileStorePath, GetPhysicalTemporaryThumbnailName());
+                    if (File.Exists(tempThumbnailFilePath))
+                        File.Move(tempThumbnailFilePath, Path.Join(options.FileStorePath, GetPhysicalThumbnailName()), true);
                 }
 
                 TempFileId = Guid.Empty;
@@ -200,6 +211,13 @@ namespace BlazorBase.Files.Models
 
                 if (File.Exists(filePath))
                     File.Delete(filePath);
+
+                if (options.UseImageThumbnails && IsImage())
+                {
+                    var thumbnailPath = deleteOnlyTemporary ? Path.Join(options.TempFileStorePath, GetPhysicalTemporaryThumbnailName()) : Path.Join(options.FileStorePath, GetPhysicalThumbnailName());
+                    if (File.Exists(thumbnailPath))
+                        File.Delete(thumbnailPath);
+                }
             });
         }
 
@@ -262,6 +280,12 @@ namespace BlazorBase.Files.Models
             } while (File.Exists(tempFilePath));
 
             await File.WriteAllBytesAsync(tempFilePath, fileContent);
+
+            if (options.UseImageThumbnails && file.IsImage())
+            {
+                var imageService = eventServices.ServiceProvider.GetRequiredService<IImageService>();
+                await file.CreateThumbnailAsync(imageService, fileContent);
+            }
 
             return file;
         }
@@ -346,9 +370,28 @@ namespace BlazorBase.Files.Models
             return ValidOfficeFileMimeTypes.Contains(MimeFileType);
         }
         #endregion
+
+        #region Image Handling
+
+        public string GetPhysicalThumbnailName() => $"{Id}-Thumbnail_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
+        public string GetPhysicalTemporaryThumbnailName() => $"{TempFileId}-Thumbnail_{MimeFileType.Replace("/", "'").Replace(".", "^")}";
+
+        public string GetPhysicalThumbnailPath()
+        {
+            var options = BlazorBaseFileOptions.Instance;
+            if (TempFileId == Guid.Empty)
+                return Path.Join(options.FileStorePath, GetPhysicalThumbnailName());
+            else
+                return Path.Join(options.TempFileStorePath, GetPhysicalTemporaryThumbnailName());
+        }
+
+        public Task CreateThumbnailAsync(IImageService imageService, byte[] bytes)
+        {
+            if (!IsImage())
+                throw new NotSupportedException("This method can only be used if the file is an image.");
+
+            return imageService.CreateThumbnailAsync(bytes, BlazorBaseFileOptions.Instance.ImageThumbnailSize, GetPhysicalThumbnailPath());
+        }
+        #endregion
     }
-
-
-
-
 }

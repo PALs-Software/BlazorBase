@@ -51,7 +51,7 @@ public partial class FileInputDialogGenerator
         ulong? maxFileSize,
         string fileFilter,
         MessageType messageType = MessageType.Information,
-        Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult, Task>? onClosing = null,
+        Func<ModalClosingEventArgs, ConfirmDialogResult, FileInputDialogResult?, Task>? onClosing = null,
         object? icon = null,
         string? confirmButtonText = null,
         Color confirmButtonColor = Color.Primary,

@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
+using BlazorBase.Files.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.StaticFiles;
@@ -28,6 +29,8 @@ namespace BlazorBase.Files.Components
         #region Inject
         [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; } = null!;
         [Inject] protected IBlazorBaseFileOptions Options { get; set; } = null!;
+        [Inject] protected IImageService ImageService { get; set; } = null!;
+        
         #endregion
 
         #region Member
@@ -185,8 +188,16 @@ namespace BlazorBase.Files.Components
 
             using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.GetPhysicalTemporaryFileName()));
             await file.WriteToStreamAsync(fileStream);
-            fileStream.Position = 0;
 
+            if (Options.UseImageThumbnails && newFile.IsImage())
+            {
+                fileStream.Position = 0;
+                using var memoryStream = new MemoryStream();
+                fileStream.CopyTo(memoryStream);
+                await newFile.CreateThumbnailAsync(ImageService, memoryStream.ToArray());
+            }
+
+            fileStream.Position = 0;
             return BaseFile.ComputeSha256Hash(fileStream);
         }
 

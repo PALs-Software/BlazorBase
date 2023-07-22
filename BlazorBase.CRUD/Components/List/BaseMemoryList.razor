@@ -1,4 +1,5 @@
-﻿@using BlazorBase.CRUD.Models
+﻿@using BlazorBase.CRUD.Enums;
+@using BlazorBase.CRUD.Models
 @using Blazorise.Icons.FontAwesome
 @using BlazorBase.CRUD.Attributes
 
@@ -39,11 +40,11 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <th class="base-list-table-header-column @displayItem.CustomizationClasses"
+                        <th class="base-list-table-header-column @displayItem.CustomizationClasses[CustomizationLocation.ListHeaderCell]"
                     @onclick="async () => await OnSortClicked(displayItem, false)"
                     @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                     @oncontextmenu:preventDefault="true"
-                            style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles"
+                            style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles[CustomizationLocation.ListHeaderCell]"
                             title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
 
                             <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
@@ -88,7 +89,7 @@
                     {
                         @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                         {
-                            <td class="base-list-table-cell text-truncate base-list-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
+                            <td class="base-list-table-cell text-truncate base-list-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses[CustomizationLocation.ListCell]" style="@displayItem.CustomizationStyles[CustomizationLocation.ListCell]">
                                 @{
                                     var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, context).Result;
                                     if (renderFragment != null)

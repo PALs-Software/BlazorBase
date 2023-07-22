@@ -67,7 +67,6 @@ public partial class BaseInput
     protected bool IsReadOnly;
     protected Type RenderType = null!;
     protected DataType? PresentationDataType = null;
-    protected CustomPropertyCssStyleAttribute? CustomPropertyCssStyle;
     protected bool LastValueConversionFailed = false;
 
     protected ValidationContext PropertyValidationContext = null!;
@@ -101,7 +100,6 @@ public partial class BaseInput
             IsReadOnly = ReadOnly.Value;
 
         RenderType = DisplayItem?.DisplayPropertyType ?? Property.PropertyType;
-        CustomPropertyCssStyle = Property.GetCustomAttribute<CustomPropertyCssStyleAttribute>();
         PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
         var dict = new Dictionary<object, object?>()
@@ -338,12 +336,13 @@ public partial class BaseInput
         FeedbackClass = isValid ? "valid-feedback" : "invalid-feedback";
         if (!showValidation)
         {
-            Feedback = InputClass = String.Empty;
+            InputClass = DisplayItem?.CustomizationClasses[CustomizationLocation.Input] ?? String.Empty;
+            Feedback = String.Empty;
             return;
         }
 
         Feedback = feedback;
-        InputClass = isValid ? "is-valid" : "is-invalid";
+        InputClass = $"{DisplayItem?.CustomizationClasses[CustomizationLocation.Input]} {(isValid ? "is-valid" : "is-invalid")}";
     }
 
     #endregion
@@ -403,8 +402,8 @@ public partial class BaseInput
     {
         InputAttributes.Clear();
 
-        if (CustomPropertyCssStyle != null && !String.IsNullOrEmpty(CustomPropertyCssStyle.InputStyle))
-            InputAttributes.Add("style", CustomPropertyCssStyle.InputStyle);
+        if (DisplayItem != null && !String.IsNullOrEmpty(DisplayItem.CustomizationStyles[CustomizationLocation.Input]))
+            InputAttributes.Add("style", DisplayItem.CustomizationStyles[CustomizationLocation.Input]);
 
         if (Property.TryGetAttribute(out PlaceholderTextAttribute? placeholderAttribute))
             InputAttributes.Add("placeholder", placeholderAttribute.Placeholder);

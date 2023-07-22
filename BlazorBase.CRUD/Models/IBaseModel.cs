@@ -35,7 +35,7 @@ namespace BlazorBase.CRUD.Models
 
         string GetPrimaryKeysAsString();
 
-        Dictionary<string, string> GetNavigationQuery(string? baseQuery = null);
+        Dictionary<string, string?> GetNavigationQuery(string? baseQuery = null);
 
         string GetDisplayKey();
 

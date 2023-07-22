@@ -140,13 +140,14 @@ namespace BlazorBase.CRUD.Components.PageActions
                 {
                     if (arg.Sequence <= 2)
                         throw new NotSupportedException("The sequence must be greater than 2, because the first sequences are already in use for the default parameters \"ComponentCanBeRemoved\" and \"Args\"");
-
+#pragma warning disable ASP0006 // Do not use non-literal sequence numbers
                     if (arg is ActionComponentParameterAttribute parameterAttribute)
                         builder.AddAttribute(parameterAttribute.Sequence, parameterAttribute.Name, parameterAttribute.Value);
                     else if (arg is ActionComponentReferenceCaptureAttribute referenceCaptureAttribute)
                         builder.AddComponentReferenceCapture(referenceCaptureAttribute.Sequence, referenceCaptureAttribute.Value);
                     else
                         throw new NotImplementedException();
+#pragma warning restore ASP0006 // Do not use non-literal sequence numbers
                 }
 
             builder.CloseComponent();

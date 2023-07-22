@@ -16,6 +16,7 @@ using System.Drawing;
 using System.Net.Http;
 using BlazorBase.RichTextEditor.Models;
 using System.Net;
+using BlazorBase.Files.Services;
 
 namespace BlazorBase.RichTextEditor.Components
 {
@@ -60,6 +61,7 @@ namespace BlazorBase.RichTextEditor.Components
         [Inject] protected IStringLocalizer<BaseRichTextEditor> Localizer { get; set; } = null!;
         [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
         [Inject] protected IBlazorBaseRichTextEditorOptions Options { get; set; } = null!;
+        [Inject] protected IImageService ImageService { get; set; } = null!;
         #endregion
 
         #region Properties
@@ -186,6 +188,9 @@ namespace BlazorBase.RichTextEditor.Components
                 internalImageCount++;
                 var imageName = $"{imageFileName}_{internalImageCount:000000}";
 
+                if (Options.ResizeBigImagesToMaxImageSize)
+                        imageData = ImageService.ResizeImage(imageData, Options.MaxImageSize, Options.MaxImageSize);
+
                 var file = await BaseFile.CreateFileAsync(Options.ImageFileType, eventServices, imageName, baseType, mimeType, imageData);
                 BaseService.DbContext.Add(file);
 
@@ -197,7 +202,7 @@ namespace BlazorBase.RichTextEditor.Components
 
         protected async Task<int> ChangeExternalImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
         {
-            ArgumentNullException.ThrowIfNull(Options.ImageFileType);            
+            ArgumentNullException.ThrowIfNull(Options.ImageFileType);
 
             var externalImages = images.Where(htmlNode =>
             {
@@ -228,6 +233,7 @@ namespace BlazorBase.RichTextEditor.Components
 #pragma warning disable CA1416 // Plattformkompatibilität überprüfen
                     var imageInformations = Image.FromStream(memoryStream);
                     mimeType = $"image/{imageInformations.RawFormat.ToString().ToLower()}";
+                    imageInformations.Dispose();
 #pragma warning restore CA1416 // Plattformkompatibilität überprüfen
                 }
                 catch (Exception)
@@ -239,6 +245,8 @@ namespace BlazorBase.RichTextEditor.Components
 
                 internalImageCount++;
                 var imageName = $"{imageFileName}_{internalImageCount,6}";
+                if (Options.ResizeBigImagesToMaxImageSize)
+                    imageData = ImageService.ResizeImage(imageData, Options.MaxImageSize, Options.MaxImageSize);
                 var file = await BaseFile.CreateFileAsync(Options.ImageFileType, eventServices, imageName, baseType, mimeType, imageData);
                 BaseService.DbContext.Add(file);
 
@@ -263,6 +271,7 @@ namespace BlazorBase.RichTextEditor.Components
                 image.SetAttributeValue("src", srcValue);
             }
         }
+
         #endregion
 
         #region MISC

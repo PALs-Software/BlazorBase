@@ -25,5 +25,9 @@ public class BlazorBaseFileOptions : IBlazorBaseFileOptions
     public string TempFileStorePath { get; set; } = @"C:\BlazorBaseFileStore\Temp";
     public bool AutomaticallyDeleteOldTemporaryFiles { get; set; } = true;
     public uint DeleteTemporaryFilesOlderThanXSeconds { get; set; } = 60 * 60 * 24 * 7; // 7 days
+
+    public bool UseImageThumbnails { get; set; } = true;
+    public int ImageThumbnailSize { get; set; } = 256;
+
     #endregion
 }

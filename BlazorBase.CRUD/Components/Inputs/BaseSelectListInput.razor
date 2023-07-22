@@ -1,33 +1,35 @@
 ﻿@inherits BaseInput
 
-@if (Model != null)
-{
-    @if (IsReadOnly)
+<div class="base-select-list-input @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.InputDiv]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.InputDiv]">
+    @if (Model != null)
     {
-        <input type="text" value="@ReadOnlyDisplayValue" disabled class="form-control @InputClass" />
+        @if (IsReadOnly)
+        {
+            <input type="text" value="@ReadOnlyDisplayValue" disabled class="form-control @InputClass @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]" />
+        }
+        else
+        {
+            <Addons Class="@DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" Style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]">
+                <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="SelectedValue" SelectedValueChanged="(x) => OnSelectedValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
+
+                @if (IsForeignKeyProperty && (BaseInputDisplayOptions == null || BaseInputDisplayOptions.ShowSelectExistingEntityButton))
+                {
+                    <BaseTypeBasedSelectList @ref="BaseSelectList"
+                                 BaseModelType="ForeignKeyBaseModelType"
+                                 Title="@Localizer["Search for {0}", ModelLocalizer[Property.Name]]"
+                                 OnSelectListClosed="AddEntryFromSelectListModalAsync" />
+
+                    <Addon AddonType="AddonType.End">
+                        <Button Color="Color.Secondary" Clicked="OpenForeignKeySelectListModal">
+                            <Blazorise.Icons.FontAwesome.Icon Name="IconName.SearchPlus" />
+                        </Button>
+                    </Addon>
+                }
+            </Addons>
+        }
+
+        <div class="@FeedbackClass">
+            @Feedback
+        </div>
     }
-    else
-    {
-        <Addons Style="@CustomPropertyCssStyle?.PropertyStyle">
-            <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="SelectedValue" SelectedValueChanged="(x) => OnSelectedValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
-
-            @if (IsForeignKeyProperty && (BaseInputDisplayOptions == null || BaseInputDisplayOptions.ShowSelectExistingEntityButton))
-            {
-                <BaseTypeBasedSelectList @ref="BaseSelectList"
-                             BaseModelType="ForeignKeyBaseModelType"
-                             Title="@Localizer["Search for {0}", ModelLocalizer[Property.Name]]"
-                             OnSelectListClosed="AddEntryFromSelectListModalAsync" />
-
-                <Addon AddonType="AddonType.End">
-                    <Button Color="Color.Secondary" Clicked="OpenForeignKeySelectListModal">
-                        <Blazorise.Icons.FontAwesome.Icon Name="IconName.SearchPlus" />
-                    </Button>
-                </Addon>
-            }
-        </Addons>
-    }
-
-    <div class="@FeedbackClass">
-        @Feedback
-    </div>
-}
+</div>
