@@ -14,7 +14,13 @@ public static class BaseMarkupStringValidator
 
     private static string ConvertWhiteListedHtmlBack(string input)
     {
-        return input.Replace("&lt;br /&gt;", "<br />");
+        input = input.Replace("&lt;br /&gt;", "<br />");
+        input = input.Replace("&lt;a", "<a");
+        input = input.Replace("&lt;/a&gt;", "</a>");
+        input = input.Replace("&quot;", "\"");
+        input = input.Replace("&gt;", ">");
+
+        return input;
     }
 }
 

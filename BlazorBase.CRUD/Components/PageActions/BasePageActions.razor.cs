@@ -134,7 +134,7 @@ namespace BlazorBase.CRUD.Components.PageActions
                 throw new NotSupportedException("The component must inherit from IActionComponent");
 
             builder.OpenComponent(0, args.ComponentType);
-            builder.AddAttribute(1, "ComponentCanBeRemoved", EventCallback.Factory.Create(this, async () => await OnComponentCanBeRemovedAsync(args)));
+            builder.AddAttribute(1, "ComponentCanBeRemoved", EventCallback.Factory.Create(this, async (optionalParameter) => await OnComponentCanBeRemovedAsync(args, optionalParameter)));
             builder.AddAttribute(2, "Args", new ActionComponentArgs(Source, EventServices, BaseModel));
 
             if (args.Attributes != null)
@@ -154,20 +154,19 @@ namespace BlazorBase.CRUD.Components.PageActions
             builder.CloseComponent();
         };
 
-        protected async Task OnComponentCanBeRemovedAsync(RenderComponentByActionArgs args)
+        protected async Task OnComponentCanBeRemovedAsync(RenderComponentByActionArgs args, object? optionalParameter)
         {
-            CurrentActionRenderFragment = null;
-
             Exception? exception = null;
             try
             {
-                await (args.OnComponentRemoved?.Invoke(Source, EventServices, BaseModel) ?? Task.CompletedTask);
+                await (args.OnComponentRemoved?.Invoke(Source, EventServices, BaseModel, optionalParameter) ?? Task.CompletedTask);
             }
             catch (Exception e)
             {
                 exception = e;
             }
 
+            CurrentActionRenderFragment = null;
             await OnPageActionInvoked.InvokeAsync(exception);
         }
         #endregion
