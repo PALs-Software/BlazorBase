@@ -17,9 +17,9 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class IQueryableExtension
     {
-        static MethodInfo LikeMethodInfo = typeof(DbFunctionsExtensions).GetMethod("Like", new Type[] { typeof(DbFunctions), typeof(string), typeof(string) });
-        static MethodInfo StringContainsMethodInfo = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) });
-        static MethodInfo ToStringMethodInfo = typeof(object).GetMethod("ToString");
+        static MethodInfo LikeMethodInfo = typeof(DbFunctionsExtensions).GetMethod("Like", new Type[] { typeof(DbFunctions), typeof(string), typeof(string) })!;
+        static MethodInfo StringContainsMethodInfo = typeof(string).GetMethod("Contains", new[] { typeof(string), typeof(StringComparison) })!;
+        static MethodInfo ToStringMethodInfo = typeof(object).GetMethod("ToString")!;
         static Expression EFFunctionsConstant = Expression.Constant(EF.Functions);
         static Expression EmptyStringConstant = Expression.Constant(String.Empty);
         static Expression NullConstant = Expression.Constant(null);
@@ -105,10 +105,10 @@ namespace BlazorBase.CRUD.Extensions
                         filterValue = filterValue?.ToString();
             }
 
-            ConstantExpression constant = null;
+            ConstantExpression? constant = null;
             Expression body;
             var parameter = Expression.Parameter(typeof(TModel));
-            var property = ResolvePropertyPath<TModel>(displayItem.DisplayPropertyPath, parameter);
+            var property = ResolvePropertyPath<TModel>(displayItem.DisplayPropertyPath ?? displayItem.Property.Name, parameter);
 
             if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?) &&
                 !(filterType == FilterType.Like && (displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))))
@@ -116,12 +116,13 @@ namespace BlazorBase.CRUD.Extensions
 
             switch (filterType)
             {
+                case FilterType.NotLike:
                 case FilterType.Like:
                     if (TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
                     {
                         var savedCulture = Thread.CurrentThread.CurrentCulture;
                         Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-                        filterValue = filterValue.ToString();
+                        filterValue = filterValue?.ToString();
                         Thread.CurrentThread.CurrentCulture = savedCulture;
                     }
                    
@@ -138,7 +139,7 @@ namespace BlazorBase.CRUD.Extensions
                         var propertyAsString = Expression.Call(property, ToStringMethodInfo);
 
                         List<Expression> partExpressions = new();
-                        foreach (var filterPart in (filterValue as string).Split(" "))
+                        foreach (var filterPart in ((string)filterValue!).Split(" "))
                         {
                             if (String.IsNullOrEmpty(filterPart))
                                 continue;
@@ -152,21 +153,40 @@ namespace BlazorBase.CRUD.Extensions
                         for (int i = 1; i < partExpressions.Count; i++)
                             body = Expression.AndAlso(body, partExpressions[i]);
                     }
+
+                    if (filterType == FilterType.NotLike)
+                        body = Expression.Not(body);
+
                     break;
                 case FilterType.Equal:
-                    body = Expression.Equal(property, constant);
+                    body = Expression.Equal(property, constant!);
+                    break;
+                case FilterType.NotEqual:
+                    body = Expression.NotEqual(property, constant!);
                     break;
                 case FilterType.Greater:
-                    body = Expression.GreaterThan(property, constant);
+                    body = Expression.GreaterThan(property, constant!);
+                    break;
+                case FilterType.NotGreater:                    
+                    body = Expression.Not(Expression.GreaterThan(property, constant!));
                     break;
                 case FilterType.GreaterOrEqual:
-                    body = Expression.GreaterThanOrEqual(property, constant);
+                    body = Expression.GreaterThanOrEqual(property, constant!);
+                    break;
+                case FilterType.NotGreaterOrEqual:
+                    body = Expression.Not(Expression.GreaterThanOrEqual(property, constant!));
                     break;
                 case FilterType.Less:
-                    body = Expression.LessThan(property, constant);
+                    body = Expression.LessThan(property, constant!);
+                    break;
+                case FilterType.NotLess:
+                    body = Expression.Not(Expression.LessThan(property, constant!));
                     break;
                 case FilterType.LessOrEqual:
-                    body = Expression.LessThanOrEqual(property, constant);
+                    body = Expression.LessThanOrEqual(property, constant!);
+                    break;
+                case FilterType.NotLessOrEqual:
+                    body = Expression.Not(Expression.LessThanOrEqual(property, constant!));
                     break;
                 case FilterType.IsEmpty:
                     if (displayItem.DisplayPropertyType == typeof(Guid))
@@ -176,8 +196,19 @@ namespace BlazorBase.CRUD.Extensions
                     else
                         body = Expression.Equal(property, EmptyStringConstant);
                     break;
+                case FilterType.NotEmpty:
+                    if (displayItem.DisplayPropertyType == typeof(Guid))
+                        body = Expression.NotEqual(property, EmptyGuid);
+                    else if (displayItem.DisplayPropertyType == typeof(Guid?))
+                        body = Expression.NotEqual(property, EmptyNullableGuid);
+                    else
+                        body = Expression.NotEqual(property, EmptyStringConstant);
+                    break;
                 case FilterType.IsNull:
                     body = Expression.Equal(property, NullConstant);
+                    break;
+                case FilterType.NotNull:
+                    body = Expression.NotEqual(property, NullConstant);
                     break;
                 default:
                     throw new Exception($"The Filter Type {displayItem.FilterType} is not supported");

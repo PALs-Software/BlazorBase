@@ -11,12 +11,12 @@ public interface IBaseUser : IBaseModel
     string Email { get; set; }
 
     string UserName { get; set; }
-    string IdentityUserId { get; set; }  
+    string? IdentityUserId { get; set; }  
 }
 
 public interface IBaseUser<TIdentityUser, TIdentityRole> : IBaseUser
     where TIdentityUser : IdentityUser, new()
 {   
-    TIdentityUser IdentityUser { get; set; }
-    TIdentityRole IdentityRole { get; set; }
+    TIdentityUser? IdentityUser { get; set; }
+    TIdentityRole? IdentityRole { get; set; }
 }

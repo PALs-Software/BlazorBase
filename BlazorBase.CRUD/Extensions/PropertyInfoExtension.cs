@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -13,37 +14,15 @@ namespace BlazorBase.CRUD.Extensions
 {
     public static class PropertyInfoExtension
     {
-
-        public static string GetPlaceholderText(this PropertyInfo propertyInfo)
-        {
-            if (Attribute.IsDefined(propertyInfo, typeof(PlaceholderTextAttribute)))
-                return (propertyInfo.GetCustomAttribute(typeof(PlaceholderTextAttribute)) as PlaceholderTextAttribute).Placeholder;
-            else
-                return String.Empty;
-        }
-
         public static bool HasAttribute(this PropertyInfo propertyInfo, Type type)
         {
             return Attribute.IsDefined(propertyInfo, type);
         }
 
-        public static T GetAttribute<T>(this PropertyInfo propertyInfo) where T : class
+        public static bool TryGetAttribute<T>(this PropertyInfo propertyInfo, [NotNullWhen(true)] out T? attribute) where T : Attribute
         {
-            return propertyInfo.GetCustomAttribute(typeof(T)) as T;
-        }
-
-        public static bool TryGetAttribute<T>(this PropertyInfo propertyInfo, out T attribute) where T : class
-        {
-            if (propertyInfo.HasAttribute(typeof(T)))
-            {
-                attribute = propertyInfo.GetCustomAttribute(typeof(T)) as T;
-                return true;
-            }
-            else
-            {
-                attribute = default;
-                return false;
-            }
+            attribute = propertyInfo.GetCustomAttribute<T>();
+            return attribute != null;
         }
 
         public static bool IsKey(this PropertyInfo propertyInfo)
@@ -60,7 +39,6 @@ namespace BlazorBase.CRUD.Extensions
         {
             return propertyInfo.HasAttribute(typeof(UseCustomLookupData));
         }
-
 
         public static bool IsDisplayKey(this PropertyInfo propertyInfo)
         {
@@ -88,7 +66,7 @@ namespace BlazorBase.CRUD.Extensions
 
         public static bool HideBaseModelDateProperties(this PropertyInfo propertyInfo, GUIType? guiType = null)
         {
-            return propertyInfo.ReflectedType.GetCustomAttribute(typeof(HideBaseModelDatePropertiesInGUIAttribute)) is HideBaseModelDatePropertiesInGUIAttribute hideProperty &&
+            return propertyInfo.ReflectedType?.GetCustomAttribute<HideBaseModelDatePropertiesInGUIAttribute>() is HideBaseModelDatePropertiesInGUIAttribute hideProperty &&
                 (
                     hideProperty.HideCreatedOn && propertyInfo.Name == nameof(BaseModel.CreatedOn) ||
                     hideProperty.HideModifiedOn && propertyInfo.Name == nameof(BaseModel.ModifiedOn)
@@ -111,15 +89,18 @@ namespace BlazorBase.CRUD.Extensions
         public static (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(this PropertyInfo property)
         {
             var propertyRenderType = property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? property.PropertyType;
-            if (!property.IsForeignKey() || property.IsListProperty())
+            var foreignKey = property.GetCustomAttribute<ForeignKeyAttribute>();
+            if (foreignKey == null || property.IsListProperty())
                 return (property.Name, propertyRenderType);
 
-            var foreignKey = property.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
-            var foreignProperty = property.ReflectedType.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
-            var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
+            var foreignProperty = property.ReflectedType?.GetProperties().Where(entry => entry.Name == foreignKey.Name).FirstOrDefault();
+            if (foreignProperty == null)
+                return (property.Name, propertyRenderType);
 
+            var foreignKeyType = foreignProperty.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? foreignProperty?.PropertyType;
             if (foreignKeyType == null)
                 return (property.Name, propertyRenderType);
+
             if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                 return (property.Name, propertyRenderType);
 

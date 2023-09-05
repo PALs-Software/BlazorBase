@@ -4,6 +4,7 @@ using BlazorBase.CRUD.ViewModels;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,7 +14,7 @@ namespace BlazorBase.User.Components
     public class BaseUserManageProfile : ComponentBase
     {
         #region Inject
-        [Inject] protected IBaseUser BaseUser { get; set; }
+        [Inject] protected IBaseUser BaseUser { get; set; } = null!;
         #endregion
 
         protected override void BuildRenderTree(RenderTreeBuilder builder)
@@ -24,16 +25,13 @@ namespace BlazorBase.User.Components
             builder.AddAttribute(1, "Embedded", false);
             builder.AddAttribute(1, "ShowEntryByStart", true);
             builder.AddAttribute(1, "ShowActions", false);
-            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<EventServices, Task<IBaseModel>>(GetShowOnlySingleEntryInstance));
+            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<EventServices, Task<IBaseModel?>>(GetShowOnlySingleEntryInstance));
             builder.CloseComponent();
         }
 
-        public virtual async Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices)
+        public virtual async Task<IBaseModel?> GetShowOnlySingleEntryInstance(EventServices eventServices)
         {
-            return await Task.Run(() =>
-            {
-                return (IBaseModel)eventServices.BaseService.Set(BaseUser.GetType()).FirstOrDefault();
-            });
+            return (IBaseModel?)await eventServices.BaseService.Set(BaseUser.GetType()).FirstOrDefaultAsync();
         }
     }
 }

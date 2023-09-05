@@ -1,0 +1,28 @@
+﻿@if (BaseFile != null)
+{
+    <Modal @ref="Modal" Class="base-file-modal modal-fullscreen">
+        <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+            <ModalHeader>
+                <ModalTitle>
+                    <span class="base-file-modal-title">@BaseFile.FileName</span>                    
+                    @if (ShowFileButton)
+                    {
+                        <a href="@BaseFile.GetFileLink()" target="_blank" title="@Localizer["View"]"><BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.ExternalLinkAlt"></BaseIcon></a>
+                    }
+                    @if (ShowFileButton && ShowDownloadFileButton)
+                    {
+                        <span>|</span>
+                    }
+                    @if (ShowDownloadFileButton)
+                    {
+                        <a href="@BaseFile.GetFileLink()" target="_blank" title="@Localizer["Download"]" download><BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.Download"></BaseIcon></a>
+                    }
+                </ModalTitle>
+                <CloseButton />
+            </ModalHeader>
+            <ModalBody>
+                <img src="@BaseFile.GetFileLink()" class="figure-img img-fluid rounded mx-auto d-block">
+            </ModalBody>
+        </ModalContent>
+    </Modal>
+}

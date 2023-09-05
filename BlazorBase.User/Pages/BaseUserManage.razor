@@ -6,18 +6,22 @@
     @Localizer["Manage Account"]
 </Heading>
 
-<FullHeightTabs SelectedTab="profile">
+<FullHeightTabs SelectedTab="change-password">
     <Items>
+        @*
         <Tab Name="profile">@Localizer["Profile"]</Tab>
         <Tab Name="change-password">@Localizer["Change Password"]</Tab>
         <Tab Name="personal data">@Localizer["Personal data"]</Tab>
+        *@
     </Items>
     <Content>
+        @*
         <TabPanel Name="profile" Class="h-100">
             <BaseUserManageProfile />
         </TabPanel>
         <TabPanel Name="change-password" Class="h-100">
             <BaseUserManagePassword />
         </TabPanel>
+        *@
     </Content>
 </FullHeightTabs>

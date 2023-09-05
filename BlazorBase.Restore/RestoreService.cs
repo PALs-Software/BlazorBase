@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.ComponentModel.Design;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 
@@ -18,9 +16,9 @@ public class RestoreService
 
         Console.WriteLine("Load app settings of the project");
         var appSettings = AppSettings.LoadAppSettings(projectPath);
-        if (appSettings == null)
+        if (appSettings == null || String.IsNullOrEmpty(appSettings.FileStorePath))
         {
-            Console.WriteLine("The app settings of the project can not be read...");
+            Console.WriteLine("The app settings of the project are not correct...");
             return;
         }
 
@@ -110,7 +108,7 @@ public class RestoreService
     {
         Console.WriteLine($"Restore file store from backup {backupPath}");
 
-        var fileStorePath = appSettings.FileStorePath;
+        var fileStorePath = appSettings.FileStorePath!;
         if (Directory.Exists(fileStorePath))
         {
             Console.WriteLine($"Clear current file store");
@@ -131,8 +129,8 @@ public class RestoreService
 
     protected virtual void RestoreDatabaseFromBackup(AppSettings appSettings)
     {
-        var bakPath = GetBakFilePath(appSettings.FileStorePath);
-        var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(appSettings.ConnectionStrings.DefaultConnection);
+        var bakPath = GetBakFilePath(appSettings.FileStorePath!);
+        var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(appSettings.ConnectionStrings!.DefaultConnection);
         var dbName = sqlConnectionStringBuilder.InitialCatalog;
         sqlConnectionStringBuilder.InitialCatalog = "master";
 

@@ -3,6 +3,7 @@ using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
@@ -19,24 +20,24 @@ namespace BlazorBase.CRUD.NumberSeries
         [Required]
         [Visible]
         [StringLength(20)]
-        public string Id { get; set; }
+        public string Id { get; set; } = default!;
 
         [Visible]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         [Visible]
         [Required]
         [CheckValidSeriesNo(onlyCheckHasDigits: true)]
-        public string StartingNo { get; set; }
+        public string StartingNo { get; set; } = default!;
 
         [Visible]
         [Required]
         [CheckValidSeriesNo]
-        public string EndingNo { get; set; }
+        public string EndingNo { get; set; } = default!;
 
         [Visible]
         [Editable(false)]
-        public string LastNoUsed { get; set; }
+        public string? LastNoUsed { get; set; }
 
         public long EndingNoNumeric { get; set; }
         public long LastNoUsedNumeric { get; set; }
@@ -50,8 +51,8 @@ namespace BlazorBase.CRUD.NumberSeries
             switch (args.PropertyName)
             {
                 case nameof(StartingNo):
-                    var noSeriesService = (NoSeriesService)args.EventServices.ServiceProvider.GetService(typeof(NoSeriesService));
-                    GenerateEndingNo(noSeriesService, (string)args.NewValue);
+                    var noSeriesService = args.EventServices.ServiceProvider.GetRequiredService<NoSeriesService>();
+                    GenerateEndingNo(noSeriesService, (string?)args.NewValue ?? String.Empty);
                     break;
             }
 
@@ -64,8 +65,6 @@ namespace BlazorBase.CRUD.NumberSeries
             ForcePropertyRepaint(nameof(EndingNo));
         }
 
-
-
         public class CheckValidSeriesNoAttribute : ValidationAttribute
         {
             public bool OnlyCheckHasDigits { get; init; }
@@ -74,9 +73,9 @@ namespace BlazorBase.CRUD.NumberSeries
                 OnlyCheckHasDigits = onlyCheckHasDigits;
             }
 
-            protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+            protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
             {
-                var localizer = (IStringLocalizer)validationContext.Items[typeof(IStringLocalizer)];
+                var localizer = (IStringLocalizer?)validationContext.Items[typeof(IStringLocalizer)];
 
                 var newValue = value as string;
                 var model = (NoSeries)validationContext.ObjectInstance;
@@ -84,15 +83,15 @@ namespace BlazorBase.CRUD.NumberSeries
                 if (String.IsNullOrEmpty(newValue))
                     return ValidationResult.Success;
 
-                var noSeriesService = (NoSeriesService)validationContext.GetService(typeof(NoSeriesService));
+                var noSeriesService = validationContext.GetRequiredService<NoSeriesService>();
                 if (!noSeriesService.IsValidNoSeries(newValue))
-                    return new ValidationResult(localizer["The no series must contain at least one digit"], new List<string>() { validationContext.MemberName });
+                    return new ValidationResult(localizer?["The no series must contain at least one digit"] ?? "The no series must contain at least one digit", new List<string>() { validationContext.MemberName ?? String.Empty });
 
                 if (!OnlyCheckHasDigits)
                 {
                     var otherNo = validationContext.MemberName == nameof(StartingNo) ? model.EndingNo : model.StartingNo;
                     if (!noSeriesService.NoSeriesAreEqualExceptOfDigits(newValue, otherNo))
-                        return new ValidationResult(localizer["The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical"], new List<string>() { validationContext.MemberName });
+                        return new ValidationResult(localizer?["The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical"] ?? "The numbers of the start and end numbers must be in the same position and the remaining characters of the numbers must be identical", new List<string>() { validationContext.MemberName ?? String.Empty });
                 }
 
                 return ValidationResult.Success;

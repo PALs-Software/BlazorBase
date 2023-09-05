@@ -2,3 +2,7 @@
     max-height: 100px;
     max-width: 200px;
 }
+
+.blazor-base-file-list-display:hover {
+    cursor: zoom-in;
+}

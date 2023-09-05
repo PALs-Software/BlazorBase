@@ -141,4 +141,28 @@
   <data name="Like" xml:space="preserve">
     <value>⊆</value>
   </data>
+  <data name="NotEmpty" xml:space="preserve">
+    <value>! ''</value>
+  </data>
+  <data name="NotEqual" xml:space="preserve">
+    <value>! =</value>
+  </data>
+  <data name="NotGreater" xml:space="preserve">
+    <value>! &gt;</value>
+  </data>
+  <data name="NotGreaterOrEqual" xml:space="preserve">
+    <value>! ≥</value>
+  </data>
+  <data name="NotLess" xml:space="preserve">
+    <value>! &lt;</value>
+  </data>
+  <data name="NotLessOrEqual" xml:space="preserve">
+    <value>! ≤</value>
+  </data>
+  <data name="NotLike" xml:space="preserve">
+    <value>! ⊆</value>
+  </data>
+  <data name="NotNull" xml:space="preserve">
+    <value>! ∅</value>
+  </data>
 </root>

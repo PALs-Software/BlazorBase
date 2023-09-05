@@ -1,78 +1,83 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Modules\**" />
-    <Content Remove="Modules\**" />
-    <EmbeddedResource Remove="Modules\**" />
-    <None Remove="Modules\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Compile Remove="Modules\**" />
+		<Content Remove="Modules\**" />
+		<EmbeddedResource Remove="Modules\**" />
+		<None Remove="Modules\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Components\BaseListFilter.razor.css" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Remove="Components\BaseListFilter.razor.css" />
+	</ItemGroup>
 
-  
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="wwwroot\blazorBase.crud.modal.js" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Blazorise.RichTextEdit" Version="0.9.3.6" />
-    <PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
-    <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.3" />
-    <PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
-    <PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.3" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
-  </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
-    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ValidationAttributesTranslations.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Blazorise.RichTextEdit" Version="0.9.3.6" />
+		<PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.9" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Update="wwwroot\card.css">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\crud.css">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
+		<ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Update="Components\Card\BaseCard.razor.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Components\List\BaseList.razor.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
-      <LastGenOutput>ValidationAttributesTranslations.de.Designer.cs</LastGenOutput>
-      <Generator>PublicResXFileCodeGenerator</Generator>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>ValidationAttributesTranslations.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Services\BaseParser.resx">
-      <Generator></Generator>
-    </EmbeddedResource>
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.Designer.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>ValidationAttributesTranslations.resx</DependentUpon>
+		</Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Update="wwwroot\card.css">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Content>
+		<Content Update="wwwroot\crud.css">
+			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Update="Components\Card\BaseCard.razor.resx">
+			<Generator></Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
+			<LastGenOutput>ValidationAttributesTranslations.de.Designer.cs</LastGenOutput>
+			<Generator>PublicResXFileCodeGenerator</Generator>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.resx">
+			<Generator>PublicResXFileCodeGenerator</Generator>
+			<LastGenOutput>ValidationAttributesTranslations.Designer.cs</LastGenOutput>
+		</EmbeddedResource>
+		<EmbeddedResource Update="Services\BaseParser.resx">
+			<Generator></Generator>
+		</EmbeddedResource>
+	</ItemGroup>
 
 </Project>

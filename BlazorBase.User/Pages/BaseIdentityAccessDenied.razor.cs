@@ -7,7 +7,7 @@ namespace BlazorBase.User.Pages;
 public partial class BaseIdentityAccessDenied : ComponentBase
 {
     #region Inject
-    [Inject] protected IStringLocalizer<BaseIdentityAccessDenied> Localizer { get; set; }
+    [Inject] protected IStringLocalizer<BaseIdentityAccessDenied> Localizer { get; set; } = null!;
     #endregion
 
 }

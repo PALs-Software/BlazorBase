@@ -1,5 +1,4 @@
 ﻿using BlazorBase.User.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.Localization;
@@ -10,10 +9,10 @@ namespace BlazorBase.User.Components;
 public partial class BaseAuthorizedLayout
 {
     #region Injects
-    [Inject] protected IStringLocalizer<BaseAuthorizedLayout> Localizer { get; set; }
-    [Inject] protected NavigationManager NavigationManager { get; set; }
-    [Inject] protected IBlazorBaseUserOptions Options { get;set;}
-    [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; }
+    [Inject] protected IStringLocalizer<BaseAuthorizedLayout> Localizer { get; set; } = null!;
+    [Inject] protected NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] protected IBlazorBaseUserOptions Options { get; set; } = null!;
+    [CascadingParameter] protected Task<AuthenticationState> AuthenticationState { get; set; } = null!;
     #endregion
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -22,7 +21,7 @@ public partial class BaseAuthorizedLayout
             return;
 
         var authState = await AuthenticationState;
-        if (authState.User.Identity.IsAuthenticated)
+        if (authState.User.Identity?.IsAuthenticated ?? false)
             return;
 
         var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);

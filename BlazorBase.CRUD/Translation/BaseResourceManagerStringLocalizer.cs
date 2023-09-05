@@ -9,7 +9,7 @@ namespace BlazorBase.CRUD.Translation
     public class BaseResourceManagerStringLocalizer : ResourceManagerStringLocalizer
     {
         readonly BaseResourceManagerStringLocalizerFactory Factory;
-        protected IStringLocalizer BaseTypeLocalizer { get; set; } = null;
+        protected IStringLocalizer? BaseTypeLocalizer { get; set; } = null;
         public Type CurrentLocalizerType { get; }
         public BaseResourceManagerStringLocalizer(
             Assembly resourceAssembly,
@@ -21,7 +21,11 @@ namespace BlazorBase.CRUD.Translation
         {
             Factory = factory;
 
-            CurrentLocalizerType = Type.GetType($"{baseName}, {resourceAssembly.FullName}");
+            var type = Type.GetType($"{baseName}, {resourceAssembly.FullName}");
+            if (type == null)
+                throw new Exception($"Can not initiate base string localizer, because the type {baseName} can not be found in the assembly {resourceAssembly.FullName}");
+
+            CurrentLocalizerType = type;
             if (CurrentLocalizerType.BaseType != null && CurrentLocalizerType.BaseType != typeof(object))
                 BaseTypeLocalizer = Factory.Create(CurrentLocalizerType.BaseType);
         }

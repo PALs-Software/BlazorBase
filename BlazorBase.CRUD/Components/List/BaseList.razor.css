@@ -4,3 +4,49 @@
     -ms-flex-wrap: wrap;
     flex-wrap: nowrap;
 }
+
+td {
+    white-space: nowrap;
+}
+
+.root-base-list-table-header-item {
+    padding: 0px;
+}
+
+.base-list-table-header {
+    background-color: var(--bs-body-bg);
+    position: sticky;
+    top: 0px;
+    z-index: 10;
+}
+
+.base-list-table-header-column {
+    max-width: var(--base-list-table-header-column-max-width, 200px);
+}
+
+.base-list-table-cell {
+    max-width: var(--base-list-table-cell-max-width, 200px);
+}
+
+.base-list-with-sticky-row-buttons .base-list-row-buttons,
+::deep .base-list-with-sticky-row-buttons .base-list-actions,
+::deep .base-list-with-sticky-row-buttons .base-list-filter-actions {
+    position: sticky;
+    left: 0px;
+    z-index: 2;
+    background-color: var(--bs-body-bg);
+}
+
+.base-list-with-sticky-row-buttons .base-list-row-selected .base-list-row-buttons {
+    background-color: var(--table-row-selected-background, #616161);
+}
+
+.base-list-with-sticky-row-buttons tr:hover .base-list-row-buttons {
+    color: var(--table-hover-color);
+    background-color: var(--table-hover-background);
+}
+
+.base-list-row-selected {
+    color: var(--table-row-selected-color, #000000);
+    background-color: var(--table-row-selected-background, #616161);
+}

@@ -6,7 +6,7 @@
         @if (baseFile.IsImage())
         {
             <div>
-                <img src="@baseFile.GetFileLink()" class="figure-img img-fluid rounded blazor-base-file-list-display" style="margin-bottom:0px;">
+                <img @onclick="() => BaseFileModal?.Show()" src="@baseFile.GetFileLink(useThumbnailIfImage: true)" class="figure-img img-fluid rounded blazor-base-file-list-display" style="margin-bottom:0px;">
             </div>
         }
         else if (baseFile.IsDocument())
@@ -34,4 +34,9 @@
             }
         </div>
     </div>
+
+    @if (baseFile.IsImage())
+    {
+        <BaseFileModal @ref="BaseFileModal" BaseFile="baseFile" ShowFileButton="DisplayShowFileButton" ShowDownloadFileButton="DisplayDownloadFileButton" />
+    }
 }

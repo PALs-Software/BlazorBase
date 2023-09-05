@@ -120,6 +120,9 @@
   <data name="CreatedOn" xml:space="preserve">
     <value>Erstellt am</value>
   </data>
+  <data name="Information" xml:space="preserve">
+    <value>Informationen</value>
+  </data>
   <data name="ModifiedOn" xml:space="preserve">
     <value>Geändert am</value>
   </data>

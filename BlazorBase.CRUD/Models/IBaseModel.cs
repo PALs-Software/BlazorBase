@@ -21,25 +21,29 @@ namespace BlazorBase.CRUD.Models
     public interface IBaseModel
     {
         #region Events
-        event EventHandler<string[]> OnForcePropertyRepaint;
+        event EventHandler<string[]>? OnForcePropertyRepaint;
 
-        event EventHandler OnReloadEntityFromDatabase;
+        event EventHandler? OnReloadEntityFromDatabase;
 
-        event EventHandler OnRecalculateVisibilityStatesOfActions;
+        event EventHandler? OnRecalculateVisibilityStatesOfActions;
         #endregion
 
         #region Attribute Methods
         List<PropertyInfo> GetVisibleProperties(GUIType? guiType = null);
 
-        object[] GetPrimaryKeys();
+        object?[]? GetPrimaryKeys(bool useCache = false);
 
         string GetPrimaryKeysAsString();
 
-        Dictionary<string, string> GetNavigationQuery(string baseQuery = null);
+        Dictionary<string, string?> GetNavigationQuery(string? baseQuery = null);
 
         string GetDisplayKey();
 
+        string GetDisplayKey(string seperator);
+
         string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties);
+
+        bool PrimaryKeysAreEqual(object?[]? secondModelsPrimaryKeys, bool useCache = false);
         #endregion
 
         #region CRUD Methods
@@ -105,11 +109,11 @@ namespace BlazorBase.CRUD.Models
         Task OnAfterValidateProperty(OnAfterValidatePropertyArgs args);
 
         bool TryValidate(out List<ValidationResult> validationResults, ValidationContext validationContext);
-        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null);
+        bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute>? additionalValidationAttributes = null, ValidationTranslationResource? translationResource = null);
         #endregion
 
         #region PageActions
-        Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices);
+        Task<List<PageActionGroup>?> GeneratePageActionGroupsAsync(EventServices eventServices);
         #endregion
 
         #region ComponentBase        
@@ -117,20 +121,20 @@ namespace BlazorBase.CRUD.Models
         bool UserCanEditEntries { get; }
         bool UserCanOpenCardReadOnly { get; }
         bool UserCanDeleteEntries { get; }
-        List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; }
+        List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; }
         bool ShowOnlySingleEntry { get; }
-        Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices);
+        Task<IBaseModel?> GetShowOnlySingleEntryInstance(EventServices eventServices);
         #endregion
                
         #region Helper Methods
         void ClearPropertyValues();
         Type GetUnproxiedType();
         void TransferPropertiesExceptKeysTo(object target, params string[] exceptPropertyNames);
-        void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null);
+        void TransferPropertiesTo(object target, PropertyInfo[]? sourceProperties = null);
         #endregion
 
         #region Caption Methods
-        static string GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
+        static string? GetPropertyCaption(EventServices eventServices, IBaseModel model, IStringLocalizer modelLocalizer, DisplayItem displayItem)
         {
             var args = new OnGetPropertyCaptionArgs(model, displayItem, modelLocalizer[displayItem.Property.Name], eventServices);
             model.OnGetPropertyCaption(args);

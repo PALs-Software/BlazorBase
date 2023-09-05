@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using Blazorise;
@@ -18,6 +16,17 @@ public class PageAction
     public GUIType[] VisibleInGUITypes { get; set; } = new GUIType[] { GUIType.Card, GUIType.List, GUIType.ListPart };
     public bool ShowAsRowButtonInList { get; set; }
     public Func<EventServices, Task<bool>> Visible { get; set; } = x => Task.FromResult(true);
-    public Func<object?, EventServices, IBaseModel?, Task>? Action { get; set; } = null;
+
+    /// <summary>
+    /// 1. Parameter:<br/>
+    /// Source object, like BaseList, BaseCard, BaseListPart <para/>
+    /// 2. Parameter:<br/>
+    /// Event services <para/>
+    /// 3. Parameter:<br/>
+    /// When List: The primary keys of the current selected object
+    /// When BaseCard: The current base model instance 
+    /// When ListPart: The current selected object 
+    /// </summary>
+    public Func<object?, EventServices, object?, Task>? Action { get; set; } = null;
     public RenderComponentByActionArgs? RenderComponentByActionArgs { get; set; } = null;
 }
