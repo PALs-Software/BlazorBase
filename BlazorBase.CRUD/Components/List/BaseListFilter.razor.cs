@@ -100,7 +100,7 @@ public partial class BaseListFilter : BaseDisplayComponent
         foreach (FilterType filter in filterTypes)
             FilterTypes.Add(filter, new KeyValuePair<FilterType, string>(filter, FilterTypeLocalizer[filter.ToString()]));
 
-        SetAllowedFilterTypes(TextFilterTypes, FilterType.Like, FilterType.NotLike, FilterType.Equal, FilterType.NotEqual, FilterType.IsEmpty);
+        SetAllowedFilterTypes(TextFilterTypes, FilterType.Like, FilterType.NotLike, FilterType.Equal, FilterType.NotEqual, FilterType.IsEmpty, FilterType.NotEmpty);
         SetAllowedFilterTypes(NullableTextFilterTypes, FilterType.Like, FilterType.NotLike, FilterType.Equal, FilterType.NotEqual, FilterType.IsEmpty, FilterType.NotEmpty, FilterType.IsNull, FilterType.NotNull);
         SetAllowedFilterTypes(GuidFilterTypes, FilterType.Like, FilterType.NotLike, FilterType.IsEmpty, FilterType.NotEmpty);
         SetAllowedFilterTypes(NullableGuidFilterTypes, FilterType.Like, FilterType.NotLike, FilterType.IsEmpty, FilterType.NotEmpty, FilterType.IsNull, FilterType.NotNull);
