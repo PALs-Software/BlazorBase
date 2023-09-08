@@ -23,7 +23,7 @@
                         <Field Horizontal="true">
                             <FieldLabel ColumnSize="ColumnSize.Is4">@args.TextInputCaption</FieldLabel>
                             <FieldBody ColumnSize="ColumnSize.Is8">
-                                <input class="form-control" type="text" @bind="@args.Text" InputMode="args.DateInputMode" />
+                                <input class="form-control" type="@(args.MaskText ? "password" : "text")" @bind="@args.Text" />
                             </FieldBody>
                         </Field>                       
                     </Fields>

@@ -1,0 +1,31 @@
+﻿@inherits BaseFileInput
+
+@if (Model != null && !IsReadOnly)
+{
+    <LoadingIndicator Visible="ShowLoadingIndicator">
+        @Localizer["Uploading file {0} of {1}...", CurrentFileUploadNo, NoOfFilesToUpload]
+        <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
+            <ProgressBar Value="UploadProgress" Animated="true" Striped="true">
+                @CurrentUploadFileName - @UploadProgress %
+            </ProgressBar>
+        </Progress>
+    </LoadingIndicator>
+
+    <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4">
+        <Fields>
+            <Field Horizontal="true">
+                <FieldLabel ColumnSize="ColumnSize.Is4" Class="text-truncate" title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
+                    @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
+                </FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is8">
+                    <div class="@InputClass">
+                        <FileEdit @ref="FileEdit" Multiple="true" Filter="@FileFilter" Changed="async (args) => await OnValueChangedAsync(args)" Progressed="OnUploadProgressed" Class="@InputClass" AutoReset="false" />
+                    </div>
+                    <div class="@FeedbackClass">
+                        @Feedback
+                    </div>
+                </FieldBody>
+            </Field>
+        </Fields>
+    </Column>
+}

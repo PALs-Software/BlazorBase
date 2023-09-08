@@ -40,6 +40,7 @@ public static class BlazorBaseFilesConfiguration
         .AddTransient<IBlazorBaseFileOptions, TOptions>()
 
         .AddTransient<IBasePropertyCardInput, BaseFileInput>()
+        .AddTransient<IBasePropertyCardInput, MultiFileUploadInput>()
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
         .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
         .AddSingleton<IImageService, MagickImageService>() // As System.Drawing.Common currently not supporting webp images (loading throws error) use third party library

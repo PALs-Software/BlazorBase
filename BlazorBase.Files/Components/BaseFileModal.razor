@@ -4,7 +4,7 @@
         <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
             <ModalHeader>
                 <ModalTitle>
-                    <span class="base-file-modal-title">@BaseFile.FileName</span>                    
+                    <span class="base-file-modal-title">@BaseFile.FileName</span>
                     @if (ShowFileButton)
                     {
                         <a href="@BaseFile.GetFileLink()" target="_blank" title="@Localizer["View"]"><BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.ExternalLinkAlt"></BaseIcon></a>
@@ -21,7 +21,10 @@
                 <CloseButton />
             </ModalHeader>
             <ModalBody>
-                <img src="@BaseFile.GetFileLink()" class="figure-img img-fluid rounded mx-auto d-block">
+                @if (ModalWasOpenedTheFirstTime)
+                {
+                    <img src="@BaseFile.GetFileLink()" class="figure-img img-fluid rounded mx-auto d-block">
+                }
             </ModalBody>
         </ModalContent>
     </Modal>

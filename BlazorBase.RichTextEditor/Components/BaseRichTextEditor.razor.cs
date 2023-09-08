@@ -167,7 +167,7 @@ namespace BlazorBase.RichTextEditor.Components
             internalImageCount = await ChangeExternalImagesToLocalFilesAsync(images, eventServices, imageFileName, internalImageCount);
         }
 
-        protected async Task<int> ChangeBase64ImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
+        protected virtual async Task<int> ChangeBase64ImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
         {
             ArgumentNullException.ThrowIfNull(Options.ImageFileType);
 
@@ -189,7 +189,7 @@ namespace BlazorBase.RichTextEditor.Components
                 var imageName = $"{imageFileName}_{internalImageCount:000000}";
 
                 if (Options.ResizeBigImagesToMaxImageSize)
-                        imageData = ImageService.ResizeImage(imageData, Options.MaxImageSize, Options.MaxImageSize);
+                        imageData = ImageService.ResizeImageToMaxSize(imageData, Options.MaxImageSize);
 
                 var file = await BaseFile.CreateFileAsync(Options.ImageFileType, eventServices, imageName, baseType, mimeType, imageData);
                 BaseService.DbContext.Add(file);
@@ -200,7 +200,7 @@ namespace BlazorBase.RichTextEditor.Components
             return internalImageCount;
         }
 
-        protected async Task<int> ChangeExternalImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
+        protected virtual async Task<int> ChangeExternalImagesToLocalFilesAsync(IEnumerable<HtmlNode> images, EventServices eventServices, string imageFileName, int internalImageCount)
         {
             ArgumentNullException.ThrowIfNull(Options.ImageFileType);
 
@@ -246,7 +246,8 @@ namespace BlazorBase.RichTextEditor.Components
                 internalImageCount++;
                 var imageName = $"{imageFileName}_{internalImageCount,6}";
                 if (Options.ResizeBigImagesToMaxImageSize)
-                    imageData = ImageService.ResizeImage(imageData, Options.MaxImageSize, Options.MaxImageSize);
+                    imageData = ImageService.ResizeImageToMaxSize(imageData, Options.MaxImageSize);
+
                 var file = await BaseFile.CreateFileAsync(Options.ImageFileType, eventServices, imageName, baseType, mimeType, imageData);
                 BaseService.DbContext.Add(file);
 

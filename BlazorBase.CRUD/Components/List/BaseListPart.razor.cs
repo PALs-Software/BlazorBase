@@ -23,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -198,6 +199,9 @@ public partial class BaseListPart : BaseDisplayComponent
     protected async Task AddEntryAsync(object? aboveEntry = null)
     {
         var newEntry = Activator.CreateInstance(ModelListEntryType)!;
+        if (newEntry is IModeInjectServiceProvider injectModel)
+            injectModel.ServiceProvider = ServiceProvider;
+
         await OnCreateNewListEntryInstanceAsync(newEntry);
 
         var args = new HandledEventArgs();

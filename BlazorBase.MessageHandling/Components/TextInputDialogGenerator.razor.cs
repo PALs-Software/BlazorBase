@@ -45,6 +45,7 @@ public partial class TextInputDialogGenerator
         string title,
         string message,
         string? textInputCaption = null,
+        bool maskText = false,
         MessageType messageType = MessageType.Information,
         Func<ModalClosingEventArgs, ConfirmDialogResult, TextInputDialogResult, Task>? onClosing = null,
         object? icon = null,
@@ -59,6 +60,7 @@ public partial class TextInputDialogGenerator
                 title,
                 message,
                 textInputCaption,
+                maskText,
                 messageType,
                 onClosing,
                 icon,
@@ -112,7 +114,7 @@ public partial class TextInputDialogGenerator
                     modalInfo.ConfirmDialogResult ?? ConfirmDialogResult.Aborted,
                     new TextInputDialogResult(textInputArgs.Text)
                 ) ?? Task.CompletedTask
-            ); ;
+            );
         }
         catch (Exception e)
         {

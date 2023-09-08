@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
@@ -56,16 +57,16 @@ namespace BlazorBase.Files.Components
             EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);            
         }
 
-        public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(typeof(BaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
         }
 
-        public Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args) { return Task.CompletedTask; }
 
-        public Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
 
-        public Task<bool> InputHasAdditionalContentChanges()
+        public virtual Task<bool> InputHasAdditionalContentChanges()
         {
             return Task.FromResult(false);
         }
@@ -100,6 +101,9 @@ namespace BlazorBase.Files.Components
                 newFile.FileSize = file.Size;
                 newFile.BaseFileType = Path.GetExtension(file.Name);
                 newFile.MimeFileType = GetMimeTypeOfFile(file);
+
+                if (newFile is IModeInjectServiceProvider injectModel)
+                    injectModel.ServiceProvider = ServiceProvider;
 
                 if (Model is BaseFile baseFile)
                 {
@@ -175,7 +179,7 @@ namespace BlazorBase.Files.Components
             }
         }
 
-        protected async Task<string?> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
+        protected virtual async Task<string?> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
         {
             if (file.Size == 0)
                 return null;

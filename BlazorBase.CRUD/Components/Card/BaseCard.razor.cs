@@ -6,6 +6,7 @@ using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Interfaces;
@@ -190,6 +191,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
                 model = new TModel();
             else
                 model = template;
+
+            if (model is IModeInjectServiceProvider injectModel)
+                injectModel.ServiceProvider = ServiceProvider;
 
             var args = new OnCreateNewEntryInstanceArgs(model, EventServices);
             await OnCreateNewEntryInstance.InvokeAsync(args);

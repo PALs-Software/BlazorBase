@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
@@ -67,5 +68,35 @@ namespace BlazorBase.CRUD.Extensions
                 hashedInputStringBuilder.Append(b.ToString("X2"));
             return hashedInputStringBuilder.ToString();
         }
+
+        #region AES
+
+        public static byte[]? EncryptAES(this string? plainText, byte[] key, byte[] iv, Encoding encoding)
+        {
+            if (plainText == null || plainText.Length <= 0)
+                return null;
+            if (key == null || key.Length <= 0)
+                throw new ArgumentNullException("Key");
+            if (iv == null || iv.Length <= 0)
+                throw new ArgumentNullException("IV");
+            if (!OperatingSystem.IsWindows())
+                throw new PlatformNotSupportedException();
+
+            using Aes aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+
+            var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+            using MemoryStream memoryStream = new();
+            using CryptoStream cryptoStream = new(memoryStream, encryptor, CryptoStreamMode.Write);
+            using (StreamWriter streamWriter = new(cryptoStream, encoding))
+            {
+                streamWriter.Write(plainText);
+            }
+
+            return memoryStream.ToArray();
+        }
+
+        #endregion
     }
 }

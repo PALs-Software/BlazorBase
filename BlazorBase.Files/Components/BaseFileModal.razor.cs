@@ -20,10 +20,12 @@ namespace BlazorBase.Files.Components
 
         #region Members
         protected Modal Modal = default!;
+        protected bool ModalWasOpenedTheFirstTime = false;
         #endregion
 
         public void Show()
         {
+            ModalWasOpenedTheFirstTime = true;
             Modal?.Show();
         }
     }
