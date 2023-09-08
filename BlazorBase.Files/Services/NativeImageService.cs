@@ -54,6 +54,27 @@ public class NativeImageService : IImageService
         return outputMemoryStream.ToArray();
     }
 
+    public byte[] ResizeImageToMaxSize(byte[] inputImageBytes, int maxSize)
+    {
+        if (!OperatingSystem.IsWindows())
+            throw new NotSupportedException(NotWindowsError);
+
+        using var inputMemoryStream = new MemoryStream(inputImageBytes);
+        var inputImage = Image.FromStream(inputMemoryStream);
+
+        if (inputImage.Width <= maxSize && inputImage.Height <= maxSize)
+            return inputImageBytes;
+
+        var outputImage = ResizeImage(inputImage, maxSize, maxSize);
+        using var outputMemoryStream = new MemoryStream();
+        outputImage.Save(outputMemoryStream, inputImage.RawFormat);
+
+        inputImage.Dispose();
+        outputImage.Dispose();
+
+        return outputMemoryStream.ToArray();
+    }
+
     public Image ResizeImage(Image inputImage, int width, int height)
     {
         if (!OperatingSystem.IsWindows())

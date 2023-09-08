@@ -94,6 +94,7 @@ public interface IMessageHandler
         string title,
         string message,     
         string? textInputCaption = null,
+        bool maskText = false,
         MessageType messageType = MessageType.Information,
         Func<ModalClosingEventArgs, ConfirmDialogResult, TextInputDialogResult, Task>? onClosing = null,
         object? icon = null,

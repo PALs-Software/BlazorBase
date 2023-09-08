@@ -44,19 +44,19 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
             IsReadOnly = ReadOnly.Value;
     }
 
-    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
     {
         var presentationDataType = displayItem.Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 
         return Task.FromResult(presentationDataType == DataType.Html);
     }
 
-    public Task<bool> InputHasAdditionalContentChanges()
+    public virtual Task<bool> InputHasAdditionalContentChanges()
     {
         return Task.FromResult(HasContentChanges);
     }
 
-    public async Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs? args)
+    public virtual async Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs? args)
     {
         if (BaseRichTextEditor == null)
             return;
@@ -69,13 +69,13 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
         await OnValueChangedAsync(CurrentContentBuffer, setCurrentValueAsString: false);
     }
 
-    public Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args)
+    public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args)
     {
         CurrentValueAsString = CurrentContentBuffer; // Delay setting CurrentValueAsString so file controller is able to serve new created image files
         return Task.CompletedTask;
     }
 
-    protected void OnContentChanged()
+    protected virtual void OnContentChanged()
     {
         if (InitCounter < 2) // Skip the first content changes due to the initialization of the editor
         {

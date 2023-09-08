@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.Translation;
 using BlazorBase.Models;
@@ -29,6 +30,7 @@ public static class BlazorBaseCRUDConfiguration
         .AddTransient<IBlazorBaseCRUDOptions, TOptions>()
         .AddSingleton<BaseParser>()
         .AddTransient<BaseService>()
+        .AddScoped<ScopedServiceProvider>()
         .AddTransient<DbContext, TDbContextImplementation>()
         .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
 

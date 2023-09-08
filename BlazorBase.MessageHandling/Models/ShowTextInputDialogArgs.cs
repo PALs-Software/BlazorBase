@@ -12,6 +12,7 @@ public class ShowTextInputDialogArgs : ShowConfirmDialogArgs
         string title,
         string message,
         string? textInputCaption = null,
+        bool maskText = false,
         MessageType messageType = MessageType.Information,
         Func<ModalClosingEventArgs, ConfirmDialogResult, TextInputDialogResult, Task>? onClosing = null,
         object? icon = null,
@@ -23,11 +24,14 @@ public class ShowTextInputDialogArgs : ShowConfirmDialogArgs
     {
         OnClosing = onClosing;
         TextInputCaption = textInputCaption;
+        MaskText = maskText;
     }
 
     public string? TextInputCaption { get; set; }
 
     public string? Text { get; set; }
+    public bool MaskText { get; set; }
+
     public record TextInputDialogResult(string? Text);
     public new Func<ModalClosingEventArgs, ConfirmDialogResult, TextInputDialogResult, Task>? OnClosing { get; set; }
 }
