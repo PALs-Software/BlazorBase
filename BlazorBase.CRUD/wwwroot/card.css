@@ -20,12 +20,6 @@ table input, table select {
     .base-card .modal-xl {
         max-width: 1500px;
     }
-
-    .base-card .col-xxl-4 {
-        -ms-flex: 0 0 33.333333%;
-        flex: 0 0 33.333333%;
-        max-width: 33.333333%;
-    }
 }
 
 @media (min-width: 1900px) {

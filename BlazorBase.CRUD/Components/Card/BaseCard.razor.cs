@@ -63,7 +63,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     [Parameter] public string? SingleDisplayName { get; set; }
     [Parameter] public bool Embedded { get; set; }
     [Parameter] public bool ShowEntryByStart { get; set; }
-    [Parameter] public Func<EventServices, Task<IBaseModel>>? EntryToBeShownByStart { get; set; } = null;
+    [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; } = null;
     [Parameter] public TModel? ComponentModelInstance { get; set; } = null;
     [Parameter] public bool ShowActions { get; set; } = true;
     #endregion
@@ -133,10 +133,11 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         if (ShowEntryByStart)
         {
             IBaseModel? entry = null;
-            var task = EntryToBeShownByStart?.Invoke(EventServices);
+            var args = new OnEntryToBeShownByStartArgs(EventServices);
+            var task = EntryToBeShownByStart?.Invoke(args);
             if (task != null)
                 entry = await task;
-            await ShowAsync(entry == null, false, entry?.GetPrimaryKeys());
+            await ShowAsync(entry == null, args.ViewMode, entry?.GetPrimaryKeys());
         }
     }
 

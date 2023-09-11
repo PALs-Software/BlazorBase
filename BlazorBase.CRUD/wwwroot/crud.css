@@ -1,6 +1,7 @@
 ﻿@import 'card.css';
 @import 'baseDataListInput.css';
 @import 'customizationAttributes.css';
+@import 'boostrap-grid-extension.css';
 
 .b-layout.b-layout-has-sider .b-layout {
     overflow-x: auto;
