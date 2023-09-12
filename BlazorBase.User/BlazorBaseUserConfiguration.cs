@@ -5,6 +5,7 @@ using BlazorBase.User.Models;
 using BlazorBase.User.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ public static class BlazorBaseUserConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
     public static IServiceCollection AddBlazorBaseUserManagement<TUserService, TUser, TIdentityUser, TIdentityRole, TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
-        where TUserService : class, IBaseUserService<TUser, TIdentityUser, TIdentityRole>
+        where TUserService : class, IBaseUserService, IBaseUserService<TUser, TIdentityUser, TIdentityRole>
         where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
         where TIdentityUser : IdentityUser, new()
         where TIdentityRole : struct, Enum
@@ -37,6 +38,7 @@ public static class BlazorBaseUserConfiguration
             .AddSingleton(configureOptions)
             .AddTransient<IBlazorBaseUserOptions, TOptions>()
             .AddSingleton<IBaseUser, TUser>()
+            .AddTransient<IBaseUserService, TUserService>()
             .AddTransient<TUserService>()
 
         .AddControllers().AddApplicationPart(typeof(UserLoginController).Assembly).AddControllersAsServices();
@@ -53,6 +55,14 @@ public static class BlazorBaseUserConfiguration
             acOptions.AccessDeniedPath = options.IdentityAccessDeniedPath;
         });
 
+        if (options.LogUserSessions)
+        {
+            if (!typeof(IBaseUserSessionData).IsAssignableFrom(typeof(TUser)))
+                throw new NotSupportedException($"The type {typeof(TUser)} must implement the interface IBaseUserSessionData, so that the user sessions can be logged into the user table");
+
+            serviceCollection.AddScoped<CircuitHandler, BaseUserCircuitHandlerService>();
+        }
+        
         return serviceCollection;
     }
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.User.Services;
 
-public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserService<TUser, TIdentityUser, TIdentityRole>
+public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserService<TUser, TIdentityUser, TIdentityRole>, IBaseUserService
     where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
     where TIdentityUser : IdentityUser, new()
     where TIdentityRole : struct, Enum
@@ -42,9 +42,19 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return await GetUserByApplicationUserIdAsync(baseService, userId, asNoTracking);
     }
 
+    async Task<IBaseUser?> IBaseUserService.GetCurrentUserAsync(BaseService baseService, bool asNoTracking)
+    {
+        return await GetCurrentUserAsync(baseService, asNoTracking);
+    }
+
     public virtual Task<TUser?> GetCurrentUserAsync(bool asNoTracking = true)
     {
         return GetCurrentUserAsync(BaseService, asNoTracking);
+    }
+
+    async Task<IBaseUser?> IBaseUserService.GetCurrentUserAsync(bool asNoTracking)
+    {
+        return await GetCurrentUserAsync(asNoTracking);
     }
 
     public virtual async Task<string?> GetCurrentUserIdentityIdAsync()
@@ -63,9 +73,20 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         return users.FirstOrDefault();
     }
 
+    async Task<IBaseUser?> IBaseUserService.GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking)
+    {
+        return await GetUserByApplicationUserIdAsync(baseService, id, asNoTracking);
+    }
+
+
     public virtual Task<TUser?> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true)
     {
         return GetUserByApplicationUserIdAsync(BaseService, id, asNoTracking);
+    }
+
+    async Task<IBaseUser?> IBaseUserService.GetUserByApplicationUserIdAsync(string id, bool asNoTracking)
+    {
+        return await GetUserByApplicationUserIdAsync(id, asNoTracking);
     }
 
     public static bool DatabaseHasNoUsers(IServiceProvider serviceProvider)
@@ -125,4 +146,5 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         baseService.AddEntry(user);
         await baseService.SaveChangesAsync();
     }
+
 }
