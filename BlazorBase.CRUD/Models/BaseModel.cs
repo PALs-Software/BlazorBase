@@ -13,6 +13,7 @@ using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
 using System;
@@ -29,11 +30,11 @@ namespace BlazorBase.CRUD.Models
     public class BaseModel : ComponentBase, IBaseModel
     {
         #region Events
-        public event EventHandler<string[]> OnForcePropertyRepaint;
+        public event EventHandler<string[]>? OnForcePropertyRepaint;
 
-        public event EventHandler OnReloadEntityFromDatabase;
+        public event EventHandler? OnReloadEntityFromDatabase;
 
-        public event EventHandler OnRecalculateVisibilityStatesOfActions;
+        public event EventHandler? OnRecalculateVisibilityStatesOfActions;
         #endregion
 
         public BaseModel()
@@ -62,7 +63,7 @@ namespace BlazorBase.CRUD.Models
 
         [NotMapped] public virtual bool StickyRowButtons { get; protected set; } = true;
 
-        [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; protected set; }
+        [NotMapped] public virtual List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; protected set; }
         [NotMapped] public virtual bool ShowOnlySingleEntry { get; protected set; }
         #endregion
 
@@ -72,15 +73,15 @@ namespace BlazorBase.CRUD.Models
             return GetType().GetVisibleProperties(guiType);
         }
 
-        private object[] CachedPrimaryKeys = null;
-        public object[] GetPrimaryKeys(bool useCache = false)
+        private object?[]? CachedPrimaryKeys = null;
+        public object?[]? GetPrimaryKeys(bool useCache = false)
         {
             if (useCache && CachedPrimaryKeys != null)
                 return CachedPrimaryKeys;
 
             var keyProperties = GetKeyProperties();
 
-            var keys = new object[keyProperties.Count];
+            var keys = new object?[keyProperties.Count];
             for (int i = 0; i < keyProperties.Count; i++)
                 keys[i] = keyProperties.ElementAt(i).GetValue(this);
 
@@ -92,7 +93,7 @@ namespace BlazorBase.CRUD.Models
 
         public string GetPrimaryKeysAsString()
         {
-            return String.Join(", ", GetPrimaryKeys());
+            return String.Join(", ", GetPrimaryKeys() ?? Array.Empty<string>());
         }
 
         public List<PropertyInfo> GetKeyProperties()
@@ -100,17 +101,17 @@ namespace BlazorBase.CRUD.Models
             return GetType().GetKeyProperties();
         }
 
-        public Dictionary<string, string> GetNavigationQuery(string baseQuery = null)
+        public Dictionary<string, string?> GetNavigationQuery(string? baseQuery = null)
         {
-            var query = new Dictionary<string, string>();
+            var query = new Dictionary<string, string?>();
             if (baseQuery != null)
-                query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => val.Value.ToString());
+                query = QueryHelpers.ParseQuery(baseQuery).ToDictionary(key => key.Key, val => (string?)val.Value.ToString());
 
             var keyProperties = GetKeyProperties();
 
             var primaryKeys = new List<object>();
             foreach (var keyProperty in keyProperties)
-                query[keyProperty.Name] = keyProperty.GetValue(this).ToString();
+                query[keyProperty.Name] = keyProperty.GetValue(this)?.ToString() ?? String.Empty;
 
             return query;
         }
@@ -119,7 +120,7 @@ namespace BlazorBase.CRUD.Models
         {
             var displayKeyProperties = GetType().GetDisplayKeyProperties();
             if (displayKeyProperties.Count == 0)
-                return String.Join(seperator, GetPrimaryKeys());
+                return String.Join(seperator, GetPrimaryKeys() ?? Array.Empty<string>());
             else
                 return GetDisplayKeyKeyValuePair(displayKeyProperties);
         }
@@ -131,7 +132,7 @@ namespace BlazorBase.CRUD.Models
 
         public string GetDisplayKeyKeyValuePair(List<PropertyInfo> displayKeyProperties)
         {
-            var displayKeyValues = new List<object>();
+            var displayKeyValues = new List<object?>();
             foreach (var displayKeyProperty in displayKeyProperties)
             {
                 var displayKeyValue = displayKeyProperty.GetValue(this);
@@ -143,7 +144,7 @@ namespace BlazorBase.CRUD.Models
             return String.Join(", ", displayKeyValues);
         }
 
-        public bool PrimaryKeysAreEqual(object[] secondModelsPrimaryKeys, bool useCache = false)
+        public bool PrimaryKeysAreEqual(object?[]? secondModelsPrimaryKeys, bool useCache = false)
         {
             var primaryKeys = GetPrimaryKeys(useCache);
             if (primaryKeys == null && secondModelsPrimaryKeys == null)
@@ -158,7 +159,6 @@ namespace BlazorBase.CRUD.Models
 
             return true;
         }
-
         #endregion
 
         #region CRUD Methods
@@ -254,7 +254,7 @@ namespace BlazorBase.CRUD.Models
         }
 
         public record ValidationTranslationResource(System.Resources.ResourceManager ResourceManager, Type ResourceType);
-        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute> additionalValidationAttributes = null, ValidationTranslationResource translationResource = null)
+        public bool TryValidateProperty(out List<ValidationResult> validationResults, ValidationContext propertyValidationContext, PropertyInfo propertyInfo, List<ValidationAttribute>? additionalValidationAttributes = null, ValidationTranslationResource? translationResource = null)
         {
             validationResults = new List<ValidationResult>();
             var attributes = propertyInfo.GetCustomAttributes<Attribute>().OfType<ValidationAttribute>().ToList();
@@ -276,12 +276,12 @@ namespace BlazorBase.CRUD.Models
                 }
             }
 
-            return Validator.TryValidateValue(propertyInfo.GetValue(this), propertyValidationContext, validationResults, attributes);
+            return Validator.TryValidateValue(propertyInfo.GetValue(this)!, propertyValidationContext, validationResults, attributes);
         }
 
         public bool TryValidate(out List<ValidationResult> validationResults, EventServices eventServices)
         {
-            var validationContext = new ValidationContext(this, eventServices.ServiceProvider, new Dictionary<object, object>()
+            var validationContext = new ValidationContext(this, eventServices.ServiceProvider, new Dictionary<object, object?>()
             {
                 [typeof(IStringLocalizer)] = eventServices.Localizer,
                 [typeof(BaseService)] = eventServices.BaseService
@@ -322,21 +322,18 @@ namespace BlazorBase.CRUD.Models
         {
             builder.OpenComponent(0, typeof(BaseCard<>).MakeGenericType(GetType()));
             builder.AddAttribute(1, "ShowEntryByStart", ShowOnlySingleEntry);
-            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<EventServices, Task<IBaseModel>>(GetShowOnlySingleEntryInstance));
+            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<OnEntryToBeShownByStartArgs, Task<IBaseModel?>>(GetShowOnlySingleEntryInstance));
             builder.CloseComponent();
         }
 
-        public virtual async Task<IBaseModel> GetShowOnlySingleEntryInstance(EventServices eventServices)
+        public virtual async Task<IBaseModel?> GetShowOnlySingleEntryInstance(OnEntryToBeShownByStartArgs args)
         {
-            return await Task.Run(() =>
-            {
-                return (IBaseModel)eventServices.BaseService.Set(GetType()).FirstOrDefault();
-            });
+            return (IBaseModel?)await args.EventServices.BaseService.Set(GetType()).FirstOrDefaultAsync();
         }
         #endregion
 
         #region PageActions
-        public virtual Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices) { return Task.FromResult<List<PageActionGroup>>(null); }
+        public virtual Task<List<PageActionGroup>?> GeneratePageActionGroupsAsync(EventServices eventServices) { return Task.FromResult<List<PageActionGroup>?>(null); }
         #endregion
 
         #region Helper Methods
@@ -347,7 +344,7 @@ namespace BlazorBase.CRUD.Models
                 !typeof(ILazyLoader).IsAssignableFrom(property.PropertyType) &&
                 property.CanWrite &&
                 property.GetSetMethod() != null &&
-                (property.GetSetMethod().Attributes & MethodAttributes.Static) == 0 &&
+                (property.GetSetMethod()!.Attributes & MethodAttributes.Static) == 0 &&
                 property.Name != nameof(CreatedOn) &&
                 property.Name != nameof(ModifiedOn)
             ).ToList();
@@ -368,7 +365,7 @@ namespace BlazorBase.CRUD.Models
             TransferPropertiesTo(target, sourceProperties.ToArray());
         }
 
-        public void TransferPropertiesTo(object target, PropertyInfo[] sourceProperties = null)
+        public void TransferPropertiesTo(object target, PropertyInfo[]? sourceProperties = null)
         {
             ObjectExtension.TransferPropertiesTo(this, target, sourceProperties);
         }
@@ -377,7 +374,7 @@ namespace BlazorBase.CRUD.Models
         {
             var type = GetType();
 
-            if (type.Namespace == "Castle.Proxies")
+            if (type.Namespace == "Castle.Proxies" && type.BaseType != null)
                 return type.BaseType;
 
             return type;

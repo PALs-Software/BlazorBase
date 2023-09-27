@@ -1,7 +1,3 @@
-window.blazorBase = {
-    version: "1.0.0.0"
-};
-
 window.blazorBase.richTextEditor = {
     configureQuillJs: (options) => {
            

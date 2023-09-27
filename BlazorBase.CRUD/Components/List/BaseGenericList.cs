@@ -32,23 +32,23 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Parameter] public bool UserCanDeleteEntries { get; set; } = true;
 
     [Parameter] public bool HideTitle { get; set; } = false;
-    [Parameter] public string SingleDisplayName { get; set; }
-    [Parameter] public string ExplainText { get; set; }
-    [Parameter] public string PluralDisplayName { get; set; }
-    [Parameter] public List<Expression<Func<IBaseModel, bool>>> DataLoadConditions { get; set; }
-       
-    [Parameter] public TModel ComponentModelInstance { get; set; }   
+    [Parameter] public string? SingleDisplayName { get; set; }
+    [Parameter] public string? ExplainText { get; set; }
+    [Parameter] public string? PluralDisplayName { get; set; }
+    [Parameter] public List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; set; }
+
+    [Parameter] public TModel ComponentModelInstance { get; set; } = null!;
     [Parameter] public bool Sortable { get; set; } = true;
     [Parameter] public bool Filterable { get; set; } = true;
     [Parameter] public bool StickyRowButtons { get; set; } = true;
     [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
-    
 
-    [Parameter] public RenderFragment<TModel> AdditionalRowButtons { get; set; }
+
+    [Parameter] public RenderFragment<TModel>? AdditionalRowButtons { get; set; }
     [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
 
     #region Style
-    [Parameter] public string TableClass { get; set; }
+    [Parameter] public string? TableClass { get; set; }
     #endregion
 
     #region Events
@@ -68,28 +68,28 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     #region Injects
 
-    [Inject] public BaseService Service { get; set; }
-    [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; }
-    [Inject] protected IStringLocalizer<BaseList<TModel>> Localizer { get; set; }
-    [Inject] protected IServiceProvider ServiceProvider { get; set; }    
-    [Inject] protected BaseParser BaseParser { get; set; }
-    [Inject] protected IMessageHandler MessageHandler { get; set; }
-    [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; }
+    [Inject] public BaseService Service { get; set; } = null!;
+    [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
+    [Inject] protected IStringLocalizer<BaseList<TModel>> Localizer { get; set; } = null!;
+    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
+    [Inject] protected BaseParser BaseParser { get; set; } = null!;
+    [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
+    [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
 
     #endregion
 
     #region Members
-    protected EventServices EventServices;
+    protected EventServices EventServices = null!;
 
     protected List<TModel> Entries = new();
-    protected object[] SelectedEntryPrimaryKeys = null;
-    protected Type TModelType;
+    protected object?[]? SelectedEntryPrimaryKeys = null;
+    protected Type TModelType = null!;
 
-    protected BaseModalCard<TModel> BaseModalCard = default!;
-    protected Virtualize<TModel> VirtualizeList = default!;
+    protected BaseModalCard<TModel>? BaseModalCard = null!;
+    protected Virtualize<TModel>? VirtualizeList = null!;
 
     protected List<IBasePropertyListDisplay> PropertyListDisplays = new();
-      
+
     protected List<DisplayItem> SortedColumns = new();
     #endregion
 
@@ -105,7 +105,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         EventServices = GetEventServices(Service);
 
         TModelType = typeof(TModel);
-        SetUpDisplayLists(TModelType, GUIType.List, ComponentModelInstance);
+        await SetUpDisplayListsAsync(TModelType, GUIType.List, ComponentModelInstance);
 
         SetDisplayNames();
         PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
@@ -144,7 +144,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             ExplainText = null;
     }
 
-    protected virtual async Task<RenderFragment> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
+    protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
     {
         foreach (var propertyListDisplay in PropertyListDisplays)
             if (await propertyListDisplay.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
@@ -185,6 +185,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
                     SortedColumns.Add(displayItem);
             }
     }
+
     #endregion
 
     #endregion
@@ -195,7 +196,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (request.Count == 0)
             return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
 
-        var baseService = ServiceProvider.GetService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
+        var baseService = ServiceProvider.GetRequiredService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
         var query = CreateLoadDataQuery(baseService.Set<TModel>());
 
         var totalEntries = await query.CountAsync();
@@ -208,14 +209,15 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     {
         var hasAlreadyOrderByQuery = false;
         foreach (var sortedColumn in SortedColumns)
-            foreach (var displayProperty in sortedColumn.DisplayPropertyPath.Split("|"))
-            {
-                if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
-                    query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(displayProperty) : query.OrderBy(displayProperty);
-                else
-                    query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
-                hasAlreadyOrderByQuery = true;
-            }
+            if (sortedColumn.DisplayPropertyPath != null)
+                foreach (var displayProperty in sortedColumn.DisplayPropertyPath.Split("|"))
+                {
+                    if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
+                        query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(displayProperty) : query.OrderBy(displayProperty);
+                    else
+                        query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
+                    hasAlreadyOrderByQuery = true;
+                }
 
         if (DataLoadConditions != null)
             foreach (var dataLoadCondition in DataLoadConditions)
@@ -248,15 +250,15 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #endregion
 
     #region Display
-    protected virtual string DisplayForeignKey(DisplayItem displayItem, TModel model)
+    protected virtual string? DisplayForeignKey(DisplayItem displayItem, TModel model)
     {
-        var key = displayItem.Property.GetValue(model)?.ToString();
-        var primaryKeyAsJson = JsonConvert.SerializeObject(new object[] { key });
+        var key = displayItem.Property.GetValue(model);
+        var primaryKeyAsJson = JsonConvert.SerializeObject(new object?[] { key });
 
         var foreignKeyPair = ForeignKeyProperties[displayItem.Property].FirstOrDefault(entry => entry.Key == primaryKeyAsJson);
 
         if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
-            return key;
+            return key?.ToString();
         else
             return foreignKeyPair.Value;
     }
@@ -306,14 +308,16 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
                 SortedColumns.Add(displayItem);
         }
 
-        await VirtualizeList.RefreshDataAsync();
+        if (VirtualizeList != null)
+            await VirtualizeList.RefreshDataAsync();
     }
     #endregion
 
     #region Filtering
     protected virtual async Task OnFilterChangedAsync()
     {
-        await VirtualizeList.RefreshDataAsync();
+        if (VirtualizeList != null)
+            await VirtualizeList.RefreshDataAsync();
     }
     #endregion
 
@@ -336,21 +340,23 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         await InvokeAsync(() =>
         {
-            MessageHandler.ShowConfirmDialog(Localizer["Delete {0}", SingleDisplayName],
+            MessageHandler.ShowConfirmDialog(Localizer["Delete {0}", SingleDisplayName ?? String.Empty],
                                                 Localizer["Do you really want to delete the entry {0}?", model.GetDisplayKey()],
                                                 confirmButtonText: Localizer["Delete"],
                                                 confirmButtonColor: Color.Danger,
-                                                onClosing: async (args, result) => await OnConfirmDialogClosedAsync(result, model));
+                                                onClosing: async (args, result) => await OnRemoveEntryConfirmDialogClosedAsync(result, model));
         });
     }
 
-    protected virtual async Task OnConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)
+    protected virtual async Task OnRemoveEntryConfirmDialogClosedAsync(ConfirmDialogResult result, TModel model)
     {
         if (result == ConfirmDialogResult.Aborted)
             return;
 
-        var baseService = ServiceProvider.GetService<BaseService>();
+        var baseService = ServiceProvider.GetRequiredService<BaseService>();
         var scopedModel = await baseService.GetAsync<TModel>(model.GetPrimaryKeys());
+        if (scopedModel == null)
+            return;
 
         var eventServices = GetEventServices(baseService);
 
@@ -375,30 +381,27 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             MessageHandler.ShowMessage(Localizer["Error while deleting"], ErrorHandler.PrepareExceptionErrorMessage(e), MessageType.Error);
         }
 
-        await VirtualizeList.RefreshDataAsync();
-        await InvokeAsync(() => StateHasChanged());
+        if (VirtualizeList != null)
+            await VirtualizeList.RefreshDataAsync();
+
+        await InvokeAsync(StateHasChanged);
     }
-      
+
     #endregion
 
 
     #region Actions
     public virtual async Task RefreshDataAsync()
     {
-        await VirtualizeList.RefreshDataAsync();
+        if (VirtualizeList != null)
+            await VirtualizeList.RefreshDataAsync();
     }
     #endregion
 
     #region Other
     protected virtual EventServices GetEventServices(BaseService baseService)
     {
-        return new EventServices()
-        {
-            ServiceProvider = ServiceProvider,
-            Localizer = ModelLocalizer,
-            BaseService = baseService,
-            MessageHandler = MessageHandler
-        };
+        return new EventServices(ServiceProvider, ModelLocalizer, baseService, MessageHandler);
     }
     #endregion
 }

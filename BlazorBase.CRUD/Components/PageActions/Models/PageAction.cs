@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using Blazorise;

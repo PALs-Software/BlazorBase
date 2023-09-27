@@ -1,4 +1,5 @@
 ﻿@inherits BaseDisplayComponent
+@using BlazorBase.CRUD.Enums;
 @using BlazorBase.CRUD.Models
 @using BlazorBase.CRUD.Extensions
 @using BlazorBase.CRUD.EventArguments
@@ -46,7 +47,7 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <th class="base-list-part-table-header-column @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
+                        <th class="base-list-part-table-header-column @displayItem.CustomizationClasses[CustomizationLocation.ListHeaderCell]" style="@displayItem.CustomizationStyles[CustomizationLocation.ListHeaderCell]">
                             @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, displayItem)
                         </th>
                     }
@@ -93,7 +94,7 @@
                     {
                         @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                         {
-                            <td class="base-list-part-table-cell base-list-part-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses" style="@displayItem.CustomizationStyles">
+                            <td class="base-list-part-table-cell base-list-part-table-cell-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses[CustomizationLocation.ListCell]" style="@displayItem.CustomizationStyles[CustomizationLocation.ListCell]">
                                 @if (entry is IBaseModel baseEntry)
                                 {
                                     var renderFragment = CheckIfPropertyRenderingIsHandledAsync(displayItem, IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey, baseEntry).Result;

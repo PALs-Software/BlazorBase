@@ -1,5 +1,4 @@
 ﻿using BlazorBase.Models;
-using System.Security;
 
 namespace BlazorBase.User.Models;
 public interface IBlazorBaseUserOptions : IBaseOptions
@@ -9,6 +8,9 @@ public interface IBlazorBaseUserOptions : IBaseOptions
     string LogoutControllerPath { get; set; }
     string IdentityAccessDeniedPath { get; set; }
     string ManageUserPath { get; set; }
-    string WebsiteName { get; set; }
+    string? WebsiteName { get; set; }
     bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; }
+    string? LoginBackgroundImageSrc { get; set; }
+
+    bool LogUserSessions { get; set; }
 }

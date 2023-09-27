@@ -12,7 +12,7 @@ public static class BlazorBaseConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBase<TOptions>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBase<TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
         where TOptions : class, IBlazorBaseOptions
     {
         // If options handler is not defined we will get an exception so
@@ -35,7 +35,7 @@ public static class BlazorBaseConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBase(this IServiceCollection serviceCollection, Action<IBlazorBaseOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBase(this IServiceCollection serviceCollection, Action<IBlazorBaseOptions>? configureOptions = null)
     {
         return AddBlazorBase<BlazorBaseOptions>(serviceCollection, configureOptions);
     }

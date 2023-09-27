@@ -1,4 +1,5 @@
 ﻿
+using BlazorBase.CRUD.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorBase.DataUpgrade;
@@ -29,6 +30,7 @@ public static class BlazorBaseDataUpgradeConfiguration
             options.AddPolicy(nameof(DataUpgradeEntry), policy => policy.RequireRole(allowedUserAccessRoles));
         });
 
+        serviceCollection.AddTransient<IBasePropertyCardInput, DataUpgradeEntryLog>();
         return serviceCollection;
     }
 }

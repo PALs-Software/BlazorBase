@@ -1,0 +1,38 @@
+﻿@using BlazorBase.Modules;
+@using BlazorBase.MessageHandling.Models;
+
+@foreach (var modalInfo in ModalInfos)
+{
+    if (modalInfo.Value.Args is ShowTextInputDialogArgs args)
+    {
+        <Modal @key="modalInfo" @ref="modalInfo.Value.Modal" Visible="true" Closing="async (closingArgs) => await OnModalClosing(modalInfo.Value, closingArgs)" Closed="() => OnModalClosed(modalInfo.Key)" Style="z-index:9999" ShowBackdrop="false">
+            <ModalContent Centered="true" Size="args.ModalSize">
+                <ModalHeader>
+                    <ModalTitle>
+                        <BaseIcon IconName="args.Icon" Style="@args.IconStyle"></BaseIcon>
+                        @args.Title
+                    </ModalTitle>
+                    <CloseButton />
+                </ModalHeader>
+                <ModalBody>
+                    <p>
+                        @BaseMarkupStringValidator.GetWhiteListedMarkupString(@modalInfo.Value.Args.Message)
+                    </p>
+
+                    <Fields>
+                        <Field Horizontal="true">
+                            <FieldLabel ColumnSize="ColumnSize.Is4">@args.TextInputCaption</FieldLabel>
+                            <FieldBody ColumnSize="ColumnSize.Is8">
+                                <input class="form-control" type="@(args.MaskText ? "password" : "text")" @bind="@args.Text" />
+                            </FieldBody>
+                        </Field>                       
+                    </Fields>
+                </ModalBody>
+                <ModalFooter>
+                    <Button Color="args.ConfirmButtonColor" Clicked="() => OnConfirmButtonClicked(modalInfo.Value)">@args.ConfirmButtonText</Button>
+                    <Button Color="args.CloseButtonColor" Clicked="() => OnAbortButtonClicked(modalInfo.Value)">@args.CloseButtonText</Button>
+                </ModalFooter>
+            </ModalContent>
+        </Modal>
+    }
+}

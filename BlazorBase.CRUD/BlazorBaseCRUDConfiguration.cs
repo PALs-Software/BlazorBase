@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.Translation;
 using BlazorBase.Models;
@@ -16,7 +17,7 @@ public static class BlazorBaseCRUDConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(this IServiceCollection serviceCollection, Action<TOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBaseCRUD<TOptions, TDbContextImplementation>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
         where TOptions : class, IBlazorBaseCRUDOptions
         where TDbContextImplementation : DbContext
     {
@@ -29,6 +30,7 @@ public static class BlazorBaseCRUDConfiguration
         .AddTransient<IBlazorBaseCRUDOptions, TOptions>()
         .AddSingleton<BaseParser>()
         .AddTransient<BaseService>()
+        .AddScoped<ScopedServiceProvider>()
         .AddTransient<DbContext, TDbContextImplementation>()
         .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
 
@@ -43,7 +45,7 @@ public static class BlazorBaseCRUDConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Action<IBlazorBaseCRUDOptions> configureOptions = null)
+    public static IServiceCollection AddBlazorBaseCRUD<TDbContextImplementation>(this IServiceCollection serviceCollection, Action<IBlazorBaseCRUDOptions>? configureOptions = null)
         where TDbContextImplementation : DbContext
     {
         return AddBlazorBaseCRUD<BlazorBaseCRUDOptions, TDbContextImplementation>(serviceCollection, configureOptions);

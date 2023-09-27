@@ -11,9 +11,9 @@ public interface IDataUpgradeStep
 
     public void Log(string message, bool extraNewLine = false)
     {
-        LogText += message + Environment.NewLine;
+        LogText += $"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}";
         if (extraNewLine)
-            LogText += Environment.NewLine;
+            LogText += $"[{DateTime.Now:HH:mm:ss}]{Environment.NewLine}";
 
 #if DEBUG
         Debug.WriteLine(message);

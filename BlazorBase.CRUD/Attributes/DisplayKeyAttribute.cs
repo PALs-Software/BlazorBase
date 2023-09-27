@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace BlazorBase.CRUD.Attributes
+namespace BlazorBase.CRUD.Attributes;
+
+[AttributeUsage(AttributeTargets.Property)]
+public class DisplayKeyAttribute : Attribute
 {
-    public class DisplayKeyAttribute : Attribute
-    {
-        public int DisplayOrder { get; set; }
-    }
+    public int DisplayOrder { get; set; }
 }

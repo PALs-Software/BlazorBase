@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Attributes
+namespace BlazorBase.CRUD.Attributes;
+
+[AttributeUsage(AttributeTargets.Property)]
+public class RenderTypeAttribute : Attribute
 {
-    public class RenderTypeAttribute : Attribute
+    public RenderTypeAttribute(Type renderType)
     {
-        public RenderTypeAttribute() { }
-        public RenderTypeAttribute(Type renderType)
-        {
-            RenderType = renderType;
-        }
-
-
-        public Type RenderType { get; set; }
+        RenderType = renderType;
     }
 
+    public Type RenderType { get; set; }
 }
