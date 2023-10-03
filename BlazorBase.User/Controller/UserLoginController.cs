@@ -55,5 +55,6 @@ namespace BlazorBase.User.Controller
 
             return Redirect("~/");
         }
+
     }
 }

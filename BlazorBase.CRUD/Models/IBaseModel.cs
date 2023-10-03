@@ -123,7 +123,7 @@ namespace BlazorBase.CRUD.Models
         bool UserCanDeleteEntries { get; }
         List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; }
         bool ShowOnlySingleEntry { get; }
-        Task<IBaseModel?> GetShowOnlySingleEntryInstance(EventServices eventServices);
+        Task<IBaseModel?> GetShowOnlySingleEntryInstance(OnEntryToBeShownByStartArgs args);
         #endregion
                
         #region Helper Methods

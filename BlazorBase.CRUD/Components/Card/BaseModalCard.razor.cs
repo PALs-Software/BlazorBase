@@ -50,7 +50,7 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     [Parameter] public string? SingleDisplayName { get; set; }
     [Parameter] public string? ExplainText { get; set; }
     [Parameter] public bool ShowEntryByStart { get; set; }
-    [Parameter] public Func<EventServices, Task<IBaseModel>>? EntryToBeShownByStart { get; set; }
+    [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; }
     [Parameter] public TModel? ComponentModelInstance { get; set; }
     [Parameter] public bool ShowActions { get; set; } = true;
 

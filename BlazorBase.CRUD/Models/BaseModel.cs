@@ -322,13 +322,13 @@ namespace BlazorBase.CRUD.Models
         {
             builder.OpenComponent(0, typeof(BaseCard<>).MakeGenericType(GetType()));
             builder.AddAttribute(1, "ShowEntryByStart", ShowOnlySingleEntry);
-            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<EventServices, Task<IBaseModel?>>(GetShowOnlySingleEntryInstance));
+            builder.AddAttribute(2, "EntryToBeShownByStart", new Func<OnEntryToBeShownByStartArgs, Task<IBaseModel?>>(GetShowOnlySingleEntryInstance));
             builder.CloseComponent();
         }
 
-        public virtual async Task<IBaseModel?> GetShowOnlySingleEntryInstance(EventServices eventServices)
+        public virtual async Task<IBaseModel?> GetShowOnlySingleEntryInstance(OnEntryToBeShownByStartArgs args)
         {
-            return (IBaseModel?)await eventServices.BaseService.Set(GetType()).FirstOrDefaultAsync();
+            return (IBaseModel?)await args.EventServices.BaseService.Set(GetType()).FirstOrDefaultAsync();
         }
         #endregion
 

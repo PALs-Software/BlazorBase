@@ -1,8 +1,5 @@
-﻿using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System.Threading.Tasks;
 
 namespace BlazorBase.User.Pages;
 
