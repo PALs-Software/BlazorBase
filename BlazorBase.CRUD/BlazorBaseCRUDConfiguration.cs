@@ -2,6 +2,7 @@
 using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.Translation;
+using BlazorBase.MessageHandling;
 using BlazorBase.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

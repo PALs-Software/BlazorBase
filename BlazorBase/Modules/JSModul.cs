@@ -1,11 +1,6 @@
 ﻿using Microsoft.JSInterop;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-
-#nullable enable
 
 namespace BlazorBase.Modules;
 
@@ -23,10 +18,16 @@ public abstract class JSModul : IAsyncDisposable
         ModuleTask = new(() => jsRuntime.InvokeAsync<IJSObjectReference>("import", modulePath).AsTask());
     }
 
-    protected async ValueTask InvokeVoidAsync(string identifier, params object[]? args) => await (await ModuleTask.Value).InvokeVoidAsync(identifier, args);
-    protected async ValueTask InvokeAsync<T>(string identifier, params object[]? args) => await (await ModuleTask.Value).InvokeAsync<T>(identifier, args);
+    protected async ValueTask InvokeJSVoidAsync(string identifier, params object[]? args)
+    {
+        // => await (await ModuleTask.Value).InvokeVoidAsync(identifier, args);
+        var mod = await ModuleTask.Value;
+        await mod.InvokeVoidAsync(identifier, args);
+    }
 
-    public async ValueTask DisposeAsync()
+    protected async ValueTask<T> InvokeJSAsync<T>(string identifier, params object[]? args) => await (await ModuleTask.Value).InvokeAsync<T>(identifier, args);
+
+    public virtual async ValueTask DisposeAsync()
     {
         if (ModuleTask.IsValueCreated)
         {

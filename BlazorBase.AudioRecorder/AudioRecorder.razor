@@ -1,0 +1,14 @@
+﻿<div class="base-audio-recorder">
+    <h1>Audio Recorder</h1>
+    <hr />
+    <button @onclick="butRecordAudioStart_Click" class="btn btn-primary" disabled=@mDisableRecordAudioStart>Start Record</button>
+    <button @onclick="butRecordAudioPause_Click" class="btn btn-primary" disabled=@mDisableRecordAudioPause>Pause</button>
+    <button @onclick="butRecordAudioResume_Click" class="btn btn-primary" disabled=@mDisableRecordAudioResume>Resume</button>
+    <button @onclick="butRecordAudioStop_Click" class="btn btn-primary" disabled=@mDisableRecordAudioStop>Stop</button>
+    <button @onclick="butDownloadBlob_Click" class="btn btn-primary" disabled=@mDisableDownloadBlob>Download Audio</button>
+    <hr />
+    <audio controls autoplay src=@mUrl></audio>
+    <hr />
+
+ 
+</div>
