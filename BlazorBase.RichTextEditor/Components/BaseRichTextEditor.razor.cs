@@ -278,7 +278,7 @@ namespace BlazorBase.RichTextEditor.Components
         #region MISC
         protected EventServices GetEventServices()
         {
-            return new EventServices(ServiceProvider, Localizer, BaseService, MessageHandler);
+            return new EventServices(ServiceProvider, Localizer, BaseService);
         }
         #endregion
     }

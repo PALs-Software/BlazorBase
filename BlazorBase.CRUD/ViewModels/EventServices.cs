@@ -1,5 +1,4 @@
 ﻿using BlazorBase.CRUD.Services;
-using BlazorBase.MessageHandling.Interfaces;
 using Microsoft.Extensions.Localization;
 using System;
 
@@ -12,7 +11,6 @@ namespace BlazorBase.CRUD.ViewModels;
 /// <param name="ServiceProvider"></param>
 /// <param name="Localizer"></param>
 /// <param name="BaseService"></param>
-/// <param name="MessageHandler"></param>
-public record EventServices(IServiceProvider ServiceProvider, IStringLocalizer Localizer, BaseService BaseService, IMessageHandler MessageHandler)
+public record EventServices(IServiceProvider ServiceProvider, IStringLocalizer Localizer, BaseService BaseService)
 {
 }

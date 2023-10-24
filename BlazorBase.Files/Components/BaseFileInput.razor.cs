@@ -54,7 +54,7 @@ namespace BlazorBase.Files.Components
             if (FileFilter == null && Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) is FileInputFilterAttribute filterAttribute)
                 FileFilter = filterAttribute?.Filter ?? "*.";
 
-            EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);            
+            EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service);            
         }
 
         public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)

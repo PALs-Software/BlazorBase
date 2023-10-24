@@ -57,7 +57,6 @@ public partial class BaseListPart : BaseDisplayComponent
     #region Injects
     [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; } = null!;
     [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
-    [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     #endregion
 
     #region Members
@@ -475,7 +474,7 @@ public partial class BaseListPart : BaseDisplayComponent
 
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);
+        return new EventServices(ServiceProvider, ModelLocalizer, Service);
     }
 
     public bool CheckIfModelIsInAddingMode(object entry)

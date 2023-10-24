@@ -73,7 +73,6 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; } = null!;
     [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
-    [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
     #endregion
 
@@ -457,7 +456,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #region Other
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);
+        return new EventServices(ServiceProvider, ModelLocalizer, Service);
     }
     #endregion
 }

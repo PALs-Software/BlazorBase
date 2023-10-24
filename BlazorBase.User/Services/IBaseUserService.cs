@@ -9,7 +9,7 @@ namespace BlazorBase.User.Services;
 
 public interface IBaseUserService
 {
-    Task<bool> CurrentUserIsRoleAsync(string roleName);
+    Task<bool> CurrentUserIsInRoleAsync(string roleName);
 
     Task<IBaseUser?> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true);
 
@@ -25,7 +25,7 @@ public interface IBaseUserService<TUser, TIdentityUser, TIdentityRole>
     where TIdentityUser : IdentityUser, new()
     where TIdentityRole : struct, Enum
 {
-    Task<bool> CurrentUserIsRoleAsync(string roleName);
+    Task<bool> CurrentUserIsInRoleAsync(string roleName);
 
     Task<TUser?> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true);
 

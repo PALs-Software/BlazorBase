@@ -26,7 +26,7 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
         BaseService = baseService;
     }
 
-    public virtual async Task<bool> CurrentUserIsRoleAsync(string roleName)
+    public virtual async Task<bool> CurrentUserIsInRoleAsync(string roleName)
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         if (!authState.User.Identity?.IsAuthenticated ?? false)

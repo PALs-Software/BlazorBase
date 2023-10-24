@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Extensions;
 using BlazorBase.Mailing.Services;
+using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.User.Enums;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Http;
@@ -49,7 +50,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
 
                             await TestModelIsInValidStateForCallingActionAsync(eventServices);
                             if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.SetupUser))
-                                eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Setup email"],
+                                eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().ShowMessage(eventServices.Localizer["Setup email"],
                                                                         eventServices.Localizer["The setup email was sent successfully"]);
                         }
                     },
@@ -67,7 +68,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
 
                             await TestModelIsInValidStateForCallingActionAsync(eventServices);
                             if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.ResetUserPassword))
-                                eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Reset Password"],
+                                eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().ShowMessage(eventServices.Localizer["Reset Password"],
                                                                         eventServices.Localizer["The password reset email was sent successfully"]);
                         }
                     }
@@ -90,7 +91,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         if (IdentityUserId == null)
             return false;
 
-        var messageId = eventServices.MessageHandler.ShowLoadingMessage(eventServices.Localizer["Sending e-mail..."]);
+        var messageId = eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().ShowLoadingMessage(eventServices.Localizer["Sending e-mail..."]);
 
         var serviceProvider = eventServices.ServiceProvider;
         var userManager = serviceProvider.GetRequiredService<UserManager<TIdentityUser>>();
@@ -119,7 +120,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
                                                         Array.Empty<string>(),
                                                         new string[] { user.UserName, callbackUrl });
 
-        eventServices.MessageHandler.CloseLoadingMessage(messageId);
+        eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().CloseLoadingMessage(messageId);
         return success;
     }
 }

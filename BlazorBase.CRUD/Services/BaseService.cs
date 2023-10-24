@@ -20,14 +20,12 @@ public class BaseService : IDisposable
 {
     public DbContext DbContext { get; protected set; }
     public IServiceProvider ServiceProvider { get; }
-    public IMessageHandler MessageHandler { get; }
     public IStringLocalizer<BaseService> Localizer { get; }
 
-    public BaseService(DbContext context, IServiceProvider provider, IMessageHandler messageHandler, IStringLocalizer<BaseService> localizer)
+    public BaseService(DbContext context, IServiceProvider provider, IStringLocalizer<BaseService> localizer)
     {
         DbContext = context;
         ServiceProvider = provider;
-        MessageHandler = messageHandler;
         Localizer = localizer;
     }
 
@@ -509,7 +507,7 @@ public class BaseService : IDisposable
 
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, Localizer, this, MessageHandler);
+        return new EventServices(ServiceProvider, Localizer, this);
     }
     #endregion
 }

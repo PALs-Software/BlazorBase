@@ -55,7 +55,6 @@ public partial class BaseInput
     #region Injects        
     [Inject] protected BaseParser BaseParser { get; set; } = null!;
     [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
-    [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
     #endregion
 
@@ -351,7 +350,7 @@ public partial class BaseInput
 
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, Service, MessageHandler);
+        return new EventServices(ServiceProvider, ModelLocalizer, Service);
     }
 
     protected async Task RaiseOnFormatPropertyEventsAsync()

@@ -16,7 +16,6 @@ public class NoSeriesTest : TestContext
 {
     protected BaseService BaseService { get; set; }
     protected NoSeriesService NoSeriesService { get; set; }
-    protected IMessageHandler MessageHandler { get; set; }
     protected EventServices EventServices { get; set; }
 
 
@@ -26,9 +25,8 @@ public class NoSeriesTest : TestContext
 
         BaseService = Services.GetRequiredService<BaseService>();
         NoSeriesService = Services.GetRequiredService<NoSeriesService>();
-        MessageHandler = Services.GetRequiredService<IMessageHandler>();
 
-        EventServices = new EventServices(Services, Services.GetRequiredService<IStringLocalizer>(), BaseService, MessageHandler);
+        EventServices = new EventServices(Services, Services.GetRequiredService<IStringLocalizer>(), BaseService);
     }
 
     [Fact]

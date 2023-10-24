@@ -401,7 +401,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #region Other
     protected virtual EventServices GetEventServices(BaseService baseService)
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, baseService, MessageHandler);
+        return new EventServices(ServiceProvider, ModelLocalizer, baseService);
     }
     #endregion
 }
