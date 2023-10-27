@@ -6,6 +6,7 @@ export class BlazorBaseAudioRecorder {
         this.audioChunks = null;
         this.mediaRecorder = null;
         this.dotNetReference = null;
+        this.finalAudioByteArrayBuffer = null;
     }
 
     static initialize(dotNetReferenceFromServer) {
@@ -38,18 +39,21 @@ export class BlazorBaseAudioRecorder {
         this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
         this.mediaRecorder = new MediaRecorder(this.mediaStream);
 
-        this.mediaRecorder.addEventListener('dataavailable', vEvent => {
-            this.audioChunks.push(vEvent.data);
+        this.mediaRecorder.addEventListener('dataavailable', e => {
+            console.log(e.data);
+            this.audioChunks.push(e.data);
         });
 
-        this.mediaRecorder.addEventListener('error', vError => {
-            console.warn('media recorder error: ' + vError);
+        this.mediaRecorder.addEventListener('error', e => {
+            console.warn('media recorder error: ' + e);
         });
 
-        this.mediaRecorder.addEventListener('stop', () => {
-            var audioBlob = new Blob(this.audioChunks, { type: "audio/mp3;" });
+        this.mediaRecorder.addEventListener('stop', async () => {
+            var audioBlob = new Blob(this.audioChunks, { type: "audio/mpeg-3" });
             var audioUrl = URL.createObjectURL(audioBlob);
-            this.dotNetReference.invokeMethodAsync('OnNewAudioUrlCreated', audioUrl);
+            this.finalAudioByteArrayBuffer = await audioBlob.arrayBuffer();
+
+            this.dotNetReference.invokeMethodAsync('OnNewRecordAvailableJSInvokable', this.dotNetReference._id, this.finalAudioByteArrayBuffer.byteLength, audioUrl);
         });
 
         this.audioChunks = [];
@@ -66,30 +70,17 @@ export class BlazorBaseAudioRecorder {
 
     stopRecord() {
         this.mediaRecorder.stop();
-        this.mediaStream.getTracks().forEach(pTrack => pTrack.stop());
+        this.mediaStream.getTracks().forEach(track => track.stop());
     }
 
-    downloadBlob(url, name) {
-        // Create a link element
-        const link = document.createElement("a");
-        // Set the link's href to point to the Blob URL
-        link.href = url;
-        link.download = name;
-        // Append link to the body
-        document.body.appendChild(link);
-        // Dispatch click event on the link
-        // This is necessary as link.click() does not work on the latest firefox
-        link.dispatchEvent(
-            new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            })
-        );
-        // Remove the link from the body
-        document.body.removeChild(link);
-    }
+    async getRecordBytes(position, length) {
+        console.log("GetRecordBytes", position, length);
 
+        if (this.finalAudioByteArrayBuffer === null)
+            return null;
+
+        return new Uint8Array(this.finalAudioByteArrayBuffer, position, length);
+    }
 }
 
 //export { BlazorBaseAudioRecorder }

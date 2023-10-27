@@ -1,5 +1,6 @@
 using BlazorBase.Modules;
 using Microsoft.JSInterop;
+using System.Diagnostics;
 
 namespace BlazorBase.AudioRecorder;
 
@@ -7,55 +8,54 @@ public class JSAudioRecorder : JSModul
 {
     #region Properties
 
-    public event EventHandler<string>? OnNewAudioUrlReceived;
+    public record OnNewRecordAvailableArgs(long InstanceId, long AudioByteSize, string AudioBlobUrl);
+    public event EventHandler<OnNewRecordAvailableArgs>? OnNewRecordAvailable;
 
     #endregion
 
-    #region Member
-    private long? Id = null;
+    #region Members
+    protected List<long> InstanceIds = new();
     #endregion
 
     public JSAudioRecorder(IJSRuntime jsRuntime) : base(jsRuntime, "./_content/BlazorBase.AudioRecorder/AudioRecorder.js") { }
 
-    public async ValueTask StartAsync()
+    public async ValueTask<long> InitAsync()
     {
-        try
-        {
-            Id ??= await InvokeJSAsync<long>("BlazorBaseAudioRecorder.initialize", DotNetObjectReference.Create(this));
-            await InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", Id, "startRecord");
-        }
-        catch (Exception e)
-        {
-            var ex = e.Message;
-        }
-        
+        var instanceId = await InvokeJSAsync<long>("BlazorBaseAudioRecorder.initialize", DotNetObjectReference.Create(this));
+        InstanceIds.Add(instanceId);
+        return instanceId;
     }
 
-    public ValueTask PauseAsync()
+    public async ValueTask StartAsync(long instanceId)
     {
-        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", Id!, "pauseRecord");
+        await InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "startRecord");
     }
 
-    public ValueTask ResumeAsync()
+    public ValueTask PauseAsync(long instanceId)
     {
-
-        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", Id!, "resumeRecord");
+        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "pauseRecord");
     }
 
-    public ValueTask StopAsync()
+    public ValueTask ResumeAsync(long instanceId)
     {
-        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", Id!, "stopRecord");
+
+        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "resumeRecord");
     }
 
-    public ValueTask DownloadBlobAsync(string audioUrl)
+    public ValueTask StopAsync(long instanceId)
     {
-        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", Id!, "downloadBlob", new object[] { audioUrl, "MyRecording_" + DateTimeStamp() + ".mp3" });
+        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "stopRecord");
+    }
+
+    public ValueTask<byte[]?> GetRecordBytesAsync(long instanceId, long position, long length)
+    {
+        return InvokeJSAsync<byte[]?>("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "getRecordBytes", new object[] { position, length });
     }
 
     [JSInvokable]
-    public void OnNewAudioUrlCreated(string newAudioUrl)
+    public void OnNewRecordAvailableJSInvokable(long instanceId, long audioByteSize, string audioBlobUrl)
     {
-        OnNewAudioUrlReceived?.Invoke(this, newAudioUrl);
+        OnNewRecordAvailable?.Invoke(this, new OnNewRecordAvailableArgs(instanceId, audioByteSize, audioBlobUrl));
     }
 
     protected virtual string DateTimeStamp()
@@ -64,11 +64,14 @@ public class JSAudioRecorder : JSModul
         return pOut;
     }
 
+    public async ValueTask DisposeInstanceAsync(long instanceId)
+    {
+        await InvokeJSVoidAsync($"BlazorAudioRecorder.dispose", instanceId);
+        InstanceIds.Remove(instanceId);
+    }
+
     public override async ValueTask DisposeAsync()
     {
-        if (Id.HasValue)
-            await InvokeJSVoidAsync($"BlazorAudioRecorder.dispose", Id);
-
         await base.DisposeAsync();
     }
 }

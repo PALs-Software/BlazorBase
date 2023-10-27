@@ -1,14 +1,25 @@
-﻿<div class="base-audio-recorder">
+﻿
+
+<div class="base-audio-recorder">
+
+    <LoadingIndicator Visible="ShowLoadingIndicator">
+        @Localizer["Uploading audio record..."]
+        <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
+            <ProgressBar Value="(int)UploadProgress.Percentage" Animated="true" Striped="true">
+                @((int)UploadProgress.Percentage) %
+            </ProgressBar>
+        </Progress>
+    </LoadingIndicator>
+
     <h1>Audio Recorder</h1>
     <hr />
-    <button @onclick="butRecordAudioStart_Click" class="btn btn-primary" disabled=@mDisableRecordAudioStart>Start Record</button>
-    <button @onclick="butRecordAudioPause_Click" class="btn btn-primary" disabled=@mDisableRecordAudioPause>Pause</button>
-    <button @onclick="butRecordAudioResume_Click" class="btn btn-primary" disabled=@mDisableRecordAudioResume>Resume</button>
-    <button @onclick="butRecordAudioStop_Click" class="btn btn-primary" disabled=@mDisableRecordAudioStop>Stop</button>
-    <button @onclick="butDownloadBlob_Click" class="btn btn-primary" disabled=@mDisableDownloadBlob>Download Audio</button>
+    <button @onclick="StartAudioRecord" class="btn btn-primary" disabled=@DisableRecordAudioStart>Start Record</button>
+    <button @onclick="PauseAudioRecord" class="btn btn-primary" disabled=@DisableRecordAudioPause>Pause</button>
+    <button @onclick="ResumeAudioRecord" class="btn btn-primary" disabled=@DisableRecordAudioResume>Resume</button>
+    <button @onclick="StopAudioRecord" class="btn btn-primary" disabled=@DisableRecordAudioStop>Stop</button>
     <hr />
-    <audio controls autoplay src=@mUrl></audio>
+    <audio controls autoplay src=@AudioBlobUrl></audio>
     <hr />
 
- 
+
 </div>
