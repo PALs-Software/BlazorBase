@@ -29,7 +29,7 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Attribute Methods
-        List<PropertyInfo> GetVisibleProperties(GUIType? guiType = null);
+        List<PropertyInfo> GetVisibleProperties(GUIType guiType, List<string> userRoles);
 
         object?[]? GetPrimaryKeys(bool useCache = false);
 

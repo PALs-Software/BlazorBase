@@ -12,9 +12,9 @@ public record OnBeforeOpenAddModalArgs(EventServices EventServices)
     public bool IsHandled { get; set; }
 }
 
-public record OnBeforeOpenEditModalArgs(IBaseModel? Model, EventServices EventServices)
+public record OnBeforeOpenEditModalArgs(IBaseModel Model, EventServices EventServices)
 {
-    public OnBeforeOpenEditModalArgs(bool isHandled, IBaseModel? model, bool changeQueryUrl, EventServices eventServices) : this(model, eventServices)
+    public OnBeforeOpenEditModalArgs(bool isHandled, IBaseModel model, bool changeQueryUrl, EventServices eventServices) : this(model, eventServices)
     {
         IsHandled = isHandled;
         ChangeQueryUrl = changeQueryUrl;
@@ -24,9 +24,9 @@ public record OnBeforeOpenEditModalArgs(IBaseModel? Model, EventServices EventSe
     public bool ChangeQueryUrl { get; set; }
 }
 
-public record OnBeforeOpenViewModalArgs(IBaseModel? Model, EventServices EventServices)
+public record OnBeforeOpenViewModalArgs(IBaseModel Model, EventServices EventServices)
 {
-    public OnBeforeOpenViewModalArgs(bool isHandled, IBaseModel? model, bool changeQueryUrl, EventServices eventServices) : this(model, eventServices)
+    public OnBeforeOpenViewModalArgs(bool isHandled, IBaseModel model, bool changeQueryUrl, EventServices eventServices) : this(model, eventServices)
     {
         IsHandled = isHandled;
         ChangeQueryUrl = changeQueryUrl;

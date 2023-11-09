@@ -1,4 +1,5 @@
 ﻿@using BlazorBase.CRUD.Components.PageActions.Models
+@using BlazorBase.CRUD.EventArguments;
 
 @if (VisiblePageActionGroups != null && VisiblePageActionGroups.Count > 0)
 {
@@ -38,7 +39,7 @@
                                     }
                                     @if (AdditionalPageActions != null)
                                     {
-                                        @AdditionalPageActions(group)
+                                        @AdditionalPageActions(new AdditionalHeaderPageActionsArgs(group, BaseModel, EventServices))
                                     }
                                 </TabPanel>
                             }

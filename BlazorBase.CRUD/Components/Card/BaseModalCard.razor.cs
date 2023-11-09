@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.CRUD.Components.PageActions.Models;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Enum;
@@ -18,6 +19,7 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     #region Events
     [Parameter] public EventCallback<OnGetPropertyCaptionArgs> OnGetPropertyCaption { get; set; }
     [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
+    [Parameter] public EventCallback<OnShowEntryArgs> OnShowEntry { get; set; }
     [Parameter] public EventCallback OnCardClosed { get; set; }
     [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
     [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
@@ -31,6 +33,7 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
 
     [Parameter] public EventCallback<OnAfterGetVisiblePropertiesArgs> OnAfterGetVisibleProperties { get; set; }
+    [Parameter] public EventCallback<OnAfterSetUpDisplayListsArgs> OnAfterSetUpDisplayLists { get; set; }
 
     #region List Events
     [Parameter] public EventCallback<OnCreateNewListEntryInstanceArgs> OnCreateNewListEntryInstance { get; set; }
@@ -53,6 +56,7 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; }
     [Parameter] public TModel? ComponentModelInstance { get; set; }
     [Parameter] public bool ShowActions { get; set; } = true;
+    [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs> AdditionalHeaderPageActions { get; set; } = null!;
 
     #endregion
 
@@ -171,5 +175,15 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     protected virtual Task GetVisiblePropertiesAsync(OnAfterGetVisiblePropertiesArgs args)
     {
         return OnAfterGetVisibleProperties.InvokeAsync(args);
+    }
+
+    public bool? CardIsInAddingMode()
+    {
+        return BaseCard?.CardIsInAddingMode();
+    }
+
+    public bool? CardIsInViewMode()
+    {
+        return BaseCard?.CardIsInViewMode();
     }
 }

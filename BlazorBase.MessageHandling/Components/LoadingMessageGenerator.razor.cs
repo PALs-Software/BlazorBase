@@ -114,7 +114,7 @@ public partial class LoadingMessageGenerator
         loadingProgressArgs.CurrentProgress = progressArgs.CurrentProgress;
         loadingProgressArgs.ShowProgressInText = progressArgs.ShowProgressInText;
 
-        InvokeAsync(() => { StateHasChanged(); });
+        InvokeAsync(StateHasChanged);
         return true;
     }
 

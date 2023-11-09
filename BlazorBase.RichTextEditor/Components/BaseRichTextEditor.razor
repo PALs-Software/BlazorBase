@@ -1,7 +1,7 @@
 ﻿@using Blazorise.RichTextEdit;
 
-<div class="blazor-base-rich-text-editor @RootClass">
-    <RichTextEdit @ref="RichTextEdit"
+<div class="blazor-base-rich-text-editor @RootClass @Class">
+    <BaseRichTextEdit @ref="RichTextEdit"
                   Theme="Theme"
                   ReadOnly="ReadOnly"
                   SubmitOnEnter="SubmitOnEnter"
@@ -81,5 +81,5 @@
                 </RichTextEditToolbarGroup>
             }
         </Toolbar>
-    </RichTextEdit>
+    </BaseRichTextEdit>
 </div>

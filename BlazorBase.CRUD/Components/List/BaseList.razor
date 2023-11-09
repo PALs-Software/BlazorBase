@@ -48,8 +48,8 @@
                     @onclick="async () => await OnSortClicked(displayItem, false)"
                     @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                     @oncontextmenu:preventDefault="true"
-                    style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles[CustomizationLocation.ListHeaderCell]"
-                    title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
+                            style="@(Sortable && displayItem.IsSortable ? "cursor: pointer;" : String.Empty) @displayItem.CustomizationStyles[CustomizationLocation.ListHeaderCell]"
+                            title="@(@IBaseModel.GetPropertyTooltip(ModelLocalizer, displayItem) + Environment.NewLine + Environment.NewLine + (Sortable ? Localizer["Click with the left mouse button to sort the list by this column or sort the list by several columns by clicking them one after another with the right mouse button"] : String.Empty))">
 
                             <div class="sortable-table-header base-list-table-header-@displayItem.Property.Name.ToLower() ">
                                 <span class="text-truncate">
@@ -178,9 +178,13 @@
                    SingleDisplayName="@SingleDisplayName"
                    ExplainText="@ExplainText"
                    ComponentModelInstance="ComponentModelInstance"
+                   AdditionalHeaderPageActions="AdditionalHeaderPageActions"
                    OnCardClosed="OnCardClosedAsync"
                    OnCreateNewEntryInstance="OnCreateNewEntryInstance"
                    OnGuiLoadData="OnGuiLoadData"
+                   OnShowEntry="OnShowEntry"
+                   OnAfterGetVisibleProperties="OnAfterGetVisibleProperties"
+                   OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
                    OnBeforeAddEntry="OnBeforeAddEntry"
                    OnAfterAddEntry="OnAfterAddEntry"
                    OnBeforeUpdateEntry="OnBeforeUpdateEntry"
@@ -188,7 +192,8 @@
                    OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
                    OnBeforePropertyChanged="OnBeforePropertyChanged"
                    OnAfterPropertyChanged="OnAfterPropertyChanged"
-                   OnAfterSaveChanges="OnAfterSaveChanges"
+                   OnBeforeSaveChanges="OnBeforeSaveChangesAsync"
+                   OnAfterSaveChanges="OnAfterSaveChangesAsync"
                    OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
                    OnBeforeAddListEntry="OnBeforeAddListEntry"
                    OnAfterAddListEntry="OnAfterAddListEntry"

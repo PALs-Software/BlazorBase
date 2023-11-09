@@ -45,7 +45,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
 
     [Parameter] public RenderFragment<TModel>? AdditionalRowButtons { get; set; }
-    [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
+    [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs> AdditionalHeaderPageActions { get; set; } = null!;
 
     #region Style
     [Parameter] public string? TableClass { get; set; }

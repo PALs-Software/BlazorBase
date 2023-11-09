@@ -27,7 +27,8 @@ public static class BlazorBaseRichTextEditorConfiguration
         serviceCollection.AddSingleton(configureOptions)
 
         .AddSingleton<IBlazorBaseRichTextEditorOptions, TOptions>()
-        .AddTransient<IBasePropertyCardInput, BaseRichTextEditorInput>();
+        .AddTransient<IBasePropertyCardInput, BaseRichTextEditorInput>()
+        .AddTransient<IBasePropertyListPartInput, BaseRichTextEditorListPartInput>();
 
         return serviceCollection;
     }

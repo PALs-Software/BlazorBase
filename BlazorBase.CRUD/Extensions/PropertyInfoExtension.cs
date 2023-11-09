@@ -45,13 +45,20 @@ namespace BlazorBase.CRUD.Extensions
             return propertyInfo.HasAttribute(typeof(DisplayKeyAttribute));
         }
 
-        public static bool IsVisibleInGUI(this PropertyInfo propertyInfo, GUIType? guiType = null)
+        public static bool IsVisibleInGUI(this PropertyInfo propertyInfo, GUIType? guiType = null, List<string>? userRoles = null)
         {
             bool isVisible;
             if (guiType == null)
                 isVisible = propertyInfo.HasAttribute(typeof(VisibleAttribute));
             else
                 isVisible = propertyInfo.GetCustomAttribute(typeof(VisibleAttribute)) is VisibleAttribute visible && !visible.HideInGUITypes.Contains(guiType.Value);
+
+            if (userRoles != null)
+            {
+                var onlyVisibleForRoles = propertyInfo.GetCustomAttribute<OnlyVisibleForRolesAttribute>();
+                if (onlyVisibleForRoles != null && (guiType == null || onlyVisibleForRoles.GUITypes.Contains(guiType.Value)))
+                    isVisible = userRoles.Any(role => onlyVisibleForRoles.Roles.Contains(role));
+            }
 
             if (isVisible && IsBaseModelDateProperty(propertyInfo))
                 return !HideBaseModelDateProperties(propertyInfo, guiType);
@@ -73,9 +80,17 @@ namespace BlazorBase.CRUD.Extensions
                 ) && (guiType == null || hideProperty.HideInGUITypes.Contains(guiType.Value));
         }
 
-        public static bool IsReadOnlyInGUI(this PropertyInfo propertyInfo)
+        public static bool IsReadOnlyInGUI(this PropertyInfo propertyInfo, GUIType? guiType = null, List<string>? userRoles = null)
         {
-            return propertyInfo.GetCustomAttribute(typeof(EditableAttribute)) is EditableAttribute editable && !editable.AllowEdit;
+            var isReadOnly = propertyInfo.GetCustomAttribute(typeof(EditableAttribute)) is EditableAttribute editable && !editable.AllowEdit;
+            if (userRoles != null)
+            {
+                var onlyEditableForRoles = propertyInfo.GetCustomAttribute<OnlyEditableForRolesAttribute>();
+                if (onlyEditableForRoles != null && (guiType == null || onlyEditableForRoles.GUITypes.Contains(guiType.Value)))
+                    isReadOnly = isReadOnly || !userRoles.Any(role => onlyEditableForRoles.Roles.Contains(role));
+            }
+
+            return isReadOnly;
         }
 
         public static bool IsListProperty(this PropertyInfo propertyInfo)

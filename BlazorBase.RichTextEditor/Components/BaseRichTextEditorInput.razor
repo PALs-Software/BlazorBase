@@ -8,23 +8,26 @@
     <Column ColumnSize="ColumnSize.IsFull" Class="">
         <Fields>
             <Field Horizontal="false">
-                <FieldLabel ColumnSize="ColumnSize.Is12">
-                    <div title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
-                        @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
-                    </div>
-                </FieldLabel>
+                @if (!HidePropertyName)
+                {
+                    <FieldLabel ColumnSize="ColumnSize.Is12">
+                        <div title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
+                            @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
+                        </div>
+                    </FieldLabel>
+                }
                 <FieldBody ColumnSize="ColumnSize.Is12">
                     <div>
                         <BaseRichTextEditor @ref="BaseRichTextEditor"
                                         BaseService="Service"
                                         ConnectedModel="Model"
-                                        HideSaveButton="false"
+                                        HideSaveButton="true"
                                         OnContentChanged="OnContentChanged"
                                         OnSave="() => OnBeforeCardSaveChanges(null)"
-                                        ReadOnly="IsReadOnly">
+                                        ReadOnly="IsReadOnly"
+                                        Class="@InputClass">
 
                             <EditorContent>@((MarkupString)(CurrentValueAsString ?? String.Empty))</EditorContent>
-
                         </BaseRichTextEditor>
 
                         <div class="@FeedbackClass">

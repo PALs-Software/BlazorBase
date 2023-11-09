@@ -36,6 +36,7 @@ namespace BlazorBase.RichTextEditor.Components
         [Parameter] public RenderFragment? EditorContent { get; set; }
 
         [Parameter] public string? BackgroundColor { get; set; }
+        [Parameter] public string? Class { get; set; }
 
         #region Events
         public record OnSaveArgs(IBaseModel ConnectedModel, string Content) { public object? AdditionalInformations { get; set; } }
@@ -65,7 +66,7 @@ namespace BlazorBase.RichTextEditor.Components
         #endregion
 
         #region Properties
-        protected RichTextEdit? RichTextEdit { get; set; }
+        protected BaseRichTextEdit? RichTextEdit { get; set; }
         #endregion
 
         #region Member
@@ -92,7 +93,7 @@ namespace BlazorBase.RichTextEditor.Components
             if (RichTextEdit == null)
                 return null;
 
-            var contentAsHtml = await RichTextEdit.GetHtmlAsync();
+            var contentAsHtml = await RichTextEdit.GetHtmlDirectlyAsync();
 
             if (withoutPostProcessing)
                 return contentAsHtml;
@@ -112,7 +113,7 @@ namespace BlazorBase.RichTextEditor.Components
             var args = new OnBeforeSaveArgs(ConnectedModel);
             await OnBeforeSave.InvokeAsync(args);
 
-            var contentAsHtml = await RichTextEdit.GetHtmlAsync();
+            var contentAsHtml = await RichTextEdit.GetHtmlDirectlyAsync();
 
             var content = await ModifyHtmlContentAsync(contentAsHtml, args);
 
@@ -217,7 +218,7 @@ namespace BlazorBase.RichTextEditor.Components
                 byte[]? imageData = null;
                 try
                 {
-                    using HttpClient client = new();
+                    using HttpClient client = CreateHttpClientForImageDownload();
                     imageData = await client.GetByteArrayAsync(srcValue);
                 }
                 catch (Exception)
@@ -244,7 +245,7 @@ namespace BlazorBase.RichTextEditor.Components
                 var baseType = $".{mimeType.Split("/")[1]}";
 
                 internalImageCount++;
-                var imageName = $"{imageFileName}_{internalImageCount,6}";
+                var imageName = $"{imageFileName}_{internalImageCount:D6}";
                 if (Options.ResizeBigImagesToMaxImageSize)
                     imageData = ImageService.ResizeImageToMaxSize(imageData, Options.MaxImageSize);
 
@@ -273,6 +274,10 @@ namespace BlazorBase.RichTextEditor.Components
             }
         }
 
+        protected virtual HttpClient CreateHttpClientForImageDownload()
+        {
+            return new HttpClient();
+        }
         #endregion
 
         #region MISC

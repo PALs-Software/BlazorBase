@@ -26,7 +26,15 @@
 
         if (ShowActions)
         {
-            <BasePageActions Source="this" BaseModel="Model" InvokeActionParameter="Model" BaseModelType="TModelType" GUIType="Enums.GUIType.Card" EventServices="EventServices" ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync" />
+            <BasePageActions Source="this"
+                     BaseModel="Model"
+                     InvokeActionParameter="Model"
+                     BaseModelType="TModelType"
+                     GUIType="Enums.GUIType.Card"
+                     EventServices="EventServices"
+                     ModelLocalizer="ModelLocalizer"
+                     OnPageActionInvoked="OnPageActionInvokedAsync"
+                     AdditionalPageActions="AdditionalHeaderPageActions" />
         }
 
         <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
@@ -58,6 +66,8 @@
                                         Property="displayItem.Property"
                                         Service="Service"
                                         ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
+                                        OnAfterGetVisibleProperties="OnAfterGetVisibleProperties"
+                                        OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
                                         OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
                                         OnBeforeAddListEntry="OnBeforeAddListEntry"
                                         OnAfterAddListEntry="OnAfterAddListEntry"
@@ -93,10 +103,10 @@
                                                         <BaseInput @ref="AddToBaseInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
 
-                                                    @if(IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
+                                                    @if (IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
                                                     {
                                                         <FieldHelp>@fieldHelpCaption</FieldHelp>
-                                                    }                                                    
+                                                    }
                                                 </FieldBody>
                                             </Field>
                                         </Fields>

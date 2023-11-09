@@ -47,7 +47,10 @@ public static class BlazorBaseFilesConfiguration
 
         .AddAuthorization(options =>
         {
-            options.AddPolicy(nameof(BaseFileController), policy => policy.RequireRole(allowedUserAccessRoles));
+            if (allowedUserAccessRoles.Length == 0)
+                options.AddPolicy(nameof(BaseFileController), policy => policy.RequireAuthenticatedUser());
+            else
+                options.AddPolicy(nameof(BaseFileController), policy => policy.RequireRole(allowedUserAccessRoles));
         })
 
         .AddControllers().AddApplicationPart(typeof(Controller.BaseFileController).Assembly).AddControllersAsServices();

@@ -35,9 +35,9 @@ public static class TypeExtension
                 ).ToList();
     }
 
-    public static List<PropertyInfo> GetVisibleProperties(this Type type, GUIType? guiType = null)
+    public static List<PropertyInfo> GetVisibleProperties(this Type type, GUIType? guiType = null, List<string>? userRoles = null)
     {
-        return type.GetProperties().Where(entry => entry.IsVisibleInGUI(guiType)).ToList();
+        return type.GetProperties().Where(entry => entry.IsVisibleInGUI(guiType, userRoles)).ToList();
     }
 
     public static List<PropertyInfo> GetDisplayKeyProperties(this Type type)

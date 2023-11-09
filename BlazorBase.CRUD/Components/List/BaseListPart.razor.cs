@@ -24,6 +24,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
+using BlazorBase.Services;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -56,7 +57,7 @@ public partial class BaseListPart : BaseDisplayComponent
 
     #region Injects
     [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
+    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;    
     #endregion
 
     #region Members
@@ -103,7 +104,7 @@ public partial class BaseListPart : BaseDisplayComponent
         EventServices = GetEventServices();
 
         if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
+            IsReadOnly = Property.IsReadOnlyInGUI(GUIType.ListPart, await BaseAuthenticationService.GetUserRolesAsync());
         else
             IsReadOnly = ReadOnly.Value;
 
@@ -130,10 +131,10 @@ public partial class BaseListPart : BaseDisplayComponent
         await PrepareCustomLookupData(Model, EventServices);
     }
 
-    protected override void OnParametersSet()
+    protected async override Task OnParametersSetAsync()
     {
         if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
+            IsReadOnly = Property.IsReadOnlyInGUI(GUIType.ListPart, await BaseAuthenticationService.GetUserRolesAsync());
         else
             IsReadOnly = ReadOnly.Value;
     }
