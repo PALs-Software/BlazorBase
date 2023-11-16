@@ -2,7 +2,6 @@
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.DataUpgrade;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Reflection;
@@ -38,7 +37,7 @@ public partial class DataUpgradeEntryLog : ComponentBase, IBasePropertyCardInput
         return Task.FromResult(displayItem.Property.DeclaringType == typeof(DataUpgradeEntry) && displayItem.Property.Name == nameof(DataUpgradeEntry.Log));
     }
 
-    public Task<bool> ValidatePropertyValueAsync() => Task.FromResult(true);
+    public Task<bool> ValidatePropertyValueAsync(bool calledFromOnValueChangedAsync = false) => Task.FromResult(true);
     public void SetValidation(bool showValidation, bool isValid, string feedback) { }
 
     public Task<bool> InputHasAdditionalContentChanges() { return Task.FromResult(false); }

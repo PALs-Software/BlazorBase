@@ -86,7 +86,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
         return Task.FromResult(false);
     }
 
-    public override async Task<bool> ValidatePropertyValueAsync()
+    public override async Task<bool> ValidatePropertyValueAsync(bool calledFromOnValueChangedAsync = false)
     {
         var validationIsOk = await base.ValidatePropertyValueAsync();
 
