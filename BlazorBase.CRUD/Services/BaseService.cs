@@ -74,13 +74,20 @@ public class BaseService : IDisposable
         if (entry == null)
             return null;
 
+        await LoadAllNavigationPropertiesAsync(entry, skipNavigationList);
+
+        return entry;
+    }
+
+    public async virtual Task LoadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string>? skipNavigationList = null) where T : class
+    {
         var navigationProperties = DbContext.Model.FindEntityType(typeof(T))?.GetNavigations();
         if (navigationProperties == null)
-            return entry;
+            return;
 
         foreach (var navigationProperty in navigationProperties)
         {
-            if (skipNavigationList.Contains(navigationProperty.Name))
+            if (skipNavigationList != null && skipNavigationList.Contains(navigationProperty.Name))
                 continue;
 
             if (navigationProperty.IsCollection)
@@ -88,8 +95,6 @@ public class BaseService : IDisposable
             else
                 await DbContext.Entry(entry).Reference(navigationProperty.Name).LoadAsync();
         }
-
-        return entry;
     }
 
     public virtual Task<List<T>> GetDataAsync<T>(bool asNoTracking = false) where T : class
@@ -287,7 +292,7 @@ public class BaseService : IDisposable
     #endregion
 
     #region Load Data
-    
+
     public async virtual Task<T?> ReloadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string> skipNavigationList) where T : class
     {
         var navigationProperties = DbContext.Model.FindEntityType(typeof(T))?.GetNavigations();
@@ -447,22 +452,88 @@ public class BaseService : IDisposable
 
         var eventServices = GetEventServices();
 
-        var addArgs = new OnBeforeDbContextAddEntryArgs(eventServices);
+        var addArgs = new OnBeforeDbContextAddEntryArgs(eventServices, new());
         foreach (var item in markedAsAdded)
             if (item.Entity is IBaseModel model)
                 await model.OnBeforeDbContextAddEntry(addArgs);
+        await CascadeOnBeforeDbContextAddEntryEventAsync(addArgs, markedAsAdded, eventServices);
 
-        var modifyArgs = new OnBeforeDbContextModifyEntryArgs(eventServices);
+        var modifyArgs = new OnBeforeDbContextModifyEntryArgs(eventServices, new());
         foreach (var item in markedAsModified)
             if (item.Entity is IBaseModel model)
                 await model.OnBeforeDbContextModifyEntry(modifyArgs);
+        await CascadeOnBeforeDbContextModifyEntryEventAsync(modifyArgs, markedAsModified, eventServices);
 
-        var deleteArgs = new OnBeforeDbContextDeleteEntryArgs(eventServices);
+        var deleteArgs = new OnBeforeDbContextDeleteEntryArgs(eventServices, new());
         foreach (var item in markedAsDeleted)
             if (item.Entity is IBaseModel model)
                 await model.OnBeforeDbContextDeleteEntry(deleteArgs);
+        await CascadeOnBeforeDbContextDeleteEntryEventAsync(deleteArgs, markedAsDeleted, eventServices);
 
         return (markedAsAdded, markedAsModified, markedAsDeleted);
+    }
+
+    protected virtual async Task CascadeOnBeforeDbContextAddEntryEventAsync(OnBeforeDbContextAddEntryArgs addEntryArgs, List<EntityEntry> markedAsAdded, EventServices eventServices)
+    {
+        while (addEntryArgs.AdditionalEntriesAdded.Count > 0)
+        {
+            var addEntryArgs2 = new OnBeforeDbContextAddEntryArgs(eventServices, new());
+            foreach (var item in addEntryArgs.AdditionalEntriesAdded)
+            {
+                var entityEntry = DbContext.Entry(item);
+                if (entityEntry.State == EntityState.Added)
+                {
+                    markedAsAdded.Add(entityEntry);
+
+                    if (entityEntry.Entity is IBaseModel model)
+                        await model.OnBeforeDbContextAddEntry(addEntryArgs2);
+                }
+            }
+
+            addEntryArgs = addEntryArgs2;
+        }
+    }
+
+    protected virtual async Task CascadeOnBeforeDbContextModifyEntryEventAsync(OnBeforeDbContextModifyEntryArgs modifyEntryArgs, List<EntityEntry> markedAsModified, EventServices eventServices)
+    {
+        while (modifyEntryArgs.AdditionalEntriesModified.Count > 0)
+        {
+            var modifyEntryArgs2 = new OnBeforeDbContextModifyEntryArgs(eventServices, new());
+            foreach (var item in modifyEntryArgs.AdditionalEntriesModified)
+            {
+                var entityEntry = DbContext.Entry(item);
+                if (entityEntry.State == EntityState.Modified)
+                {
+                    markedAsModified.Add(entityEntry);
+
+                    if (entityEntry.Entity is IBaseModel model)
+                        await model.OnBeforeDbContextModifyEntry(modifyEntryArgs2);
+                }
+            }
+
+            modifyEntryArgs = modifyEntryArgs2;
+        }
+    }
+
+    protected virtual async Task CascadeOnBeforeDbContextDeleteEntryEventAsync(OnBeforeDbContextDeleteEntryArgs deleteEntryArgs, List<EntityEntry> markedAsDeleted, EventServices eventServices)
+    {
+        while (deleteEntryArgs.AdditionalEntriesDeleted.Count > 0)
+        {
+            var deleteEntryArgs2 = new OnBeforeDbContextDeleteEntryArgs(eventServices, new());
+            foreach (var item in deleteEntryArgs.AdditionalEntriesDeleted)
+            {
+                var entityEntry = DbContext.Entry(item);
+                if (entityEntry.State == EntityState.Deleted)
+                {
+                    markedAsDeleted.Add(entityEntry);
+
+                    if (entityEntry.Entity is IBaseModel model)
+                        await model.OnBeforeDbContextDeleteEntry(deleteEntryArgs2);
+                }
+            }
+
+            deleteEntryArgs = deleteEntryArgs2;
+        }
     }
 
     protected async Task HandleOnAfterDbContextEvents((List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted) changedEntries)

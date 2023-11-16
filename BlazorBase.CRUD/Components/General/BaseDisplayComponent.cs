@@ -9,7 +9,6 @@ using BlazorBase.Modules;
 using BlazorBase.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -32,7 +31,8 @@ namespace BlazorBase.CRUD.Components.General
         [Parameter] public EventCallback<OnAfterSetUpDisplayListsArgs> OnAfterSetUpDisplayLists { get; set; }
         #endregion
 
-        #region Injects
+        #region Injects        
+        [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
         [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; } = null!;
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; } = null!;
@@ -75,7 +75,7 @@ namespace BlazorBase.CRUD.Components.General
 
             foreach (var property in visibleProperties)
             {
-                var displayItem = DisplayItem.CreateFromProperty(property, guiType, userRoles, BaseDisplayComponentLocalizer["General"]);
+                var displayItem = DisplayItem.CreateFromProperty(property, guiType, ServiceProvider, userRoles, BaseDisplayComponentLocalizer["General"]);
                 VisibleProperties.Add(property, displayItem);
 
                 if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup ?? String.Empty))
@@ -128,6 +128,13 @@ namespace BlazorBase.CRUD.Components.General
 
                 if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                     continue;
+
+                if (foreignKeyType.IsInterface)
+                {
+                    var type = ServiceProvider.GetService(foreignKeyType)?.GetType();
+                    if (type != null && typeof(IBaseModel).IsAssignableFrom(type))
+                        foreignKeyType = type;
+                }
 
                 if (CachedForeignKeys.ContainsKey(foreignKeyType))
                 {
@@ -352,15 +359,15 @@ namespace BlazorBase.CRUD.Components.General
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
 
-            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, List<string>? userRoles = null, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, IServiceProvider serviceProvider, List<string>? userRoles = null, string? defaultDisplayGroup = null)
             {
                 var property = typeof(T).GetProperty(propertyName);
                 if (property == null)
                     throw new Exception($"The property with the given property name \"{propertyName}\" does not exists");
-                return CreateFromProperty(property, guiType, userRoles, defaultDisplayGroup);
+                return CreateFromProperty(property, guiType, serviceProvider, userRoles, defaultDisplayGroup);
             }
 
-            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, List<string>? userRoles = null, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, IServiceProvider serviceProvider, List<string>? userRoles = null, string? defaultDisplayGroup = null)
             {
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
                 if (attribute == null)
@@ -388,7 +395,7 @@ namespace BlazorBase.CRUD.Components.General
                 bool sortAndFilterable;
                 if (customPropertyPath == null)
                 {
-                    displayPathAndType = property.GetDisplayPropertyPathAndType();
+                    displayPathAndType = property.GetDisplayPropertyPathAndType(serviceProvider);
                     sortAndFilterable = property.GetPropertyIsSortAndFilterable();
                 }
                 else

@@ -64,6 +64,14 @@ public partial class BaseSelectListInput : BaseInput
                 ForeignKeyBaseModelType = Property.PropertyType;
             else
                 ForeignKeyBaseModelType = Property.ReflectedType?.GetProperties().Where(entry => entry.Name == foreignKey!.Name).FirstOrDefault()?.PropertyType;
+
+
+            if (ForeignKeyBaseModelType != null && ForeignKeyBaseModelType.IsInterface)
+            {
+                var type = ServiceProvider.GetService(ForeignKeyBaseModelType)?.GetType();
+                if (type != null && typeof(IBaseModel).IsAssignableFrom(type))
+                    ForeignKeyBaseModelType = type;
+            }
         }
 
         UpdateSelectedValue();

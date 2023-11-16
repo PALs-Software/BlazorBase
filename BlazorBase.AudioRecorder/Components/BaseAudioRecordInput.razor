@@ -1,0 +1,56 @@
+﻿@inherits BaseInput
+
+@if (Model != null && CurrentAudioRecord != null && ComponentIsInitialized)
+{
+    <Column ColumnSize="ColumnSize.Is6.OnFullHD.Is12.OnWidescreen" Class="col-xxl-4 blazor-base-audio-record-input">
+        <Fields>
+            <Field Horizontal="true">
+                <FieldLabel ColumnSize="ColumnSize.Is4" Class="text-truncate" title="@IBaseModel.GetPropertyTooltip(ModelLocalizer, DisplayItem)">
+                    @IBaseModel.GetPropertyCaption(EventServices, Model, ModelLocalizer, DisplayItem)
+                </FieldLabel>
+                <FieldBody ColumnSize="ColumnSize.Is8">
+                    <div class="@InputClass">
+                        <Row Margin="Margin.Is0">
+
+                            @if (IsReadOnly)
+                            {
+                                <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
+                            }
+                            else
+                            {
+                                <Row Class="m-0 w-100">
+                                    <Column ColumnSize="ColumnSize.Is4" Class="pl-0 pr-2">
+                                        <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
+                                    </Column>
+                                    <Column ColumnSize="ColumnSize.Is8" Class="pr-0">
+                                        <Row Class="mr-0">
+                                            <BaseAudioRecorder @ref="AudioRecorder" OnRecordFinished="OnRecordFinishedAsync" Class="w-100">
+                                                @if (AudioRecorder != null && AudioRecorder.AudioRecordState == BaseAudioRecordState.Stopped)
+                                                {
+                                                    <Button Color="Color.Danger" Clicked="DeleteAttachedAudioFilePropertyAsync" Class="ml-2" title="@Localizer["Deletes the currently saved recording"]"><BaseIcon IconName="FontAwesomeIcons.Trash" /></Button>
+                                                }
+                                            </BaseAudioRecorder>
+                                        </Row>
+                                    </Column>
+                                </Row>
+                            }
+
+                            <Row Class="m-0 w-100 mt-2">
+                                <BaseAudioRecordListDisplay Model="Model"
+                                                        Property="Property"
+                                                        Service="Service"
+                                                        ModelLocalizer="ModelLocalizer"
+                                                        IsDisplayedInGuiType="CRUD.Enums.GUIType.Card"
+                                                        Class="w-100" />
+                            </Row>
+
+                        </Row>
+                    </div>
+                    <div class="@FeedbackClass">
+                        @Feedback
+                    </div>
+                </FieldBody>
+            </Field>
+        </Fields>
+    </Column>
+}

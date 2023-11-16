@@ -5,6 +5,7 @@ using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
 using Blazorise;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -44,7 +45,7 @@ public partial class MultiFileUploadInput : BaseFileInput
         var propertyList = (IList)Property.GetValue(Model)!;
 
         bool valid = true;
-        BaseFile? newFile = null;
+        IBaseFile? newFile = null;
         try
         {
             var files = ((FileChangedEventArgs)fileChangedEventArgs).Files;
@@ -71,7 +72,7 @@ public partial class MultiFileUploadInput : BaseFileInput
                 UploadProgress = 0;
                 CurrentUploadFileName = file.Name;
 
-                newFile = (BaseFile)Activator.CreateInstance(Property.PropertyType.GenericTypeArguments[0])!;
+                newFile = (IBaseFile)Activator.CreateInstance(ServiceProvider.GetRequiredService<IBaseFile>().GetType())!;
                 newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
                 newFile.FileSize = file.Size;
                 newFile.BaseFileType = Path.GetExtension(file.Name);

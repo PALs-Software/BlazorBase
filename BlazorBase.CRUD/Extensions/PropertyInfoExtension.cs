@@ -101,7 +101,7 @@ namespace BlazorBase.CRUD.Extensions
             return propertyInfo.PropertyType.IsGenericType && propertyInfo.PropertyType.GetGenericTypeDefinition().IsAssignableFrom(typeof(List<>));
         }
 
-        public static (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(this PropertyInfo property)
+        public static (string DisplayPath, Type DisplayType) GetDisplayPropertyPathAndType(this PropertyInfo property, IServiceProvider serviceProvider)
         {
             var propertyRenderType = property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? property.PropertyType;
             var foreignKey = property.GetCustomAttribute<ForeignKeyAttribute>();
@@ -118,6 +118,13 @@ namespace BlazorBase.CRUD.Extensions
 
             if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                 return (property.Name, propertyRenderType);
+
+            if (foreignKeyType.IsInterface)
+            {
+                var type = serviceProvider.GetService(foreignKeyType)?.GetType();
+                if (type != null && typeof(IBaseModel).IsAssignableFrom(type))
+                    foreignKeyType = type;
+            }
 
             var displayKeyProperties = foreignKeyType.GetDisplayKeyProperties();
             if (displayKeyProperties.Count == 0)

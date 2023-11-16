@@ -2,7 +2,7 @@
 using BlazorBase.MessageHandling.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BlazorBase.CRUD
+namespace BlazorBase.MessageHandling
 {
     public static class BlazorBaseMessageHandlingConfiguration
     {

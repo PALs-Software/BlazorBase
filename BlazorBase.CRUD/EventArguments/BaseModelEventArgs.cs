@@ -10,11 +10,11 @@ using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 namespace BlazorBase.CRUD.EventArguments
 {
     #region DbContext
-    public record OnBeforeDbContextAddEntryArgs(EventServices EventServices);
+    public record OnBeforeDbContextAddEntryArgs(EventServices EventServices, List<object> AdditionalEntriesAdded);
     public record OnAfterDbContextAddedEntryArgs(EventServices EventServices);
-    public record OnBeforeDbContextModifyEntryArgs(EventServices EventServices);
+    public record OnBeforeDbContextModifyEntryArgs(EventServices EventServices, List<object> AdditionalEntriesModified);
     public record OnAfterDbContextModifiedEntryArgs(EventServices EventServices);
-    public record OnBeforeDbContextDeleteEntryArgs(EventServices EventServices);
+    public record OnBeforeDbContextDeleteEntryArgs(EventServices EventServices, List<object> AdditionalEntriesDeleted);
     public record OnAfterDbContextDeletedEntryArgs(EventServices EventServices);
     #endregion
 

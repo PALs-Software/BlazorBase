@@ -1,6 +1,6 @@
 ﻿@inherits IBasePropertyListDisplay
 
-@if (Model != null && (Property.GetValue(Model) is BaseFile baseFile))
+@if (Model != null && (Property.GetValue(Model) is IBaseFile baseFile))
 {
     <div class="blazor-base-file-list-display-container">
         @if (baseFile.IsImage())
