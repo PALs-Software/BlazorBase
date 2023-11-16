@@ -1,0 +1,38 @@
+﻿@inherits BaseAudioRecordInput
+
+@if (Model != null && CurrentAudioRecord != null && ComponentIsInitialized)
+{
+    <div class="blazor-base-audio-record-list-part-input">
+        <div class="@InputClass">
+            <Row Margin="Margin.Is0">
+
+                <Column Class="pl-0">
+                    <BaseAudioRecordListDisplay Model="Model"
+                                            Property="Property"
+                                            Service="Service"
+                                            ModelLocalizer="ModelLocalizer"
+                                            IsDisplayedInGuiType="CRUD.Enums.GUIType.Card" />
+                </Column>
+
+                <Column Class="pl-0">
+                    <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
+                </Column>
+
+                @if (!IsReadOnly)
+                {
+                    <Column ColumnSize="ColumnSize.IsAuto" Class="pl-0">
+                        <BaseAudioRecorder @ref="AudioRecorder" OnRecordFinished="OnRecordFinishedAsync">
+                            @if (AudioRecorder != null && AudioRecorder.AudioRecordState == BaseAudioRecordState.Stopped)
+                            {
+                                <Button Color="Color.Danger" Clicked="DeleteAttachedAudioFilePropertyAsync" Class="ml-2" title="@Localizer["Deletes the currently saved recording"]"><BaseIcon IconName="FontAwesomeIcons.Trash" /></Button>
+                            }
+                        </BaseAudioRecorder>
+                    </Column>
+                }
+            </Row>
+        </div>
+        <div class="@FeedbackClass">
+            @Feedback
+        </div>
+    </div>
+}

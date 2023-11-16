@@ -1,4 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using BlazorBase.AudioRecorder.Components;
+using BlazorBase.AudioRecorder.Models;
+using BlazorBase.AudioRecorder.Services;
+using BlazorBase.CRUD.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorBase.AudioRecorder;
 public static class BlazorBaseAudioRecorderConfiguration
@@ -9,9 +13,14 @@ public static class BlazorBaseAudioRecorderConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseAudioRecorder(this IServiceCollection serviceCollection)
+    public static IServiceCollection AddBlazorBaseAudioRecorder<TBaseRecordImplementation>(this IServiceCollection serviceCollection) where TBaseRecordImplementation : class, IBaseAudioRecord
     {
-        serviceCollection.AddScoped<JSAudioRecorder>();
+        serviceCollection
+            .AddScoped<JSAudioRecorder>()
+            .AddTransient<IBaseAudioRecord, TBaseRecordImplementation>()
+            .AddTransient<IBasePropertyCardInput, BaseAudioRecordInput>()
+            .AddTransient<IBasePropertyListPartInput, BaseAudioRecordListPartInput>()
+            .AddTransient<IBasePropertyListDisplay, BaseAudioRecordListDisplay>();
 
         return serviceCollection;
     }

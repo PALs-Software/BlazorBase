@@ -1,15 +1,14 @@
 using BlazorBase.Modules;
 using Microsoft.JSInterop;
-using System.Diagnostics;
 
-namespace BlazorBase.AudioRecorder;
+namespace BlazorBase.AudioRecorder.Services;
 
 public class JSAudioRecorder : JSModul
 {
     #region Properties
 
-    public record OnNewRecordAvailableArgs(long InstanceId, long AudioByteSize, string AudioBlobUrl);
-    public event EventHandler<OnNewRecordAvailableArgs>? OnNewRecordAvailable;
+    public record OnRecordFinishedArgs(long InstanceId, long AudioByteSize, string ClientAudioBlobUrl);
+    public event EventHandler<OnRecordFinishedArgs>? OnRecordFinished;
 
     #endregion
 
@@ -42,6 +41,11 @@ public class JSAudioRecorder : JSModul
         return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "resumeRecord");
     }
 
+    public ValueTask CancelAsync(long instanceId)
+    {
+        return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "cancelRecord");
+    }
+
     public ValueTask StopAsync(long instanceId)
     {
         return InvokeJSVoidAsync("BlazorBaseAudioRecorder.callInstanceFunction", instanceId, "stopRecord");
@@ -53,9 +57,9 @@ public class JSAudioRecorder : JSModul
     }
 
     [JSInvokable]
-    public void OnNewRecordAvailableJSInvokable(long instanceId, long audioByteSize, string audioBlobUrl)
+    public void OnRecordFinishedJSInvokable(long instanceId, long audioByteSize, string clientAudioBlobUrl)
     {
-        OnNewRecordAvailable?.Invoke(this, new OnNewRecordAvailableArgs(instanceId, audioByteSize, audioBlobUrl));
+        OnRecordFinished?.Invoke(this, new OnRecordFinishedArgs(instanceId, audioByteSize, clientAudioBlobUrl));
     }
 
     protected virtual string DateTimeStamp()
@@ -66,7 +70,7 @@ public class JSAudioRecorder : JSModul
 
     public async ValueTask DisposeInstanceAsync(long instanceId)
     {
-        await InvokeJSVoidAsync($"BlazorAudioRecorder.dispose", instanceId);
+        await InvokeJSVoidAsync($"BlazorBaseAudioRecorder.dispose", instanceId);
         InstanceIds.Remove(instanceId);
     }
 

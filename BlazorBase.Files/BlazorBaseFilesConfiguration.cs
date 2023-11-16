@@ -28,8 +28,9 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseFiles<TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null, params string[] allowedUserAccessRoles)
+    public static IServiceCollection AddBlazorBaseFiles<TOptions, TBaseFile>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null, params string[] allowedUserAccessRoles)
         where TOptions : class, IBlazorBaseFileOptions
+        where TBaseFile : class, IBaseFile
     {
         // If options handler is not defined we will get an exception so
         // we need to initialize and empty action.
@@ -39,11 +40,14 @@ public static class BlazorBaseFilesConfiguration
         serviceCollection.AddSingleton(configureOptions)
         .AddTransient<IBlazorBaseFileOptions, TOptions>()
 
+        .AddTransient<IBaseFile, TBaseFile>()
         .AddTransient<IBasePropertyCardInput, BaseFileInput>()
         .AddTransient<IBasePropertyCardInput, MultiFileUploadInput>()
         .AddTransient<IBasePropertyListPartInput, BaseFileListPartInput>()
         .AddTransient<IBasePropertyListDisplay, BaseFileListDisplay>()
         .AddSingleton<IImageService, MagickImageService>() // As System.Drawing.Common currently not supporting webp images (loading throws error) use third party library
+        .AddSingleton<IBaseFileService, BaseFileService>()
+
 
         .AddAuthorization(options =>
         {
@@ -61,10 +65,10 @@ public static class BlazorBaseFilesConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-
-    public static IServiceCollection AddBlazorBaseFiles(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions>? configureOptions = null, params string[] allowedUserAccessRoles)
+    public static IServiceCollection AddBlazorBaseFiles<TBaseFile>(this IServiceCollection serviceCollection, Action<IBlazorBaseFileOptions>? configureOptions = null, params string[] allowedUserAccessRoles)
+         where TBaseFile : class, IBaseFile
     {
-        return AddBlazorBaseFiles<BlazorBaseFileOptions>(serviceCollection, configureOptions, allowedUserAccessRoles);
+        return AddBlazorBaseFiles<BlazorBaseFileOptions, TBaseFile>(serviceCollection, configureOptions, allowedUserAccessRoles);
     }
 
 }

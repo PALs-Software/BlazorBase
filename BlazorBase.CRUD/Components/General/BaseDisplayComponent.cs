@@ -30,7 +30,8 @@ namespace BlazorBase.CRUD.Components.General
         [Parameter] public EventCallback<OnAfterGetVisiblePropertiesArgs> OnAfterGetVisibleProperties { get; set; }
         #endregion
 
-        #region Injects
+        #region Injects        
+        [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
         [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; } = null!;
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; } = null!;
@@ -70,7 +71,7 @@ namespace BlazorBase.CRUD.Components.General
 
             foreach (var property in VisibleProperties)
             {
-                var displayItem = DisplayItem.CreateFromProperty(property, guiType, BaseDisplayComponentLocalizer["General"]);
+                var displayItem = DisplayItem.CreateFromProperty(property, guiType, ServiceProvider, BaseDisplayComponentLocalizer["General"]);
 
                 if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup ?? String.Empty))
                     DisplayGroups[displayItem.Attribute.DisplayGroup ?? String.Empty] = new DisplayGroup(displayItem.Attribute, new List<DisplayItem>());
@@ -119,6 +120,13 @@ namespace BlazorBase.CRUD.Components.General
 
                 if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                     continue;
+
+                if (foreignKeyType.IsInterface)
+                {
+                    var type = ServiceProvider.GetService(foreignKeyType)?.GetType();
+                    if (type != null && typeof(IBaseModel).IsAssignableFrom(type))
+                        foreignKeyType = type;
+                }
 
                 if (CachedForeignKeys.ContainsKey(foreignKeyType))
                 {
@@ -280,6 +288,7 @@ namespace BlazorBase.CRUD.Components.General
             {
                 Property = property;
                 Attribute = attribute;
+                GUIType = guiType;
                 IsReadOnly = isReadonly;
                 IsKey = isKey;
                 IsListProperty = isListProperty;
@@ -329,6 +338,7 @@ namespace BlazorBase.CRUD.Components.General
 
             public PropertyInfo Property { get; set; }
             public VisibleAttribute Attribute { get; set; }
+            public GUIType GUIType { get; set; }
             public bool IsReadOnly { get; set; }
             public bool IsKey { get; set; }
             public bool IsListProperty { get; set; }
@@ -341,15 +351,15 @@ namespace BlazorBase.CRUD.Components.General
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
 
-            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, IServiceProvider serviceProvider, string? defaultDisplayGroup = null)
             {
                 var property = typeof(T).GetProperty(propertyName);
                 if (property == null)
                     throw new Exception($"The property with the given property name \"{propertyName}\" does not exists");
-                return CreateFromProperty(property, guiType, defaultDisplayGroup);
+                return CreateFromProperty(property, guiType, serviceProvider, defaultDisplayGroup);
             }
 
-            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, IServiceProvider serviceProvider, string? defaultDisplayGroup = null)
             {
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
                 if (attribute == null)
@@ -377,7 +387,7 @@ namespace BlazorBase.CRUD.Components.General
                 bool sortAndFilterable;
                 if (customPropertyPath == null)
                 {
-                    displayPathAndType = property.GetDisplayPropertyPathAndType();
+                    displayPathAndType = property.GetDisplayPropertyPathAndType(serviceProvider);
                     sortAndFilterable = property.GetPropertyIsSortAndFilterable();
                 }
                 else

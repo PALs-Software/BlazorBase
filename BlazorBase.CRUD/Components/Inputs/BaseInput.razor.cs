@@ -297,7 +297,7 @@ public partial class BaseInput
 
     #region Validation
 
-    public async Task<bool> ValidatePropertyValueAsync()
+    public virtual async Task<bool> ValidatePropertyValueAsync()
     {
         if (LastValueConversionFailed)
             return false;

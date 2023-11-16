@@ -22,6 +22,8 @@ using BlazorBase.CRUD.Components.Card;
 using BlazorBase.Models;
 using Newtonsoft.Json;
 using BlazorBase.CRUD.Components.PageActions.Models;
+using BlazorBase.CRUD.Attributes;
+using System.Reflection;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -71,7 +73,6 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Inject] public BaseService Service { get; set; } = null!;
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseList<TModel>> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected BaseParser BaseParser { get; set; } = null!;
     [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
@@ -355,6 +356,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         var baseService = ServiceProvider.GetRequiredService<BaseService>();
         var scopedModel = await baseService.GetAsync<TModel>(model.GetPrimaryKeys());
+
         if (scopedModel == null)
             return;
 

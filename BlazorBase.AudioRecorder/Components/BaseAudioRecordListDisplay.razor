@@ -1,0 +1,28 @@
+﻿@inherits IBasePropertyListDisplay
+
+@if (Model != null && (Property.GetValue(Model) is IBaseAudioRecord baseAudioRecord))
+{
+    <div class="blazor-base-audio-record-list-display-container @Class">
+        <Row>
+            <Column ColumnSize="ColumnSize.Is9" Class="pr-0">
+                <audio src="@baseAudioRecord.GetFileLink()" controls class="blazor-base-audio-record-list-display w-100" />
+            </Column>
+            <Column ColumnSize="ColumnSize.Is3">
+                <div class="float-right">
+                    @if (DisplayShowFileButton)
+                    {
+                        <a href="@baseAudioRecord.GetFileLink()" target="_blank" title="@Localizer["View"]"><BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.ExternalLinkAlt"></BaseIcon></a>
+                    }
+                    @if (DisplayShowFileButton && DisplayDownloadFileButton)
+                    {
+                        <span>|</span>
+                    }
+                    @if (DisplayDownloadFileButton)
+                    {
+                        <a href="@baseAudioRecord.GetFileLink()" target="_blank" title="@Localizer["Download"]" download><BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.Download"></BaseIcon></a>
+                    }
+                </div>
+            </Column>
+        </Row>
+    </div>
+}

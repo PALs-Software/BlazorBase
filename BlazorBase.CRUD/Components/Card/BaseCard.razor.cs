@@ -72,7 +72,6 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     [Inject] protected BaseService Service { get; set; } = null!;
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
     #endregion

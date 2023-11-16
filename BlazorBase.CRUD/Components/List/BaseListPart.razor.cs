@@ -56,7 +56,6 @@ public partial class BaseListPart : BaseDisplayComponent
 
     #region Injects
     [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     #endregion
 

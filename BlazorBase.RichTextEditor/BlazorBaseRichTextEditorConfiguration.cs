@@ -1,5 +1,4 @@
 ﻿using BlazorBase.CRUD.Models;
-using BlazorBase.Files.Models;
 using BlazorBase.RichTextEditor.Components;
 using BlazorBase.RichTextEditor.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,14 +14,13 @@ public static class BlazorBaseRichTextEditorConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseRichTextEditor<ImageFile, TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
-        where ImageFile : BaseFile
+    public static IServiceCollection AddBlazorBaseRichTextEditor<TOptions>(this IServiceCollection serviceCollection, Action<TOptions>? configureOptions = null)
         where TOptions : class, IBlazorBaseRichTextEditorOptions
     {
         // If options handler is not defined we will get an exception so
         // we need to initialize and empty action.
         if (configureOptions == null)
-            configureOptions = (e) => { e.ImageFileType = typeof(ImageFile); };
+            configureOptions = (e) => { };
 
         serviceCollection.AddSingleton(configureOptions)
 
@@ -38,9 +36,9 @@ public static class BlazorBaseRichTextEditorConfiguration
     /// <param name="serviceCollection"></param>
     /// <param name="configureOptions"></param>
     /// <returns></returns>
-    public static IServiceCollection AddBlazorBaseRichTextEditor<ImageFile>(this IServiceCollection serviceCollection, Action<IBlazorBaseRichTextEditorOptions>? configureOptions = null) where ImageFile : BaseFile
+    public static IServiceCollection AddBlazorBaseRichTextEditor(this IServiceCollection serviceCollection, Action<IBlazorBaseRichTextEditorOptions>? configureOptions = null)
     {
-        return AddBlazorBaseRichTextEditor<ImageFile, BlazorBaseRichTextEditorOptions>(serviceCollection, configureOptions);
+        return AddBlazorBaseRichTextEditor<BlazorBaseRichTextEditorOptions>(serviceCollection, configureOptions);
     }
 
 }

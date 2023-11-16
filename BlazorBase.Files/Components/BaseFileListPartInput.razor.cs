@@ -1,7 +1,6 @@
-﻿namespace BlazorBase.Files.Components
+﻿namespace BlazorBase.Files.Components;
+
+public partial class BaseFileListPartInput : BaseFileInput
 {
-    public partial class BaseFileListPartInput : BaseFileInput
-    {
-       
-    }
+   
 }
