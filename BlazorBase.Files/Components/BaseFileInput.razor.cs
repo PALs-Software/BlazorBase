@@ -1,9 +1,11 @@
 ﻿using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
+using BlazorBase.Files.Services;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.StaticFiles;
@@ -22,21 +24,23 @@ namespace BlazorBase.Files.Components
     {
         #region Parameters
         [Parameter] public ulong? MaxFileSize { get; set; } = null;
-        [Parameter] public string FileFilter { get; set; } = null;
+        [Parameter] public string? FileFilter { get; set; } = null;
         #endregion
 
         #region Inject
-        [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; }
-        [Inject] protected IBlazorBaseFileOptions Options { get; set; }
+        [Inject] protected IStringLocalizer<BaseFileInput> Localizer { get; set; } = null!;
+        [Inject] protected IBlazorBaseFileOptions Options { get; set; } = null!;
+        [Inject] protected IImageService ImageService { get; set; } = null!;
+        
         #endregion
 
         #region Member
         protected bool ShowLoadingIndicator = false;
         protected int UploadProgress = 0;
-        protected FileEdit FileEdit = default;
-        protected BaseFileModal BaseFileModal = default!;
+        protected FileEdit? FileEdit;
+        protected BaseFileModal? BaseFileModal;
         protected bool FileEditIsResetting = false;
-        protected EventServices EventServices;
+        protected EventServices EventServices = null!;
 
         #endregion
 
@@ -50,38 +54,32 @@ namespace BlazorBase.Files.Components
             if (FileFilter == null && Property.GetCustomAttribute(typeof(FileInputFilterAttribute)) is FileInputFilterAttribute filterAttribute)
                 FileFilter = filterAttribute?.Filter ?? "*.";
 
-            EventServices = new EventServices()
-            {
-                ServiceProvider = ServiceProvider,
-                Localizer = ModelLocalizer,
-                BaseService = Service,
-                MessageHandler = MessageHandler
-            };
+            EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service);            
         }
 
-        public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+        public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
         {
             return Task.FromResult(typeof(BaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
         }
 
-        public Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args) { return Task.CompletedTask; }
+        public virtual Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args) { return Task.CompletedTask; }
 
-        public Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
+        public virtual Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args) { return Task.CompletedTask; }
 
-        public Task<bool> InputHasAdditionalContentChanges()
+        public virtual Task<bool> InputHasAdditionalContentChanges()
         {
             return Task.FromResult(false);
         }
 
-        protected override async Task OnValueChangedAsync(object fileChangedEventArgs, bool setCurrentValueAsString = true)
+        protected override async Task OnValueChangedAsync(object? fileChangedEventArgs, bool setCurrentValueAsString = true)
         {
-            if (FileEditIsResetting)
+            if (FileEditIsResetting || fileChangedEventArgs == null || FileEdit == null)
                 return;
 
             var eventServices = GetEventServices();
             var oldValue = Property.GetValue(Model);
             bool valid = true;
-            BaseFile newFile = null;
+            BaseFile? newFile = null;
             try
             {
                 var files = ((FileChangedEventArgs)fileChangedEventArgs).Files;
@@ -98,11 +96,14 @@ namespace BlazorBase.Files.Components
                 if (MaxFileSize != null && MaxFileSize != 0 && (ulong)file.Size > MaxFileSize)
                     throw new IOException(Localizer["The file exceed the maximum allowed file size of {0} bytes", MaxFileSize]);
 
-                newFile = Activator.CreateInstance(RenderType) as BaseFile;
+                newFile = (BaseFile)Activator.CreateInstance(RenderType)!;
                 newFile.FileName = Path.GetFileNameWithoutExtension(file.Name);
                 newFile.FileSize = file.Size;
                 newFile.BaseFileType = Path.GetExtension(file.Name);
                 newFile.MimeFileType = GetMimeTypeOfFile(file);
+
+                if (newFile is IModeInjectServiceProvider injectModel)
+                    injectModel.ServiceProvider = ServiceProvider;
 
                 if (Model is BaseFile baseFile)
                 {
@@ -178,7 +179,7 @@ namespace BlazorBase.Files.Components
             }
         }
 
-        protected async Task<string> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
+        protected virtual async Task<string?> WriteFileStreamToTempFileStore(IFileEntry file, BaseFile newFile)
         {
             if (file.Size == 0)
                 return null;
@@ -191,8 +192,16 @@ namespace BlazorBase.Files.Components
 
             using var fileStream = File.Create(Path.Join(Options.TempFileStorePath, newFile.GetPhysicalTemporaryFileName()));
             await file.WriteToStreamAsync(fileStream);
-            fileStream.Position = 0;
 
+            if (Options.UseImageThumbnails && newFile.IsImage())
+            {
+                fileStream.Position = 0;
+                using var memoryStream = new MemoryStream();
+                fileStream.CopyTo(memoryStream);
+                await newFile.CreateThumbnailAsync(ImageService, memoryStream.ToArray());
+            }
+
+            fileStream.Position = 0;
             return BaseFile.ComputeSha256Hash(fileStream);
         }
 
@@ -220,7 +229,7 @@ namespace BlazorBase.Files.Components
 
         protected virtual string GetMimeTypeOfFile(IFileEntry file)
         {
-            new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string mimeFileType);
+            new FileExtensionContentTypeProvider().TryGetContentType(file.Name, out string? mimeFileType);
             return mimeFileType ?? "application/octet-stream";
         }
     }

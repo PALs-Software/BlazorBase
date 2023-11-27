@@ -4,9 +4,9 @@ namespace BlazorBase.Restore;
 
 public class AppSettings
 {
-    public ConnectionStrings ConnectionStrings { get; set; } = null!;
-    public string FileStorePath { get; set; } = null!;
-    public string TempFileStorePath { get; set; } = null!;
+    public ConnectionStrings? ConnectionStrings { get; set; } = null;
+    public string? FileStorePath { get; set; } = null;
+    public string? TempFileStorePath { get; set; } = null;
 
     public static AppSettings? LoadAppSettings(string projectPath)
     {
@@ -18,5 +18,5 @@ public class AppSettings
 
 public class ConnectionStrings
 {
-    public string DefaultConnection { get; set; } = null!;
+    public string? DefaultConnection { get; set; } = null!;
 }

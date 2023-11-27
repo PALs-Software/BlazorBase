@@ -29,13 +29,13 @@ namespace BlazorBase.User.Controller
         }
 
         [HttpPost()]
-        public async Task<IActionResult> Login([FromForm] LoginData loginData, string returnUrl = null)
+        public async Task<IActionResult> Login([FromForm] LoginData loginData, string? returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
 
             var result = new Microsoft.AspNetCore.Identity.SignInResult();
             var user = await UserManager.FindByEmailAsync(loginData.Email);
-            if (user != null)
+            if (user != null && user.UserName != null)
                 result = await SignInManager.PasswordSignInAsync(user.UserName, loginData.Password, loginData.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
@@ -55,5 +55,6 @@ namespace BlazorBase.User.Controller
 
             return Redirect("~/");
         }
+
     }
 }

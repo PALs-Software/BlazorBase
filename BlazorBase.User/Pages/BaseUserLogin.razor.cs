@@ -7,11 +7,7 @@ namespace BlazorBase.User.Pages;
 public partial class BaseUserLogin : ComponentBase
 {
     #region Inject
-    [Inject] protected IStringLocalizer<BaseUserLogin> Localizer { get; set; }
-    [Inject] protected IBlazorBaseUserOptions Options { get; set; }
-    #endregion
-
-    #region Member
-    protected string Password = null;
+    [Inject] protected IStringLocalizer<BaseUserLogin> Localizer { get; set; } = null!;
+    [Inject] protected IBlazorBaseUserOptions Options { get; set; } = null!;
     #endregion
 }

@@ -1,0 +1,12 @@
+﻿@using BlazorBase.CRUD.Models
+
+@inherits IBasePropertyCardInput
+
+<div class="data-upgrade-entry-log pl-3">
+
+    @if (Model != null && Model is DataUpgradeEntry entry)
+    {
+        @entry.Log
+    }
+
+</div>

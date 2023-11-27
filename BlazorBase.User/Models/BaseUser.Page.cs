@@ -4,6 +4,7 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Extensions;
 using BlazorBase.Mailing.Services;
+using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.User.Enums;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +25,9 @@ namespace BlazorBase.User.Models;
 public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel where TIdentityUser : IdentityUser, new()
 {
     [SupportedOSPlatform("windows")]
-    public override Task<List<PageActionGroup>> GeneratePageActionGroupsAsync(EventServices eventServices)
+    public override Task<List<PageActionGroup>?> GeneratePageActionGroupsAsync(EventServices eventServices)
     {
-        return Task.FromResult(new List<PageActionGroup>()
+        return Task.FromResult<List<PageActionGroup>?>(new List<PageActionGroup>()
         {
             new PageActionGroup()
             {
@@ -49,7 +50,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
 
                             await TestModelIsInValidStateForCallingActionAsync(eventServices);
                             if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.SetupUser))
-                                eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Setup email"],
+                                eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().ShowMessage(eventServices.Localizer["Setup email"],
                                                                         eventServices.Localizer["The setup email was sent successfully"]);
                         }
                     },
@@ -67,7 +68,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
 
                             await TestModelIsInValidStateForCallingActionAsync(eventServices);
                             if (await user.SendPasswordMailAsync(eventServices, UserMailTemplate.ResetUserPassword))
-                                eventServices.MessageHandler.ShowMessage(eventServices.Localizer["Reset Password"],
+                                eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().ShowMessage(eventServices.Localizer["Reset Password"],
                                                                         eventServices.Localizer["The password reset email was sent successfully"]);
                         }
                     }
@@ -87,7 +88,10 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
     [SupportedOSPlatform("windows")]
     public async Task<bool> SendPasswordMailAsync(EventServices eventServices, UserMailTemplate mailTemplate)
     {
-        var messageId = eventServices.MessageHandler.ShowLoadingMessage(eventServices.Localizer["Sending e-mail..."]);
+        if (IdentityUserId == null)
+            return false;
+
+        var messageId = eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().ShowLoadingMessage(eventServices.Localizer["Sending e-mail..."]);
 
         var serviceProvider = eventServices.ServiceProvider;
         var userManager = serviceProvider.GetRequiredService<UserManager<TIdentityUser>>();
@@ -96,13 +100,19 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         var mailService = serviceProvider.GetRequiredService<BaseMailService<UserMailTemplate>>();
 
         var user = await userManager.FindByIdAsync(IdentityUserId);
+        ArgumentNullException.ThrowIfNull(user);
+        ArgumentNullException.ThrowIfNull(user.Email);
+        ArgumentNullException.ThrowIfNull(user.UserName);
+
         var code = await userManager.GeneratePasswordResetTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
+        ArgumentNullException.ThrowIfNull(accessor.HttpContext);
         var callbackUrl = linkGenerator.GetUriByPage(accessor.HttpContext,
                                                      page: "/Account/ResetPassword",
                                                      handler: null,
                                                      values: new { area = "Identity", code });
+        ArgumentNullException.ThrowIfNull(callbackUrl);
         callbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
         var success = await mailService.SendMailAsync(user.Email,
@@ -110,7 +120,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
                                                         Array.Empty<string>(),
                                                         new string[] { user.UserName, callbackUrl });
 
-        eventServices.MessageHandler.CloseLoadingMessage(messageId);
+        eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().CloseLoadingMessage(messageId);
         return success;
     }
 }

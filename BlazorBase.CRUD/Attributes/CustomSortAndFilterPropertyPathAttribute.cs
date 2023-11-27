@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.CRUD.Attributes
+namespace BlazorBase.CRUD.Attributes;
+
+[AttributeUsage(AttributeTargets.Property)]
+public class CustomSortAndFilterPropertyPathAttribute : Attribute
 {
-    public class CustomSortAndFilterPropertyPathAttribute : Attribute
+    public CustomSortAndFilterPropertyPathAttribute(string path, Type pathType)
     {
-        public string Path { get; set; }
-        public Type PathType { get; set; }
+        Path = path;
+        PathType = pathType;
     }
+
+    public string Path { get; set; } = null!;
+    public Type PathType { get; set; }
 }

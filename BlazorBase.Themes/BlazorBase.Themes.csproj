@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   
@@ -13,7 +14,7 @@
     <PackageReference Include="Blazorise" Version="0.9.3.1" />
     <PackageReference Include="Blazorise.Bootstrap" Version="0.9.3.1" />
     <PackageReference Include="Blazorise.Components" Version="0.9.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.9" />
   </ItemGroup>
 
   <ItemGroup>

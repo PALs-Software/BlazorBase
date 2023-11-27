@@ -1,7 +1,6 @@
 ﻿using BlazorBase.Models;
 using BlazorBase.User.Controller;
 using System;
-using System.Security;
 
 namespace BlazorBase.User.Models;
 public class BlazorBaseUserOptions : IBlazorBaseUserOptions
@@ -23,9 +22,11 @@ public class BlazorBaseUserOptions : IBlazorBaseUserOptions
     public string IdentityAccessDeniedPath { get; set; } = "/User/AccessDenied";
 
     public string ManageUserPath { get; set; } = "User/Manage";
-    public string WebsiteName { get; set; } = "BlazorBase";
+    public string? WebsiteName { get; set; } = "BlazorBase";
+
     public bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; } = true;
+    public string? LoginBackgroundImageSrc { get; set; }
+    public bool LogUserSessions { get;set; }
+
     #endregion
-
-
 }

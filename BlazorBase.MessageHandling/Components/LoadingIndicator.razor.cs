@@ -1,15 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlazorBase.MessageHandling.Components
+namespace BlazorBase.MessageHandling.Components;
+
+public partial class LoadingIndicator
 {
-    public partial class LoadingIndicator
-    {
-        [Parameter] public RenderFragment ChildContent { get; set; }
-        [Parameter] public bool Visible { get; set; }
-    }
+    [Parameter] public RenderFragment? ChildContent { get; set; } = null;
+    [Parameter] public bool Visible { get; set; }
 }

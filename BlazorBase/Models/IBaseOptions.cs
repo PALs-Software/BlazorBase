@@ -11,7 +11,7 @@ public interface IBaseOptions
 
     void ImportOptions<T>(IServiceProvider serviceProvider, Action<T> action) where T : class, IBaseOptions
     {
-        action?.Invoke(this as T);
+        action?.Invoke((T)this);
 
         if (OptionsImportMode != BaseOptionsImportMode.Database)
             return;
