@@ -33,7 +33,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     [Parameter] public bool HideTitle { get; set; } = false;
     [Parameter] public string? SingleDisplayName { get; set; }
-    [Parameter] public string? ExplainText { get; set; }
+    [Parameter] public ExplainText? ExplainText { get; set; }
     [Parameter] public string? PluralDisplayName { get; set; }
     [Parameter] public List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; set; }
 
@@ -41,6 +41,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Parameter] public bool Sortable { get; set; } = true;
     [Parameter] public bool Filterable { get; set; } = true;
     [Parameter] public bool StickyRowButtons { get; set; } = true;
+    [Parameter] public bool HideRowButtons { get; set; } = false;
     [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
 
@@ -137,11 +138,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         else
             PluralDisplayName = ModelLocalizer[PluralDisplayName];
 
-        if (String.IsNullOrEmpty(ExplainText))
-            ExplainText = ModelLocalizer["ExplainText"];
-
-        if (ExplainText == "ExplainText")
-            ExplainText = null;
+        if (ExplainText == null && ModelLocalizer["ExplainText"] != "ExplainText")
+            ExplainText = new ExplainText(ModelLocalizer["ExplainText"], ModelLocalizer["ExplainText_Location"] == "Bottom" ? ExplainTextLocation.Bottom : ExplainTextLocation.Top);
     }
 
     protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
