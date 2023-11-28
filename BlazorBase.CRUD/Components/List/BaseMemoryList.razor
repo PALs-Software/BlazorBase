@@ -72,8 +72,8 @@
             <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
                 <tr @onclick="() => OnRowSelected(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
                     <td class="base-list-row-buttons">
-                        <Buttons>                      
-                            @if (UserCanDeleteEntries)
+                        <Buttons>
+                            @if (UserCanDeleteEntries && !HideRowButtons)
                             {
                                 <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
                             }

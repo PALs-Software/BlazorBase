@@ -37,7 +37,7 @@
                 <th class="base-list-actions">
                     @if (UserCanAddEntries)
                     {
-                        <Button Color="Color.Success" Clicked="() => AddEntryAsync()"><Blazorise.Icon Name="IconName.Add" /></Button>
+                        <Button Color="Color.Success" Clicked="() => AddEntryAsync()" title="@Localizer["Add new {0}", SingleDisplayName ?? String.Empty]"><Blazorise.Icon Name="IconName.Add" /></Button>
                     }
                 </th>
                 @foreach (var displayGroup in DisplayGroups)
@@ -77,17 +77,20 @@
                 <tr @onclick="() => OnRowSelected(context)" @ondblclick="() => OnRowDoubleClicked(context)" class="@(SelectedEntryPrimaryKeys != null && context.PrimaryKeysAreEqual(SelectedEntryPrimaryKeys, useCache: true) ? "base-list-row-selected" : "")">
                     <td class="base-list-row-buttons">
                         <Buttons>
-                            @if (UserCanEditEntries)
+                            @if (!HideRowButtons)
                             {
-                                <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
-                            }
-                            @if (UserCanOpenCardReadOnly)
-                            {
-                                <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
-                            }
-                            @if (UserCanDeleteEntries)
-                            {
-                                <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
+                                @if (UserCanEditEntries)
+                                {
+                                    <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
+                                }
+                                @if (UserCanOpenCardReadOnly)
+                                {
+                                    <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
+                                }
+                                @if (UserCanDeleteEntries)
+                                {
+                                    <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
+                                }
                             }
 
                             @if (AdditionalRowButtons != null)

@@ -16,6 +16,10 @@ table input, table select {
     min-width: 125px;
 }
 
+.base-card-explain-text {
+    justify-content: flex-start;
+}
+
 @media (min-width: 1600px) {
     .base-card .modal-xl {
         max-width: 1500px;
