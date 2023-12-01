@@ -51,7 +51,7 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     #endregion
 
     [Parameter] public string? SingleDisplayName { get; set; }
-    [Parameter] public string? ExplainText { get; set; }
+    [Parameter] public ExplainText? ExplainText { get; set; }
     [Parameter] public bool ShowEntryByStart { get; set; }
     [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; }
     [Parameter] public TModel? ComponentModelInstance { get; set; }
