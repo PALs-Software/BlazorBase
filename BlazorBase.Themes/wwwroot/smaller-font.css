@@ -1,0 +1,35 @@
+html {
+    font-size: 90%;
+}
+
+.table td, .table th {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.btn {
+    padding: .375rem .75rem;
+    padding: .3rem .6rem;
+}
+
+.form-group {
+    margin-bottom: .6rem;
+}
+
+.card-body {
+    padding: .7rem;
+    padding-bottom: 0rem;
+}
+
+.custom-select {
+    min-width: 50px !important;
+}
+
+.table td, .table th {
+    padding-left: .3rem;
+    padding-right: .3rem;
+}
+
+.base-list-table .form-control[type="datetime-local"] {
+    max-width: 145px;
+}

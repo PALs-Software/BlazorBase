@@ -38,7 +38,7 @@ td {
 }
 
 .base-list-with-sticky-row-buttons .base-list-row-selected .base-list-row-buttons {
-    background-color: var(--table-row-selected-background, #616161);
+    background-color: var(--table-row-selected-background, #b8b8b8);
 }
 
 .base-list-with-sticky-row-buttons tr:hover .base-list-row-buttons {
@@ -48,5 +48,5 @@ td {
 
 .base-list-row-selected {
     color: var(--table-row-selected-color, #000000);
-    background-color: var(--table-row-selected-background, #616161);
+    background-color: var(--table-row-selected-background, #b8b8b8);
 }

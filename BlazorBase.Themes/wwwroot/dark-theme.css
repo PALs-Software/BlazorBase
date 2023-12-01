@@ -1,0 +1,62 @@
+﻿@import 'base-theme.css';
+
+:root {
+    --bs-body-color: #f4f4f4;
+    --bs-body-bg: #3b3a39;
+    --bs-body-hover-color: #525150;
+    /*Sidebar*/
+    --b-bar-light-color: var(--bs-body-color);
+    --b-bar-dark-color: var(--bs-body-color);
+    --b-bar-dark-background: #3b3a39;
+    --b-bar-light-background: #3b3a39;
+    --b-bar-dropdown-dark-background: #474645;
+    --b-bar-dropdown-light-background: #474645;
+    --b-bar-brand-dark-background: var(--b-bar-dark-background);
+    --b-bar-item-dark-active-color: var(--bs-body-color);
+    --b-bar-item-light-active-color: var(--bs-body-color);
+    --b-bar-item-dark-active-background: #666565;
+    --b-bar-item-light-active-background: #666565;
+    --b-bar-item-dark-hover-color: var(--bs-body-color);
+    --b-bar-item-light-hover-color: var(--bs-body-color);
+    --b-bar-item-dark-hover-background: var(--bs-body-hover-color);
+    --b-bar-item-light-hover-background: var(--bs-body-color);
+    --b-vertical-bar-width: 300px;
+    /*Table*/
+    --table-hover-color: var(--bs-body-color);
+    --table-hover-background: #474645;
+    --table-border-color: #5c5c5c;
+    --table-row-selected-color: var(--bs-body-color);
+    --table-row-selected-background: #525151;
+    --list-part-table-row-selected-color: var(--table-row-selected-color);
+    --list-part-table-row-selected-background: var(--table-row-selected-background);
+    /*Card*/
+    --card-modal-background: #2d2d2d;
+    --card-color: var(--bs-body-color);
+    --card-background: #3b3a39;
+    --card-header-color: var(--bs-body-color);
+    --card-header-background: #545454;
+    --card-header-hover-color: var(--card-header-color);
+    --card-header-hover-background: var(--card-header-background);
+    --card-border-color: var(--table-border-color);
+    /*Form*/
+    --form-color: var(--bs-body-color);
+    --form-background: var(--bs-body-bg);
+    --form-active-background-color: #303030;
+    --form-disabled-color: #b3b0b0;
+    --form-disabled-background: #343433;
+    --form-border-color: var(--table-border-color);
+    /*Loading Indicator*/
+    --blazor-base-loading-indicator-color: var(--bs-body-color);
+    --blazor-base-loading-indicator-background: var(--bs-body-bg);
+    /*Chrome/Edge Scrollbar*/
+    --scrollbar-thumb-color: #888;
+    --scrollbar-thumb-hover-color: #adadad;
+    --scrollbar-background-color: #4e4e4e;
+    /*Icons*/
+    --icon-color: var(--bs-body-color);
+    --button-icon-color: var(--bs-body-color);
+}
+
+.navbar .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.5%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}

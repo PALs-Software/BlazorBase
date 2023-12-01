@@ -75,6 +75,7 @@ public partial class BaseLoginForm : ComponentBase
 
         LastImageOfTheDayUrlPull = DateTime.Now;
         ImageOfTheDayUrl = await GetBingImageOfTheDayUrlAsync();
+        LoginFormBackgroundImageUrl = ImageOfTheDayUrl;
     }
 
     #endregion

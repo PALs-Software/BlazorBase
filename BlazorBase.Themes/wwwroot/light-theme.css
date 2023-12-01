@@ -1,0 +1,58 @@
+﻿@import 'base-theme.css';
+
+:root {
+    --bs-body-color: #212529;
+    --bs-body-bg: #fff;
+    --bs-body-hover-color: #c0c0c0;
+    /*Sidebar*/
+    --b-bar-light-color: var(--bs-body-color);
+    --b-bar-dark-color: var(--bs-body-color);
+    --b-bar-dark-background: #fff;
+    --b-bar-light-background: #fff;
+    --b-bar-dropdown-dark-background: #f2f2f2;
+    --b-bar-dropdown-light-background: #f2f2f2;
+    --b-bar-brand-dark-background: var(--b-bar-dark-background);
+    --b-bar-item-dark-active-color: var(--bs-body-color);
+    --b-bar-item-light-active-color: var(--bs-body-color);
+    --b-bar-item-dark-active-background: #cacaca;
+    --b-bar-item-light-active-background: #cacaca;
+    --b-bar-item-dark-hover-color: var(--bs-body-color);
+    --b-bar-item-light-hover-color: var(--bs-body-color);
+    --b-bar-item-dark-hover-background: var(--bs-body-hover-color);
+    --b-bar-item-light-hover-background: var(--bs-body-color);
+    --b-vertical-bar-width: 300px;
+    /*Table*/
+    --table-hover-color: var(--bs-body-color);
+    --table-hover-background: #dddddd;
+    --table-border-color: #c9c9c9;
+    --table-row-selected-color: var(--bs-body-color);
+    --table-row-selected-background: #d9d9d9;
+    --list-part-table-row-selected-color: var(--table-row-selected-color);
+    --list-part-table-row-selected-background: var(--table-row-selected-background);
+    /*Card*/
+    --card-modal-background: #fff;
+    --card-color: var(--bs-body-color);
+    --card-background: #ffffff;
+    --card-header-color: var(--bs-body-color);
+    --card-header-background: #f3f3f3;
+    --card-header-hover-color: var(--card-header-color);
+    --card-header-hover-background: var(--card-header-background);
+    --card-border-color: var(--table-border-color);
+    /*Form*/
+    --form-color: var(--bs-body-color);
+    --form-background: var(--bs-body-bg);
+    --form-active-background-color: #fff;
+    --form-disabled-color: #6a6a6a;
+    --form-disabled-background: #e9ecef;
+    --form-border-color: var(--table-border-color);
+    /*Loading Indicator*/
+    --blazor-base-loading-indicator-color: var(--bs-body-color);
+    --blazor-base-loading-indicator-background: var(--bs-body-bg);
+    /*Chrome/Edge Scrollbar*/
+    --scrollbar-thumb-color: #b2b2b2;
+    --scrollbar-thumb-hover-color: #8c8a8a;
+    --scrollbar-background-color: #e8e8e8;
+    /*Icons*/
+    --icon-color: #484848;
+    --button-icon-color: #fff
+}

@@ -1,5 +1,4 @@
-﻿using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.ViewModels;
+﻿using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Models;
 using System;
 using System.IO;
