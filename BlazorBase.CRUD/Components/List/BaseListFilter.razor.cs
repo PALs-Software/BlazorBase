@@ -152,7 +152,9 @@ public partial class BaseListFilter : BaseDisplayComponent
                 else if (displayItem.DisplayPropertyType == typeof(Guid?))
                     TypeFilterTypesDictionary[displayItem.DisplayPropertyType] = NullableGuidFilterTypes;
                 else if (displayItem.DisplayPropertyType.IsEnum)
-                    TypeFilterTypesDictionary[displayItem.DisplayPropertyType] = Nullable.GetUnderlyingType(displayItem.DisplayPropertyType) == null ? EnumFilterTypes : NullableEnumFilterTypes;
+                    TypeFilterTypesDictionary[displayItem.DisplayPropertyType] = EnumFilterTypes;
+                else if (Nullable.GetUnderlyingType(displayItem.DisplayPropertyType)?.IsEnum == true)
+                    TypeFilterTypesDictionary[displayItem.DisplayPropertyType] = NullableEnumFilterTypes;
             }
         }
     }
