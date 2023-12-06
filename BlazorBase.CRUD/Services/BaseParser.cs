@@ -50,7 +50,7 @@ namespace BlazorBase.CRUD.Services
                 if (isNullable && conversionType != typeof(string) && String.IsNullOrEmpty(inputValue))
                     outputValue = null;
                 else if (conversionType.IsEnum)
-                    outputValue = Enum.Parse(outputType, inputValue!, true);
+                    outputValue = Enum.Parse(conversionType, inputValue!, true);
                 else if (conversionType == typeof(Guid))
                     outputValue = Convert.ChangeType(Guid.Parse(inputValue!), conversionType);
                 else if (conversionType == typeof(DateTimeOffset))

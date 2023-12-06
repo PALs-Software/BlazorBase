@@ -172,7 +172,7 @@ public partial class BaseInput
     #endregion
 
     #region Events        
-    private void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
+    protected virtual void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
     {
         if (!propertyNames.Contains(Property.Name))
             return;

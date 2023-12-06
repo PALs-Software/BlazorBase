@@ -227,9 +227,12 @@ namespace BlazorBase.CRUD.Components.General
         protected virtual List<KeyValuePair<string?, string>> GetEnumValues(Type enumType)
         {
             long key = GetEnumTypeDictionaryKey(enumType);
-
             if (CachedEnumValueDictionary.ContainsKey(key))
                 return CachedEnumValueDictionary[key];
+
+            var underlyingType = Nullable.GetUnderlyingType(enumType);
+            if (underlyingType != null)
+                enumType = underlyingType;
 
             var result = new List<KeyValuePair<string?, string>>();
             var values = Enum.GetNames(enumType);
