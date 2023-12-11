@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Authors>Patrick Londong</Authors>
 		<Company>ThePALBotCompany</Company>
@@ -104,9 +104,10 @@
 		<PackageReference Include="Blazorise.Components" Version="0.9.3.6" />
 		<PackageReference Include="Blazorise.DataGrid" Version="0.9.3.6" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.6" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.9" />
-		<PackageReference Include="Microsoft.Extensions.Localization" Version="7.0.9" />
+		<PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
