@@ -6,6 +6,10 @@
         @if (IsReadOnly)
         {
             <input type="text" value="@ReadOnlyDisplayValue" disabled class="form-control @InputClass @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]" />
+
+            <div class="@FeedbackClass">
+                @Feedback
+            </div>
         }
         else
         {
@@ -15,9 +19,9 @@
                 @if (IsForeignKeyProperty && (BaseInputDisplayOptions == null || BaseInputDisplayOptions.ShowSelectExistingEntityButton))
                 {
                     <BaseTypeBasedSelectList @ref="BaseSelectList"
-                                 BaseModelType="ForeignKeyBaseModelType"
-                                 Title="@Localizer["Search for {0}", ModelLocalizer[Property.Name]]"
-                                 OnSelectListClosed="AddEntryFromSelectListModalAsync" />
+                                             BaseModelType="ForeignKeyBaseModelType"
+                                             Title="@Localizer["Search for {0}", ModelLocalizer[Property.Name]]"
+                                             OnSelectListClosed="AddEntryFromSelectListModalAsync" />
 
                     <Addon AddonType="AddonType.End">
                         <Button Color="Color.Secondary" Clicked="OpenForeignKeySelectListModal">
@@ -25,11 +29,11 @@
                         </Button>
                     </Addon>
                 }
+
+                <div class="@FeedbackClass">
+                    @Feedback
+                </div>
             </Addons>
         }
-
-        <div class="@FeedbackClass">
-            @Feedback
-        </div>
     }
 </div>
