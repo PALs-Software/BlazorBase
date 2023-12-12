@@ -4,4 +4,4 @@ using BlazorBase.CRUD.ViewModels;
 
 namespace BlazorBase.CRUD.EventArguments;
 
-public record AdditionalHeaderPageActionsArgs(PageActionGroup PageActionGroup, IBaseModel? Model, EventServices EventServices);
+public record AdditionalHeaderPageActionsArgs(PageActionGroup PageActionGroup, object? Source, IBaseModel? Model, EventServices EventServices);

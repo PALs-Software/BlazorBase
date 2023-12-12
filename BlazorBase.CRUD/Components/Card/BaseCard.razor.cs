@@ -12,6 +12,7 @@ using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Models;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
@@ -296,6 +297,11 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         catch (CRUDException e)
         {
             ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
+            success = false;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            ShowFormattedInvalidFeedback(Localizer["Another user has modified the data for this {0} after you retrieved it from the database. Reload the view and reenter your changes.", SingleDisplayName ?? String.Empty]);
             success = false;
         }
         catch (Exception e)
