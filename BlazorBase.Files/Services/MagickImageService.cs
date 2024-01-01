@@ -1,5 +1,4 @@
 ﻿using ImageMagick;
-using System;
 using System.Threading.Tasks;
 
 namespace BlazorBase.Files.Services;

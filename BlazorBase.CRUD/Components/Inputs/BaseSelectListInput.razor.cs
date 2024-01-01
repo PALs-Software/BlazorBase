@@ -127,6 +127,18 @@ public partial class BaseSelectListInput : BaseInput
         UpdateSelectedValue();
     }
 
+    protected override void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
+    {
+        if (!propertyNames.Contains(Property.Name))
+            return;
+
+        UpdateSelectedValue();
+        if (IsReadOnly)
+            ReadOnlyDisplayValue = GetReadOnlyDisplayText();
+
+        base.Model_OnForcePropertyRepaint(sender, propertyNames);
+    }
+
     protected virtual string GetReadOnlyDisplayText()
     {
         var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == SelectedValue);

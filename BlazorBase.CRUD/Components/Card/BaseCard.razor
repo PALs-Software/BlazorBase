@@ -94,7 +94,7 @@
                                                     {
                                                         <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="ForeignKeyProperties[displayItem.Property]" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
-                                                    else if (displayItem.Property.PropertyType.IsEnum)
+                                                    else if (displayItem.Property.PropertyType.IsEnum || Nullable.GetUnderlyingType(displayItem.Property.PropertyType)?.IsEnum == true)
                                                     {
                                                         <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="GetEnumValues(displayItem.Property.PropertyType)" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }

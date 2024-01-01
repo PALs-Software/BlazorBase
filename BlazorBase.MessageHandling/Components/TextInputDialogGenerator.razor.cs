@@ -99,7 +99,7 @@ public partial class TextInputDialogGenerator
     #region Modal
     protected void OnModalClosed(Guid id)
     {
-        ModalInfos.TryRemove(id, out ModalInfo _);
+        ModalInfos.TryRemove(id, out var _);
     }
 
     protected async Task OnModalClosing(ModalInfo modalInfo, ModalClosingEventArgs args)
