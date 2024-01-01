@@ -422,6 +422,20 @@ public partial class BaseListPart : BaseDisplayComponent
             await baseModel.OnAfterMoveEntryDown(new OnAfterMoveEntryDownArgs(Model, EventServices));
     }
 
+    protected async Task OnBeforeListPropertyChangedAsync(OnBeforePropertyChangedArgs args)
+    {
+        var listArgs = new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices);
+        await OnBeforeListPropertyChanged.InvokeAsync(listArgs);
+        await Model.OnBeforeListPropertyChanged(listArgs);
+    }
+
+    protected async Task OnAfterListPropertyChangedAsync(OnAfterPropertyChangedArgs args)
+    {
+        var listArgs = new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices);
+        await OnAfterListPropertyChanged.InvokeAsync(listArgs);
+        await Model.OnAfterListPropertyChanged(listArgs);
+    }
+
     #endregion
 
     #region Parent Events

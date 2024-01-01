@@ -56,3 +56,7 @@
     --icon-color: #484848;
     --button-icon-color: #fff
 }
+
+input[type=date], input[type=datetime], input[type=datetime-local] {
+    color-scheme: light;
+}

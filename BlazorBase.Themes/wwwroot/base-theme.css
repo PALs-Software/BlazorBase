@@ -100,12 +100,6 @@
         background-color: var(--form-background);
     }
 
-input[type=date],
-input[type=datetime],
-input[type=datetime-local] {
-    color-scheme: dark;
-}
-
 .fas {
     color: var(--icon-color);
 }

@@ -36,7 +36,6 @@ namespace BlazorBase.CRUD.NumberSeries
         public string EndingNo { get; set; } = default!;
 
         [Visible]
-        [Editable(false)]
         public string? LastNoUsed { get; set; }
 
         public long EndingNoNumeric { get; set; }
