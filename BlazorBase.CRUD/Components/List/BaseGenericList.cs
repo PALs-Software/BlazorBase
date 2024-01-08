@@ -22,6 +22,8 @@ using BlazorBase.CRUD.Components.Card;
 using BlazorBase.Models;
 using Newtonsoft.Json;
 using BlazorBase.CRUD.Components.PageActions.Models;
+using BlazorBase.CRUD.Attributes;
+using System.Reflection;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -33,7 +35,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     [Parameter] public bool HideTitle { get; set; } = false;
     [Parameter] public string? SingleDisplayName { get; set; }
-    [Parameter] public string? ExplainText { get; set; }
+    [Parameter] public ExplainText? ExplainText { get; set; }
     [Parameter] public string? PluralDisplayName { get; set; }
     [Parameter] public List<Expression<Func<IBaseModel, bool>>>? DataLoadConditions { get; set; }
 
@@ -41,11 +43,12 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Parameter] public bool Sortable { get; set; } = true;
     [Parameter] public bool Filterable { get; set; } = true;
     [Parameter] public bool StickyRowButtons { get; set; } = true;
+    [Parameter] public bool HideRowButtons { get; set; } = false;
     [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
 
     [Parameter] public RenderFragment<TModel>? AdditionalRowButtons { get; set; }
-    [Parameter] public RenderFragment<PageActionGroup> AdditionalHeaderPageActions { get; set; } = null!;
+    [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs> AdditionalHeaderPageActions { get; set; } = null!;
 
     #region Style
     [Parameter] public string? TableClass { get; set; }
@@ -71,7 +74,6 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Inject] public BaseService Service { get; set; } = null!;
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseList<TModel>> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected BaseParser BaseParser { get; set; } = null!;
     [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
@@ -137,11 +139,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         else
             PluralDisplayName = ModelLocalizer[PluralDisplayName];
 
-        if (String.IsNullOrEmpty(ExplainText))
-            ExplainText = ModelLocalizer["ExplainText"];
-
-        if (ExplainText == "ExplainText")
-            ExplainText = null;
+        if (ExplainText == null && ModelLocalizer["ExplainText"] != "ExplainText")
+            ExplainText = new ExplainText(ModelLocalizer["ExplainText"], ModelLocalizer["ExplainText_Location"] == "Bottom" ? ExplainTextLocation.Bottom : ExplainTextLocation.Top);
     }
 
     protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
@@ -355,6 +354,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         var baseService = ServiceProvider.GetRequiredService<BaseService>();
         var scopedModel = await baseService.GetAsync<TModel>(model.GetPrimaryKeys());
+
         if (scopedModel == null)
             return;
 

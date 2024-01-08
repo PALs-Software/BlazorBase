@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace BlazorBase.Files.Services;
 
 // System.Drawing.Common currently not supporting webp images -> loading throws error !!!
+#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
 
 public class NativeImageService : IImageService
 {
@@ -46,6 +47,7 @@ public class NativeImageService : IImageService
         var inputImage = Image.FromStream(inputMemoryStream);
         var outputImage = ResizeImage(inputImage, width, height);
         using var outputMemoryStream = new MemoryStream();
+
         outputImage.Save(outputMemoryStream, inputImage.RawFormat);
 
         inputImage.Dispose();
@@ -97,3 +99,5 @@ public class NativeImageService : IImageService
         return resultImage;
     }
 }
+
+#pragma warning restore CA1416 // Plattformkompatibilität überprüfen

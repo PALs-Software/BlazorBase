@@ -27,9 +27,15 @@ public class ExtendedInformationBaseModel : BaseModel
     public override async Task OnBeforeDbContextAddEntry(OnBeforeDbContextAddEntryArgs args)
     {
         await base.OnBeforeDbContextAddEntry(args);
+
         var userName = await GetCurrentUserNameAsync(args.EventServices.ServiceProvider);
         if (userName != null)
-            LastModifiedBy = CreatedBy = userName;
+        {
+            if (String.IsNullOrEmpty(CreatedBy))
+                CreatedBy = userName;
+
+            LastModifiedBy = userName;
+        }
     }
 
     public override async Task OnBeforeDbContextModifyEntry(OnBeforeDbContextModifyEntryArgs args)

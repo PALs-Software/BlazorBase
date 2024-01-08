@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using BlazorBase.CRUD.EventArguments;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.AspNetCore.Components.Routing;
+using BlazorBase.CRUD.ViewModels;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -29,6 +30,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
     [Parameter] public EventCallback OnCardClosed { get; set; }
     [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
     [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
+    [Parameter] public EventCallback<OnShowEntryArgs> OnShowEntry { get; set; }
     [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
     [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
     [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -37,6 +39,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
     [Parameter] public EventCallback<OnBeforePropertyChangedArgs> OnBeforePropertyChanged { get; set; }
     [Parameter] public EventCallback<OnAfterPropertyChangedArgs> OnAfterPropertyChanged { get; set; }
     [Parameter] public EventCallback<OnAfterCardSaveChangesArgs> OnAfterSaveChanges { get; set; }
+    [Parameter] public EventCallback<OnBeforeCardSaveChangesArgs> OnBeforeSaveChanges { get; set; }
     #endregion
 
     #region List Part Events
@@ -74,6 +77,8 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
     protected bool IsSelfNavigating = false;
     protected string ListNavigationBasePath = null!;
     protected EventHandler<LocationChangedEventArgs>? LocationEventHandler;
+
+    protected bool CardIsCurrentlyInAddingMode = false;
     #endregion
 
     #region Init
@@ -225,7 +230,10 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             return;
 
         if (BaseModalCard != null)
+        {
+            CardIsCurrentlyInAddingMode = true;
             await BaseModalCard.ShowModalAsync(addingMode: true, template: template);
+        }   
     }
 
     public virtual async Task EditEntryAsync(TModel entry, bool changeQueryUrl = true)
@@ -240,7 +248,10 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             return;
 
         if (BaseModalCard != null)
+        {
+            CardIsCurrentlyInAddingMode = false;
             await BaseModalCard.ShowModalAsync(addingMode: false, viewMode: false, entry.GetPrimaryKeys());
+        }   
     }
 
     public virtual async Task ViewEntryAsync(TModel entry, bool changeQueryUrl = true)
@@ -255,7 +266,10 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             return;
 
         if (BaseModalCard != null)
+        {
+            CardIsCurrentlyInAddingMode = false;
             await BaseModalCard.ShowModalAsync(addingMode: false, viewMode: true, entry.GetPrimaryKeys());
+        }   
     }
 
     public virtual void HideCardModal()
@@ -264,6 +278,11 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             BaseModalCard.HideModal();
     }
 
+
+    #endregion
+
+    #region Events
+
     protected virtual async Task OnCardClosedAsync()
     {
         if (VirtualizeList != null)
@@ -271,6 +290,22 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
         ChangeUrlToList();
 
         await OnCardClosed.InvokeAsync();
+    }
+
+    public virtual Task OnBeforeSaveChangesAsync(OnBeforeCardSaveChangesArgs args)
+    {
+        CardIsCurrentlyInAddingMode = BaseModalCard?.CardIsInAddingMode() ?? false;
+        return OnBeforeSaveChanges.InvokeAsync(args);
+    }
+
+    public virtual Task OnAfterSaveChangesAsync(OnAfterCardSaveChangesArgs args)
+    {
+        var isInAddingMode = BaseModalCard?.CardIsInAddingMode() ?? false;
+        if (CardIsCurrentlyInAddingMode && !isInAddingMode && args.Model is TModel model)
+            ChangeUrlToEntry(model);
+
+        CardIsCurrentlyInAddingMode = isInAddingMode;
+        return OnAfterSaveChanges.InvokeAsync(args);
     }
     #endregion
 }

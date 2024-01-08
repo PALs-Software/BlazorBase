@@ -28,16 +28,19 @@ namespace BlazorBase.CRUD.Components.General
     {
         #region Parameter
         [Parameter] public EventCallback<OnAfterGetVisiblePropertiesArgs> OnAfterGetVisibleProperties { get; set; }
+        [Parameter] public EventCallback<OnAfterSetUpDisplayListsArgs> OnAfterSetUpDisplayLists { get; set; }
         #endregion
 
-        #region Injects
+        #region Injects        
+        [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
         [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; } = null!;
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; } = null!;
+        [Inject] protected BaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
         #endregion
 
         #region Protected Properties
-        protected virtual List<PropertyInfo> VisibleProperties { get; set; } = new();
+        protected virtual Dictionary<PropertyInfo, DisplayItem> VisibleProperties { get; set; } = new();
         protected virtual Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new();
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string?, string>>> ForeignKeyProperties { get; set; } = null!;
         protected static ConcurrentDictionary<long, List<KeyValuePair<string?, string>>> CachedEnumValueDictionary { get; set; } = new();
@@ -50,15 +53,15 @@ namespace BlazorBase.CRUD.Components.General
         protected bool ShowInvalidFeedback = false;
         #endregion
 
-        protected virtual async Task<List<PropertyInfo>> GetVisiblePropertiesAsync(Type modelType, GUIType guiType, IBaseModel? componentModelInstance = null)
+        protected virtual async Task<List<PropertyInfo>> GetVisiblePropertiesAsync(Type modelType, GUIType guiType, List<string> userRoles, IBaseModel? componentModelInstance = null)
         {
             List<PropertyInfo> visibleProperties;
             if (componentModelInstance == null)
-                visibleProperties = modelType.GetVisibleProperties(guiType);
+                visibleProperties = modelType.GetVisibleProperties(guiType, userRoles);
             else
-                visibleProperties = componentModelInstance.GetVisibleProperties(guiType);
+                visibleProperties = componentModelInstance.GetVisibleProperties(guiType, userRoles);
 
-            var args = new OnAfterGetVisiblePropertiesArgs(modelType, guiType, componentModelInstance, visibleProperties);
+            var args = new OnAfterGetVisiblePropertiesArgs(modelType, guiType, componentModelInstance, visibleProperties, userRoles);
             await OnAfterGetVisibleProperties.InvokeAsync(args);
 
             return args.VisibleProperties;
@@ -66,11 +69,14 @@ namespace BlazorBase.CRUD.Components.General
 
         protected virtual async Task SetUpDisplayListsAsync(Type modelType, GUIType guiType, IBaseModel? componentModelInstance = null)
         {
-            VisibleProperties = await GetVisiblePropertiesAsync(modelType, guiType, componentModelInstance);
+            var userRoles = await BaseAuthenticationService.GetUserRolesAsync();
+            VisibleProperties = new();
+            var visibleProperties = await GetVisiblePropertiesAsync(modelType, guiType, userRoles, componentModelInstance);
 
-            foreach (var property in VisibleProperties)
+            foreach (var property in visibleProperties)
             {
-                var displayItem = DisplayItem.CreateFromProperty(property, guiType, BaseDisplayComponentLocalizer["General"]);
+                var displayItem = DisplayItem.CreateFromProperty(property, guiType, ServiceProvider, userRoles, BaseDisplayComponentLocalizer["General"]);
+                VisibleProperties.Add(property, displayItem);
 
                 if (!DisplayGroups.ContainsKey(displayItem.Attribute.DisplayGroup ?? String.Empty))
                     DisplayGroups[displayItem.Attribute.DisplayGroup ?? String.Empty] = new DisplayGroup(displayItem.Attribute, new List<DisplayItem>());
@@ -79,6 +85,9 @@ namespace BlazorBase.CRUD.Components.General
             }
 
             SortDisplayLists();
+
+            var args = new OnAfterSetUpDisplayListsArgs(modelType, guiType, componentModelInstance, VisibleProperties, DisplayGroups, userRoles);
+            await OnAfterSetUpDisplayLists.InvokeAsync(args);
         }
 
         protected virtual void SortDisplayLists()
@@ -99,10 +108,10 @@ namespace BlazorBase.CRUD.Components.General
 
             ForeignKeyProperties = new Dictionary<PropertyInfo, List<KeyValuePair<string?, string>>>();
 
-            var foreignKeyProperties = VisibleProperties.Where(entry => entry.IsForeignKey());
-            foreach (var foreignKeyProperty in foreignKeyProperties)
+            var foreignKeyProperties = VisibleProperties.Where(entry => entry.Key.IsForeignKey());
+            foreach (var foreignKeyPropertyPair in foreignKeyProperties)
             {
-                var isReadonly = foreignKeyProperty.IsReadOnlyInGUI();
+                var foreignKeyProperty = foreignKeyPropertyPair.Key;
                 var foreignKey = foreignKeyProperty.GetCustomAttribute(typeof(ForeignKeyAttribute)) as ForeignKeyAttribute;
                 if (foreignKey == null)
                     continue;
@@ -120,6 +129,13 @@ namespace BlazorBase.CRUD.Components.General
                 if (!typeof(IBaseModel).IsAssignableFrom(foreignKeyType))
                     continue;
 
+                if (foreignKeyType.IsInterface)
+                {
+                    var type = ServiceProvider.GetService(foreignKeyType)?.GetType();
+                    if (type != null && typeof(IBaseModel).IsAssignableFrom(type))
+                        foreignKeyType = type;
+                }
+
                 if (CachedForeignKeys.ContainsKey(foreignKeyType))
                 {
                     ForeignKeyProperties.Add(foreignKeyProperty, CachedForeignKeys[foreignKeyType]);
@@ -132,7 +148,7 @@ namespace BlazorBase.CRUD.Components.General
                     new KeyValuePair<string?, string>(null, String.Empty)
                 };
 
-                if (isReadonly && instance != null)
+                if (foreignKeyPropertyPair.Value.IsReadOnly && instance != null)
                 {
                     var foreignKeyValue = foreignKeyProperty.GetValue(instance);
                     if (foreignKeyValue != null)
@@ -175,7 +191,7 @@ namespace BlazorBase.CRUD.Components.General
         {
             UsesCustomLookupDataProperties.Clear();
 
-            var properties = VisibleProperties.Where(entry => entry.UsesCustomLookupData());
+            var properties = VisibleProperties.Keys.Where(entry => entry.UsesCustomLookupData());
             foreach (var property in properties)
             {
                 var useCustomLookupData = property.GetCustomAttribute<UseCustomLookupData>();
@@ -211,9 +227,12 @@ namespace BlazorBase.CRUD.Components.General
         protected virtual List<KeyValuePair<string?, string>> GetEnumValues(Type enumType)
         {
             long key = GetEnumTypeDictionaryKey(enumType);
-
             if (CachedEnumValueDictionary.ContainsKey(key))
                 return CachedEnumValueDictionary[key];
+
+            var underlyingType = Nullable.GetUnderlyingType(enumType);
+            if (underlyingType != null)
+                enumType = underlyingType;
 
             var result = new List<KeyValuePair<string?, string>>();
             var values = Enum.GetNames(enumType);
@@ -280,6 +299,7 @@ namespace BlazorBase.CRUD.Components.General
             {
                 Property = property;
                 Attribute = attribute;
+                GUIType = guiType;
                 IsReadOnly = isReadonly;
                 IsKey = isKey;
                 IsListProperty = isListProperty;
@@ -329,6 +349,7 @@ namespace BlazorBase.CRUD.Components.General
 
             public PropertyInfo Property { get; set; }
             public VisibleAttribute Attribute { get; set; }
+            public GUIType GUIType { get; set; }
             public bool IsReadOnly { get; set; }
             public bool IsKey { get; set; }
             public bool IsListProperty { get; set; }
@@ -341,15 +362,15 @@ namespace BlazorBase.CRUD.Components.General
             public bool IsSortable { get; set; }
             public bool IsFilterable { get; set; }
 
-            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty<T>(string propertyName, GUIType guiType, IServiceProvider serviceProvider, List<string>? userRoles = null, string? defaultDisplayGroup = null)
             {
                 var property = typeof(T).GetProperty(propertyName);
                 if (property == null)
                     throw new Exception($"The property with the given property name \"{propertyName}\" does not exists");
-                return CreateFromProperty(property, guiType, defaultDisplayGroup);
+                return CreateFromProperty(property, guiType, serviceProvider, userRoles, defaultDisplayGroup);
             }
 
-            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, string? defaultDisplayGroup = null)
+            public static DisplayItem CreateFromProperty(PropertyInfo property, GUIType guiType, IServiceProvider serviceProvider, List<string>? userRoles = null, string? defaultDisplayGroup = null)
             {
                 var attribute = property.GetCustomAttributes(typeof(VisibleAttribute)).FirstOrDefault() as VisibleAttribute;
                 if (attribute == null)
@@ -365,7 +386,7 @@ namespace BlazorBase.CRUD.Components.General
                     var foreignKey = property.GetCustomAttribute<ForeignKeyAttribute>();
                     if (foreignKey != null && foreignKey.Name.Contains(",")) // Reference has more than one primary key
                     {
-                        return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(),
+                        return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(guiType, userRoles),
                                 property.IsKey(), property.IsListProperty(), dateInputMode,
                                 property.Name, property.PropertyType,
                                 false, attribute.SortDirection, false)
@@ -377,7 +398,7 @@ namespace BlazorBase.CRUD.Components.General
                 bool sortAndFilterable;
                 if (customPropertyPath == null)
                 {
-                    displayPathAndType = property.GetDisplayPropertyPathAndType();
+                    displayPathAndType = property.GetDisplayPropertyPathAndType(serviceProvider);
                     sortAndFilterable = property.GetPropertyIsSortAndFilterable();
                 }
                 else
@@ -386,7 +407,7 @@ namespace BlazorBase.CRUD.Components.General
                     sortAndFilterable = true;
                 }
 
-                return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(),
+                return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(guiType, userRoles),
                     property.IsKey(), property.IsListProperty(), dateInputMode,
                     displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
                     sortAndFilterable, attribute.SortDirection, sortAndFilterable)

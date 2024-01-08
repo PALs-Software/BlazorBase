@@ -52,10 +52,11 @@ public partial class BaseInput
 
     #endregion
 
-    #region Injects        
+    #region Injects
     [Inject] protected BaseParser BaseParser { get; set; } = null!;
     [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
+    [Inject] protected BaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
     #endregion
 
     #region Members
@@ -94,7 +95,7 @@ public partial class BaseInput
         Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
 
         if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
+            IsReadOnly = Property.IsReadOnlyInGUI(DisplayItem.GUIType, await BaseAuthenticationService.GetUserRolesAsync());
         else
             IsReadOnly = ReadOnly.Value;
 
@@ -154,7 +155,7 @@ public partial class BaseInput
             return;
 
         if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
+            IsReadOnly = Property.IsReadOnlyInGUI(DisplayItem.GUIType, await BaseAuthenticationService.GetUserRolesAsync());
         else
             IsReadOnly = ReadOnly.Value;
 
@@ -171,7 +172,7 @@ public partial class BaseInput
     #endregion
 
     #region Events        
-    private void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
+    protected virtual void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
     {
         if (!propertyNames.Contains(Property.Name))
             return;
@@ -259,7 +260,7 @@ public partial class BaseInput
                 newValue = newValueAsString.EncryptString();
 
             Property.SetValue(Model, newValue);
-            var valid = await ValidatePropertyValueAsync();
+            var valid = await ValidatePropertyValueAsync(calledFromOnValueChangedAsync: true);
 
             if (valid)
                 await ReloadForeignProperties(newValue);
@@ -296,7 +297,7 @@ public partial class BaseInput
 
     #region Validation
 
-    public async Task<bool> ValidatePropertyValueAsync()
+    public virtual async Task<bool> ValidatePropertyValueAsync(bool calledFromOnValueChangedAsync = false)
     {
         if (LastValueConversionFailed)
             return false;
@@ -355,17 +356,14 @@ public partial class BaseInput
 
     protected async Task RaiseOnFormatPropertyEventsAsync()
     {
-        try
-        {
-            var formatArgs = new OnFormatPropertyArgs(Model, Property.Name, InputAttributes, FeedbackClass, InputClass, Feedback, GetEventServices());
-            await OnFormatProperty.InvokeAsync(formatArgs);
-            await Model.OnFormatProperty(formatArgs);
+        var formatArgs = new OnFormatPropertyArgs(Model, Property.Name, InputAttributes, FeedbackClass, InputClass, Feedback, IsReadOnly, GetEventServices());
+        await OnFormatProperty.InvokeAsync(formatArgs);
+        await Model.OnFormatProperty(formatArgs);
 
-            FeedbackClass = formatArgs.FeedbackClass;
-            InputClass = formatArgs.InputClass;
-            Feedback = formatArgs.Feedback;
-        }
-        catch (Exception) { }
+        FeedbackClass = formatArgs.FeedbackClass;
+        InputClass = formatArgs.InputClass;
+        Feedback = formatArgs.Feedback;
+        IsReadOnly = formatArgs.IsReadOnly;
     }
 
     #endregion

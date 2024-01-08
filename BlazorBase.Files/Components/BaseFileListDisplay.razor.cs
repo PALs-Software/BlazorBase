@@ -48,7 +48,7 @@ public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDispl
 
     public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
     {
-        return Task.FromResult(typeof(BaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
+        return Task.FromResult(typeof(IBaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
     }
     #endregion
 }

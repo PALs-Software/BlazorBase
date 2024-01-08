@@ -114,7 +114,7 @@ public partial class LoadingMessageGenerator
         loadingProgressArgs.CurrentProgress = progressArgs.CurrentProgress;
         loadingProgressArgs.ShowProgressInText = progressArgs.ShowProgressInText;
 
-        InvokeAsync(() => { StateHasChanged(); });
+        InvokeAsync(StateHasChanged);
         return true;
     }
 
@@ -139,7 +139,7 @@ public partial class LoadingMessageGenerator
     #region Close
     public bool CloseLoadingMessage(Guid id)
     {
-        var success = LoadingMessages.TryRemove(id, out ShowLoadingMessageArgs _);
+        var success = LoadingMessages.TryRemove(id, out var _);
         InvokeAsync(StateHasChanged);
         return success;
     }

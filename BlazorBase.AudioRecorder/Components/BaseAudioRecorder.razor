@@ -1,0 +1,44 @@
+﻿
+
+<div class="base-audio-recorder @Class">
+
+    <LoadingIndicator Visible="ShowLoadingIndicator">
+        @Localizer["Recording is being uploaded..."]
+        <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
+            <ProgressBar Value="(int)UploadProgress.Percentage" Animated="true" Striped="true">
+                @((int)UploadProgress.Percentage) %
+            </ProgressBar>
+        </Progress>
+    </LoadingIndicator>
+
+    @switch (AudioRecordState)
+    {
+        case BaseAudioRecordState.Stopped:
+            <Button Color="Color.Primary" Clicked="StartAudioRecord" title="@Localizer["Starts a new recording"]"><BaseIcon IconName="FontAwesomeIcons.Microphone" /></Button>
+            break;
+
+        case BaseAudioRecordState.Recording:
+            <span>@Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")</span>
+            <Button Color="Color.Secondary" Clicked="PauseAudioRecord" title="@Localizer["Pauses the current recording"]"><BaseIcon IconName="FontAwesomeIcons.PauseCircle" /></Button>
+            <Button Color="Color.Primary" Clicked="StopAudioRecord" title="@Localizer["Saves the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Save" /></Button>
+            <Button Color="Color.Danger" Clicked="CancelAudioRecord" title="@Localizer["Cancels the current recording"]"><BaseIcon IconName="FontAwesomeIcons.TimesCircle" /></Button>
+            break;
+
+        case BaseAudioRecordState.Paused:
+            <span>@Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")</span>
+            <Button Color="Color.Secondary" Clicked="ResumeAudioRecord" title="@Localizer["Resumes the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Microphone" /></Button>
+            <Button Color="Color.Primary" Clicked="StopAudioRecord" title="@Localizer["Saves the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Save" /></Button>
+            <Button Color="Color.Danger" Clicked="CancelAudioRecord" title="@Localizer["Cancels the current recording"]"><BaseIcon IconName="FontAwesomeIcons.TimesCircle" /></Button>
+            break;
+    }
+
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+
+    @if (ShowAudioResultDirectly && !String.IsNullOrEmpty(ClientAudioBlobUrl))
+    {
+        <audio controls autoplay src=@ClientAudioBlobUrl></audio>
+    }
+</div>

@@ -1,10 +1,7 @@
-﻿using BlazorBase.Themes.Models;
-using Blazorise;
+﻿using Blazorise;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BlazorBase.Themes.Components
@@ -25,6 +22,7 @@ namespace BlazorBase.Themes.Components
 
         void OnThemeChanged(ThemeContrast theme)
         {
+            /*
             var baseTheme = (BaseTheme)Theme;
 
             baseTheme.ThemeContrast = theme;
@@ -43,6 +41,7 @@ namespace BlazorBase.Themes.Components
                 default:
                     break;
             }
+            */
 
             Theme.ThemeHasChanged();
         }

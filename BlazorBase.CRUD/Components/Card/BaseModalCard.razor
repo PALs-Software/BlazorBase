@@ -1,4 +1,6 @@
-﻿@typeparam TModel
+﻿@using BlazorBase.CRUD.Models;
+@using BlazorBase.Modules;
+@typeparam TModel
 
 <div class="base-card">
     <Modal @ref="Modal" Class="modal-fullscreen" Closing="async (args) => await OnModalClosing(args)">
@@ -17,6 +19,14 @@
                 </ModalTitle>
                 <CloseButton />
             </ModalHeader>
+            @if (ExplainText != null && ExplainText.Location == ExplainTextLocation.Top)
+            {
+                <ModalHeader Class="base-card-explain-text">
+                    <div>
+                        @BaseMarkupStringValidator.GetWhiteListedMarkupString(ExplainText.Text)
+                    </div>
+                </ModalHeader>
+            }
             <ModalBody>
                 <BaseCard @ref="BaseCard"
                           TModel="TModel"
@@ -26,8 +36,11 @@
                           ShowEntryByStart="ShowEntryByStart"
                           ComponentModelInstance="ComponentModelInstance"
                           EntryToBeShownByStart="EntryToBeShownByStart"
+                          OnShowEntry="OnShowEntry"
+                          AdditionalHeaderPageActions="AdditionalHeaderPageActions"
                           OnTitleCalculated="OnTitleCalculated"
                           OnAfterGetVisibleProperties="GetVisiblePropertiesAsync"
+                          OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
                           OnCreateNewEntryInstance="OnCreateNewEntryInstance"
                           OnGuiLoadData="OnGuiLoadData"
                           OnBeforeAddEntry="OnBeforeAddEntry"
@@ -50,14 +63,12 @@
                           OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
                           OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
             </ModalBody>
-            @if (!String.IsNullOrEmpty(ExplainText))
+            @if (ExplainText != null && ExplainText.Location == ExplainTextLocation.Bottom)
             {
-                <ModalFooter Style="justify-content:flex-start">
-                    @foreach (var item in ExplainText.Split(new string[] { Environment.NewLine }, StringSplitOptions.None))
-                    {
-                        @item
-                        <br />
-                    }
+                <ModalFooter Class="base-card-explain-text">
+                    <div>
+                        @BaseMarkupStringValidator.GetWhiteListedMarkupString(ExplainText.Text)
+                    </div>
                 </ModalFooter>
             }
             <ModalFooter>

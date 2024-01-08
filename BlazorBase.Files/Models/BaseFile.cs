@@ -8,20 +8,16 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using BlazorBase.CRUD.ViewModels;
-using System.Security.Cryptography;
 using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using System.Reflection;
-using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.DependencyInjection;
 using BlazorBase.Files.Services;
 
 namespace BlazorBase.Files.Models;
 
 [Route("/BaseFiles")]
-public class BaseFile : BaseModel, ISortableItem
+public class BaseFile : BaseModel, IBaseFile, ISortableItem
 {
     public int SortIndex { get; set; }
 
@@ -152,19 +148,6 @@ public class BaseFile : BaseModel, ISortableItem
         return Convert.ToBase64String(content);
     }
 
-    public virtual async Task<T> CreateCopyAsync<T>(EventServices eventServices) where T : BaseFile, new()
-    {
-        var fileContent = await GetFileContentAsync();
-
-        if (fileContent == null)
-        {
-            var localizer = eventServices.ServiceProvider.GetRequiredService<IStringLocalizer<T>>();
-            throw new Exception(localizer["The file \"{0}\" can not be copied, because file with the id \"{1}\" can not be found on the hard disk. Maybe the file was deleted on the disk, but not the file entry.", FileName, Id]);
-        }
-
-        return await CreateFileAsync<T>(eventServices, FileName, BaseFileType, MimeFileType, fileContent);
-    }
-
     protected async Task CopyTempFileToFileStoreAsync()
     {
         await Task.Run(() =>
@@ -237,80 +220,7 @@ public class BaseFile : BaseModel, ISortableItem
         property.SetValue(model, null);
     }
 
-    public static async Task<TBaseFile> CreateFileAsync<TBaseFile>(EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent) where TBaseFile : BaseFile, new()
-    {
-        var file = new TBaseFile()
-        {
-            FileName = fileName,
-            FileSize = fileContent.Length,
-            BaseFileType = baseFileType,
-            MimeFileType = mimeFileType,
-            Hash = ComputeSha256Hash(fileContent)
-        };
-
-        return (TBaseFile)await FinishCreateFileTaskAsync(file, eventServices, fileContent);
-    }
-    public static async Task<BaseFile> CreateFileAsync(Type FileType, EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent)
-    {
-        var file = (BaseFile)Activator.CreateInstance(FileType)!;
-        file.FileName = fileName;
-        file.FileSize = fileContent.Length;
-        file.BaseFileType = baseFileType;
-        file.MimeFileType = mimeFileType;
-        file.Hash = ComputeSha256Hash(fileContent);
-
-        return await FinishCreateFileTaskAsync(file, eventServices, fileContent);
-    }
-
-    protected static async Task<BaseFile> FinishCreateFileTaskAsync(BaseFile file, EventServices eventServices, byte[] fileContent)
-    {
-        await file.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(file, eventServices));
-
-        var options = BlazorBaseFileOptions.Instance;
-        if (!Directory.Exists(options.TempFileStorePath))
-            Directory.CreateDirectory(options.TempFileStorePath);
-
-        string tempFilePath;
-        do
-        {
-            file.TempFileId = Guid.NewGuid();
-            tempFilePath = Path.Join(options.TempFileStorePath, file.GetPhysicalTemporaryFileName());
-        } while (File.Exists(tempFilePath));
-
-        await File.WriteAllBytesAsync(tempFilePath, fileContent);
-
-        if (options.UseImageThumbnails && file.IsImage())
-        {
-            var imageService = eventServices.ServiceProvider.GetRequiredService<IImageService>();
-            await file.CreateThumbnailAsync(imageService, fileContent);
-        }
-
-        return file;
-    }
-
-    public static string ComputeSha256Hash(Func<SHA256, byte[]> computeHash)
-    {
-        using SHA256 sha256Hash = SHA256.Create();
-        byte[] Hashbytes = computeHash(sha256Hash);
-
-        var hash = String.Empty;
-        foreach (var hashByte in Hashbytes)
-            hash += $"{hashByte:X2}";
-
-        return hash;
-    }
-
-    public static string ComputeSha256Hash(FileStream fileStream)
-    {
-        return ComputeSha256Hash((hasher) => hasher.ComputeHash(fileStream));
-    }
-
-    public static string ComputeSha256Hash(byte[] buffer)
-    {
-        return ComputeSha256Hash((hasher) => hasher.ComputeHash(buffer));
-    }
-
-    public void RecalculateHashAndSize()
+    public void RecalculateHashAndSize(IBaseFileService baseFileService)
     {
         var path = GetPhysicalFilePath();
         if (!File.Exists(path))
@@ -321,12 +231,13 @@ public class BaseFile : BaseModel, ISortableItem
         }
 
         var bytes = File.ReadAllBytes(path);
-        Hash = ComputeSha256Hash(bytes);
+        Hash = baseFileService.ComputeSha256Hash(bytes);
         FileSize = bytes.Length;
     }
     #endregion
 
-    #region File Type
+    #region File Type   
+
     public bool IsImage()
     {
         return MimeFileType?.StartsWith("image") ?? false;

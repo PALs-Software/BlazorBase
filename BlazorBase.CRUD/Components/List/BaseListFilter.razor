@@ -13,7 +13,7 @@
         @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
         {
             <th class="@displayItem.CustomizationClasses[CustomizationLocation.ListHeaderCell]" style="@displayItem.CustomizationStyles[CustomizationLocation.ListHeaderCell]">
-                @if (displayItem.IsFilterable && (AllowedFilterTypes.Contains(displayItem.DisplayPropertyType) || displayItem.DisplayPropertyType.IsEnum))
+                @if (displayItem.IsFilterable && (AllowedFilterTypes.Contains(displayItem.DisplayPropertyType) || displayItem.DisplayPropertyType.IsEnum || Nullable.GetUnderlyingType(displayItem.DisplayPropertyType)?.IsEnum == true))
                 {
                     <Addons Class="flex-nowrap">
 
@@ -49,7 +49,7 @@
                         {
                             <BaseTextFilterInput @ref="AddToComponents" Value="@displayItem.FilterValue?.ToString()"  OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" />
                         }
-                        else if (displayItem.DisplayPropertyType.IsEnum)
+                        else if (displayItem.DisplayPropertyType.IsEnum || Nullable.GetUnderlyingType(displayItem.DisplayPropertyType)?.IsEnum == true)
                         {
                             <SelectList @ref="AddToComponents" SelectedValue="@displayItem.FilterValue?.ToString()" Data="@GetEnumValues(displayItem.DisplayPropertyType)" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (v) => await FilterChangedAsync(displayItem, v)" Class="form-control" />
                         }

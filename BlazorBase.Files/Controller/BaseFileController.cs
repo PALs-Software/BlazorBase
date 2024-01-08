@@ -29,7 +29,9 @@ namespace BlazorBase.Files.Controller
 
         #region Base File Download
 
+#pragma warning disable ASP0023 // Route conflict detected between controller actions -> Issue is wrong because action name is prefixed
         [HttpGet("{id}/{fileName}")]
+#pragma warning restore ASP0023 // Route conflict detected between controller actions
         public virtual async Task<IActionResult> GetFile(string id, string fileName, bool thumbnail = false)
         {
             if (!Guid.TryParse(id, out Guid result))
@@ -55,7 +57,9 @@ namespace BlazorBase.Files.Controller
             return PhysicalFile(filePath, mimeType);
         }
 
+#pragma warning disable ASP0023 // Route conflict detected between controller actions -> Issue is wrong because action name is prefixed
         [HttpGet("{temporaryFileId}/{fileName}")]
+#pragma warning restore ASP0023 // Route conflict detected between controller actions
         public virtual async Task<IActionResult> GetTemporaryFile(string temporaryFileId, string fileName, bool thumbnail = false)
         {
             if (!Guid.TryParse(temporaryFileId, out Guid result))

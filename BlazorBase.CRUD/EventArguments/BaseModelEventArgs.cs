@@ -10,11 +10,11 @@ using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 namespace BlazorBase.CRUD.EventArguments
 {
     #region DbContext
-    public record OnBeforeDbContextAddEntryArgs(EventServices EventServices);
+    public record OnBeforeDbContextAddEntryArgs(EventServices EventServices, List<object> AdditionalEntriesAdded);
     public record OnAfterDbContextAddedEntryArgs(EventServices EventServices);
-    public record OnBeforeDbContextModifyEntryArgs(EventServices EventServices);
+    public record OnBeforeDbContextModifyEntryArgs(EventServices EventServices, List<object> AdditionalEntriesModified);
     public record OnAfterDbContextModifiedEntryArgs(EventServices EventServices);
-    public record OnBeforeDbContextDeleteEntryArgs(EventServices EventServices);
+    public record OnBeforeDbContextDeleteEntryArgs(EventServices EventServices, List<object> AdditionalEntriesDeleted);
     public record OnAfterDbContextDeletedEntryArgs(EventServices EventServices);
     #endregion
 
@@ -26,16 +26,20 @@ namespace BlazorBase.CRUD.EventArguments
     }
     public record OnFormatPropertyArgs(IBaseModel Model, string PropertyName, Dictionary<string, object> InputAttributes, EventServices EventServices)
     {
-        public OnFormatPropertyArgs(IBaseModel model, string propertyName, Dictionary<string, object> inputAttributes, string? feedbackClass, string? inputClass, string? feedback, EventServices eventServices) : this(model, propertyName, inputAttributes, eventServices)
+        public OnFormatPropertyArgs(IBaseModel model, string propertyName, Dictionary<string, object> inputAttributes, string? feedbackClass, string? inputClass, string? feedback, bool isReadOnly, EventServices eventServices) : this(model, propertyName, inputAttributes, eventServices)
         {
             FeedbackClass = feedbackClass;
             InputClass = inputClass;
             Feedback = feedback;
+
+            IsReadOnly = isReadOnly;
         }
 
         public string? FeedbackClass { get; set; }
         public string? InputClass { get; set; }
         public string? Feedback { get; set; }
+
+        public bool IsReadOnly { get; set; }
     }
     public record OnBeforeConvertPropertyTypeArgs(IBaseModel Model, string PropertyName, object? OldValue, EventServices EventServices)
     {
@@ -127,17 +131,20 @@ namespace BlazorBase.CRUD.EventArguments
 
     #region Property Event Args
 
-    public record OnAfterGetVisiblePropertiesArgs(Type ModelType, GUIType GuiType, IBaseModel? ComponentModelInstance, List<PropertyInfo> VisibleProperties);
+    public record OnAfterGetVisiblePropertiesArgs(Type ModelType, GUIType GuiType, IBaseModel? ComponentModelInstance, List<PropertyInfo> VisibleProperties, List<string> UserRoles);
+
+    public record OnAfterSetUpDisplayListsArgs(Type ModelType, GUIType GuiType, IBaseModel? ComponentModelInstance, Dictionary<PropertyInfo, DisplayItem> VisiblePropertyDictionary, Dictionary<string, DisplayGroup> DisplayGroups, List<string> UserRoles);
 
     #endregion
 
     #region Data Loading
 
-    public record OnGuiLoadDataArgs(GUIType GuiType, IBaseModel Model,  EventServices EventServices)
+    public record OnGuiLoadDataArgs(GUIType GuiType, IBaseModel Model, EventServices EventServices)
     {
         public OnGuiLoadDataArgs(GUIType guiType, IBaseModel model, IQueryable<IBaseModel>? listLoadQuery, EventServices eventServices) : this(guiType, model, eventServices) => ListLoadQuery = listLoadQuery;
         public IQueryable<IBaseModel>? ListLoadQuery { get; set; }
     };
 
+    public record OnShowEntryArgs(GUIType GuiType, IBaseModel Model, bool AddingMode, bool ViewMode, Dictionary<PropertyInfo, DisplayItem> VisiblePropertyDictionary, Dictionary<string, DisplayGroup> DisplayGroups, EventServices EventServices);
     #endregion
 }

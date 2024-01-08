@@ -68,9 +68,9 @@ namespace BlazorBase.CRUD.Models
         #endregion
 
         #region Attribute Methods
-        public virtual List<PropertyInfo> GetVisibleProperties(GUIType? guiType = null)
+        public virtual List<PropertyInfo> GetVisibleProperties(GUIType guiType, List<string> userRoles)
         {
-            return GetType().GetVisibleProperties(guiType);
+            return GetType().GetVisibleProperties(guiType, userRoles);
         }
 
         private object?[]? CachedPrimaryKeys = null;

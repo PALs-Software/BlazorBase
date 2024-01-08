@@ -9,10 +9,10 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Models;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
@@ -35,6 +35,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
     [Parameter] public EventCallback<OnCreateNewEntryInstanceArgs> OnCreateNewEntryInstance { get; set; }
     [Parameter] public EventCallback<OnGuiLoadDataArgs> OnGuiLoadData { get; set; }
+    [Parameter] public EventCallback<OnShowEntryArgs> OnShowEntry { get; set; }
     [Parameter] public EventCallback<OnBeforeAddEntryArgs> OnBeforeAddEntry { get; set; }
     [Parameter] public EventCallback<OnAfterAddEntryArgs> OnAfterAddEntry { get; set; }
     [Parameter] public EventCallback<OnBeforeUpdateEntryArgs> OnBeforeUpdateEntry { get; set; }
@@ -66,13 +67,13 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; } = null;
     [Parameter] public TModel? ComponentModelInstance { get; set; } = null;
     [Parameter] public bool ShowActions { get; set; } = true;
+    [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs> AdditionalHeaderPageActions { get; set; } = null!;
     #endregion
 
     #region Injects
     [Inject] protected BaseService Service { get; set; } = null!;
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
     #endregion
 
@@ -210,6 +211,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
         Model.OnGuiLoadData(onGuiLoadDataArgs);
 
+        var onAfterShowEntryArgs = new OnShowEntryArgs(GUIType.Card, Model, addingMode, viewMode, VisibleProperties, DisplayGroups, EventServices);
+        await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
+
         await PrepareForeignKeyProperties(Service, Model);
         await PrepareCustomLookupData(Model, EventServices);
 
@@ -236,11 +240,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             return;
 
         await ShowAsync(false, ViewMode, Model.GetPrimaryKeys());
-
-        await InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
+        await InvokeAsync(StateHasChanged);
     }
 
     public virtual async Task<bool> SaveCardAsync(bool showSnackBar = true)
@@ -297,6 +297,11 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         catch (CRUDException e)
         {
             ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(e));
+            success = false;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            ShowFormattedInvalidFeedback(Localizer["Another user has modified the data for this {0} after you retrieved it from the database. Reload the view and reenter your changes.", SingleDisplayName ?? String.Empty]);
             success = false;
         }
         catch (Exception e)
@@ -457,6 +462,16 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     protected EventServices GetEventServices()
     {
         return new EventServices(ServiceProvider, ModelLocalizer, Service);
+    }
+
+    public bool CardIsInAddingMode()
+    {
+        return AddingMode;
+    }
+
+    public bool CardIsInViewMode()
+    {
+        return ViewMode;
     }
     #endregion
 }

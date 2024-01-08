@@ -13,7 +13,6 @@ public class BlazorBaseRichTextEditorOptions: IBlazorBaseRichTextEditorOptions
     #endregion
 
     #region Properties
-    public Type? ImageFileType { get; set; }
     public BaseOptionsImportMode OptionsImportMode { get; set; }
 
     public bool ResizeBigImagesToMaxImageSize { get; set; } = false;

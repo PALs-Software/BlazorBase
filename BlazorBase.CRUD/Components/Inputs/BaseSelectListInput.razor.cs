@@ -64,6 +64,14 @@ public partial class BaseSelectListInput : BaseInput
                 ForeignKeyBaseModelType = Property.PropertyType;
             else
                 ForeignKeyBaseModelType = Property.ReflectedType?.GetProperties().Where(entry => entry.Name == foreignKey!.Name).FirstOrDefault()?.PropertyType;
+
+
+            if (ForeignKeyBaseModelType != null && ForeignKeyBaseModelType.IsInterface)
+            {
+                var type = ServiceProvider.GetService(ForeignKeyBaseModelType)?.GetType();
+                if (type != null && typeof(IBaseModel).IsAssignableFrom(type))
+                    ForeignKeyBaseModelType = type;
+            }
         }
 
         UpdateSelectedValue();
@@ -117,6 +125,18 @@ public partial class BaseSelectListInput : BaseInput
         var entry = await Service.GetAsync(ForeignKeyBaseModelType!, primaryKeys);
         await OnValueChangedAsync(entry);
         UpdateSelectedValue();
+    }
+
+    protected override void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
+    {
+        if (!propertyNames.Contains(Property.Name))
+            return;
+
+        UpdateSelectedValue();
+        if (IsReadOnly)
+            ReadOnlyDisplayValue = GetReadOnlyDisplayText();
+
+        base.Model_OnForcePropertyRepaint(sender, propertyNames);
     }
 
     protected virtual string GetReadOnlyDisplayText()

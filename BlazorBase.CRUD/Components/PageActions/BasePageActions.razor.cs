@@ -1,6 +1,7 @@
 ﻿using BlazorBase.CRUD.Components.PageActions.Interfaces;
 using BlazorBase.CRUD.Components.PageActions.Models;
 using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
@@ -29,7 +30,7 @@ namespace BlazorBase.CRUD.Components.PageActions
         [Parameter] public bool ShowOnlyButtons { get; set; }
         [Parameter] public object? InvokeActionParameter { get; set; }
 
-        [Parameter] public RenderFragment<PageActionGroup>? AdditionalPageActions { get; set; } = null;
+        [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs>? AdditionalPageActions { get; set; } = null;
         #endregion
 
         #region Injects

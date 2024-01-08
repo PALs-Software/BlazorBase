@@ -1,9 +1,7 @@
 ﻿using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
-using Microsoft.AspNetCore.Components;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -20,6 +18,8 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
     protected bool ChangesFromContentSaving = false;
     protected int InitCounter = 0;
     protected string? CurrentContentBuffer = null;
+
+    protected bool HidePropertyName = false;
     #endregion
 
     protected override async Task OnInitializedAsync()
@@ -29,19 +29,6 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
         EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service);
 
         SkipCustomSetParametersAsync = true;
-    }
-
-    public override async Task SetParametersAsync(ParameterView parameters)
-    {
-        await base.SetParametersAsync(parameters);
-
-        if (Property == null || Model == null)
-            return;
-
-        if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
-        else
-            IsReadOnly = ReadOnly.Value;
     }
 
     public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
@@ -56,12 +43,23 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
         return Task.FromResult(HasContentChanges);
     }
 
+    public override async Task<bool> ValidatePropertyValueAsync(bool calledFromOnValueChangedAsync = false)
+    {
+        if (!calledFromOnValueChangedAsync)
+            await OnBeforeCardSaveChanges(null);
+
+        return await base.ValidatePropertyValueAsync();
+    }
+
     public virtual async Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs? args)
     {
-        if (BaseRichTextEditor == null)
+        CurrentContentBuffer = CurrentValueAsString;
+        if (BaseRichTextEditor == null || IsReadOnly)
             return;
 
         CurrentContentBuffer = await BaseRichTextEditor.GetContentAsync();
+        if (CurrentContentBuffer == "<p><br></p>")
+            CurrentContentBuffer = null;
 
         HasContentChanges = false;
         ChangesFromContentSaving = true;

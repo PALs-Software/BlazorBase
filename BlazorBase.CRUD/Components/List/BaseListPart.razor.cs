@@ -24,6 +24,7 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
+using BlazorBase.Services;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -56,7 +57,6 @@ public partial class BaseListPart : BaseDisplayComponent
 
     #region Injects
     [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; } = null!;
-    [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     #endregion
 
     #region Members
@@ -103,7 +103,7 @@ public partial class BaseListPart : BaseDisplayComponent
         EventServices = GetEventServices();
 
         if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
+            IsReadOnly = Property.IsReadOnlyInGUI(GUIType.ListPart, await BaseAuthenticationService.GetUserRolesAsync());
         else
             IsReadOnly = ReadOnly.Value;
 
@@ -130,10 +130,10 @@ public partial class BaseListPart : BaseDisplayComponent
         await PrepareCustomLookupData(Model, EventServices);
     }
 
-    protected override void OnParametersSet()
+    protected async override Task OnParametersSetAsync()
     {
         if (ReadOnly == null)
-            IsReadOnly = Property.IsReadOnlyInGUI();
+            IsReadOnly = Property.IsReadOnlyInGUI(GUIType.ListPart, await BaseAuthenticationService.GetUserRolesAsync());
         else
             IsReadOnly = ReadOnly.Value;
     }
@@ -420,6 +420,20 @@ public partial class BaseListPart : BaseDisplayComponent
 
         if (entry is IBaseModel baseModel)
             await baseModel.OnAfterMoveEntryDown(new OnAfterMoveEntryDownArgs(Model, EventServices));
+    }
+
+    protected async Task OnBeforeListPropertyChangedAsync(OnBeforePropertyChangedArgs args)
+    {
+        var listArgs = new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices);
+        await OnBeforeListPropertyChanged.InvokeAsync(listArgs);
+        await Model.OnBeforeListPropertyChanged(listArgs);
+    }
+
+    protected async Task OnAfterListPropertyChangedAsync(OnAfterPropertyChangedArgs args)
+    {
+        var listArgs = new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices);
+        await OnAfterListPropertyChanged.InvokeAsync(listArgs);
+        await Model.OnAfterListPropertyChanged(listArgs);
     }
 
     #endregion

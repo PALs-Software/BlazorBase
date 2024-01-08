@@ -19,24 +19,24 @@
 ::deep .base-list-part-with-sticky-row-buttons .base-list-part-actions {
     position: sticky;
     left: 0px;
-    z-index: 2;
+    z-index: 3;
     background-color: var(--card-background);
 }
 
 .table-hover tbody tr:hover {
-    background-color: var(--list-part-table-hover-background-color,#313131);
+    background-color: var(--list-part-table-hover-background-color,#ececec);
 }
 
 .base-list-part-with-sticky-row-buttons tr:hover .base-list-part-row-buttons {
     color: var(--table-hover-color);
-    background-color: var(--list-part-table-hover-background-color,#313131);
+    background-color: var(--list-part-table-hover-background-color,#ececec);
 }
 
 .base-list-part-row-selected {
     color: var(--list-part-table-row-selected-color, #000000);
-    background-color: var(--list-part-table-row-selected-background, #616161) !important;
+    background-color: var(--list-part-table-row-selected-background, #b8b8b8) !important;
 }
 
 .base-list-part-with-sticky-row-buttons .base-list-part-row-selected .base-list-part-row-buttons {
-    background-color: var(--list-part-table-row-selected-background, #616161) !important;
+    background-color: var(--list-part-table-row-selected-background, #b8b8b8) !important;
 }

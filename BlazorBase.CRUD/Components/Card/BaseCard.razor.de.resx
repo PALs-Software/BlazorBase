@@ -120,6 +120,9 @@
   <data name="Abort" xml:space="preserve">
     <value>Abbrechen</value>
   </data>
+  <data name="Another user has modified the data for this {0} after you retrieved it from the database. Reload the view and reenter your changes." xml:space="preserve">
+    <value>Ein anderer Benutzer hat die Daten für diese(n) {0} geändert, nachdem Sie sie aus der Datenbank abgerufen haben. Laden Sie die Ansicht neu und geben Sie Ihre Änderungen erneut ein.</value>
+  </data>
   <data name="Close" xml:space="preserve">
     <value>Schließen</value>
   </data>

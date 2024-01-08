@@ -1,9 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\compilerconfig.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\de.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\en.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\es.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\fr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\hr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\it.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\nl.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\Carousel\pt.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\de.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\en.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\es.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\fr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\hr.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\it.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\nl.json" />
+    <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.6\contentFiles\any\net5.0\Resources\Localization\FileEdit\pt.json" />
+  </ItemGroup>
 
   
   <ItemGroup>
@@ -11,14 +31,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazorise" Version="0.9.3.1" />
-    <PackageReference Include="Blazorise.Bootstrap" Version="0.9.3.1" />
-    <PackageReference Include="Blazorise.Components" Version="0.9.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\" />
+    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
 </Project>
