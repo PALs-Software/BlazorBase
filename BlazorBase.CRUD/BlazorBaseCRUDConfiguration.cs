@@ -3,7 +3,6 @@ using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.Translation;
 using BlazorBase.MessageHandling;
-using BlazorBase.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -29,10 +28,10 @@ public static class BlazorBaseCRUDConfiguration
 
         serviceCollection.AddSingleton(configureOptions)
         .AddTransient<IBlazorBaseCRUDOptions, TOptions>()
-        .AddSingleton<BaseParser>()
-        .AddTransient<BaseService>()
-        .AddScoped<ScopedServiceProvider>()
+        .AddTransient<IBaseDbContext, BaseDbContext>()
         .AddTransient<DbContext, TDbContextImplementation>()
+        .AddSingleton<BaseParser>()
+        .AddScoped<ScopedServiceProvider>()
         .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
 
         .AddBlazorBaseMessageHandling();
