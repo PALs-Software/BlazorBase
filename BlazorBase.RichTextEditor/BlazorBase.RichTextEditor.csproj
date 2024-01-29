@@ -12,9 +12,9 @@
 
   <ItemGroup>
     <PackageReference Include="Blazorise.RichTextEdit" Version="0.9.3.6" />
-    <PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.58" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.1" />
+    <PackageReference Include="System.Drawing.Common" Version="8.0.1" />
   </ItemGroup>
 
   <ItemGroup>
