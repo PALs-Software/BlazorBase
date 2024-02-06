@@ -18,7 +18,7 @@ namespace BlazorBase.CRUD.Models
         [Parameter] IBaseModel Model { get; set; }
         [Parameter] PropertyInfo Property { get; set; }
         [Parameter] bool? ReadOnly { get; set; }
-        [Parameter] BaseService Service { get; set; }
+        [Parameter] IBaseDbContext DbContext { get; set; }
         [Parameter] IStringLocalizer ModelLocalizer { get; set; }
         [Parameter] DisplayItem DisplayItem { get; set; }
 

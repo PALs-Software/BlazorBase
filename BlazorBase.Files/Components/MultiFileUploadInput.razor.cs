@@ -78,7 +78,7 @@ public partial class MultiFileUploadInput : BaseFileInput
                 newFile.BaseFileType = Path.GetExtension(file.Name);
                 newFile.MimeFileType = GetMimeTypeOfFile(file);
 
-                if (newFile is IModeInjectServiceProvider injectModel)
+                if (newFile is IModelInjectServiceProvider injectModel)
                     injectModel.ServiceProvider = ServiceProvider;
 
                 await OnCreateNewListEntryInstanceAsync(newFile);

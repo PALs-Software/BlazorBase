@@ -82,7 +82,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         if (!TryValidate(out List<ValidationResult> results, services))
             throw new CRUDException(services.Localizer["The user card cannot be saved to call actions: {0}", Environment.NewLine + Environment.NewLine + results.FormatResultsToString()]);
 
-        await services.BaseService.SaveChangesAsync();
+        await services.DbContext.SaveChangesTSAsync();
     }
 
     [SupportedOSPlatform("windows")]

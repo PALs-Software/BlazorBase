@@ -103,7 +103,7 @@ public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePro
             newFile.BaseFileType = Path.GetExtension(file.Name);
             newFile.MimeFileType = GetMimeTypeOfFile(file);
 
-            if (newFile is IModeInjectServiceProvider injectModel)
+            if (newFile is IModelInjectServiceProvider injectModel)
                 injectModel.ServiceProvider = ServiceProvider;
 
             if (Model is IBaseFile baseFile)
@@ -135,7 +135,7 @@ public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePro
                 if (oldValue is IBaseFile oldFile)
                 {
                     await oldFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
-                    var entry = Service.DbContext.Entry(oldFile);
+                    var entry = await DbContext.EntryAsync(oldFile);
                     entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
                 }
 
@@ -221,7 +221,7 @@ public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePro
         await OnBeforePropertyChanged.InvokeAsync(args);
         await Model.OnBeforePropertyChanged(args);
 
-        await oldFile.ClearFileFromPropertyAsync(Model, Property, Service);
+        await oldFile.ClearFileFromPropertyAsync(Model, Property, DbContext);
 
         var onAfterArgs = new OnAfterPropertyChangedArgs(Model, Property.Name, Property.GetValue(Model), oldFile, true, eventServices);
         await OnAfterPropertyChanged.InvokeAsync(onAfterArgs);

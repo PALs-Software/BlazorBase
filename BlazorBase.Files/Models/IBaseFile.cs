@@ -38,8 +38,8 @@ public interface IBaseFile : IBaseModel
     Task<string?> GetFileAsBase64StringAsync();
 
     Task RemoveFileFromDiskAsync(bool deleteOnlyTemporary = false);
-    Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, BaseService service);
-    Task ClearFileFromPropertyAsync(IBaseModel model, PropertyInfo property, BaseService service);
+    Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, IBaseDbContext dbContext);
+    Task ClearFileFromPropertyAsync(IBaseModel model, PropertyInfo property, IBaseDbContext dbContext);
 
     void RecalculateHashAndSize(IBaseFileService baseFileService);
     #endregion

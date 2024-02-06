@@ -18,7 +18,7 @@ public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDispl
     #region Parameters
     [Parameter] public IBaseModel Model { get; set; } = null!;
     [Parameter] public PropertyInfo Property { get; set; } = null!;
-    [Parameter] public BaseService Service { get; set; } = null!;
+    [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
     [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
     [Parameter] public GUIType IsDisplayedInGuiType { get; set; }

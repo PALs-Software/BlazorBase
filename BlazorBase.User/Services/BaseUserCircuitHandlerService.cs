@@ -14,7 +14,7 @@ public class BaseUserCircuitHandlerService : BaseCircuitHandlerService
 {
     #region Injects
     protected IBaseUserService BaseUserService { get; }
-    protected BaseService BaseService { get; }
+    protected IBaseDbContext DbContext { get; }
     #endregion
 
     #region Properties
@@ -33,10 +33,10 @@ public class BaseUserCircuitHandlerService : BaseCircuitHandlerService
 
     #region Init
 
-    public BaseUserCircuitHandlerService(IBaseUserService baseUserService, BaseService baseService)
+    public BaseUserCircuitHandlerService(IBaseUserService baseUserService, IBaseDbContext dbContext)
     {
         BaseUserService = baseUserService;
-        BaseService = baseService;
+        DbContext = dbContext;
     }
 
     #endregion
@@ -48,12 +48,12 @@ public class BaseUserCircuitHandlerService : BaseCircuitHandlerService
 
     public override async Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
     {
-        var user = await BaseUserService.GetCurrentUserAsync(BaseService, asNoTracking: false);
+        var user = await BaseUserService.GetCurrentUserAsync(DbContext, asNoTracking: false);
         CurrentUserId = user?.Id;
         if (user is IBaseUserSessionData extendedUser)
         {
             extendedUser.LastSessionCreatedOn = DateTime.Now;
-            await BaseService.SaveChangesAsync();
+            await DbContext.SaveChangesTSAsync();
         }
 
         if (user?.Id != null)

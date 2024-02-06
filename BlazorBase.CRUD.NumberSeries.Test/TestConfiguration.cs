@@ -28,7 +28,7 @@ namespace BlazorBase.CRUD.NumberSeries.Test
                 options.SupportedUICultures = new List<CultureInfo> { new CultureInfo("en") };
             });
 
-            services.AddTransient<BaseService>();
+            services.AddTransient<IBaseDbContext, BaseDbContext>();
             services.AddSingleton<NoSeriesService>();
 
             services.AddBlazorBaseMessageHandling();

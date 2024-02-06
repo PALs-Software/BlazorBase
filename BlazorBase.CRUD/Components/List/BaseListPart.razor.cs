@@ -47,7 +47,7 @@ public partial class BaseListPart : BaseDisplayComponent
 
     [Parameter] public IBaseModel Model { get; set; } = null!;
     [Parameter] public PropertyInfo Property { get; set; } = null!;
-    [Parameter] public BaseService Service { get; set; } = null!;
+    [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public bool? ReadOnly { get; set; }
     [Parameter] public string? SingleDisplayName { get; set; }
     [Parameter] public string? PluralDisplayName { get; set; }
@@ -126,7 +126,7 @@ public partial class BaseListPart : BaseDisplayComponent
 
         Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
 
-        await PrepareForeignKeyProperties(Service);
+        await PrepareForeignKeyProperties(DbContext);
         await PrepareCustomLookupData(Model, EventServices);
     }
 
@@ -162,7 +162,7 @@ public partial class BaseListPart : BaseDisplayComponent
         builder.AddAttribute(1, "Model", model);
         builder.AddAttribute(2, "Property", displayItem.Property);
         builder.AddAttribute(3, "ReadOnly", isReadonly);
-        builder.AddAttribute(4, "Service", Service);
+        builder.AddAttribute(4, "DbContext", DbContext);
         builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
         builder.AddAttribute(6, "DisplayItem", displayItem);
         builder.AddAttribute(7, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))));
@@ -198,7 +198,7 @@ public partial class BaseListPart : BaseDisplayComponent
     protected async Task AddEntryAsync(object? aboveEntry = null)
     {
         var newEntry = Activator.CreateInstance(ModelListEntryType)!;
-        if (newEntry is IModeInjectServiceProvider injectModel)
+        if (newEntry is IModelInjectServiceProvider injectModel)
             injectModel.ServiceProvider = ServiceProvider;
 
         await OnCreateNewListEntryInstanceAsync(newEntry);
@@ -231,7 +231,7 @@ public partial class BaseListPart : BaseDisplayComponent
         if (args.SelectedModel == null)
             return;
 
-        var entryToAdd = await Service.GetAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
+        var entryToAdd = await DbContext.FindTSAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
         if (entryToAdd == null)
             return;
 
@@ -264,7 +264,7 @@ public partial class BaseListPart : BaseDisplayComponent
         BaseSelectListInputs.RemoveAll(input => input.Model == entry);
         BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
 
-        var entityEntry = Service.DbContext.Entry(entry);
+        var entityEntry = await DbContext.EntryAsync(entry);
         if (entityEntry.State == EntityState.Added)
             entityEntry.State = EntityState.Detached;
 
@@ -472,7 +472,7 @@ public partial class BaseListPart : BaseDisplayComponent
                 var validationContext = new ValidationContext(item, ServiceProvider, new Dictionary<object, object?>()
                 {
                     [typeof(IStringLocalizer)] = ModelLocalizer,
-                    [typeof(BaseService)] = Service
+                    [typeof(IBaseDbContext)] = DbContext
                 });
 
                 if (!baseModel.TryValidate(out List<ValidationResult> validationResults, validationContext))
@@ -488,7 +488,7 @@ public partial class BaseListPart : BaseDisplayComponent
 
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, Service);
+        return new EventServices(ServiceProvider, DbContext, ModelLocalizer);
     }
 
     public bool CheckIfModelIsInAddingMode(object entry)

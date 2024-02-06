@@ -71,7 +71,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #endregion
 
     #region Injects
-    [Inject] protected BaseService Service { get; set; } = null!;
+    [Inject] protected IBaseDbContext DbContext { get; set; } = null!;
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
@@ -156,7 +156,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         builder.AddAttribute(1, "Model", model);
         builder.AddAttribute(2, "Property", displayItem.Property);
         builder.AddAttribute(3, "ReadOnly", isReadonly);
-        builder.AddAttribute(4, "Service", Service);
+        builder.AddAttribute(4, "DbContext", DbContext);
         builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
         builder.AddAttribute(6, "DisplayItem", displayItem);
 
@@ -174,7 +174,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #region Actions
     public async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, TModel? template = null)
     {
-        await Service.RefreshDbContextAsync();
+        await DbContext.RefreshDbContextAsync();
 
         ModelLoaded = false;
         AddingMode = addingMode;
@@ -193,7 +193,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             else
                 model = template;
 
-            if (model is IModeInjectServiceProvider injectModel)
+            if (model is IModelInjectServiceProvider injectModel)
                 injectModel.ServiceProvider = ServiceProvider;
 
             var args = new OnCreateNewEntryInstanceArgs(model, EventServices);
@@ -201,7 +201,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             await model.OnCreateNewEntryInstance(args);
         }
         else
-            model = await Service.GetWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
+            model = await DbContext.FindWithAllNavigationPropertiesTSAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
         if (model == null)
             throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys ?? new object())]);
@@ -214,13 +214,13 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         var onAfterShowEntryArgs = new OnShowEntryArgs(GUIType.Card, Model, addingMode, viewMode, VisibleProperties, DisplayGroups, EventServices);
         await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
 
-        await PrepareForeignKeyProperties(Service, Model);
+        await PrepareForeignKeyProperties(DbContext, Model);
         await PrepareCustomLookupData(Model, EventServices);
 
         ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object?>()
         {
             [typeof(IStringLocalizer)] = ModelLocalizer,
-            [typeof(BaseService)] = Service
+            [typeof(IBaseDbContext)] = DbContext
         });
 
         CalculateTitle(addingMode: AddingMode);
@@ -260,14 +260,15 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
                 await Model.OnBeforeAddEntry(args);
                 if (args.AbortAdding)
                     return false;
-
-                if (!await Service.AddEntryAsync(Model))
+               
+                if (await DbContext.ExistsTSAsync<TModel>(Model))
                 {
                     ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
                     if (showSnackBar)
                         Snackbar?.Show();
                     return false;
                 }
+                await DbContext.AddAsync(Model);
 
                 var onAfterArgs = new OnAfterAddEntryArgs(Model, EventServices);
                 await OnAfterAddEntry.InvokeAsync(onAfterArgs);
@@ -282,7 +283,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
                 if (args.AbortUpdating)
                     return false;
 
-                Service.UpdateEntry(Model);
+                await DbContext.UpdateAsync(Model);
 
                 var onAfterArgs = new OnAfterUpdateEntryArgs(Model, EventServices);
                 await OnAfterUpdateEntry.InvokeAsync(onAfterArgs);
@@ -290,7 +291,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             }
 
             await InvokeOnBeforeSaveChangesEvents(EventServices);
-            await Service.SaveChangesAsync();
+            await DbContext.SaveChangesTSAsync();
             AddingMode = false;
             await InvokeOnAfterSaveChangesEvents(EventServices);
         }
@@ -422,7 +423,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             if (await basePropertyCardInput.InputHasAdditionalContentChanges())
                 return true;
 
-        return Service.HasUnsavedChanges();
+        return await DbContext.HasUnsavedChangesTSAsync();
     }
 
     protected virtual async Task<bool> CardIsValidAsync()
@@ -461,7 +462,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #region Other
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, Service);
+        return new EventServices(ServiceProvider, DbContext, ModelLocalizer);
     }
 
     public bool CardIsInAddingMode()

@@ -27,7 +27,7 @@ public partial class BaseRichTextEditor
     [Parameter] public bool ReadOnly { get; set; } = false;
     [Parameter] public bool SubmitOnEnter { get; set; } = false;
     [Parameter] public Blazorise.Placement ToolbarPosition { get; set; } = Blazorise.Placement.Top;
-    [Parameter] public BaseService BaseService { get; set; } = null!;
+    [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IBaseModel ConnectedModel { get; set; } = null!;
     [Parameter] public string? BaseImageFileNames { get; set; } = String.Empty;
     [Parameter] public bool HideSaveButton { get; set; } = false;
@@ -190,10 +190,10 @@ public partial class BaseRichTextEditor
             var imageName = $"{imageFileName}_{internalImageCount:000000}";
 
             if (Options.ResizeBigImagesToMaxImageSize)
-                imageData = ImageService.ResizeImageToMaxSize(imageData, Options.MaxImageSize);
+                imageData = await ImageService.ResizeImageToMaxSizeAsync(imageData, Options.MaxImageSize);
 
             var file = await FileService.CreateFileAsync(eventServices, imageName, baseType, mimeType, imageData);
-            BaseService.DbContext.Add(file);
+            await DbContext.AddAsync(file);
 
             image.SetAttributeValue("src", file.GetFileLink(ignoreTemporaryLink: true));
         }
@@ -245,10 +245,10 @@ public partial class BaseRichTextEditor
             internalImageCount++;
             var imageName = $"{imageFileName}_{internalImageCount:D6}";
             if (Options.ResizeBigImagesToMaxImageSize)
-                imageData = ImageService.ResizeImageToMaxSize(imageData, Options.MaxImageSize);
+                imageData = await ImageService.ResizeImageToMaxSizeAsync(imageData, Options.MaxImageSize);
 
             var file = await FileService.CreateFileAsync(eventServices, imageName, baseType, mimeType, imageData);
-            BaseService.DbContext.Add(file);
+            await DbContext.AddAsync(file);
 
             image.SetAttributeValue("src", file.GetFileLink(ignoreTemporaryLink: true));
         }
@@ -281,7 +281,7 @@ public partial class BaseRichTextEditor
     #region MISC
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, Localizer, BaseService);
+        return new EventServices(ServiceProvider, DbContext, Localizer);
     }
     #endregion
 }

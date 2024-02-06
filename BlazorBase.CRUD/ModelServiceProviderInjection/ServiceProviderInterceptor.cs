@@ -8,7 +8,7 @@ public class ServiceProviderInterceptor : IMaterializationInterceptor
 {
     public object InitializedInstance(MaterializationInterceptionData materializationData, object instance)
     {
-        if (instance is IModeInjectServiceProvider entity)
+        if (instance is IModelInjectServiceProvider entity)
             entity.ServiceProvider = materializationData.Context.GetService<ScopedServiceProvider>().ServiceProvider;
 
         return instance;

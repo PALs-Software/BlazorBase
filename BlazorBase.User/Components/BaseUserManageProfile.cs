@@ -1,10 +1,10 @@
 ﻿using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.EventArguments;
+using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 
@@ -32,6 +32,6 @@ public class BaseUserManageProfile : ComponentBase
     {
         args.ViewMode = true;
 
-        return (IBaseModel?)await args.EventServices.BaseService.Set(BaseUser.GetType()).FirstOrDefaultAsync();
+        return (IBaseModel?)await args.EventServices.DbContext.Set(BaseUser.GetType()).FirstOrDefaultTSAsync(args.EventServices.DbContext);
     }
 }

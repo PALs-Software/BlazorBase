@@ -1,5 +1,4 @@
 ﻿using BlazorBase.Models;
-using System;
 
 namespace BlazorBase.Files.Models;
 public interface IBlazorBaseFileOptions : IBaseOptions

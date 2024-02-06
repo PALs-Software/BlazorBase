@@ -5,7 +5,6 @@ using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Services;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
@@ -31,7 +30,7 @@ public partial class BaseInput
     [Parameter] public IBaseModel Model { get; set; } = null!;
     [Parameter] public PropertyInfo Property { get; set; } = null!;
     [Parameter] public bool? ReadOnly { get; set; }
-    [Parameter] public BaseService Service { get; set; } = null!;
+    [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
     [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
     [Parameter] public DataType? InputPresentationDataType { get; set; } = null;
@@ -105,7 +104,7 @@ public partial class BaseInput
         var dict = new Dictionary<object, object?>()
         {
             [typeof(IStringLocalizer)] = ModelLocalizer,
-            [typeof(BaseService)] = Service
+            [typeof(IBaseDbContext)] = DbContext
         };
 
         var propertyNameTranslation = ModelLocalizer[Property.Name].ToString();
@@ -288,10 +287,10 @@ public partial class BaseInput
         if (ForeignKeyProperty == null || (!typeof(IBaseModel).IsAssignableFrom(ForeignKeyProperty.PropertyType)))
             return;
 
-        if (Service.DbContext.Entry(Model).State == EntityState.Detached)
-            ForeignKeyProperty.SetValue(Model, await Service.GetAsync(ForeignKeyProperty.PropertyType, newValue));
+        if ((await DbContext.EntryAsync(Model)).State == EntityState.Detached)
+            ForeignKeyProperty.SetValue(Model, await DbContext.FindTSAsync(ForeignKeyProperty.PropertyType, newValue));
         else
-            await Service.DbContext.Entry(Model).Reference(ForeignKeyProperty.Name).LoadAsync();
+            (await DbContext.EntryAsync(Model)).Reference(ForeignKeyProperty.Name).Load();
     }
     #endregion
 
@@ -351,7 +350,7 @@ public partial class BaseInput
 
     protected EventServices GetEventServices()
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, Service);
+        return new EventServices(ServiceProvider, DbContext, ModelLocalizer);
     }
 
     protected async Task RaiseOnFormatPropertyEventsAsync()

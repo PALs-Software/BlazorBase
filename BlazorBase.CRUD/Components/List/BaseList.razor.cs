@@ -155,7 +155,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
 
     protected virtual async Task NavigateToEntryAsync(bool isFirstPageLoadNavigation, params object[] primaryKeys)
     {
-        var entry = await Service.GetAsync<TModel>(primaryKeys);
+        var entry = await DbContext.FindTSAsync<TModel>(primaryKeys);
         var args = new OnBeforeNavigateToEntryArgs(entry, isFirstPageLoadNavigation, EventServices);
         await OnBeforeNavigateToEntry.InvokeAsync(args);
 

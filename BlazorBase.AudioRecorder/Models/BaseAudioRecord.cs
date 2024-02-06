@@ -45,6 +45,7 @@ public class BaseAudioRecord : BaseModel, IBaseAudioRecord, ISortableItem
     /// </summary>
     [NotMapped]
     [Visible(DisplayOrder = 100)]
+    [CustomClassAndStyle(Style = "min-width:200px", Locations = [CustomizationLocation.ListHeaderCell], ValidInGUITypes = [GUIType.List])]
     public virtual IBaseAudioRecord DisplayAudioRecord { get { return this; } }
 
     #endregion
@@ -53,9 +54,9 @@ public class BaseAudioRecord : BaseModel, IBaseAudioRecord, ISortableItem
 
     public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
     {
-        Id = await args.EventServices.BaseService.GetNewPrimaryKeyAsync(GetType());
+        Id = await args.EventServices.DbContext.GetNewPrimaryKeyTSAsync(GetType());
 
-        args.EventServices.BaseService.DbContext.Entry(this).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a record is a navigation property and is newly added, it must add the record before it add or update the entity itself
+        (await args.EventServices.DbContext.EntryAsync(this)).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a record is a navigation property and is newly added, it must add the record before it add or update the entity itself
     }
 
     public override Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args)
@@ -67,28 +68,24 @@ public class BaseAudioRecord : BaseModel, IBaseAudioRecord, ISortableItem
         return Task.CompletedTask;
     }
 
-    public override Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args)
-    {
-        var entityEntry = args.EventServices.BaseService.DbContext.Entry(this);
-        entityEntry.State = EntityState.Modified; // Set state temporarily to modified so that all navigation properties will be lazy loaded and switch it at the end back to deleted
-
+    public override async Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args)
+    {        
+        await args.EventServices.DbContext.LoadReferenceTSAsync(this, entry => entry.AudioFile);
+        
         if (AudioFile != null)
         {
             args.AdditionalEntriesDeleted.Add(AudioFile);
-            args.EventServices.BaseService.DbContext.Remove(AudioFile);
+            await args.EventServices.DbContext.RemoveAsync(AudioFile);
         }
-
-        entityEntry.State = EntityState.Deleted;
-        return Task.CompletedTask;
     }
 
-    public override Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
+    public override async Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
     {
-        var entry = args.EventServices.BaseService.DbContext.Entry(this);
+        var entry = await args.EventServices.DbContext.EntryAsync(this);
         if (entry.State != EntityState.Detached) // Only relevant if removed from another entity as list property
             entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
 
-        return base.OnAfterRemoveEntry(args);
+        await base.OnAfterRemoveEntry(args);
     }
 
     #endregion

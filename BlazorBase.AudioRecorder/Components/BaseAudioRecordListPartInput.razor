@@ -9,13 +9,13 @@
                 <Column Class="pl-0">
                     <BaseAudioRecordListDisplay Model="Model"
                                             Property="Property"
-                                            Service="Service"
+                                            DbContext="DbContext"
                                             ModelLocalizer="ModelLocalizer"
                                             IsDisplayedInGuiType="CRUD.Enums.GUIType.Card" />
                 </Column>
 
                 <Column Class="pl-0">
-                    <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
+                    <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
                 </Column>
 
                 @if (!IsReadOnly)

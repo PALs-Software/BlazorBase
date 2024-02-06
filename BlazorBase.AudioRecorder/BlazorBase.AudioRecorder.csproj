@@ -21,4 +21,10 @@
     <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Models\BaseAudioRecord.de.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

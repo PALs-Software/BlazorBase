@@ -12,21 +12,21 @@ public class MagickImageService : IImageService
         return image.WriteAsync(destinationPath);
     }
 
-    public byte[] ResizeImage(byte[] inputImageBytes, int width, int height)
+    public Task<byte[]> ResizeImageAsync(byte[] inputImageBytes, int width, int height)
     {
         using var image = new MagickImage(inputImageBytes);
         image.Resize(width, height); // Resize will keep the aspect ratio!
-        return image.ToByteArray();
+        return Task.FromResult(image.ToByteArray());
     }
 
-    public byte[] ResizeImageToMaxSize(byte[] inputImageBytes, int maxSize)
+    public Task<byte[]> ResizeImageToMaxSizeAsync(byte[] inputImageBytes, int maxSize)
     {
         using var image = new MagickImage(inputImageBytes);
         if (image.Width <= maxSize && image.Height <= maxSize)
-            return inputImageBytes;
+            return Task.FromResult(inputImageBytes);
 
         image.Resize(maxSize, maxSize); // Resize will keep the aspect ratio!
-        return image.ToByteArray();
+        return Task.FromResult(image.ToByteArray());
     }
 
     public Task ResizeImageAsync(string path, int width, int height)

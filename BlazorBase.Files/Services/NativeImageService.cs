@@ -13,13 +13,13 @@ public class NativeImageService : IImageService
 {
     protected const string NotWindowsError = "This feature is only supported on Windows";
 
-    public Task CreateThumbnailAsync(byte[] inputImageBytes, int imageThumbnailSize, string destinationPath)
+    public async Task CreateThumbnailAsync(byte[] inputImageBytes, int imageThumbnailSize, string destinationPath)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);
 
-        var thumbnail = ResizeImage(inputImageBytes, imageThumbnailSize, imageThumbnailSize);
-        return File.WriteAllBytesAsync(destinationPath, thumbnail);
+        var thumbnail = await ResizeImageAsync(inputImageBytes, imageThumbnailSize, imageThumbnailSize).ConfigureAwait(false);
+        await File.WriteAllBytesAsync(destinationPath, thumbnail).ConfigureAwait(false);
     }
 
     public Task ResizeImageAsync(string path, int width, int height)
@@ -38,7 +38,7 @@ public class NativeImageService : IImageService
         });
     }
 
-    public byte[] ResizeImage(byte[] inputImageBytes, int width, int height)
+    public Task<byte[]> ResizeImageAsync(byte[] inputImageBytes, int width, int height)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);
@@ -53,10 +53,10 @@ public class NativeImageService : IImageService
         inputImage.Dispose();
         outputImage.Dispose();
 
-        return outputMemoryStream.ToArray();
+        return Task.FromResult(outputMemoryStream.ToArray());
     }
 
-    public byte[] ResizeImageToMaxSize(byte[] inputImageBytes, int maxSize)
+    public Task<byte[]> ResizeImageToMaxSizeAsync(byte[] inputImageBytes, int maxSize)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);
@@ -65,7 +65,7 @@ public class NativeImageService : IImageService
         var inputImage = Image.FromStream(inputMemoryStream);
 
         if (inputImage.Width <= maxSize && inputImage.Height <= maxSize)
-            return inputImageBytes;
+            return Task.FromResult(inputImageBytes);
 
         var outputImage = ResizeImage(inputImage, maxSize, maxSize);
         using var outputMemoryStream = new MemoryStream();
@@ -74,7 +74,7 @@ public class NativeImageService : IImageService
         inputImage.Dispose();
         outputImage.Dispose();
 
-        return outputMemoryStream.ToArray();
+        return Task.FromResult(outputMemoryStream.ToArray());
     }
 
     public Image ResizeImage(Image inputImage, int width, int height)

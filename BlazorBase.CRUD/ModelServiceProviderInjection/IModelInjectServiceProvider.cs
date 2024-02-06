@@ -2,7 +2,7 @@
 
 namespace BlazorBase.CRUD.ModelServiceProviderInjection;
 
-public interface IModeInjectServiceProvider
+public interface IModelInjectServiceProvider
 {
     IServiceProvider ServiceProvider { get; set; }
 }

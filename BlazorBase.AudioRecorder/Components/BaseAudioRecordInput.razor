@@ -14,13 +14,13 @@
 
                             @if (IsReadOnly)
                             {
-                                <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
+                                <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
                             }
                             else
                             {
                                 <Row Class="m-0 w-100">
                                     <Column ColumnSize="ColumnSize.Is4" Class="pl-0 pr-2">
-                                        <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" Service="Service" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
+                                        <BaseInput @ref="FileNameInput" Model="CurrentAudioRecord" Property="FileNameDisplayItem.Property" ReadOnly="FileNameDisplayItem.IsReadOnly || IsReadOnly" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="FileNameDisplayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="OnAfterFileNamePropertyChanged" />
                                     </Column>
                                     <Column ColumnSize="ColumnSize.Is8" Class="pr-0">
                                         <Row Class="mr-0">
@@ -38,7 +38,7 @@
                             <Row Class="m-0 w-100 mt-2">
                                 <BaseAudioRecordListDisplay Model="Model"
                                                         Property="Property"
-                                                        Service="Service"
+                                                        DbContext="DbContext"
                                                         ModelLocalizer="ModelLocalizer"
                                                         IsDisplayedInGuiType="CRUD.Enums.GUIType.Card"
                                                         Class="w-100" />

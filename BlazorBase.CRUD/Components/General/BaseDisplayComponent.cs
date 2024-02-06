@@ -101,7 +101,7 @@ namespace BlazorBase.CRUD.Components.General
             DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        protected virtual async Task PrepareForeignKeyProperties(BaseService service, IBaseModel? instance = null)
+        protected virtual async Task PrepareForeignKeyProperties(IBaseDbContext dbContext, IBaseModel? instance = null)
         {
             if (ForeignKeyProperties != null)
                 return;
@@ -153,7 +153,7 @@ namespace BlazorBase.CRUD.Components.General
                     var foreignKeyValue = foreignKeyProperty.GetValue(instance);
                     if (foreignKeyValue != null)
                     {
-                        var entry = await service.GetAsync(foreignKeyType, foreignKeyValue);
+                        var entry = await dbContext.FindTSAsync(foreignKeyType, foreignKeyValue);
                         if (entry != null)
                             AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);
                     }
@@ -162,11 +162,11 @@ namespace BlazorBase.CRUD.Components.General
                     continue;
                 }
 
-                dynamic query = service.DbContext.Set(foreignKeyType);
+                dynamic query = dbContext.Set(foreignKeyType);
                 query = EntityFrameworkQueryableExtensions.AsNoTracking(query);
                 for (int i = 0; i < displayKeyProperties.Count; i++)
                     query = i == 0 ? IQueryableExtension.OrderBy(query, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(query, displayKeyProperties[i].Name);
-                var entries = await EntityFrameworkQueryableExtensions.ToListAsync(query);
+                var entries = await ThreadSafeQueryableExtension.ToListTSAsync(query, dbContext);
 
                 foreach (var entry in entries)
                     AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);

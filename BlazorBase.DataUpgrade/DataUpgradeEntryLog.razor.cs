@@ -16,7 +16,7 @@ public partial class DataUpgradeEntryLog : ComponentBase, IBasePropertyCardInput
     [Parameter] public IBaseModel Model { get; set; } = null!;
     [Parameter] public PropertyInfo Property { get; set; } = null!;
     [Parameter] public bool? ReadOnly { get; set; }
-    [Parameter] public BaseService Service { get; set; } = null!;
+    [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
     [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
 

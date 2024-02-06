@@ -1,4 +1,5 @@
 ﻿using BlazorBase.CRUD.EventArguments;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +39,9 @@ public class BaseFileService : IBaseFileService
         file.MimeFileType = mimeFileType;
         file.Hash = ComputeSha256Hash(fileContent);
         await file.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(file, eventServices));
+
+        if (file is IModelInjectServiceProvider injectModel && injectModel.ServiceProvider == null)
+            injectModel.ServiceProvider = ServiceProvider;
 
         return await FinishCreateFileTaskAsync(file, fileContent);
     }
