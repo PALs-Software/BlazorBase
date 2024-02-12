@@ -513,7 +513,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return await query.ToListTSAsync(this, cancellationToken);
+            return query.ToList();
         }
         finally
         {
@@ -531,7 +531,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return await query.ToListAsyncTSAsync(this, cancellationToken);
+            return await query.ToListAsync(cancellationToken);
         }
         finally
         {
@@ -549,7 +549,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return await query.Select(dataSelectCondition).ToListTSAsync(this, cancellationToken);
+            return query.Select(dataSelectCondition).ToList();
         }
         finally
         {
@@ -567,7 +567,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return await query.Select(dataSelectCondition).ToListAsyncTSAsync(this, cancellationToken);
+            return await query.Select(dataSelectCondition).ToListAsync(cancellationToken);
         }
         finally
         {
