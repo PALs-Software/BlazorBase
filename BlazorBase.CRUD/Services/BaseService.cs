@@ -2,8 +2,6 @@
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
@@ -570,12 +568,6 @@ public class BaseService : IDisposable
     #endregion
 
     #region Other
-    public static void MigrateDatabase<TDbContext>(IApplicationBuilder app) where TDbContext : DbContext
-    {
-        using var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
-        scope.ServiceProvider.GetRequiredService<TDbContext>().Database.Migrate();
-    }
-
     protected EventServices GetEventServices()
     {
         return new EventServices(ServiceProvider, Localizer, this);

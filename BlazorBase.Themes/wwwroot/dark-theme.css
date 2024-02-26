@@ -4,6 +4,7 @@
     --bs-body-color: #f4f4f4;
     --bs-body-bg: #3b3a39;
     --bs-body-hover-color: #525150;
+    --bs-body-hover-background: #444444;
     /*Sidebar*/
     --b-bar-light-color: var(--bs-body-color);
     --b-bar-dark-color: var(--bs-body-color);
@@ -36,7 +37,7 @@
     --card-header-color: var(--bs-body-color);
     --card-header-background: #545454;
     --card-header-hover-color: var(--card-header-color);
-    --card-header-hover-background: var(--card-header-background);
+    --card-header-hover-background: var(--bs-body-hover-background);
     --card-border-color: var(--table-border-color);
     /*Form*/
     --form-color: var(--bs-body-color);

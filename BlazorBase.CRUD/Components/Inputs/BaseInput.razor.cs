@@ -56,7 +56,7 @@ public partial class BaseInput
     [Inject] protected BaseParser BaseParser { get; set; } = null!;
     [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
     [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
-    [Inject] protected BaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
+    [Inject] protected IBaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
     #endregion
 
     #region Members

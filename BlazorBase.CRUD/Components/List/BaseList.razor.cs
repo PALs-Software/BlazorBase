@@ -1,14 +1,13 @@
-﻿using BlazorBase.CRUD.Extensions;
+﻿using BlazorBase.CRUD.EventArguments;
+using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BlazorBase.CRUD.EventArguments;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.AspNetCore.Components.Routing;
-using BlazorBase.CRUD.ViewModels;
 
 namespace BlazorBase.CRUD.Components.List;
 

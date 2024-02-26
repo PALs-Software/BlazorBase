@@ -1,14 +1,11 @@
 ﻿using BlazorBase.CRUD.Services;
-using BlazorBase.Services;
-using BlazorBase.User.Models;
+using BlazorBase.Server.Services;
+using BlazorBase.Server.User.Models;
+using BlazorBase.User.Services;
 using Microsoft.AspNetCore.Components.Server.Circuits;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace BlazorBase.User.Services;
+namespace BlazorBase.Server.User.Services;
 
 public class BaseUserCircuitHandlerService : BaseCircuitHandlerService
 {

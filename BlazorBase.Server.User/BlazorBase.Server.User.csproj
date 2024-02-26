@@ -1,10 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+
 
   <ItemGroup>
     <SupportedPlatform Include="browser" />
@@ -15,13 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Enums\" />
-    <Folder Include="wwwroot\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
-    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
+    <ProjectReference Include="..\BlazorBase.Server\BlazorBase.Server.csproj" />
+    <ProjectReference Include="..\BlazorBase.User\BlazorBase.User.csproj" />
   </ItemGroup>
 
 </Project>

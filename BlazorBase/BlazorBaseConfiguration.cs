@@ -23,7 +23,6 @@ public static class BlazorBaseConfiguration
         serviceCollection
             .AddSingleton(configureOptions)
             .AddSingleton<BaseErrorHandler>()
-            .AddScoped<BaseAuthenticationService>()
             .AddTransient<IBlazorBaseOptions, TOptions>()
             .AddLocalization();
 

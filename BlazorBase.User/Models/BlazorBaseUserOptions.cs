@@ -26,7 +26,5 @@ public class BlazorBaseUserOptions : IBlazorBaseUserOptions
 
     public bool ShowImageOfTheDayAsBackgroundImageByLogin { get; set; } = true;
     public string? LoginBackgroundImageSrc { get; set; }
-    public bool LogUserSessions { get;set; }
-
     #endregion
 }
