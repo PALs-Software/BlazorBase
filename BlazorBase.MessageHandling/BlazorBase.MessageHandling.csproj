@@ -4,6 +4,10 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\compilerconfig.json" />
@@ -23,11 +27,6 @@
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\it.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\nl.json" />
     <Content Remove="C:\Users\patri\.nuget\packages\blazorise\0.9.3.2\contentFiles\any\net5.0\Resources\Localization\FileEdit\pt.json" />
-  </ItemGroup>
-
-  
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,19 +5,15 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-	
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<Compile Remove="Modules\**" />
 		<Content Remove="Modules\**" />
 		<EmbeddedResource Remove="Modules\**" />
 		<None Remove="Modules\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="wwwroot\blazorBase.crud.modal.js" />
 	</ItemGroup>
 
 	<ItemGroup>
