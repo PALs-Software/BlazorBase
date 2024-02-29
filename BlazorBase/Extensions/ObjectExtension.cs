@@ -5,6 +5,12 @@ using System.Reflection;
 namespace BlazorBase.Extensions;
 public static class ObjectExtension
 {
+    public static void TransferPropertiesTo<T>(this T source, object target, params string[] exceptPropertyNames) where T : class
+    {
+        var sourceProperties = typeof(T).GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
+        TransferPropertiesTo(source, target, sourceProperties.ToArray());
+    }
+
     public static void TransferPropertiesTo(this object source, object target, PropertyInfo[]? sourceProperties = null)
     {
         if (sourceProperties == null)

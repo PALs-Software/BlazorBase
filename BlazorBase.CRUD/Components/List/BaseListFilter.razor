@@ -21,17 +21,13 @@
                             <SelectList @ref="AddToComponents" SelectedValue="displayItem.FilterType" Data="@TypeFilterTypesDictionary[displayItem.DisplayPropertyType]" TItem="KeyValuePair<FilterType, string>" TValue="FilterType" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (newValue) => await FilterTypeChangedAsync(displayItem, newValue)" />
                         </Addon>
 
-                        @if (displayItem.DisplayPropertyType == typeof(string))
+                        @if (displayItem.DisplayPropertyType == typeof(string) || TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
                         {
-                            <BaseTextFilterInput @ref="AddToComponents" Value="@displayItem.FilterValue?.ToString()" OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" />
+                            <BaseDelayInput @ref="AddToComponents" DeviatingConvertType="displayItem.DisplayPropertyType" @bind-Value="@displayItem.FilterValue" OnDelayedInput="async (v) => await FilterChangedAsync(displayItem, v.Value, setFilterValue: false)" />
                         }
                         else if (TypeHelper.DecimalTypes.Contains(displayItem.DisplayPropertyType))
                         {
-                            <BaseNumberFilterInput @ref="AddToComponents" Value="@displayItem.FilterValue?.ToString()" OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" step="any" />
-                        }
-                        else if (TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
-                        {
-                            <BaseNumberFilterInput @ref="AddToComponents" Value="@displayItem.FilterValue?.ToString()" OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" />
+                            <BaseDelayInput @ref="AddToComponents" step="any" DeviatingConvertType="displayItem.DisplayPropertyType" @bind-Value="@displayItem.FilterValue" OnDelayedInput="async (v) => await FilterChangedAsync(displayItem, v.Value, setFilterValue: false)" />
                         }
                         else if (displayItem.DisplayPropertyType == typeof(bool) || displayItem.DisplayPropertyType == typeof(bool?))
                         {
@@ -47,7 +43,7 @@
                         }
                         else if (displayItem.DisplayPropertyType == typeof(Guid) || displayItem.DisplayPropertyType == typeof(Guid?))
                         {
-                            <BaseTextFilterInput @ref="AddToComponents" Value="@displayItem.FilterValue?.ToString()"  OnInput="async (v) => await FilterChangedAsync(displayItem, v.Value)" />
+                            <BaseDelayInput @ref="AddToComponents" DeviatingConvertType="typeof(string)" @bind-Value="@displayItem.FilterValue" OnDelayedInput="async (v) => await FilterChangedAsync(displayItem, v.Value, setFilterValue: false)" />
                         }
                         else if (displayItem.DisplayPropertyType.IsEnum || Nullable.GetUnderlyingType(displayItem.DisplayPropertyType)?.IsEnum == true)
                         {

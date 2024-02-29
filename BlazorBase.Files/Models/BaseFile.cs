@@ -302,5 +302,26 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
 
         return imageService.CreateThumbnailAsync(bytes, BlazorBaseFileOptions.Instance.ImageThumbnailSize, GetPhysicalThumbnailPath());
     }
+
+    public virtual Task<byte[]> GetThumbnailAsync()
+    {
+        if (String.IsNullOrEmpty(BaseFileType) || FileSize == 0 || String.IsNullOrEmpty(Hash) || !IsImage())
+            return Task.FromResult(Array.Empty<byte>());
+
+        string path = GetPhysicalThumbnailPath();
+        if (!File.Exists(path))
+            return Task.FromResult(Array.Empty<byte>());
+
+        return File.ReadAllBytesAsync(path);
+    }
+
+    public async Task<string?> GetThumbnailAsBase64StringAsync()
+    {
+        var content = await GetThumbnailAsync();
+        if (content == null)
+            return null;
+
+        return Convert.ToBase64String(content);
+    }
     #endregion
 }

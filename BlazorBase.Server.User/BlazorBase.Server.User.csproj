@@ -6,19 +6,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+
   <ItemGroup>
     <SupportedPlatform Include="browser" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.2" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorBase.Files\BlazorBase.Files.csproj" />
-    <ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
-    <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
+    <ProjectReference Include="..\BlazorBase.Server\BlazorBase.Server.csproj" />
+    <ProjectReference Include="..\BlazorBase.User\BlazorBase.User.csproj" />
   </ItemGroup>
 
 </Project>

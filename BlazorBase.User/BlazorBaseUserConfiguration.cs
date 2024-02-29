@@ -54,15 +54,7 @@ public static class BlazorBaseUserConfiguration
             acOptions.LoginPath = options.LoginPath;
             acOptions.AccessDeniedPath = options.IdentityAccessDeniedPath;
         });
-
-        if (options.LogUserSessions)
-        {
-            if (!typeof(IBaseUserSessionData).IsAssignableFrom(typeof(TUser)))
-                throw new NotSupportedException($"The type {typeof(TUser)} must implement the interface IBaseUserSessionData, so that the user sessions can be logged into the user table");
-
-            serviceCollection.AddScoped<CircuitHandler, BaseUserCircuitHandlerService>();
-        }
-        
+      
         return serviceCollection;
     }
 

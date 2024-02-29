@@ -1,19 +1,11 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using BlazorBase.Services;
+using Microsoft.AspNetCore.Components.Authorization;
 
-namespace BlazorBase.Services;
+namespace BlazorBase.Server.Services;
 
-public class BaseAuthenticationService
+public class BaseAuthenticationService(AuthenticationStateProvider authenticationStateProvider) : IBaseAuthenticationService
 {
-    protected readonly AuthenticationStateProvider AuthenticationStateProvider;
-
-    public BaseAuthenticationService(AuthenticationStateProvider authenticationStateProvider)
-    {
-        AuthenticationStateProvider = authenticationStateProvider;
-    }
+    protected readonly AuthenticationStateProvider AuthenticationStateProvider = authenticationStateProvider;
 
     public virtual async Task<List<string>> GetUserRolesAsync()
     {

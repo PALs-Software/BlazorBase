@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BlazorBase.User.Models;
+﻿namespace BlazorBase.Server.User.Models;
 
 public interface IBaseUserSessionData
 {

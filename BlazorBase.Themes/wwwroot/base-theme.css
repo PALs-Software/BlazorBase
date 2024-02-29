@@ -61,16 +61,17 @@
 .card-header, .card-header button {
     color: var(--card-header-color);
     background-color: var(--card-header-background);
+    cursor: pointer;
 }
 
-    .card-header button:hover {
+    .card-header:hover, .card-header:hover button {
         color: var(--card-header-hover-color);
         background-color: var(--card-header-hover-background);
     }
 
 .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
     color: var(--card-header-color);
-    background-color: var(--card-header-background);
+    background-color: var(--bs-body-hover-background);
     border-color: var(--card-border-color);
 }
 
@@ -78,6 +79,11 @@
     border-bottom-color: var(--card-border-color);
     background-color: var(--card-header-background);
 }
+
+    .nav-tabs .nav-link:hover {
+        color: var(--card-header-color);
+        background-color: var(--bs-body-hover-background);
+    }
 
 .form-control:disabled, .form-control[readonly] {
     color: var(--form-disabled-color);
@@ -123,10 +129,6 @@ button.close {
     .nav-link:hover {
         color: var(--bs-body-hover-color);
     }
-
-::-webkit-scrollbar {
-    width: 10px;
-}
 
 ::-webkit-scrollbar-track {
     background: var(--scrollbar-background-color);

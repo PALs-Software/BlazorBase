@@ -194,12 +194,13 @@ public partial class BaseListFilter : BaseDisplayComponent
         await OnFilterChanged.InvokeAsync();
     }
 
-    protected async virtual Task FilterChangedAsync(DisplayItem displayItem, object? newValue)
+    protected async virtual Task FilterChangedAsync(DisplayItem displayItem, object? newValue, bool setFilterValue = true)
     {
         if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?))
             ConvertValueIfNeeded(ref newValue, displayItem.DisplayPropertyType);
 
-        displayItem.FilterValue = newValue;
+        if (setFilterValue)
+            displayItem.FilterValue = newValue;
 
         await OnFilterChanged.InvokeAsync();
     }

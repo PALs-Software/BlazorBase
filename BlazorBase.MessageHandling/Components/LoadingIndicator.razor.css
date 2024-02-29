@@ -5,6 +5,17 @@
     display: block;
     overflow: hidden;
     color: var(--blazor-base-loading-indicator-color, black);
+    text-align: center;
+    font-weight: bold;
+}
+
+.blazor-base-loading-indicator-background {
+    position: fixed;
+    inset: 0px;
+    z-index: 99998;
+    display: block;
+    overflow: hidden;
+    color: var(--blazor-base-loading-indicator-color, black);
     background-color: var(--blazor-base-loading-indicator-background, white);
     opacity: 0.6;
     text-align: center;

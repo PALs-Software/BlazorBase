@@ -1,20 +1,14 @@
 ﻿using Microsoft.AspNetCore.Components.Server.Circuits;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace BlazorBase.Services;
+namespace BlazorBase.Server.Services;
 
 public class BaseCircuitHandlerService : CircuitHandler
 {
     #region Properties
     public static event EventHandler? OnCircuitsChanged;
-
     public string CurrentCircuitId { get; protected set; } = null!;
     #endregion
-
 
     #region Properties
     public static IReadOnlyDictionary<string, Circuit> Circuits { get { return LocalCircuits; } }

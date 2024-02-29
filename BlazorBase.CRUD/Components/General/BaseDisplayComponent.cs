@@ -36,7 +36,7 @@ namespace BlazorBase.CRUD.Components.General
         [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; } = null!;
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; } = null!;
-        [Inject] protected BaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
+        [Inject] protected IBaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
         #endregion
 
         #region Protected Properties
