@@ -50,7 +50,7 @@ namespace BlazorBase.CRUD.NumberSeries
 
         public async Task<string> GetNextNoAsync(IBaseDbContext dbContext, string noSeriesId)
         {
-            var noSeries = await dbContext.FindTSAsync<NoSeries>(noSeriesId);
+            var noSeries = await dbContext.FindAsync<NoSeries>(noSeriesId);
             if (noSeries == null)
                 throw new CRUDException(Localizer["Cant get next number in series, because number series can not be found with the key {0}", noSeriesId]);
 

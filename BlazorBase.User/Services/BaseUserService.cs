@@ -136,7 +136,7 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole>(
         var dbContext = serviceProvider.GetRequiredService<IBaseDbContext>();
         var user = new TUser
         {
-            Id = await dbContext.GetNewPrimaryKeyTSAsync<TUser>().ConfigureAwait(false),
+            Id = await dbContext.GetNewPrimaryKeyAsync<TUser>().ConfigureAwait(false),
             Email = email,
             UserName = username,
             IdentityUserId = identityUser.Id,
@@ -144,7 +144,7 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole>(
         };
 
         await dbContext.AddAsync(user).ConfigureAwait(false);
-        await dbContext.SaveChangesTSAsync().ConfigureAwait(false);
+        await dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
 
 }

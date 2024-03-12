@@ -51,7 +51,7 @@ public class NoSeriesTest : TestContext
 
         // Test
         var nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
-        var noSeries = await DbContext.FindTSAsync<NoSeries>(seriesId);
+        var noSeries = await DbContext.FindAsync<NoSeries>(seriesId);
 
         // Validate
         Assert.Equal("A-000", nextNo);
@@ -70,7 +70,7 @@ public class NoSeriesTest : TestContext
         // Test
         await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
         var nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
-        var noSeries = await DbContext.FindTSAsync<NoSeries>(seriesId);
+        var noSeries = await DbContext.FindAsync<NoSeries>(seriesId);
 
         // Validate
         Assert.Equal("A-001", nextNo);
@@ -88,7 +88,7 @@ public class NoSeriesTest : TestContext
         String nextNo = String.Empty;
         for (int i = 0; i <= 999; i++)
             nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
-        var noSeries = await DbContext.FindTSAsync<NoSeries>(seriesId);
+        var noSeries = await DbContext.FindAsync<NoSeries>(seriesId);
 
         // Validate
         Assert.Equal("A-999", nextNo);

@@ -65,7 +65,7 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
 
     public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
     {
-        Id = await args.EventServices.DbContext.GetNewPrimaryKeyTSAsync(GetType());
+        Id = await args.EventServices.DbContext.GetNewPrimaryKeyAsync(GetType());
 
         (await args.EventServices.DbContext.EntryAsync(this)).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a basefile is a navigation property and is newly added, it must add the base file before it add or update the entity itself
     }

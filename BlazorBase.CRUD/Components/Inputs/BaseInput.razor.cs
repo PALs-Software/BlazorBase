@@ -288,7 +288,7 @@ public partial class BaseInput
             return;
 
         if ((await DbContext.EntryAsync(Model)).State == EntityState.Detached)
-            ForeignKeyProperty.SetValue(Model, await DbContext.FindTSAsync(ForeignKeyProperty.PropertyType, newValue));
+            ForeignKeyProperty.SetValue(Model, await DbContext.FindAsync(ForeignKeyProperty.PropertyType, newValue));
         else
             (await DbContext.EntryAsync(Model)).Reference(ForeignKeyProperty.Name).Load();
     }

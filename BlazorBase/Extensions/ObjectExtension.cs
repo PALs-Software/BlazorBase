@@ -7,7 +7,7 @@ public static class ObjectExtension
 {
     public static void TransferPropertiesTo<T>(this T source, object target, params string[] exceptPropertyNames) where T : class
     {
-        var sourceProperties = typeof(T).GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
+        var sourceProperties = source.GetType().GetProperties().Where(property => !exceptPropertyNames.Contains(property.Name));
         TransferPropertiesTo(source, target, sourceProperties.ToArray());
     }
 

@@ -50,7 +50,7 @@ public class BaseUserCircuitHandlerService : BaseCircuitHandlerService
         if (user is IBaseUserSessionData extendedUser)
         {
             extendedUser.LastSessionCreatedOn = DateTime.Now;
-            await DbContext.SaveChangesTSAsync();
+            await DbContext.SaveChangesAsync();
         }
 
         if (user?.Id != null)
@@ -58,7 +58,7 @@ public class BaseUserCircuitHandlerService : BaseCircuitHandlerService
             lock (SessionLock)
             {
                 if (!LocalUserSessions.ContainsKey(user.Id))
-                    LocalUserSessions[user.Id] = new List<string>();
+                    LocalUserSessions[user.Id] = [];
                 LocalUserSessions[user.Id].Add(circuit.Id);
             }
         }

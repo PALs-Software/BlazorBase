@@ -153,7 +153,7 @@ namespace BlazorBase.CRUD.Components.General
                     var foreignKeyValue = foreignKeyProperty.GetValue(instance);
                     if (foreignKeyValue != null)
                     {
-                        var entry = await dbContext.FindTSAsync(foreignKeyType, foreignKeyValue);
+                        var entry = await dbContext.FindAsync(foreignKeyType, foreignKeyValue);
                         if (entry != null)
                             AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);
                     }

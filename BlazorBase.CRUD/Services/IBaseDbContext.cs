@@ -22,6 +22,13 @@ public interface IBaseDbContext
     ChangeTracker ChangeTracker { get; }
     IStringLocalizer Localizer { get; set; }
     SemaphoreSlim Semaphore { get; init; }
+
+    /// <summary>
+    /// Currently there is a performance problem in the .net SQLClient when data records are loaded from the database that contain large amounts of data of type string.
+    /// This performance problem only occurs with the async methods.
+    /// For this reason, it may be useful to use the sync methods of the db context.
+    /// </summary>
+    bool UseAsyncDbContextMethods { get; set; }
     #endregion
 
     #region Refresh
@@ -89,93 +96,77 @@ public interface IBaseDbContext
     #endregion
 
     #region Exists
-    Task<bool> ExistsTSAsync<T>(IBaseModel baseModel) where T : class, IBaseModel;
-
-    Task<bool> ExistsAsyncTSAsync<T>(IBaseModel baseModel) where T : class, IBaseModel;
+    Task<bool> ExistsAsync<T>(IBaseModel baseModel, CancellationToken cancellationToken = default, bool? useAsyncDbContextMethod = null) where T : class, IBaseModel;
     #endregion
 
     #region Find
-    Task<object?> FindTSAsync(Type entityType, params object?[]? keyValues);
+    Task<object?> FindAsync(Type entityType, params object?[]? keyValues);
 
-    Task<object?> FindTSAsync(Type entityType, CancellationToken cancellationToken, params object?[]? keyValues);
+    Task<object?> FindAsync(Type entityType, bool useAsyncDbContextMethod, params object?[]? keyValues);
 
-    Task<T?> FindTSAsync<T>(params object?[]? keyValues) where T : class;
+    Task<object?> FindAsync(Type entityType, CancellationToken cancellationToken, params object?[]? keyValues);
 
-    Task<T?> FindTSAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
+    Task<object?> FindAsync(Type entityType, CancellationToken cancellationToken, bool useAsyncDbContextMethod, params object?[]? keyValues);
 
-    ValueTask<object?> FindAsyncTSAsync(Type entityType, params object?[]? keyValues);
+    Task<T?> FindAsync<T>(params object?[]? keyValues) where T : class;
 
-    ValueTask<object?> FindAsyncTSAsync(Type entityType, CancellationToken cancellationToken, params object?[]? keyValues);
+    Task<T?> FindAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
 
-    ValueTask<T?> FindAsyncTSAsync<T>(params object?[]? keyValues) where T : class;
+    Task<T?> FindAsync<T>(bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class;
 
-    ValueTask<T?> FindAsyncTSAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
+    Task<T?> FindAsync<T>(CancellationToken cancellationToken, bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class;
 
     IQueryable<T> FindAll<T>(IEnumerable<T> args) where T : class;
 
-    Task<T?> FindWithAllNavigationPropertiesTSAsync<T>(params object?[]? keyValues) where T : class;
-
-    Task<T?> FindWithAllNavigationPropertiesTSAsync<T>(IEnumerable<string> skipNavigationList, params object?[]? keyValues) where T : class;
-
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(params object?[]? keyValues) where T : class;
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class;
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, params object?[]? keyValues) where T : class;
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class;
+    Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, bool useAsyncDbContextMethod, CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
     #endregion
 
     #region Where
 
-    Task<List<T>> WhereTSAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class;
+    Task<List<T>> WhereAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
 
-    Task<List<T>> WhereAsyncTSAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class;
-
-    Task<List<M>> WhereTSAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class;
-
-    Task<List<M>> WhereAsyncTSAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class;
+    Task<List<M>> WhereAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
 
     #endregion
 
     #region Get New Primary Key
-    Task<Guid> GetNewPrimaryKeyTSAsync<T>(CancellationToken cancellationToken = default) where T : class;
+    Task<Guid> GetNewPrimaryKeyAsync<T>(bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
 
-    Task<Guid> GetNewPrimaryKeyAsyncTSAsync<T>(CancellationToken cancellationToken = default) where T : class;
-
-    Task<Guid> GetNewPrimaryKeyTSAsync(Type type, CancellationToken cancellationToken = default);
-
-    Task<Guid> GetNewPrimaryKeyAsyncTSAsync(Type type, CancellationToken cancellationToken = default);
+    Task<Guid> GetNewPrimaryKeyAsync(Type type, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default);
 
     #endregion
 
     #region Load Data
-    Task LoadAllNavigationPropertiesTSAsync<T>(T entry, IEnumerable<string>? skipNavigationList = null, CancellationToken cancellationToken = default) where T : class;
+    Task LoadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string>? skipNavigationList = null, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
 
-    Task<T?> ReloadAllNavigationPropertiesTSAsync<T>(T entry, IEnumerable<string> skipNavigationList, CancellationToken cancellationToken = default) where T : class;
+    Task<T?> ReloadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string> skipNavigationList, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
 
     #region Load Reference
 
-    Task LoadReferenceTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
+    Task LoadReferenceAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
 
-    Task LoadReferenceAsyncTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
-
-    Task LoadReferenceTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
-
-    Task LoadReferenceAsyncTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
+    Task LoadReferenceAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty?>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
 
     #endregion
 
     #region Load Collection
 
-    Task LoadCollectionTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
+    Task LoadCollectionAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
 
-    Task LoadCollectionAsyncTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
-
-    Task LoadCollectionTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
-
-    Task LoadCollectionAsyncTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
+    Task LoadCollectionAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class;
 
     #endregion
-
 
     #endregion
 
     #region Has Unsaved Changes
-    Task<bool> HasUnsavedChangesTSAsync(CancellationToken cancellationToken = default);
+    Task<bool> HasUnsavedChangesAsync(CancellationToken cancellationToken = default);
 
     #endregion
 
@@ -183,7 +174,6 @@ public interface IBaseDbContext
 
     /// <summary>
     /// Saves all changes made in this context to the database.
-    /// Uses the sync SaveChanges method of the DbContext for that
     /// Triggers all on before and on after DbContext events of the changed IBaseModels
     /// </summary>
     /// <param name="acceptAllChangesOnSuccess">
@@ -191,20 +181,7 @@ public interface IBaseDbContext
     ///     the changes have been sent successfully to the database.
     /// </param>
     /// <returns></returns>
-    Task<int> SaveChangesTSAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Saves all changes made in this context to the database.
-    /// Uses the async SaveChangesAsync method of the DbContext for that
-    /// Triggers all on before and on after DbContext events of the changed IBaseModels
-    /// </summary>
-    /// <param name="acceptAllChangesOnSuccess">
-    ///     Indicates whether <see cref="Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker.AcceptAllChanges" /> is called after
-    ///     the changes have been sent successfully to the database.
-    /// </param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
-    /// <returns></returns>
-    Task<int> SaveChangesAsyncTSAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = default);
+    Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess = true, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default);
 
     #endregion
 

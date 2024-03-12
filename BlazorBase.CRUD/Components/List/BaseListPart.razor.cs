@@ -231,7 +231,7 @@ public partial class BaseListPart : BaseDisplayComponent
         if (args.SelectedModel == null)
             return;
 
-        var entryToAdd = await DbContext.FindTSAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
+        var entryToAdd = await DbContext.FindAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
         if (entryToAdd == null)
             return;
 

@@ -18,20 +18,38 @@ namespace BlazorBase.CRUD.Services;
 /// <summary>
 /// Thread safe db context
 /// </summary>
-public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider, IStringLocalizer<BaseDbContext> localizer) : IBaseDbContext
+public class BaseDbContext : IBaseDbContext
 {
     #region Injects
-    protected DbContext DbContext = dbContext;
-    protected readonly IServiceProvider ServiceProvider = serviceProvider;
+    protected DbContext DbContext;
+    protected readonly IServiceProvider ServiceProvider;
+    protected readonly IBlazorBaseCRUDOptions Options;
     #endregion
 
     #region Properties
     public ChangeTracker ChangeTracker { get { return DbContext.ChangeTracker; } }
 
-    public IStringLocalizer Localizer { get; set; } = localizer;
+    public IStringLocalizer Localizer { get; set; }
 
     public SemaphoreSlim Semaphore { get; init; } = new(1, 1);
+
+    /// <summary>
+    /// Currently there is a performance problem in the .net SQLClient when data records are loaded from the database that contain large amounts of data of type string.
+    /// This performance problem only occurs with the async methods.
+    /// For this reason, it may be useful to use the sync methods of the db context.
+    /// </summary>
+    public bool UseAsyncDbContextMethods { get; set; }
     #endregion
+
+    public BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider, IStringLocalizer<BaseDbContext> localizer, IBlazorBaseCRUDOptions options)
+    {
+        DbContext = dbContext;
+        ServiceProvider = serviceProvider;
+        Localizer = localizer;
+        Options = options;
+
+        UseAsyncDbContextMethods = Options.UseAsyncDbContextMethodsPerDefaultInBaseDbContext;
+    }
 
     #region Refresh
     public async Task RefreshDbContextAsync(CancellationToken cancellationToken = default)
@@ -313,25 +331,15 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
     #endregion
 
     #region Exists
-    public virtual async Task<bool> ExistsTSAsync<T>(IBaseModel baseModel) where T: class, IBaseModel
+    public virtual async Task<bool> ExistsAsync<T>(IBaseModel baseModel, CancellationToken cancellationToken = default, bool? useAsyncDbContextMethod = null) where T : class, IBaseModel
     {
-        await Semaphore.WaitAsync().ConfigureAwait(false);
+        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return DbContext.Find<T>(baseModel.GetPrimaryKeys()) != null;
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task<bool> ExistsAsyncTSAsync<T>(IBaseModel baseModel) where T : class, IBaseModel
-    {
-        await Semaphore.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            return await DbContext.FindAsync<T>(baseModel.GetPrimaryKeys()).ConfigureAwait(false) != null;
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await DbContext.FindAsync<T>(baseModel.GetPrimaryKeys(), cancellationToken).ConfigureAwait(false) != null;
+            else
+                return DbContext.Find<T>(baseModel.GetPrimaryKeys()) != null;
         }
         finally
         {
@@ -342,26 +350,30 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     #region Find
 
-    public virtual async Task<object?> FindTSAsync(Type entityType, params object?[]? keyValues)
+    public virtual Task<object?> FindAsync(Type entityType, params object?[]? keyValues)
     {
-        await Semaphore.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            return DbContext.Find(entityType, keyValues);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
+        return FindAsync(entityType, default, UseAsyncDbContextMethods, keyValues);
     }
 
+    public virtual Task<object?> FindAsync(Type entityType, bool useAsyncDbContextMethod, params object?[]? keyValues)
+    {
+        return FindAsync(entityType, default, useAsyncDbContextMethod, keyValues);
+    }
 
-    public virtual async Task<object?> FindTSAsync(Type entityType, CancellationToken cancellationToken, params object?[]? keyValues)
+    public virtual Task<object?> FindAsync(Type entityType, CancellationToken cancellationToken, params object?[]? keyValues)
+    {
+        return FindAsync(entityType, cancellationToken, UseAsyncDbContextMethods, keyValues);
+    }
+
+    public virtual async Task<object?> FindAsync(Type entityType, CancellationToken cancellationToken, bool useAsyncDbContextMethod, params object?[]? keyValues)
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return DbContext.Find(entityType, keyValues);
+            if (useAsyncDbContextMethod)
+                return await DbContext.FindAsync(entityType, keyValues).ConfigureAwait(false);
+            else
+                return DbContext.Find(entityType, keyValues);
         }
         finally
         {
@@ -369,77 +381,30 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    public virtual async Task<T?> FindTSAsync<T>(params object?[]? keyValues) where T : class
+    public virtual Task<T?> FindAsync<T>(params object?[]? keyValues) where T : class
     {
-        await Semaphore.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            return DbContext.Find<T>(keyValues);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
+        return FindAsync<T>(default, UseAsyncDbContextMethods, keyValues);
     }
 
-    public virtual async Task<T?> FindTSAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class
+    public virtual Task<T?> FindAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class
     {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            return DbContext.Find<T>(keyValues);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
+        return FindAsync<T>(cancellationToken, UseAsyncDbContextMethods, keyValues);
     }
 
-    public virtual async ValueTask<object?> FindAsyncTSAsync(Type entityType, params object?[]? keyValues)
+    public virtual Task<T?> FindAsync<T>(bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class
     {
-        await Semaphore.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            return await DbContext.FindAsync(entityType, keyValues).ConfigureAwait(false);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
+        return FindAsync<T>(default, useAsyncDbContextMethod, keyValues);
     }
 
-    public virtual async ValueTask<object?> FindAsyncTSAsync(Type entityType, CancellationToken cancellationToken, params object?[]? keyValues)
+    public virtual async Task<T?> FindAsync<T>(CancellationToken cancellationToken, bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            return await DbContext.FindAsync(entityType, keyValues, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async ValueTask<T?> FindAsyncTSAsync<T>(params object?[]? keyValues) where T : class
-    {
-        await Semaphore.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            return await DbContext.FindAsync<T>(keyValues).ConfigureAwait(false);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async ValueTask<T?> FindAsyncTSAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            return await DbContext.FindAsync<T>(keyValues).ConfigureAwait(false);
+            if (useAsyncDbContextMethod)
+                return await DbContext.FindAsync<T>(keyValues).ConfigureAwait(false);
+            else
+                return DbContext.Find<T>(keyValues);
         }
         finally
         {
@@ -483,18 +448,43 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         return DbContext.Set<T>().Where(expression);
     }
 
-    public virtual Task<T?> FindWithAllNavigationPropertiesTSAsync<T>(params object?[]? keyValues) where T : class
+    public virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(params object?[]? keyValues) where T : class
     {
-        return FindWithAllNavigationPropertiesTSAsync<T>(new List<string>(), keyValues);
+        return FindWithAllNavigationPropertiesAsync<T>(new List<string>(), UseAsyncDbContextMethods, default, keyValues);
     }
 
-    public async virtual Task<T?> FindWithAllNavigationPropertiesTSAsync<T>(IEnumerable<string> skipNavigationList, params object?[]? keyValues) where T : class
+    public virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(CancellationToken cancellationToken, params object?[]? keyValues) where T : class
     {
-        var entry = await FindTSAsync<T>(keyValues);
+        return FindWithAllNavigationPropertiesAsync<T>(new List<string>(), UseAsyncDbContextMethods, cancellationToken, keyValues);
+    }
+
+    public virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class
+    {
+        return FindWithAllNavigationPropertiesAsync<T>(new List<string>(), useAsyncDbContextMethod, keyValues);
+    }
+
+    public virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, params object?[]? keyValues) where T : class
+    {
+        return FindWithAllNavigationPropertiesAsync<T>(skipNavigationList, UseAsyncDbContextMethods, default, keyValues);
+    }
+
+    public virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, CancellationToken cancellationToken, params object?[]? keyValues) where T : class
+    {
+        return FindWithAllNavigationPropertiesAsync<T>(skipNavigationList, UseAsyncDbContextMethods, cancellationToken, keyValues);
+    }
+
+    public virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class
+    {
+        return FindWithAllNavigationPropertiesAsync<T>(skipNavigationList, useAsyncDbContextMethod, default, keyValues);
+    }
+
+    public async virtual Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, bool useAsyncDbContextMethod, CancellationToken cancellationToken, params object?[]? keyValues) where T : class
+    {
+        var entry = await FindAsync<T>(keyValues).ConfigureAwait(false);
         if (entry == null)
             return null;
 
-        await LoadAllNavigationPropertiesTSAsync(entry, skipNavigationList);
+        await LoadAllNavigationPropertiesAsync(entry, skipNavigationList, useAsyncDbContextMethod, cancellationToken).ConfigureAwait(false);
 
         return entry;
     }
@@ -503,7 +493,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     #region Where
 
-    public virtual async Task<List<T>> WhereTSAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class
+    public virtual async Task<List<T>> WhereAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -513,7 +503,10 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return query.ToList();
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+            else
+                return query.ToList();
         }
         finally
         {
@@ -521,7 +514,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    public virtual async Task<List<T>> WhereAsyncTSAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class
+    public virtual async Task<List<M>> WhereAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -531,43 +524,10 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
             if (asNoTracking)
                 query = query.AsNoTracking();
 
-            return await query.ToListAsync(cancellationToken);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task<List<M>> WhereTSAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            var query = DbContext.Set<T>().Where(dataLoadCondition);
-
-            if (asNoTracking)
-                query = query.AsNoTracking();
-
-            return query.Select(dataSelectCondition).ToList();
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task<List<M>> WhereAsyncTSAsync<T, M>(Expression<Func<T, bool>> dataLoadCondition, Expression<Func<T, M>> dataSelectCondition, bool asNoTracking = false, CancellationToken cancellationToken = default) where T : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            var query = DbContext.Set<T>().Where(dataLoadCondition);
-
-            if (asNoTracking)
-                query = query.AsNoTracking();
-
-            return await query.Select(dataSelectCondition).ToListAsync(cancellationToken);
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await query.Select(dataSelectCondition).ToListAsync(cancellationToken).ConfigureAwait(false);
+            else
+                return query.Select(dataSelectCondition).ToList();
         }
         finally
         {
@@ -579,16 +539,23 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     #region Get New Primary Key
 
-    public virtual async Task<Guid> GetNewPrimaryKeyTSAsync<T>(CancellationToken cancellationToken = default) where T : class
+    public virtual async Task<Guid> GetNewPrimaryKeyAsync<T>(bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             Guid guid;
+            object? objectInstance;
             do
             {
                 guid = Guid.NewGuid();
-            } while (DbContext.Find<T>(guid) != null);
+
+                if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                    objectInstance = await DbContext.FindAsync<T>(guid).ConfigureAwait(false);
+                else
+                    objectInstance = DbContext.Find<T>(guid);
+
+            } while (objectInstance != null);
 
             return guid;
         }
@@ -598,54 +565,23 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    public async virtual Task<Guid> GetNewPrimaryKeyAsyncTSAsync<T>(CancellationToken cancellationToken = default) where T : class
+    public virtual async Task<Guid> GetNewPrimaryKeyAsync(Type type, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default)
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             Guid guid;
+            object? objectInstance;
             do
             {
                 guid = Guid.NewGuid();
-            } while (await DbContext.FindAsync<T>(guid).ConfigureAwait(false) != null);
 
-            return guid;
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
+                if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                    objectInstance = await DbContext.FindAsync(type, guid).ConfigureAwait(false);
+                else
+                    objectInstance = DbContext.Find(type, guid);
 
-    public virtual async Task<Guid> GetNewPrimaryKeyTSAsync(Type type, CancellationToken cancellationToken = default)
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            Guid guid;
-            do
-            {
-                guid = Guid.NewGuid();
-            } while (DbContext.Find(type, guid) != null);
-
-            return guid;
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public async virtual Task<Guid> GetNewPrimaryKeyAsyncTSAsync(Type type, CancellationToken cancellationToken = default)
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            Guid guid;
-            do
-            {
-                guid = Guid.NewGuid();
-            } while (await DbContext.FindAsync(type, guid).ConfigureAwait(false) != null);
+            } while (objectInstance != null);
 
             return guid;
         }
@@ -659,13 +595,14 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     #region Load Data
 
-    public async virtual Task LoadAllNavigationPropertiesTSAsync<T>(T entry, IEnumerable<string>? skipNavigationList = null, CancellationToken cancellationToken = default) where T : class
+    public async virtual Task LoadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string>? skipNavigationList = null, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
     {
         var navigationProperties = DbContext.Model.FindEntityType(typeof(T))?.GetNavigations();
         if (navigationProperties == null)
             return;
 
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var useAsyncMethods = useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value;
         try
         {
             foreach (var navigationProperty in navigationProperties)
@@ -673,10 +610,16 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
                 if (skipNavigationList != null && skipNavigationList.Contains(navigationProperty.Name))
                     continue;
 
+                Microsoft.EntityFrameworkCore.ChangeTracking.NavigationEntry navigationEntry;
                 if (navigationProperty.IsCollection)
-                    DbContext.Entry(entry).Collection(navigationProperty.Name).Load();
+                    navigationEntry = DbContext.Entry(entry).Collection(navigationProperty.Name);
                 else
-                    DbContext.Entry(entry).Reference(navigationProperty.Name).Load();
+                    navigationEntry = DbContext.Entry(entry).Reference(navigationProperty.Name);
+
+                if (useAsyncMethods)
+                    await navigationEntry.LoadAsync(cancellationToken).ConfigureAwait(false);
+                else
+                    navigationEntry.Load();
             }
         }
         finally
@@ -685,13 +628,14 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    public async virtual Task<T?> ReloadAllNavigationPropertiesTSAsync<T>(T entry, IEnumerable<string> skipNavigationList, CancellationToken cancellationToken = default) where T : class
+    public async virtual Task<T?> ReloadAllNavigationPropertiesAsync<T>(T entry, IEnumerable<string> skipNavigationList, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
     {
         var navigationProperties = DbContext.Model.FindEntityType(typeof(T))?.GetNavigations();
         if (navigationProperties == null)
             return entry;
 
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        var useAsyncMethods = useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value;
         try
         {
             foreach (var navigationProperty in navigationProperties)
@@ -699,10 +643,16 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
                 if (skipNavigationList.Contains(navigationProperty.Name))
                     continue;
 
+                Microsoft.EntityFrameworkCore.ChangeTracking.NavigationEntry navigationEntry;
                 if (navigationProperty.IsCollection)
-                    DbContext.Entry(entry).Collection(navigationProperty.Name).Load();
+                    navigationEntry = DbContext.Entry(entry).Collection(navigationProperty.Name);
                 else
-                    DbContext.Entry(entry).Reference(navigationProperty.Name).Load();
+                    navigationEntry = DbContext.Entry(entry).Reference(navigationProperty.Name);
+
+                if (useAsyncMethods)
+                    await navigationEntry.LoadAsync(cancellationToken).ConfigureAwait(false);
+                else
+                    navigationEntry.Load();
             }
 
             return entry;
@@ -715,7 +665,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     #region Load Reference
 
-    public virtual async Task LoadReferenceTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
+    public virtual async Task LoadReferenceAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -727,7 +677,10 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
                 entityIsInDeletionMode = true;
             }
 
-            entityEntry.Reference(propertyExpression).Load();
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                await entityEntry.Reference(propertyExpression).LoadAsync(cancellationToken).ConfigureAwait(false);
+            else
+                entityEntry.Reference(propertyExpression).Load();
 
             if (entityIsInDeletionMode)
                 entityEntry.State = EntityState.Deleted;
@@ -738,30 +691,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    public virtual async Task LoadReferenceAsyncTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            var entityIsInDeletionMode = false;
-            if (entityEntry.State == EntityState.Deleted) // Temporarily change deleted state, otherwise the reference cannot be loaded
-            {
-                entityEntry.State = EntityState.Modified;
-                entityIsInDeletionMode = true;
-            }
-
-            await entityEntry.Reference(propertyExpression).LoadAsync(cancellationToken);
-
-            if (entityIsInDeletionMode)
-                entityEntry.State = EntityState.Deleted;
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task LoadReferenceTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
+    public virtual async Task LoadReferenceAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty?>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -774,31 +704,10 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
                 entityIsInDeletionMode = true;
             }
 
-            entityEntry.Reference(propertyExpression).Load();
-
-            if (entityIsInDeletionMode)
-                entityEntry.State = EntityState.Deleted;
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task LoadReferenceAsyncTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, TProperty?>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            var entityIsInDeletionMode = false;
-            var entityEntry = DbContext.Entry(entity);
-            if (entityEntry.State == EntityState.Deleted) // Temporarily change deleted state, otherwise the reference cannot be loaded
-            {
-                entityEntry.State = EntityState.Modified;
-                entityIsInDeletionMode = true;
-            }
-
-            await entityEntry.Reference(propertyExpression).LoadAsync(cancellationToken);
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                await entityEntry.Reference(propertyExpression).LoadAsync(cancellationToken).ConfigureAwait(false);
+            else
+                entityEntry.Reference(propertyExpression).Load();
 
             if (entityIsInDeletionMode)
                 entityEntry.State = EntityState.Deleted;
@@ -813,12 +722,15 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     #region Load Collection
 
-    public virtual async Task LoadCollectionTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
+    public virtual async Task LoadCollectionAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            entityEntry.Collection(propertyExpression).Load();
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                await entityEntry.Collection(propertyExpression).LoadAsync(cancellationToken);
+            else
+                entityEntry.Collection(propertyExpression).Load();
         }
         finally
         {
@@ -826,38 +738,15 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    public virtual async Task LoadCollectionAsyncTSAsync<TEntity, TProperty>(EntityEntry<TEntity> entityEntry, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
+    public virtual async Task LoadCollectionAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
-            await entityEntry.Collection(propertyExpression).LoadAsync(cancellationToken);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task LoadCollectionTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            DbContext.Entry(entity).Collection(propertyExpression).Load();
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-    }
-
-    public virtual async Task LoadCollectionAsyncTSAsync<TEntity, TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> propertyExpression, CancellationToken cancellationToken = default) where TProperty : class where TEntity : class
-    {
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-        try
-        {
-            await DbContext.Entry(entity).Collection(propertyExpression).LoadAsync(cancellationToken);
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                await DbContext.Entry(entity).Collection(propertyExpression).LoadAsync(cancellationToken);
+            else
+                DbContext.Entry(entity).Collection(propertyExpression).Load();
         }
         finally
         {
@@ -870,7 +759,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
     #endregion
 
     #region Has Unsaved Changes
-    public async Task<bool> HasUnsavedChangesTSAsync(CancellationToken cancellationToken = default)
+    public async Task<bool> HasUnsavedChangesAsync(CancellationToken cancellationToken = default)
     {
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -892,7 +781,6 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
 
     /// <summary>
     /// Saves all changes made in this context to the database.
-    /// Uses the sync SaveChanges method of the DbContext for that
     /// Triggers all on before and on after DbContext events of the changed IBaseModels
     /// </summary>
     /// <param name="acceptAllChangesOnSuccess">
@@ -900,56 +788,29 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
     ///     the changes have been sent successfully to the database.
     /// </param>
     /// <returns></returns>
-    public async virtual Task<int> SaveChangesTSAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = default)
+    public async virtual Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess = true, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default)
     {
-        var changedEntries = await HandleOnBeforeDbContextEvents().ConfigureAwait(false);
+        var changedEntries = await HandleOnBeforeDbContextEventsAsync().ConfigureAwait(false);
         await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
 
         int result;
         try
         {
-            result = DbContext.SaveChanges(acceptAllChangesOnSuccess);
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                result = await DbContext.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken).ConfigureAwait(false);
+            else
+                result = DbContext.SaveChanges(acceptAllChangesOnSuccess);
         }
         finally
         {
             Semaphore.Release();
         }
 
-        await HandleOnAfterDbContextEvents(changedEntries).ConfigureAwait(false);
+        await HandleOnAfterDbContextEventsAsync(changedEntries).ConfigureAwait(false);
         return result;
     }
 
-    /// <summary>
-    /// Saves all changes made in this context to the database.
-    /// Uses the async SaveChangesAsync method of the DbContext for that
-    /// Triggers all on before and on after DbContext events of the changed IBaseModels
-    /// </summary>
-    /// <param name="acceptAllChangesOnSuccess">
-    ///     Indicates whether <see cref="Microsoft.EntityFrameworkCore.ChangeTracking.ChangeTracker.AcceptAllChanges" /> is called after
-    ///     the changes have been sent successfully to the database.
-    /// </param>
-    /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
-    /// <returns></returns>
-    public async virtual Task<int> SaveChangesAsyncTSAsync(bool acceptAllChangesOnSuccess = true, CancellationToken cancellationToken = default)
-    {
-        var changedEntries = await HandleOnBeforeDbContextEvents().ConfigureAwait(false);
-        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-
-        int result;
-        try
-        {
-            result = await DbContext.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken).ConfigureAwait(false);
-        }
-        finally
-        {
-            Semaphore.Release();
-        }
-
-        await HandleOnAfterDbContextEvents(changedEntries).ConfigureAwait(false);
-        return result;
-    }
-
-    protected async Task<(List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted)> HandleOnBeforeDbContextEvents()
+    protected async Task<(List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted)> HandleOnBeforeDbContextEventsAsync()
     {
         var entries = DbContext.ChangeTracker.Entries(); // Already runs internally DetectChanges()
 
@@ -1049,7 +910,7 @@ public class BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider
         }
     }
 
-    protected async Task HandleOnAfterDbContextEvents((List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted) changedEntries)
+    protected async Task HandleOnAfterDbContextEventsAsync((List<EntityEntry> Added, List<EntityEntry> Modified, List<EntityEntry> Deleted) changedEntries)
     {
         var eventServices = new EventServices(ServiceProvider, this, Localizer);
 

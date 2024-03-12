@@ -54,7 +54,7 @@ public class BaseAudioRecord : BaseModel, IBaseAudioRecord, ISortableItem
 
     public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
     {
-        Id = await args.EventServices.DbContext.GetNewPrimaryKeyTSAsync(GetType());
+        Id = await args.EventServices.DbContext.GetNewPrimaryKeyAsync(GetType());
 
         (await args.EventServices.DbContext.EntryAsync(this)).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a record is a navigation property and is newly added, it must add the record before it add or update the entity itself
     }
@@ -70,7 +70,7 @@ public class BaseAudioRecord : BaseModel, IBaseAudioRecord, ISortableItem
 
     public override async Task OnBeforeDbContextDeleteEntry(OnBeforeDbContextDeleteEntryArgs args)
     {        
-        await args.EventServices.DbContext.LoadReferenceTSAsync(this, entry => entry.AudioFile);
+        await args.EventServices.DbContext.LoadReferenceAsync(this, entry => entry.AudioFile);
         
         if (AudioFile != null)
         {

@@ -56,7 +56,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         var userManager = args.EventServices.ServiceProvider.GetRequiredService<UserManager<TIdentityUser>>();
         await CheckIdentityRolePermissionsAsync(args.EventServices, userManager, null);
 
-        Id = await args.EventServices.DbContext.GetNewPrimaryKeyTSAsync(GetType());
+        Id = await args.EventServices.DbContext.GetNewPrimaryKeyAsync(GetType());
 
         IdentityUser = new TIdentityUser
         {

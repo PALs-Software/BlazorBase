@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Components.Card;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
@@ -80,16 +81,17 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #region Members
     protected EventServices EventServices = null!;
 
-    protected List<TModel> Entries = new();
+    protected List<TModel> Entries = [];
     protected object?[]? SelectedEntryPrimaryKeys = null;
     protected Type TModelType = null!;
 
     protected BaseModalCard<TModel>? BaseModalCard = null!;
     protected Virtualize<TModel>? VirtualizeList = null!;
 
-    protected List<IBasePropertyListDisplay> PropertyListDisplays = new();
+    protected List<IBasePropertyListDisplay> PropertyListDisplays = [];
 
-    protected List<DisplayItem> SortedColumns = new();
+    protected List<DisplayItem> SortedColumns = [];
+    protected List<string> IncludePropertiesInListLoadQuery = [];
     #endregion
 
     #region Init
@@ -108,6 +110,9 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         SetDisplayNames();
         PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+        IncludePropertiesInListLoadQuery = TModelType.GetProperties()
+            .Where(entry => ((IncludeNavigationPropertyOnListLoadAttribute?)Attribute.GetCustomAttribute(entry, typeof(IncludeNavigationPropertyOnListLoadAttribute)))?.Include ?? false)
+            .Select(entry => entry.Name).ToList();
 
         SetInitalSortOfPropertyColumns();
 
@@ -194,9 +199,9 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         var dbContext = ServiceProvider.GetRequiredService<IBaseDbContext>(); // Use new instance for that, to get always current data
         var query = CreateLoadDataQuery(dbContext.Set<TModel>());
-        
-        var totalEntries = await query.CountTSAsync(dbContext, request.CancellationToken);
-        Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListTSAsync(dbContext, request.CancellationToken);
+
+        var totalEntries = await query.CountTSAsync(dbContext, cancellationToken: request.CancellationToken);
+        Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListTSAsync(dbContext, cancellationToken: request.CancellationToken);
 
         return new ItemsProviderResult<TModel>(Entries, totalEntries);
     }
@@ -224,13 +229,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             foreach (var displayItem in group.Value.DisplayItems)
                 query = query.Where(displayItem, useEFFilters);
 
-        if (ComponentModelInstance != null)
-        {
-            var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
-            ComponentModelInstance.OnGuiLoadData(args);
-            if (args.ListLoadQuery != null)
-                query = args.ListLoadQuery.Cast<TModel>();
-        }
+        foreach (var includePropertyName in IncludePropertiesInListLoadQuery)
+            query = query.Include(includePropertyName);
 
         if (ComponentModelInstance != null)
         {
@@ -350,7 +350,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             return;
 
         var dbContext = ServiceProvider.GetRequiredService<IBaseDbContext>();
-        var scopedModel = await dbContext.FindTSAsync<TModel>(model.GetPrimaryKeys());
+        var scopedModel = await dbContext.FindAsync<TModel>(model.GetPrimaryKeys());
 
         if (scopedModel == null)
             return;
@@ -366,7 +366,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
                 return;
 
             await dbContext.RemoveAsync(scopedModel);
-            await dbContext.SaveChangesTSAsync();
+            await dbContext.SaveChangesAsync();
             Entries.Remove(scopedModel);
 
             var afterRemoveArgs = new OnAfterRemoveEntryArgs(scopedModel, eventServices);

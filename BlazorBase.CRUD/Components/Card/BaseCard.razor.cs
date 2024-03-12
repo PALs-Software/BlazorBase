@@ -201,7 +201,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             await model.OnCreateNewEntryInstance(args);
         }
         else
-            model = await DbContext.FindWithAllNavigationPropertiesTSAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
+            model = await DbContext.FindWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
         if (model == null)
             throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys ?? new object())]);
@@ -261,7 +261,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
                 if (args.AbortAdding)
                     return false;
                
-                if (await DbContext.ExistsTSAsync<TModel>(Model))
+                if (await DbContext.ExistsAsync<TModel>(Model))
                 {
                     ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
                     if (showSnackBar)
@@ -291,7 +291,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             }
 
             await InvokeOnBeforeSaveChangesEvents(EventServices);
-            await DbContext.SaveChangesTSAsync();
+            await DbContext.SaveChangesAsync();
             AddingMode = false;
             await InvokeOnAfterSaveChangesEvents(EventServices);
         }
@@ -423,7 +423,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             if (await basePropertyCardInput.InputHasAdditionalContentChanges())
                 return true;
 
-        return await DbContext.HasUnsavedChangesTSAsync();
+        return await DbContext.HasUnsavedChangesAsync();
     }
 
     protected virtual async Task<bool> CardIsValidAsync()
