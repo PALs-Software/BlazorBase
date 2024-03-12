@@ -1,0 +1,21 @@
+﻿@using BlazorBase.CRUD.Models
+@using BlazorBase.RecurringBackgroundJobQueue.Models;
+@using Blazorise.Icons.FontAwesome
+
+@inherits IBasePropertyCardInput
+
+<div class="background-job-log ml-3">
+
+    @if (Model != null && Model is RecurringBackgroundJobEntry entry)
+    {
+        if (Property.Name == nameof(RecurringBackgroundJobEntry.Log))
+        {
+            @entry.Log
+        }
+        else
+        {
+            @entry.LastErrors
+        }
+    }
+
+</div>

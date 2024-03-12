@@ -35,9 +35,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.DataUpgrade", "B
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.AudioRecorder", "BlazorBase.AudioRecorder\BlazorBase.AudioRecorder.csproj", "{DDC8206A-2CE6-4C34-81DD-2548B356CD9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.Server", "BlazorBase.Server\BlazorBase.Server.csproj", "{97C86A8F-C7C7-4B0B-A0F6-ACCA6A6AE4C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Server", "BlazorBase.Server\BlazorBase.Server.csproj", "{97C86A8F-C7C7-4B0B-A0F6-ACCA6A6AE4C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.Server.User", "BlazorBase.Server.User\BlazorBase.Server.User.csproj", "{D7BAC27F-89CC-4E98-A173-2CC5D0847B69}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorBase.Server.User", "BlazorBase.Server.User\BlazorBase.Server.User.csproj", "{D7BAC27F-89CC-4E98-A173-2CC5D0847B69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorBase.RecurringBackgroundJobQueue", "BlazorBase.RecurringJobQueue\BlazorBase.RecurringBackgroundJobQueue.csproj", "{DC8B2C50-81B4-4F4F-A53F-3FFE38D85E15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -109,6 +111,10 @@ Global
 		{D7BAC27F-89CC-4E98-A173-2CC5D0847B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7BAC27F-89CC-4E98-A173-2CC5D0847B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7BAC27F-89CC-4E98-A173-2CC5D0847B69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC8B2C50-81B4-4F4F-A53F-3FFE38D85E15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC8B2C50-81B4-4F4F-A53F-3FFE38D85E15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC8B2C50-81B4-4F4F-A53F-3FFE38D85E15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC8B2C50-81B4-4F4F-A53F-3FFE38D85E15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -130,6 +136,7 @@ Global
 		{DDC8206A-2CE6-4C34-81DD-2548B356CD9E} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 		{97C86A8F-C7C7-4B0B-A0F6-ACCA6A6AE4C9} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 		{D7BAC27F-89CC-4E98-A173-2CC5D0847B69} = {DB570994-9245-4729-9B12-A02CCED2F12F}
+		{DC8B2C50-81B4-4F4F-A53F-3FFE38D85E15} = {DB570994-9245-4729-9B12-A02CCED2F12F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6F9C395A-A326-4362-81F4-AF9526CBEE16}

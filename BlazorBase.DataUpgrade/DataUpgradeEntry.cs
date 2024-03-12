@@ -21,6 +21,6 @@ public class DataUpgradeEntry : BaseModel
     public string? Description { get; set; }
 
     [Editable(false)]
-    [Visible(DisplayGroup = "Log", DisplayGroupOrder = 200, DisplayOrder = 100, HideInGUITypes = new GUIType[] { GUIType.List })]
+    [Visible(DisplayGroup = "Log", DisplayGroupOrder = 200, DisplayOrder = 100, HideInGUITypes = [GUIType.List])]
     public string? Log { get; set; }
 }
