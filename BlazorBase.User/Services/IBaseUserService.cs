@@ -11,11 +11,11 @@ public interface IBaseUserService
 {
     Task<bool> CurrentUserIsInRoleAsync(string roleName);
 
-    Task<IBaseUser?> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true);
+    Task<IBaseUser?> GetCurrentUserAsync(IBaseDbContext dbContext, bool asNoTracking = true);
 
     Task<IBaseUser?> GetCurrentUserAsync(bool asNoTracking = true);
 
-    Task<IBaseUser?> GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking = true);
+    Task<IBaseUser?> GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string id, bool asNoTracking = true);
 
     Task<IBaseUser?> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true);
 }
@@ -27,11 +27,11 @@ public interface IBaseUserService<TUser, TIdentityUser, TIdentityRole>
 {
     Task<bool> CurrentUserIsInRoleAsync(string roleName);
 
-    Task<TUser?> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true);
+    Task<TUser?> GetCurrentUserAsync(IBaseDbContext dbContext, bool asNoTracking = true);
 
     Task<TUser?> GetCurrentUserAsync(bool asNoTracking = true);
 
-    Task<TUser?> GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking = true);
+    Task<TUser?> GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string id, bool asNoTracking = true);
 
     Task<TUser?> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true);
 }

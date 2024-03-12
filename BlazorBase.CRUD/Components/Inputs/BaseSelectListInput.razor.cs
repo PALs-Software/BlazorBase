@@ -122,7 +122,7 @@ public partial class BaseSelectListInput : BaseInput
         for (int i = 0; i < primaryKeys.Length; i++)
             primaryKeys[i] = Convert.ChangeType(primaryKeys[i], ForeignKeyProperties[i].PropertyType, CultureInfo.InvariantCulture);
 
-        var entry = await Service.GetAsync(ForeignKeyBaseModelType!, primaryKeys);
+        var entry = await DbContext.FindAsync(ForeignKeyBaseModelType!, primaryKeys);
         await OnValueChangedAsync(entry);
         UpdateSelectedValue();
     }
@@ -163,7 +163,7 @@ public partial class BaseSelectListInput : BaseInput
 
         if (ForeignKeyIsOnBaseModel)
         {
-            var entry = await Service.GetAsync(ForeignKeyBaseModelType!, args.SelectedModel.GetPrimaryKeys());
+            var entry = await DbContext.FindAsync(ForeignKeyBaseModelType!, args.SelectedModel.GetPrimaryKeys());
             await OnValueChangedAsync(entry);
         }
         else

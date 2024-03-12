@@ -1,29 +1,27 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.Card;
+using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Enums;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
+using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.Models;
+using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using BlazorBase.CRUD.EventArguments;
-using BlazorBase.MessageHandling.Enum;
-using Blazorise;
 using System.Linq.Expressions;
-using Microsoft.EntityFrameworkCore;
-using BlazorBase.CRUD.Components.General;
-using BlazorBase.CRUD.Components.Card;
-using BlazorBase.Models;
-using Newtonsoft.Json;
-using BlazorBase.CRUD.Components.PageActions.Models;
-using BlazorBase.CRUD.Attributes;
-using System.Reflection;
+using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -71,7 +69,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     #region Injects
 
-    [Inject] public BaseService Service { get; set; } = null!;
+    [Inject] protected IBaseDbContext DbContext { get; set; } = null!;
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseList<TModel>> Localizer { get; set; } = null!;
     [Inject] protected BaseParser BaseParser { get; set; } = null!;
@@ -83,16 +81,17 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #region Members
     protected EventServices EventServices = null!;
 
-    protected List<TModel> Entries = new();
+    protected List<TModel> Entries = [];
     protected object?[]? SelectedEntryPrimaryKeys = null;
     protected Type TModelType = null!;
 
     protected BaseModalCard<TModel>? BaseModalCard = null!;
     protected Virtualize<TModel>? VirtualizeList = null!;
 
-    protected List<IBasePropertyListDisplay> PropertyListDisplays = new();
+    protected List<IBasePropertyListDisplay> PropertyListDisplays = [];
 
-    protected List<DisplayItem> SortedColumns = new();
+    protected List<DisplayItem> SortedColumns = [];
+    protected List<string> IncludePropertiesInListLoadQuery = [];
     #endregion
 
     #region Init
@@ -104,17 +103,20 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (ComponentModelInstance == null)
             ComponentModelInstance = new TModel();
 
-        EventServices = GetEventServices(Service);
+        EventServices = GetEventServices(DbContext);
 
         TModelType = typeof(TModel);
         await SetUpDisplayListsAsync(TModelType, GUIType.List, ComponentModelInstance);
 
         SetDisplayNames();
         PropertyListDisplays = ServiceProvider.GetServices<IBasePropertyListDisplay>().ToList();
+        IncludePropertiesInListLoadQuery = TModelType.GetProperties()
+            .Where(entry => ((IncludeNavigationPropertyOnListLoadAttribute?)Attribute.GetCustomAttribute(entry, typeof(IncludeNavigationPropertyOnListLoadAttribute)))?.Include ?? false)
+            .Select(entry => entry.Name).ToList();
 
         SetInitalSortOfPropertyColumns();
 
-        await PrepareForeignKeyProperties(Service);
+        await PrepareForeignKeyProperties(DbContext);
     }
 
     public override async Task SetParametersAsync(ParameterView parameters)
@@ -158,7 +160,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         builder.AddAttribute(1, "Model", model);
         builder.AddAttribute(2, "Property", displayItem.Property);
-        builder.AddAttribute(3, "Service", Service);
+        builder.AddAttribute(3, "DbContext", DbContext);
         builder.AddAttribute(4, "ModelLocalizer", ModelLocalizer);
         builder.AddAttribute(5, "DisplayItem", displayItem);
 
@@ -195,11 +197,11 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (request.Count == 0)
             return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
 
-        var baseService = ServiceProvider.GetRequiredService<BaseService>(); //Use own service for each call, because then the queries can run parallel, because this method get called multiple times at the same time
-        var query = CreateLoadDataQuery(baseService.Set<TModel>());
+        var dbContext = ServiceProvider.GetRequiredService<IBaseDbContext>(); // Use new instance for that, to get always current data
+        var query = CreateLoadDataQuery(dbContext.Set<TModel>());
 
-        var totalEntries = await query.CountAsync();
-        Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListAsync();
+        var totalEntries = await query.CountTSAsync(dbContext, cancellationToken: request.CancellationToken);
+        Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListTSAsync(dbContext, cancellationToken: request.CancellationToken);
 
         return new ItemsProviderResult<TModel>(Entries, totalEntries);
     }
@@ -227,13 +229,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             foreach (var displayItem in group.Value.DisplayItems)
                 query = query.Where(displayItem, useEFFilters);
 
-        if (ComponentModelInstance != null)
-        {
-            var args = new OnGuiLoadDataArgs(GUIType.List, ComponentModelInstance, query, EventServices);
-            ComponentModelInstance.OnGuiLoadData(args);
-            if (args.ListLoadQuery != null)
-                query = args.ListLoadQuery.Cast<TModel>();
-        }
+        foreach (var includePropertyName in IncludePropertiesInListLoadQuery)
+            query = query.Include(includePropertyName);
 
         if (ComponentModelInstance != null)
         {
@@ -352,13 +349,13 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (result == ConfirmDialogResult.Aborted)
             return;
 
-        var baseService = ServiceProvider.GetRequiredService<BaseService>();
-        var scopedModel = await baseService.GetAsync<TModel>(model.GetPrimaryKeys());
+        var dbContext = ServiceProvider.GetRequiredService<IBaseDbContext>();
+        var scopedModel = await dbContext.FindAsync<TModel>(model.GetPrimaryKeys());
 
         if (scopedModel == null)
             return;
 
-        var eventServices = GetEventServices(baseService);
+        var eventServices = GetEventServices(dbContext);
 
         try
         {
@@ -368,8 +365,8 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             if (beforeRemoveArgs.AbortRemoving)
                 return;
 
-            await baseService.RemoveEntryAsync(scopedModel);
-            await baseService.SaveChangesAsync();
+            await dbContext.RemoveAsync(scopedModel);
+            await dbContext.SaveChangesAsync();
             Entries.Remove(scopedModel);
 
             var afterRemoveArgs = new OnAfterRemoveEntryArgs(scopedModel, eventServices);
@@ -389,7 +386,6 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     #endregion
 
-
     #region Actions
     public virtual async Task RefreshDataAsync()
     {
@@ -399,9 +395,9 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #endregion
 
     #region Other
-    protected virtual EventServices GetEventServices(BaseService baseService)
+    protected virtual EventServices GetEventServices(IBaseDbContext dbContext)
     {
-        return new EventServices(ServiceProvider, ModelLocalizer, baseService);
+        return new EventServices(ServiceProvider, dbContext, ModelLocalizer);
     }
     #endregion
 }

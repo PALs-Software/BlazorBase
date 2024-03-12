@@ -26,7 +26,7 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
     {
         await base.OnInitializedAsync();
 
-        EventServices = new EventServices(ServiceProvider, ModelLocalizer, Service);
+        EventServices = new EventServices(ServiceProvider, DbContext, ModelLocalizer);
 
         SkipCustomSetParametersAsync = true;
     }

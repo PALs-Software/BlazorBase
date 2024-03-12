@@ -1,8 +1,10 @@
-﻿using BlazorBase.CRUD.Services;
+﻿using BlazorBase.CRUD.Extensions;
+using BlazorBase.CRUD.Services;
 using BlazorBase.User.Extensions;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -10,46 +12,42 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.User.Services;
 
-public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserService<TUser, TIdentityUser, TIdentityRole>, IBaseUserService
-    where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
-    where TIdentityUser : IdentityUser, new()
-    where TIdentityRole : struct, Enum
+public class BaseUserService<TUser, TIdentityUser, TIdentityRole>(
+        AuthenticationStateProvider authenticationStateProvider,
+        UserManager<TIdentityUser> userManager,
+        IBaseDbContext dbContext) : IBaseUserService<TUser, TIdentityUser, TIdentityRole>, IBaseUserService
+            where TUser : class, IBaseUser<TIdentityUser, TIdentityRole>, new()
+            where TIdentityUser : IdentityUser, new()
+            where TIdentityRole : struct, Enum
 {
-    protected AuthenticationStateProvider AuthenticationStateProvider { get; }
-    protected UserManager<TIdentityUser> UserManager { get; }
-    protected BaseService BaseService { get; }
-
-    public BaseUserService(AuthenticationStateProvider authenticationStateProvider, UserManager<TIdentityUser> userManager, BaseService baseService)
-    {
-        AuthenticationStateProvider = authenticationStateProvider;
-        UserManager = userManager;
-        BaseService = baseService;
-    }
+    protected AuthenticationStateProvider AuthenticationStateProvider { get; } = authenticationStateProvider;
+    protected UserManager<TIdentityUser> UserManager { get; } = userManager;
+    protected IBaseDbContext DbContext { get; } = dbContext;
 
     public virtual async Task<bool> CurrentUserIsInRoleAsync(string roleName)
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
         if (!authState.User.Identity?.IsAuthenticated ?? false)
             return false;
 
         return authState.User.IsInRole(roleName);
     }
 
-    public virtual async Task<TUser?> GetCurrentUserAsync(BaseService baseService, bool asNoTracking = true)
+    public virtual async Task<TUser?> GetCurrentUserAsync(IBaseDbContext dbContext, bool asNoTracking = true)
     {
-        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
         var userId = UserManager.GetUserId(authenticationState.User);
-        return await GetUserByApplicationUserIdAsync(baseService, userId, asNoTracking);
+        return await GetUserByApplicationUserIdAsync(dbContext, userId, asNoTracking).ConfigureAwait(false);
     }
 
-    async Task<IBaseUser?> IBaseUserService.GetCurrentUserAsync(BaseService baseService, bool asNoTracking)
+    async Task<IBaseUser?> IBaseUserService.GetCurrentUserAsync(IBaseDbContext dbContext, bool asNoTracking)
     {
-        return await GetCurrentUserAsync(baseService, asNoTracking);
+        return await GetCurrentUserAsync(dbContext, asNoTracking);
     }
 
     public virtual Task<TUser?> GetCurrentUserAsync(bool asNoTracking = true)
     {
-        return GetCurrentUserAsync(BaseService, asNoTracking);
+        return GetCurrentUserAsync(DbContext, asNoTracking);
     }
 
     async Task<IBaseUser?> IBaseUserService.GetCurrentUserAsync(bool asNoTracking)
@@ -59,29 +57,31 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
 
     public virtual async Task<string?> GetCurrentUserIdentityIdAsync()
     {
-        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(false);
         return UserManager.GetUserId(authenticationState.User);
     }
 
-    public virtual async Task<TUser?> GetUserByApplicationUserIdAsync(BaseService baseService, string? id, bool asNoTracking = true)
+    public virtual async Task<TUser?> GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string? id, bool asNoTracking = true)
     {
         if (id == null)
             return null;
 
-        var users = await baseService.GetDataAsync<TUser>(user => user.IdentityUserId == id, asNoTracking);
+        var query = dbContext.Set<TUser>().Where(user => user.IdentityUserId == id);
+        if (asNoTracking)
+            query = query.AsNoTracking();
 
-        return users.FirstOrDefault();
+        return await query.FirstOrDefaultTSAsync(dbContext).ConfigureAwait(false);
     }
 
-    async Task<IBaseUser?> IBaseUserService.GetUserByApplicationUserIdAsync(BaseService baseService, string id, bool asNoTracking)
+    async Task<IBaseUser?> IBaseUserService.GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string id, bool asNoTracking)
     {
-        return await GetUserByApplicationUserIdAsync(baseService, id, asNoTracking);
+        return await GetUserByApplicationUserIdAsync(dbContext, id, asNoTracking);
     }
 
 
     public virtual Task<TUser?> GetUserByApplicationUserIdAsync(string id, bool asNoTracking = true)
     {
-        return GetUserByApplicationUserIdAsync(BaseService, id, asNoTracking);
+        return GetUserByApplicationUserIdAsync(DbContext, id, asNoTracking);
     }
 
     async Task<IBaseUser?> IBaseUserService.GetUserByApplicationUserIdAsync(string id, bool asNoTracking)
@@ -102,9 +102,9 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
 
         foreach (var role in userRoles)
         {
-            var result = await roleManager.FindByNameAsync(role);
+            var result = await roleManager.FindByNameAsync(role).ConfigureAwait(false);
             if (result == null)
-                await roleManager.CreateAsync(new IdentityRole(role));
+                await roleManager.CreateAsync(new IdentityRole(role)).ConfigureAwait(false);
         }
     }
 
@@ -112,7 +112,7 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
     {
         var userManager = serviceProvider.GetRequiredService<UserManager<TIdentityUser>>();
 
-        if (await userManager.FindByEmailAsync(email) != null)
+        if (await userManager.FindByEmailAsync(email).ConfigureAwait(false) != null)
             return;
 
         var identityUser = new TIdentityUser
@@ -122,29 +122,29 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole> : IBaseUserSer
             EmailConfirmed = true
         };
 
-        var result = await userManager.CreateAsync(identityUser, initPassword);
+        var result = await userManager.CreateAsync(identityUser, initPassword).ConfigureAwait(false);
 
         if (result.Succeeded)
         {
-            result = await userManager.AddToRoleAsync(identityUser, role.ToString());
+            result = await userManager.AddToRoleAsync(identityUser, role.ToString()).ConfigureAwait(false);
             if (!result.Succeeded)
                 throw new Exception(result.GetErrorMessage());
         }
         else
             throw new Exception(result.GetErrorMessage());
 
-        var baseService = serviceProvider.GetRequiredService<BaseService>();
+        var dbContext = serviceProvider.GetRequiredService<IBaseDbContext>();
         var user = new TUser
         {
-            Id = baseService.GetNewPrimaryKey<TUser>(),
+            Id = await dbContext.GetNewPrimaryKeyAsync<TUser>().ConfigureAwait(false),
             Email = email,
             UserName = username,
             IdentityUserId = identityUser.Id,
             IdentityRole = role
         };
 
-        baseService.AddEntry(user);
-        await baseService.SaveChangesAsync();
+        await dbContext.AddAsync(user).ConfigureAwait(false);
+        await dbContext.SaveChangesAsync().ConfigureAwait(false);
     }
 
 }

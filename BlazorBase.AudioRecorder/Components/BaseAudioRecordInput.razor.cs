@@ -55,7 +55,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
     protected async Task CreateCurrentAudioRecordInstanceAsync(object? oldValue)
     {
         CurrentAudioRecord = (IBaseAudioRecord)Activator.CreateInstance(ServiceProvider.GetRequiredService<IBaseAudioRecord>().GetType())!;
-        if (CurrentAudioRecord is IModeInjectServiceProvider injectModel)
+        if (CurrentAudioRecord is IModelInjectServiceProvider injectModel)
             injectModel.ServiceProvider = ServiceProvider;
         await CurrentAudioRecord.OnCreateNewEntryInstance(new OnCreateNewEntryInstanceArgs(Model, EventServices));
 
@@ -119,7 +119,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
         if (CurrentAudioRecord.AudioFile != null)
         {
             await CurrentAudioRecord.AudioFile.RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
-            var entry = Service.DbContext.Entry(CurrentAudioRecord.AudioFile);
+            var entry = await DbContext.EntryAsync(CurrentAudioRecord.AudioFile);
             entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
         }
 
@@ -145,7 +145,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
 
         audioRecord.Hash = null;
         audioRecord.FileName = String.Empty;
-        await audioRecord.AudioFile.ClearFileFromPropertyAsync(audioRecord, nameof(IBaseAudioRecord.AudioFile), Service);
+        await audioRecord.AudioFile.ClearFileFromPropertyAsync(audioRecord, nameof(IBaseAudioRecord.AudioFile), DbContext);
 
         if (FileNameInput != null)
             await FileNameInput.ValidatePropertyValueAsync();

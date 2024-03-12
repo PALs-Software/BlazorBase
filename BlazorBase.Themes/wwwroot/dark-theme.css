@@ -30,6 +30,7 @@
     --table-row-selected-background: #525151;
     --list-part-table-row-selected-color: var(--table-row-selected-color);
     --list-part-table-row-selected-background: var(--table-row-selected-background);
+    --list-part-table-hover-background-color: var(--table-hover-background);
     /*Card*/
     --card-modal-background: #2d2d2d;
     --card-color: var(--bs-body-color);

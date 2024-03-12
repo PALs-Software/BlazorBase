@@ -284,7 +284,7 @@ namespace BlazorBase.CRUD.Models
             var validationContext = new ValidationContext(this, eventServices.ServiceProvider, new Dictionary<object, object?>()
             {
                 [typeof(IStringLocalizer)] = eventServices.Localizer,
-                [typeof(BaseService)] = eventServices.BaseService
+                [typeof(IBaseDbContext)] = eventServices.DbContext
             });
 
             return TryValidate(out validationResults, validationContext);
@@ -328,7 +328,7 @@ namespace BlazorBase.CRUD.Models
 
         public virtual async Task<IBaseModel?> GetShowOnlySingleEntryInstance(OnEntryToBeShownByStartArgs args)
         {
-            return (IBaseModel?)await args.EventServices.BaseService.Set(GetType()).FirstOrDefaultAsync();
+            return (IBaseModel?)await args.EventServices.DbContext.Set(GetType()).FirstOrDefaultTSAsync(args.EventServices.DbContext);
         }
         #endregion
 

@@ -56,7 +56,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         var userManager = args.EventServices.ServiceProvider.GetRequiredService<UserManager<TIdentityUser>>();
         await CheckIdentityRolePermissionsAsync(args.EventServices, userManager, null);
 
-        Id = await args.EventServices.BaseService.GetNewPrimaryKeyAsync(GetType());
+        Id = await args.EventServices.DbContext.GetNewPrimaryKeyAsync(GetType());
 
         IdentityUser = new TIdentityUser
         {
@@ -74,7 +74,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         var user = await userManager.FindByIdAsync(IdentityUser.Id);
         ArgumentNullException.ThrowIfNull(user);
         await SetIdentityRoleAsync(args.EventServices, userManager, user);
-        await args.EventServices.BaseService.DbContext.Entry(IdentityUser).ReloadAsync();
+        await (await args.EventServices.DbContext.EntryAsync(IdentityUser)).ReloadAsync();
     }
 
     public override async Task OnBeforeUpdateEntry(OnBeforeUpdateEntryArgs args)
@@ -99,7 +99,7 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         }
 
         await SetIdentityRoleAsync(args.EventServices, userManager, user);
-        await args.EventServices.BaseService.DbContext.Entry(IdentityUser).ReloadAsync();
+        await (await args.EventServices.DbContext.EntryAsync(IdentityUser)).ReloadAsync();
     }
 
     protected abstract Task<bool> IdentityHasRightToChangeRoleAsync(ClaimsPrincipal currentLoggedInUser, TIdentityRole identityChangedRole, TIdentityUser? identityToChange);

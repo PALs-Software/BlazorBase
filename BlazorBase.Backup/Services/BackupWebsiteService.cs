@@ -11,24 +11,16 @@ using static BlazorBase.Backup.Controller.BlazorBaseBackupFileController;
 
 namespace BlazorBase.Backup.Services;
 
-public class BackupWebsiteService
+public class BackupWebsiteService(DbContext dbContext, IStringLocalizer<BackupWebsiteService> localizer, IJSRuntime jsRuntime, IMessageHandler messageHandler)
 {
     #region Injects
 
-    protected readonly BaseService BaseService;
-    protected readonly IStringLocalizer<BackupWebsiteService> Localizer;
-    protected readonly IJSRuntime JSRuntime;
-    protected readonly IMessageHandler MessageHandler;
+    protected readonly DbContext DbContext = dbContext;
+    protected readonly IStringLocalizer<BackupWebsiteService> Localizer = localizer;
+    protected readonly IJSRuntime JSRuntime = jsRuntime;
+    protected readonly IMessageHandler MessageHandler = messageHandler;
 
     #endregion
-
-    public BackupWebsiteService(BaseService baseService, IStringLocalizer<BackupWebsiteService> localizer, IJSRuntime jsRuntime, IMessageHandler messageHandler)
-    {
-        BaseService = baseService;
-        Localizer = localizer;
-        JSRuntime = jsRuntime;
-        MessageHandler = messageHandler;
-    }
 
     public virtual async Task CreateAndDownloadWebsiteBackupAsync()
     {
@@ -69,7 +61,7 @@ public class BackupWebsiteService
 
         try
         {
-            var sqlConStrBuilder = new SqlConnectionStringBuilder(BaseService.DbContext.Database.GetDbConnection().ConnectionString);
+            var sqlConStrBuilder = new SqlConnectionStringBuilder(DbContext.Database.GetDbConnection().ConnectionString);
 
             using var connection = new SqlConnection(sqlConStrBuilder.ConnectionString);
             var query = $"BACKUP DATABASE {sqlConStrBuilder.InitialCatalog} TO DISK='{backupPath}'";

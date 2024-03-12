@@ -20,9 +20,7 @@ public abstract class JSModul : IAsyncDisposable
 
     protected async ValueTask InvokeJSVoidAsync(string identifier, params object[]? args)
     {
-        // => await (await ModuleTask.Value).InvokeVoidAsync(identifier, args);
-        var mod = await ModuleTask.Value;
-        await mod.InvokeVoidAsync(identifier, args);
+        await (await ModuleTask.Value).InvokeVoidAsync(identifier, args);
     }
 
     protected async ValueTask<T> InvokeJSAsync<T>(string identifier, params object[]? args) => await (await ModuleTask.Value).InvokeAsync<T>(identifier, args);

@@ -32,7 +32,7 @@ namespace BlazorBase.CRUD.NumberSeries
 
         public bool IsValidNoSeries(string noSeries)
         {
-            var digits = noSeries.Where(entry => char.IsDigit(entry)).ToList();
+            var digits = noSeries.Where(char.IsDigit).ToList();
             return digits.Count != 0;
         }
 
@@ -48,9 +48,9 @@ namespace BlazorBase.CRUD.NumberSeries
             return true;
         }
 
-        public async Task<string> GetNextNoAsync(BaseService service, string noSeriesId)
+        public async Task<string> GetNextNoAsync(IBaseDbContext dbContext, string noSeriesId)
         {
-            var noSeries = await service.GetAsync<NoSeries>(noSeriesId);
+            var noSeries = await dbContext.FindAsync<NoSeries>(noSeriesId);
             if (noSeries == null)
                 throw new CRUDException(Localizer["Cant get next number in series, because number series can not be found with the key {0}", noSeriesId]);
 
@@ -64,7 +64,7 @@ namespace BlazorBase.CRUD.NumberSeries
             else
                 IncreaseNo(noSeries);
 
-            service.UpdateEntry(noSeries);
+            await dbContext.UpdateAsync(noSeries);
             return noSeries.LastNoUsed;
         }
 

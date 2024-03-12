@@ -14,7 +14,7 @@ namespace BlazorBase.CRUD.NumberSeries.Test.Tests;
 
 public class NoSeriesTest : TestContext
 {
-    protected BaseService BaseService { get; set; }
+    protected IBaseDbContext DbContext { get; set; }
     protected NoSeriesService NoSeriesService { get; set; }
     protected EventServices EventServices { get; set; }
 
@@ -23,10 +23,10 @@ public class NoSeriesTest : TestContext
     {
         TestConfiguration.AddTestConfiguration(Services);
 
-        BaseService = Services.GetRequiredService<BaseService>();
+        DbContext = Services.GetRequiredService<IBaseDbContext>();
         NoSeriesService = Services.GetRequiredService<NoSeriesService>();
 
-        EventServices = new EventServices(Services, Services.GetRequiredService<IStringLocalizer>(), BaseService);
+        EventServices = new EventServices(Services, DbContext, Services.GetRequiredService<IStringLocalizer>());
     }
 
     [Fact]
@@ -47,11 +47,11 @@ public class NoSeriesTest : TestContext
     public async void TestFirstIncreaseNo()
     {
         // Setup
-        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(BaseService);
+        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
 
         // Test
-        var nextNo = await NoSeriesService.GetNextNoAsync(BaseService, seriesId);
-        var noSeries = await BaseService.GetAsync<NoSeries>(seriesId);
+        var nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
+        var noSeries = await DbContext.FindAsync<NoSeries>(seriesId);
 
         // Validate
         Assert.Equal("A-000", nextNo);
@@ -65,12 +65,12 @@ public class NoSeriesTest : TestContext
     public async void TestRealIncreaseNo()
     {
         // Setup
-        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(BaseService);
+        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
 
         // Test
-        await NoSeriesService.GetNextNoAsync(BaseService, seriesId);
-        var nextNo = await NoSeriesService.GetNextNoAsync(BaseService, seriesId);
-        var noSeries = await BaseService.GetAsync<NoSeries>(seriesId);
+        await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
+        var nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
+        var noSeries = await DbContext.FindAsync<NoSeries>(seriesId);
 
         // Validate
         Assert.Equal("A-001", nextNo);
@@ -82,13 +82,13 @@ public class NoSeriesTest : TestContext
     public async void TestIncreaseNoUntilEnd()
     {
         // Setup
-        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(BaseService);
+        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
 
         // Test
         String nextNo = String.Empty;
         for (int i = 0; i <= 999; i++)
-            nextNo = await NoSeriesService.GetNextNoAsync(BaseService, seriesId);
-        var noSeries = await BaseService.GetAsync<NoSeries>(seriesId);
+            nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
+        var noSeries = await DbContext.FindAsync<NoSeries>(seriesId);
 
         // Validate
         Assert.Equal("A-999", nextNo);
@@ -100,15 +100,15 @@ public class NoSeriesTest : TestContext
     public async void TestIncreaseNoOverEndingNo()
     {
         // Setup
-        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(BaseService);
+        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
 
         // Test
         String nextNo = String.Empty;
         for (int i = 0; i <= 999; i++)
-            nextNo = await NoSeriesService.GetNextNoAsync(BaseService, seriesId);
+            nextNo = await NoSeriesService.GetNextNoAsync(DbContext, seriesId);
 
         // Validate
-        var exception = await Assert.ThrowsAsync<CRUDException>(async () => await NoSeriesService.GetNextNoAsync(BaseService, seriesId));
+        var exception = await Assert.ThrowsAsync<CRUDException>(async () => await NoSeriesService.GetNextNoAsync(DbContext, seriesId));
         Assert.Equal("The defined maximum of the no series is reached, please create a new number series", exception.Message);
     }
 
@@ -116,11 +116,11 @@ public class NoSeriesTest : TestContext
     public async void TestNoSeriesCanNotFoundException()
     {
         // Setup
-        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(BaseService);
+        var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
         seriesId = "999";
 
         // Validate
-        var exception = await Assert.ThrowsAsync<CRUDException>(async () => await NoSeriesService.GetNextNoAsync(BaseService, seriesId));
+        var exception = await Assert.ThrowsAsync<CRUDException>(async () => await NoSeriesService.GetNextNoAsync(DbContext, seriesId));
         Assert.Equal("Cant get next number in series, because number series can not be found with the key \"999\"", exception.Message);
     }
 }

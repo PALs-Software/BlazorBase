@@ -65,18 +65,18 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
 
     public override async Task OnCreateNewEntryInstance(OnCreateNewEntryInstanceArgs args)
     {
-        Id = await args.EventServices.BaseService.GetNewPrimaryKeyAsync(GetType());
+        Id = await args.EventServices.DbContext.GetNewPrimaryKeyAsync(GetType());
 
-        args.EventServices.BaseService.DbContext.Entry(this).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a basefile is a navigation property and is newly added, it must add the base file before it add or update the entity itself
+        (await args.EventServices.DbContext.EntryAsync(this)).State = EntityState.Added; //Needed for some Reason, because ef not detect that when a basefile is a navigation property and is newly added, it must add the base file before it add or update the entity itself
     }
 
-    public override Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
+    public override async Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args)
     {
-        var entry = args.EventServices.BaseService.DbContext.Entry(this);
+        var entry = await args.EventServices.DbContext.EntryAsync(this);
         if (entry.State != EntityState.Detached) // Only relevant if removed from another entity as list property
             entry.State = entry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
 
-        return base.OnAfterRemoveEntry(args);
+        await base.OnAfterRemoveEntry(args);
     }
 
     public override async Task OnAfterDbContextAddedEntry(OnAfterDbContextAddedEntryArgs args)
@@ -202,20 +202,21 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
         });
     }
 
-    public async Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, BaseService service)
+    public async Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, IBaseDbContext dbContext)
     {
         var property = model.GetType().GetProperty(propertyName);
         ArgumentNullException.ThrowIfNull(property);
-        await ClearFileFromPropertyAsync(model, property, service);
+        await ClearFileFromPropertyAsync(model, property, dbContext);
     }
 
-    public async Task ClearFileFromPropertyAsync(IBaseModel model, PropertyInfo property, BaseService service)
+    public async Task ClearFileFromPropertyAsync(IBaseModel model, PropertyInfo property, IBaseDbContext dbContext)
     {
         if (!property.CanWrite || property.GetValue(model) != this)
             return;
 
         await RemoveFileFromDiskAsync(deleteOnlyTemporary: true);
-        service.DbContext.Entry(this).State = service.DbContext.Entry(this).State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
+        var entityEntry = await dbContext.EntryAsync(this);
+        entityEntry.State = entityEntry.State == EntityState.Added ? EntityState.Detached : EntityState.Deleted;
 
         property.SetValue(model, null);
     }

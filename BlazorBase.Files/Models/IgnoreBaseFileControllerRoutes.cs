@@ -3,14 +3,9 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.Files.Models;
 
-public class IgnoreBaseFileControllerRoutes
+public class IgnoreBaseFileControllerRoutes(RequestDelegate next)
 {
-    private readonly RequestDelegate next;
-
-    public IgnoreBaseFileControllerRoutes(RequestDelegate next)
-    {
-        this.next = next;
-    }
+    private readonly RequestDelegate next = next;
 
     public Task Invoke(HttpContext context)
     {
