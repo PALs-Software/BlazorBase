@@ -8,6 +8,7 @@ using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.NumberSeries
@@ -36,6 +37,7 @@ namespace BlazorBase.CRUD.NumberSeries
         public string EndingNo { get; set; } = default!;
 
         [Visible]
+        [CheckValidSeriesNo]
         public string? LastNoUsed { get; set; }
 
         public long EndingNoNumeric { get; set; }
@@ -47,11 +49,22 @@ namespace BlazorBase.CRUD.NumberSeries
             if (!args.IsValid)
                 return base.OnAfterPropertyChanged(args);
 
+            
             switch (args.PropertyName)
             {
                 case nameof(StartingNo):
                     var noSeriesService = args.EventServices.ServiceProvider.GetRequiredService<NoSeriesService>();
                     GenerateEndingNo(noSeriesService, (string?)args.NewValue ?? String.Empty);
+                    break;
+
+                case nameof(LastNoUsed):
+                    if (!String.IsNullOrEmpty(LastNoUsed))
+                        LastNoUsedNumeric = long.Parse(new String(LastNoUsed.Where(char.IsDigit).ToArray()));
+                    break;
+
+                case nameof(EndingNo):
+                    if (!String.IsNullOrEmpty(LastNoUsed))
+                        EndingNoNumeric = long.Parse(new String(EndingNo.Where(char.IsDigit).ToArray()));
                     break;
             }
 
