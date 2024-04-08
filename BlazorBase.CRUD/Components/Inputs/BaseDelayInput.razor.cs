@@ -16,7 +16,7 @@ public partial class BaseDelayInput<TValue> : ComponentBase
     [Parameter] public EventCallback<TValue?> ValueChanged { get; set; }
     [Parameter] public Type? DeviatingConvertType { get; set; }
     [Parameter] public string? InputType { get; set; }
-    [Parameter] public int InputDelay { get; set; } = 200;
+    [Parameter] public int InputDelay { get; set; } = 250;
     [Parameter] public string? CultureName { get; set; } = CultureInfo.CurrentUICulture.Name;
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> AdditionalInputAttributes { get; set; } = [];
     #endregion
@@ -50,7 +50,7 @@ public partial class BaseDelayInput<TValue> : ComponentBase
     {
         base.OnParametersSet();
 
-        if (Timer != null)
+        if (Timer != null && Timer.Interval != InputDelay) // Setting the Interval will restart the timer and OnSendDelayedInputEvent will be called endless, this check is there to prevent that
             Timer.Interval = InputDelay;
 
         InternalValue = Value?.ToString();
