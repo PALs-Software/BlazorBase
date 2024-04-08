@@ -11,7 +11,7 @@ public interface IBaseFileService
 {
     Task<IBaseFile> CreateFileAsync(EventServices eventServices, string fileName, string baseFileType, string mimeFileType, byte[] fileContent);
     Task<IBaseFile> CreateCopyAsync(IBaseFile sourceFile, EventServices eventServices);
-
+    Task WriteTemporaryFileToDiskAsync(IBaseFile file, byte[] fileContent);
 
     string ComputeSha256Hash(Func<SHA256, byte[]> computeHash);
 
