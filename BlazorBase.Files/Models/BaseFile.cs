@@ -148,6 +148,17 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
         return Convert.ToBase64String(content);
     }
 
+    public async Task ReplaceFileContentAsync(string fileName, string baseFileType, string mimeFileType, byte[] fileContent, IBaseFileService baseFileService)
+    {
+        FileName = fileName;
+        FileSize = fileContent.Length;
+        BaseFileType = baseFileType;
+        MimeFileType = mimeFileType;
+        Hash = baseFileService.ComputeSha256Hash(fileContent);
+
+        await baseFileService.WriteTemporaryFileToDiskAsync(this, fileContent);
+    }
+
     protected async Task CopyTempFileToFileStoreAsync()
     {
         await Task.Run(() =>

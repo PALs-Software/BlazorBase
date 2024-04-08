@@ -66,6 +66,29 @@ public class BaseFileService : IBaseFileService
         return file;
     }
 
+    public virtual async Task WriteTemporaryFileToDiskAsync(IBaseFile file, byte[] fileContent)
+    {
+        if (!Directory.Exists(Options.TempFileStorePath))
+            Directory.CreateDirectory(Options.TempFileStorePath);
+
+        string tempFilePath;
+        do
+        {
+            file.TempFileId = Guid.NewGuid();
+            tempFilePath = Path.Join(Options.TempFileStorePath, file.GetPhysicalTemporaryFileName());
+        } while (File.Exists(tempFilePath));
+
+        await File.WriteAllBytesAsync(tempFilePath, fileContent);
+
+        if (Options.UseImageThumbnails && file.IsImage())
+            await file.CreateThumbnailAsync(ImageService, fileContent);
+    }
+
+    public virtual Task ReplaceFileContent(IBaseFile file, string fileName, string baseFileType, string mimeFileType, byte[] fileContent)
+    {
+        return file.ReplaceFileContentAsync(fileName, baseFileType, mimeFileType, fileContent, this);
+    }
+
     public virtual async Task<IBaseFile> CreateCopyAsync(IBaseFile sourceFile, EventServices eventServices)
     {
         var fileContent = await sourceFile.GetFileContentAsync() ?? Array.Empty<byte>();

@@ -36,6 +36,7 @@ public interface IBaseFile : IBaseModel
 
     Task<byte[]> GetFileContentAsync();
     Task<string?> GetFileAsBase64StringAsync();
+    Task ReplaceFileContentAsync(string fileName, string baseFileType, string mimeFileType, byte[] fileContent, IBaseFileService baseFileService);
 
     Task RemoveFileFromDiskAsync(bool deleteOnlyTemporary = false);
     Task ClearFileFromPropertyAsync(IBaseModel model, string propertyName, IBaseDbContext dbContext);
