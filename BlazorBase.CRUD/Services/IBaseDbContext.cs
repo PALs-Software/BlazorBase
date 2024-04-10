@@ -99,6 +99,10 @@ public interface IBaseDbContext
     Task<bool> ExistsAsync<T>(IBaseModel baseModel, CancellationToken cancellationToken = default, bool? useAsyncDbContextMethod = null) where T : class, IBaseModel;
     #endregion
 
+    #region Any
+    Task<bool> AnyAsync<T>(Expression<Func<T, bool>> anyCondition, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
+    #endregion
+
     #region Find
     Task<object?> FindAsync(Type entityType, params object?[]? keyValues);
 

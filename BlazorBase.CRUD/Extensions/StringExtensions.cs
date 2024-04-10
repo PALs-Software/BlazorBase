@@ -30,11 +30,13 @@ namespace BlazorBase.CRUD.Extensions
             return Convert.ToBase64String(encryptedData);
         }
 
-        public static SecureString DecryptString(this string encryptedData)
+        public static SecureString DecryptString(this string? encryptedData)
         {
-
             try
             {
+                if (String.IsNullOrEmpty(encryptedData))
+                    return new SecureString();
+
 #pragma warning disable CA1416 // Plattformkompatibilität überprüfen
                 byte[] decryptedData = ProtectedData.Unprotect(Convert.FromBase64String(encryptedData), null, DataProtectionScope.CurrentUser);
 #pragma warning restore CA1416 // Plattformkompatibilität überprüfen
@@ -48,6 +50,9 @@ namespace BlazorBase.CRUD.Extensions
 
         public static string? DecryptStringToInsecureString(this string encryptedData)
         {
+            if (String.IsNullOrEmpty(encryptedData))
+                return null;
+
 #pragma warning disable CA1416 // Plattformkompatibilität überprüfen
             byte[] decryptedData = ProtectedData.Unprotect(Convert.FromBase64String(encryptedData), null, DataProtectionScope.CurrentUser);
 #pragma warning restore CA1416 // Plattformkompatibilität überprüfen

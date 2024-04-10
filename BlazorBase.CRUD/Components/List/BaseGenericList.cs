@@ -122,11 +122,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     public override async Task SetParametersAsync(ParameterView parameters)
     {
         await base.SetParametersAsync(parameters);
-
         SetDisplayNames();
-        if (VirtualizeList != null)
-            await VirtualizeList.RefreshDataAsync();
-        await InvokeAsync(StateHasChanged);
     }
 
     protected virtual void SetDisplayNames()

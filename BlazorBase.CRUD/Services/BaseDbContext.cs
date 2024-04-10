@@ -348,6 +348,25 @@ public class BaseDbContext : IBaseDbContext
     }
     #endregion
 
+    #region Any
+    public virtual async Task<bool> AnyAsync<T>(Expression<Func<T, bool>> anyCondition, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+
+        try
+        {
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await DbContext.Set<T>().AnyAsync(anyCondition, cancellationToken).ConfigureAwait(false);
+            else
+                return DbContext.Set<T>().Any(anyCondition);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+    #endregion
+
     #region Find
 
     public virtual Task<object?> FindAsync(Type entityType, params object?[]? keyValues)
