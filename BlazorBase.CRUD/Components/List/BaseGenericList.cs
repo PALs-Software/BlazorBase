@@ -80,6 +80,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     #region Members
     protected EventServices EventServices = null!;
+    protected string? DataLoadConditionHashCode;
 
     protected List<TModel> Entries = [];
     protected object?[]? SelectedEntryPrimaryKeys = null;
@@ -123,6 +124,14 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     {
         await base.SetParametersAsync(parameters);
         SetDisplayNames();
+
+        var dataLoadConditionHashCode = DataLoadConditions?.GetExtendedHashCode();
+        if (dataLoadConditionHashCode != DataLoadConditionHashCode)
+        {
+            DataLoadConditionHashCode = dataLoadConditionHashCode;
+            if (VirtualizeList != null)
+                await VirtualizeList.RefreshDataAsync();
+        }
     }
 
     protected virtual void SetDisplayNames()
