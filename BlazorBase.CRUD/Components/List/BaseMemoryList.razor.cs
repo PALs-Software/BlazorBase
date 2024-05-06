@@ -1,17 +1,48 @@
 ﻿using BlazorBase.CRUD.Models;
+using BlazorBase.Modules;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
 
 namespace BlazorBase.CRUD.Components.List;
 
 public partial class BaseMemoryList<TModel> : BaseGenericList<TModel> where TModel : class, IBaseModel, new()
 {
     #region Parameters
-    [Parameter] public List<TModel> Models { get; set; } = new();
+    [Parameter] public BaseObservableCollection<TModel> Models { get; set; } = [];
     #endregion
+
+    #region Members
+    protected BaseObservableCollection<TModel> ModelCollection = [];
+    #endregion
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (ModelCollection == Models)
+            return;
+
+        ModelCollection.CollectionChanged -= ModelCollection_CollectionChanged;
+        ModelCollection = Models ?? [];
+        ModelCollection.CollectionChanged += ModelCollection_CollectionChanged;
+    }
+
+    private void ModelCollection_CollectionChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        var action = e.Action;
+        
+        InvokeAsync(async () =>
+        {
+            if (VirtualizeList == null)
+                return;
+
+            await VirtualizeList.RefreshDataAsync();
+            StateHasChanged();
+        });
+    }
 
     #region Data Loading
 
