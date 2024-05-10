@@ -104,14 +104,10 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
         ArgumentNullException.ThrowIfNull(user.Email);
         ArgumentNullException.ThrowIfNull(user.UserName);
 
-        var code = await userManager.GeneratePasswordResetTokenAsync(user);
-        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        var resetCode = await userManager.GeneratePasswordResetTokenAsync(user);
+        resetCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(resetCode));
 
-        ArgumentNullException.ThrowIfNull(accessor.HttpContext);
-        var callbackUrl = linkGenerator.GetUriByPage(accessor.HttpContext,
-                                                     page: "/Account/ResetPassword",
-                                                     handler: null,
-                                                     values: new { area = "Identity", code });
+        var callbackUrl = BuildResetPasswordUrlLink(accessor, resetCode);
         ArgumentNullException.ThrowIfNull(callbackUrl);
         callbackUrl = HtmlEncoder.Default.Encode(callbackUrl);
 
@@ -122,5 +118,20 @@ public abstract partial class BaseUser<TIdentityUser, TIdentityRole> : BaseModel
 
         eventServices.ServiceProvider.GetRequiredService<IMessageHandler>().CloseLoadingMessage(messageId);
         return success;
+    }
+
+    protected string BuildResetPasswordUrlLink(IHttpContextAccessor accessor, string resetCode)
+    {
+        var request = accessor.HttpContext?.Request;
+        ArgumentNullException.ThrowIfNull(request);
+
+        var uriBuilder = new UriBuilder(request.Scheme, request.Host.Host, request.Host.Port ?? -1);
+        if (uriBuilder.Uri.IsDefaultPort)
+            uriBuilder.Port = -1;
+
+        uriBuilder.Path = "Identity/Account/ResetPassword";
+        uriBuilder.Query = $"?code={resetCode}";
+
+        return uriBuilder.Uri.AbsoluteUri;
     }
 }

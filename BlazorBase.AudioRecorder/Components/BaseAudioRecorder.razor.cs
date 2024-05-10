@@ -18,7 +18,7 @@ public partial class BaseAudioRecorder : IAsyncDisposable
 
     #region Parameters
 
-    [Parameter] public int MaxAudioChunkTransferSizeInBytes { get; set; } = 32 * 1024;
+    [Parameter] public int MaxAudioChunkTransferSizeInBytes { get; set; } = 30 * 1024;
     [Parameter] public bool ShowAudioResultDirectly { get; set; }
     [Parameter] public string? Class { get; set; }
 
@@ -140,9 +140,6 @@ public partial class BaseAudioRecorder : IAsyncDisposable
         ClientAudioBlobUrl = args.ClientAudioBlobUrl;
         InvokeAsync(StateHasChanged);
     }
-
-
-
 
     public async Task<bool> GetRecordedAudioDataAsync(long totalAudioByteSize, Stream stream, CancellationToken cancellationToken)
     {

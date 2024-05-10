@@ -16,11 +16,23 @@ public static class BlazorBaseAudioRecorderConfiguration
     public static IServiceCollection AddBlazorBaseAudioRecorder<TBaseRecordImplementation>(this IServiceCollection serviceCollection) where TBaseRecordImplementation : class, IBaseAudioRecord
     {
         serviceCollection
+            .AddSingleton<AudioConverter>()
             .AddScoped<JSAudioRecorder>()
+            .AddScoped<JSRawAudioRecorder>()
             .AddTransient<IBaseAudioRecord, TBaseRecordImplementation>()
             .AddTransient<IBasePropertyCardInput, BaseAudioRecordInput>()
             .AddTransient<IBasePropertyListPartInput, BaseAudioRecordListPartInput>()
             .AddTransient<IBasePropertyListDisplay, BaseAudioRecordListDisplay>();
+
+        return serviceCollection;
+    }
+
+    public static IServiceCollection AddBlazorBaseAudioRecorderWithoutCRUDSupport(this IServiceCollection serviceCollection)
+    {
+        serviceCollection
+            .AddSingleton<AudioConverter>()
+            .AddScoped<JSAudioRecorder>()
+            .AddScoped<JSRawAudioRecorder>();
 
         return serviceCollection;
     }

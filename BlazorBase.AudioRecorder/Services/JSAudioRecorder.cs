@@ -3,20 +3,16 @@ using Microsoft.JSInterop;
 
 namespace BlazorBase.AudioRecorder.Services;
 
-public class JSAudioRecorder : JSModul
+public class JSAudioRecorder(IJSRuntime jsRuntime) : JSModul(jsRuntime, "./_content/BlazorBase.AudioRecorder/AudioRecorder.js")
 {
     #region Properties
-
     public record OnRecordFinishedArgs(long InstanceId, long AudioByteSize, string ClientAudioBlobUrl);
     public event EventHandler<OnRecordFinishedArgs>? OnRecordFinished;
-
     #endregion
 
     #region Members
-    protected List<long> InstanceIds = new();
+    protected List<long> InstanceIds = [];
     #endregion
-
-    public JSAudioRecorder(IJSRuntime jsRuntime) : base(jsRuntime, "./_content/BlazorBase.AudioRecorder/AudioRecorder.js") { }
 
     public async ValueTask<long> InitAsync()
     {
