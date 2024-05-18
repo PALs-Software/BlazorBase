@@ -1,9 +1,9 @@
-﻿@if (BaseFile != null)
-{
-    <Modal @ref="Modal" Class="base-file-modal modal-fullscreen">
-        <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
-            <ModalHeader>
-                <ModalTitle>
+﻿<Modal @ref="Modal" Class="base-file-modal modal-fullscreen">
+    <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+        <ModalHeader>
+            <ModalTitle>
+                @if (BaseFile != null)
+                {
                     <span class="base-file-modal-title">@BaseFile.FileName</span>
                     @if (ShowFileButton)
                     {
@@ -17,15 +17,15 @@
                     {
                         <a href="@BaseFile.GetFileLink()" target="_blank" title="@Localizer["Download"]" download><BaseIcon IconName="Blazorise.Icons.FontAwesome.FontAwesomeIcons.Download"></BaseIcon></a>
                     }
-                </ModalTitle>
-                <CloseButton />
-            </ModalHeader>
-            <ModalBody>
-                @if (ModalWasOpenedTheFirstTime)
-                {
-                    <img src="@BaseFile.GetFileLink()" class="figure-img img-fluid rounded mx-auto d-block">
                 }
-            </ModalBody>
-        </ModalContent>
-    </Modal>
-}
+            </ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            @if (BaseFile != null && ModalWasOpenedTheFirstTime)
+            {
+                <img src="@BaseFile.GetFileLink()" class="figure-img img-fluid rounded mx-auto d-block">
+            }
+        </ModalBody>
+    </ModalContent>
+</Modal>

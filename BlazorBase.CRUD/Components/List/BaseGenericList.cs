@@ -129,8 +129,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (dataLoadConditionHashCode != DataLoadConditionHashCode)
         {
             DataLoadConditionHashCode = dataLoadConditionHashCode;
-            if (VirtualizeList != null)
-                await VirtualizeList.RefreshDataAsync();
+            await RefreshDataAsync();
         }
     }
 
@@ -177,19 +176,19 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         if (!Sortable)
             return;
 
-        foreach (var group in DisplayGroups)
-            foreach (var displayItem in group.Value.DisplayItems.OrderBy(entry => entry.Attribute.SortOrder))
-            {
-                if (!displayItem.IsSortable)
-                    continue;
+        var displayItems = DisplayGroups.SelectMany(entry => entry.Value.DisplayItems).OrderBy(entry => entry.Attribute.SortOrder);
+        foreach (var displayItem in displayItems)
+        {
+            if (!displayItem.IsSortable)
+                continue;
 
-                var sortedColumn = InitalSortPropertyColumns.Where(entry => entry.Key == displayItem.Property.Name);
-                if (sortedColumn.Any())
-                    displayItem.SortDirection = sortedColumn.First().Value;
+            var sortedColumn = InitalSortPropertyColumns.Where(entry => entry.Key == displayItem.Property.Name);
+            if (sortedColumn.Any())
+                displayItem.SortDirection = sortedColumn.First().Value;
 
-                if (displayItem.SortDirection != Enums.SortDirection.None)
-                    SortedColumns.Add(displayItem);
-            }
+            if (displayItem.SortDirection != Enums.SortDirection.None)
+                SortedColumns.Add(displayItem);
+        }
     }
 
     #endregion
@@ -309,16 +308,14 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
                 SortedColumns.Add(displayItem);
         }
 
-        if (VirtualizeList != null)
-            await VirtualizeList.RefreshDataAsync();
+        await RefreshDataAsync();
     }
     #endregion
 
     #region Filtering
     protected virtual async Task OnFilterChangedAsync()
     {
-        if (VirtualizeList != null)
-            await VirtualizeList.RefreshDataAsync();
+        await RefreshDataAsync();
     }
     #endregion
 
@@ -383,19 +380,19 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             MessageHandler.ShowMessage(Localizer["Error while deleting"], ErrorHandler.PrepareExceptionErrorMessage(e), MessageType.Error);
         }
 
-        if (VirtualizeList != null)
-            await VirtualizeList.RefreshDataAsync();
-
+        await RefreshDataAsync();
         await InvokeAsync(StateHasChanged);
     }
 
     #endregion
 
     #region Actions
-    public virtual async Task RefreshDataAsync()
+    public virtual Task RefreshDataAsync()
     {
-        if (VirtualizeList != null)
-            await VirtualizeList.RefreshDataAsync();
+        if (VirtualizeList == null)
+            return Task.CompletedTask;
+
+        return VirtualizeList.RefreshDataAsync();
     }
     #endregion
 

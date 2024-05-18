@@ -284,8 +284,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
 
     protected virtual async Task OnCardClosedAsync()
     {
-        if (VirtualizeList != null)
-            await VirtualizeList.RefreshDataAsync();
+        await RefreshDataAsync();
         ChangeUrlToList();
 
         await OnCardClosed.InvokeAsync();

@@ -39,7 +39,7 @@ public partial class BaseMemoryList<TModel> : BaseGenericList<TModel> where TMod
             if (VirtualizeList == null)
                 return;
 
-            await VirtualizeList.RefreshDataAsync();
+            await RefreshDataAsync();
             StateHasChanged();
         });
     }
