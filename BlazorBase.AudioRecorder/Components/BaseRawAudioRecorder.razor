@@ -3,21 +3,27 @@
     @switch (AudioRecordState)
     {
         case BaseAudioRecordState.Stopped:
-            <Button Color="Color.Primary" Clicked="StartAudioRecord" title="@Localizer["Starts a new recording"]"><BaseIcon IconName="FontAwesomeIcons.Microphone" /></Button>
+            <Button Color="Color.Primary" Clicked="StartAudioRecordAsync" title="@Localizer["Starts a new recording"]"><BaseIcon IconName="FontAwesomeIcons.Microphone" /></Button>
             break;
 
         case BaseAudioRecordState.Recording:
-            <span>@Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")</span>
-            <Button Color="Color.Secondary" Clicked="PauseAudioRecord" title="@Localizer["Pauses the current recording"]"><BaseIcon IconName="FontAwesomeIcons.PauseCircle" /></Button>
-            <Button Color="Color.Primary" Clicked="StopAudioRecord" title="@Localizer["Saves the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Save" /></Button>
-            <Button Color="Color.Danger" Clicked="CancelAudioRecord" title="@Localizer["Cancels the current recording"]"><BaseIcon IconName="FontAwesomeIcons.TimesCircle" /></Button>
+            @if (ShowTimer)
+            {
+                <span>@Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")</span>
+            }
+            <Button Color="Color.Secondary" Clicked="PauseAudioRecordAsync" title="@Localizer["Pauses the current recording"]"><BaseIcon IconName="FontAwesomeIcons.PauseCircle" /></Button>
+            <Button Color="Color.Primary" Clicked="StopAudioRecordAsync" title="@Localizer["Saves the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Save" /></Button>
+            <Button Color="Color.Danger" Clicked="CancelAudioRecordAsync" title="@Localizer["Cancels the current recording"]"><BaseIcon IconName="FontAwesomeIcons.TimesCircle" /></Button>
             break;
 
         case BaseAudioRecordState.Paused:
-            <span>@Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")</span>
-            <Button Color="Color.Secondary" Clicked="ResumeAudioRecord" title="@Localizer["Resumes the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Microphone" /></Button>
-            <Button Color="Color.Primary" Clicked="StopAudioRecord" title="@Localizer["Saves the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Save" /></Button>
-            <Button Color="Color.Danger" Clicked="CancelAudioRecord" title="@Localizer["Cancels the current recording"]"><BaseIcon IconName="FontAwesomeIcons.TimesCircle" /></Button>
+            @if (ShowTimer)
+            {
+                <span>@Stopwatch.Elapsed.ToString(@"hh\:mm\:ss")</span>
+            }
+            <Button Color="Color.Secondary" Clicked="ResumeAudioRecordAsync" title="@Localizer["Resumes the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Microphone" /></Button>
+            <Button Color="Color.Primary" Clicked="StopAudioRecordAsync" title="@Localizer["Saves the current recording"]"><BaseIcon IconName="FontAwesomeIcons.Save" /></Button>
+            <Button Color="Color.Danger" Clicked="CancelAudioRecordAsync" title="@Localizer["Cancels the current recording"]"><BaseIcon IconName="FontAwesomeIcons.TimesCircle" /></Button>
             break;
     }
 

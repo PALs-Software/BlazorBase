@@ -21,9 +21,9 @@ public class JSRawAudioRecorder(IJSRuntime jsRuntime) : JSModul(jsRuntime, "./_c
         return instanceId;
     }
 
-    public async ValueTask StartAsync(long instanceId, int? sampleRate = null)
+    public async ValueTask StartAsync(long instanceId, int? sampleRate = null, int? bufferSize = null)
     {
-        await InvokeJSVoidAsync("BlazorBaseRawAudioRecorder.callInstanceFunction", instanceId, "startRecord", new object?[] { sampleRate });
+        await InvokeJSVoidAsync("BlazorBaseRawAudioRecorder.callInstanceFunction", instanceId, "startRecord", new object?[] { sampleRate, bufferSize });
     }
 
     public ValueTask PauseAsync(long instanceId)

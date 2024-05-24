@@ -17,7 +17,9 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
 
     #region Parameters
     [Parameter] public int? SampleRate { get; set; }
+    [Parameter] public int? BufferSize { get; set; }
     [Parameter] public string? Class { get; set; }
+    [Parameter] public bool ShowTimer { get; set; } = true;
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     [Parameter] public EventCallback OnStartAudio { get; set; }
@@ -52,6 +54,9 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
 
     private void TimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
+        if (!ShowTimer)
+            Timer.Stop();
+
         InvokeAsync(StateHasChanged);
     }
 
@@ -67,21 +72,20 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
     }
     #endregion
 
-    #region UI Events
+    #region Audio Handling
 
-    protected async Task StartAudioRecord()
+    public async Task StartAudioRecordAsync()
     {
         AudioRecordState = BaseAudioRecordState.Recording;
 
         JSRawAudioRecorderId ??= await JSRawAudioRecorder.InitAsync();
-        await JSRawAudioRecorder.StartAsync(JSRawAudioRecorderId.Value, SampleRate);
-        Stopwatch.Restart();
-        Timer.Start();
+        await JSRawAudioRecorder.StartAsync(JSRawAudioRecorderId.Value, SampleRate, BufferSize);
+        StartTimer();
 
         await OnStartAudio.InvokeAsync();
     }
 
-    protected async Task PauseAudioRecord()
+    public async Task PauseAudioRecordAsync()
     {
         if (JSRawAudioRecorderId == null)
             return;
@@ -89,13 +93,12 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
         AudioRecordState = BaseAudioRecordState.Paused;
 
         await JSRawAudioRecorder.PauseAsync(JSRawAudioRecorderId.Value);
-        Stopwatch.Stop();
-        Timer.Stop();
+        StopTimer();
 
         await OnPauseAudio.InvokeAsync();
     }
 
-    protected async Task ResumeAudioRecord()
+    public async Task ResumeAudioRecordAsync()
     {
         if (JSRawAudioRecorderId == null)
             return;
@@ -103,13 +106,12 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
         AudioRecordState = BaseAudioRecordState.Recording;
 
         await JSRawAudioRecorder.ResumeAsync(JSRawAudioRecorderId.Value);
-        Stopwatch.Start();
-        Timer.Start();
+        StopTimer();
 
         await OnResumeAudio.InvokeAsync();
     }
 
-    protected async Task CancelAudioRecord()
+    public async Task CancelAudioRecordAsync()
     {
         if (JSRawAudioRecorderId == null)
             return;
@@ -117,13 +119,12 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
         AudioRecordState = BaseAudioRecordState.Stopped;
 
         await JSRawAudioRecorder.StopAsync(JSRawAudioRecorderId.Value);
-        Stopwatch.Stop();
-        Timer.Stop();
+        StopTimer();
 
         await OnCancelAudio.InvokeAsync();
     }
 
-    protected async Task StopAudioRecord()
+    public async Task StopAudioRecordAsync()
     {
         if (JSRawAudioRecorderId == null)
             return;
@@ -131,8 +132,7 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
         AudioRecordState = BaseAudioRecordState.Stopped;
 
         await JSRawAudioRecorder.StopAsync(JSRawAudioRecorderId.Value);
-        Stopwatch.Stop();
-        Timer.Stop();
+        StopTimer();
 
         await OnStopAudio.InvokeAsync();
     }
@@ -146,6 +146,22 @@ public partial class BaseRawAudioRecorder : IAsyncDisposable
             return ValueTask.CompletedTask;
 
         return JSRawAudioRecorder.DisposeInstanceAsync(JSRawAudioRecorderId.Value);
+    }
+
+    protected void StartTimer()
+    {
+        if (!ShowTimer)
+            return;
+        Stopwatch.Restart();
+        Timer.Start();
+    }
+
+    protected void StopTimer()
+    {
+        if (!ShowTimer)
+            return;
+        Stopwatch.Stop();
+        Timer.Stop();
     }
     #endregion
 }

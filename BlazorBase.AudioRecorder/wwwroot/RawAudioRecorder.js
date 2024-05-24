@@ -28,7 +28,7 @@ export class BlazorBaseRawAudioRecorder {
         return BlazorBaseRawAudioRecorder.instances[id][functionName].apply(BlazorBaseRawAudioRecorder.instances[id], args);
     }
 
-    async startRecord(sampleRate = null) {
+    async startRecord(sampleRate = null, bufferSize = null) {
         this.userMedia = await navigator.mediaDevices.getUserMedia({ audio: true });
         var options = {}
         if (sampleRate !== null) {
@@ -39,7 +39,7 @@ export class BlazorBaseRawAudioRecorder {
         this.mediaStreamSource = this.audioContext.createMediaStreamSource(this.userMedia);
 
         await this.audioContext.audioWorklet.addModule("_content/BlazorBase.AudioRecorder/AudioRecorderProcessor.js")
-        this.audioRecorder = new AudioWorkletNode(this.audioContext, "blazor.base.audio.recorder.worklet")
+        this.audioRecorder = new AudioWorkletNode(this.audioContext, "blazor.base.audio.recorder.worklet", { parameterData: { bufferSize: bufferSize } })
 
         this.mediaStreamSource
             .connect(this.audioRecorder)

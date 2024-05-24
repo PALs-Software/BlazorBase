@@ -1,46 +1,50 @@
 ﻿class AudioRecorderProcessor extends AudioWorkletProcessor {
     bufferSize = 32 * 1024
-    bytesWritten = 0
-    buffer = new Float32Array(this.bufferSize)
+    floatsWritten = 0
+    buffer = new Float32Array()
 
-    constructor() {
-        super();
-        this.initBuffer()
+    constructor(options) {
+        super(options);
+
+        if (options?.parameterData?.bufferSize)
+            this.bufferSize = options.parameterData.bufferSize;
+        
+        this.buffer = new Float32Array(this.bufferSize);
+        this.initBuffer();
     }
 
     initBuffer() {
-        this.bytesWritten = 0
+        this.floatsWritten = 0;
     }
 
     isBufferEmpty() {
-        return this.bytesWritten === 0
+        return this.floatsWritten === 0;
     }
 
     isBufferFull() {
-        return this.bytesWritten === this.bufferSize
+        return this.floatsWritten === this.bufferSize;
     }
 
     process(inputs) {
         // use only the 1st channel similar to ScriptProcessorNode
         this.append(inputs[0][0])
-        return true
+        return true;
     }
 
     append(channelData) {
-        if (this.isBufferFull()) {
-            this.flush()
-        }
+        if (!channelData)
+            return;
 
-        if (!channelData) return
+        if (this.isBufferFull() || (channelData.length + this.floatsWritten > this.bufferSize))
+            this.flush();
 
-        for (let i = 0; i < channelData.length; i++) {
-            this.buffer[this.bytesWritten++] = channelData[i]
-        }
+        for (let i = 0; i < channelData.length; i++)
+            this.buffer[this.floatsWritten++] = channelData[i];
     }
 
     flush() {
-        this.port.postMessage(this.bytesWritten < this.bufferSize ? this.buffer.slice(0, this.bytesWritten) : this.buffer)
-        this.initBuffer()
+        this.port.postMessage(this.floatsWritten < this.bufferSize ? this.buffer.slice(0, this.floatsWritten) : this.buffer);
+        this.initBuffer();
     }
 
 }

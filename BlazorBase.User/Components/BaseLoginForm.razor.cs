@@ -108,8 +108,17 @@ public partial class BaseLoginForm : ComponentBase
         var url = $"https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt={CultureInfo.Name}";
         var client = new HttpClient();
         var response = await client.GetAsync(new Uri(url));
-        var result = JObject.Parse(await response.Content.ReadAsStringAsync());
-        if (!result.TryGetValue("images", out JToken? token))
+        if (!response.IsSuccessStatusCode)
+            return null;
+
+        JObject? result = null;
+        try
+        {
+            result = JObject.Parse(await response.Content.ReadAsStringAsync());
+        }
+        catch (Exception) { }
+
+        if (result == null || !result.TryGetValue("images", out JToken? token))
             return null;
 
         var images = token as JArray;
