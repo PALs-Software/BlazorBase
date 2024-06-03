@@ -6,13 +6,17 @@ namespace BlazorBase.Modules;
 
 public static class BaseMarkupStringValidator
 {
-    public static MarkupString GetWhiteListedMarkupString(string? input)
+    public static MarkupString GetWhiteListedMarkupString(string? input, bool htmlEncodeInput = true)
     {
         if (input == null)
             return (MarkupString)String.Empty;
 
         input = input.Replace(Environment.NewLine, "<br />");
-        return (MarkupString)ConvertWhiteListedHtmlBack(WebUtility.HtmlEncode(input));
+
+        if (htmlEncodeInput)
+            input = WebUtility.HtmlEncode(input);
+
+        return (MarkupString)ConvertWhiteListedHtmlBack(input);
     }
 
     private static string ConvertWhiteListedHtmlBack(string input)

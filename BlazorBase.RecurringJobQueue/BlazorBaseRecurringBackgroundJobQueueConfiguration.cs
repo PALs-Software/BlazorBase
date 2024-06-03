@@ -2,6 +2,7 @@
 using BlazorBase.RecurringBackgroundJobQueue.Abstracts;
 using BlazorBase.RecurringBackgroundJobQueue.Components;
 using BlazorBase.RecurringBackgroundJobQueue.Models;
+using BlazorBase.RecurringBackgroundJobQueue.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorBase.RecurringBackgroundJobQueue;
@@ -15,7 +16,7 @@ public static class BlazorBaseRecurringBackgroundJobQueueConfiguration
     /// <param name="configureOptions"></param>
     /// <returns></returns>
 
-    public static IServiceCollection AddBlazorBaseRecurringBackgroundJob(this IServiceCollection serviceCollection, string[] allowedUserAccessRoles, params Type[] recurringBackgroundJobs)
+    public static IServiceCollection AddBlazorBaseRecurringBackgroundJob(this IServiceCollection serviceCollection, string[] allowedUserAccessRoles, bool useJobTimerTrigger = true, params Type[] recurringBackgroundJobs)
     {
         serviceCollection.AddSingleton<Services.RecurringBackgroundJobQueue>();
 
@@ -31,6 +32,10 @@ public static class BlazorBaseRecurringBackgroundJobQueueConfiguration
             .AddPolicy(nameof(RecurringBackgroundJobEntry), policy => policy.RequireRole(allowedUserAccessRoles));
 
         serviceCollection.AddTransient<IBasePropertyCardInput, RecurringBackgroundJobLog>();
+
+        if (useJobTimerTrigger)
+            serviceCollection.AddHostedService<RecurringBackgroundJobTimer>();
+
         return serviceCollection;
     }
 }

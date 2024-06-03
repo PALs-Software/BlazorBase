@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace BlazorBase.CRUD.Services;
+namespace BlazorBase.Server.Services;
 
 public static class DatabaseMigrationService
 {
