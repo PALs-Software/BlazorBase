@@ -12,7 +12,7 @@ public class ShowLoadingMessageArgs
         LoadingChildContent = loadingChildContent;
     }
 
-    public Guid Id { get; set; }
+    public ulong Id { get; set; }
     public string? Message { get; set; }
     public RenderFragment? LoadingChildContent { get; set; }
     public bool IsHandled { get; set; }

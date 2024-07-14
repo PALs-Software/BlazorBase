@@ -1,5 +1,5 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -18,12 +18,12 @@ public partial class RecurringBackgroundJobEntry : BaseModel
     
     [Required]
     [Visible(DisplayOrder = 200)]
-    [DateDisplayMode(DateInputMode = Blazorise.DateInputMode.DateTime)]
+    [PresentationDataType(PresentationDataType.DateTime)]
     public DateTime LastRuntime { get; set; } = DateTime.MinValue;
     
     [Required]
     [Visible(DisplayOrder = 200)]
-    [DateDisplayMode(DateInputMode = Blazorise.DateInputMode.DateTime)]
+    [PresentationDataType(PresentationDataType.DateTime)]
     public DateTime NextRuntime { get; set; } = DateTime.MinValue;
 
     [Visible(DisplayGroup = "Log", DisplayGroupOrder = 200, DisplayOrder = 100, HideInGUITypes = [GUIType.List])]

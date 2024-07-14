@@ -1,8 +1,7 @@
-﻿using BlazorBase.CRUD.Components.PageActions.Models;
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
-using BlazorBase.Extensions;
 using BlazorBase.Mailing.Services;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.User.Enums;

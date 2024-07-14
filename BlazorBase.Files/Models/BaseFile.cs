@@ -1,18 +1,17 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.CRUD.Models;
+using BlazorBase.Files.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using BlazorBase.CRUD.SortableItem;
-using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Services;
 using System.Reflection;
-using BlazorBase.Files.Services;
+using System.Threading.Tasks;
 
 namespace BlazorBase.Files.Models;
 
@@ -334,5 +333,6 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
 
         return Convert.ToBase64String(content);
     }
+
     #endregion
 }

@@ -1,4 +1,5 @@
-﻿@inherits IBasePropertyListDisplay
+﻿@using BlazorBase.Abstractions.CRUD.Interfaces
+@inherits IBasePropertyListDisplay
 
 @if (Model != null && (Property.GetValue(Model) is IBaseFile baseFile))
 {

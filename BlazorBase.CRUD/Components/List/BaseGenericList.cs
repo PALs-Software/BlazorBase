@@ -1,16 +1,17 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.General;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Models;
-using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     [Parameter] public bool Filterable { get; set; } = true;
     [Parameter] public bool StickyRowButtons { get; set; } = true;
     [Parameter] public bool HideRowButtons { get; set; } = false;
-    [Parameter] public Dictionary<string, Enums.SortDirection> InitalSortPropertyColumns { get; set; } = new();
+    [Parameter] public Dictionary<string, SortDirection> InitalSortPropertyColumns { get; set; } = new();
 
 
     [Parameter] public RenderFragment<TModel>? AdditionalRowButtons { get; set; }
@@ -85,13 +86,12 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     protected List<TModel> Entries = [];
     protected object?[]? SelectedEntryPrimaryKeys = null;
     protected Type TModelType = null!;
-
-    protected BaseModalCard<TModel>? BaseModalCard = null!;
+        
     protected Virtualize<TModel>? VirtualizeList = null!;
 
     protected List<IBasePropertyListDisplay> PropertyListDisplays = [];
 
-    protected List<DisplayItem> SortedColumns = [];
+    protected List<IDisplayItem> SortedColumns = [];
     protected List<string> IncludePropertiesInListLoadQuery = [];
     #endregion
 
@@ -149,7 +149,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             ExplainText = new ExplainText(ModelLocalizer["ExplainText"], ModelLocalizer["ExplainText_Location"] == "Bottom" ? ExplainTextLocation.Bottom : ExplainTextLocation.Top);
     }
 
-    protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, TModel model)
+    protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(IDisplayItem displayItem, TModel model)
     {
         foreach (var propertyListDisplay in PropertyListDisplays)
             if (await propertyListDisplay.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
@@ -158,7 +158,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         return null;
     }
 
-    protected virtual RenderFragment GetPropertyListDisplayExtensionAsRenderFragment(DisplayItem displayItem, Type baseInputExtensionType, TModel model) => builder =>
+    protected virtual RenderFragment GetPropertyListDisplayExtensionAsRenderFragment(IDisplayItem displayItem, Type baseInputExtensionType, TModel model) => builder =>
     {
         builder.OpenComponent(0, baseInputExtensionType);
 
@@ -186,7 +186,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             if (sortedColumn.Any())
                 displayItem.SortDirection = sortedColumn.First().Value;
 
-            if (displayItem.SortDirection != Enums.SortDirection.None)
+            if (displayItem.SortDirection != Abstractions.CRUD.Enums.SortDirection.None)
                 SortedColumns.Add(displayItem);
         }
     }
@@ -217,7 +217,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             if (sortedColumn.DisplayPropertyPath != null)
                 foreach (var displayProperty in sortedColumn.DisplayPropertyPath.Split("|"))
                 {
-                    if (sortedColumn.SortDirection == Enums.SortDirection.Ascending)
+                    if (sortedColumn.SortDirection == SortDirection.Ascending)
                         query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenBy(displayProperty) : query.OrderBy(displayProperty);
                     else
                         query = hasAlreadyOrderByQuery && query is IOrderedQueryable<TModel> orderedQuery ? orderedQuery.ThenByDescending(displayProperty) : query.OrderByDescending(displayProperty);
@@ -250,7 +250,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #endregion
 
     #region Display
-    protected virtual string? DisplayForeignKey(DisplayItem displayItem, TModel model)
+    protected virtual string? DisplayForeignKey(IDisplayItem displayItem, TModel model)
     {
         var key = displayItem.Property.GetValue(model);
         var primaryKeyAsJson = JsonConvert.SerializeObject(new object?[] { key });
@@ -263,7 +263,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             return foreignKeyPair.Value;
     }
 
-    protected virtual string DisplayEnum(DisplayItem displayItem, TModel model)
+    protected virtual string DisplayEnum(IDisplayItem displayItem, TModel model)
     {
         var value = displayItem.Property.GetValue(model)?.ToString();
         if (value == null)
@@ -275,7 +275,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     #endregion
 
     #region Sorting
-    protected async Task OnSortClicked(DisplayItem displayItem, bool fromRightClicked)
+    protected async Task OnSortClicked(IDisplayItem displayItem, bool fromRightClicked)
     {
         if (!Sortable || !displayItem.IsSortable)
             return;
@@ -286,10 +286,10 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
             switch (displayItem.SortDirection)
             {
-                case Enums.SortDirection.None:
+                case SortDirection.None:
                     SortedColumns.Remove(displayItem);
                     break;
-                case Enums.SortDirection.Ascending:
+                case SortDirection.Ascending:
                     SortedColumns.Add(displayItem);
                     break;
             }
@@ -299,12 +299,12 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             foreach (var displayGroup in DisplayGroups)
                 foreach (var item in displayGroup.Value.DisplayItems)
                     if (displayItem != item)
-                        item.SortDirection = Enums.SortDirection.None;
+                        item.SortDirection = SortDirection.None;
 
             displayItem.SortDirection = displayItem.SortDirection.GetNextSortDirection();
             SortedColumns.Clear();
 
-            if (displayItem.SortDirection != Enums.SortDirection.None)
+            if (displayItem.SortDirection != SortDirection.None)
                 SortedColumns.Add(displayItem);
         }
 
@@ -341,7 +341,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             MessageHandler.ShowConfirmDialog(Localizer["Delete {0}", SingleDisplayName ?? String.Empty],
                                                 Localizer["Do you really want to delete the entry {0}?", model.GetDisplayKey()],
                                                 confirmButtonText: Localizer["Delete"],
-                                                confirmButtonColor: Color.Danger,
+                                                confirmButtonColor: Blazorise.Color.Danger,
                                                 onClosing: async (args, result) => await OnRemoveEntryConfirmDialogClosedAsync(result, model));
         });
     }

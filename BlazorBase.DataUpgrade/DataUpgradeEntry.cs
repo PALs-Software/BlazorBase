@@ -1,5 +1,5 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;

@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.CRUD.Enums;
 using System;
 
 namespace BlazorBase.CRUD.Attributes;

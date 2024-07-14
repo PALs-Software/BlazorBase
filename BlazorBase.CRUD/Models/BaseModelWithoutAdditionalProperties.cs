@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Attributes;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 

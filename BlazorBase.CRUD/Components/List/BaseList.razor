@@ -1,4 +1,6 @@
-﻿@using BlazorBase.CRUD.Enums;
+﻿@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.Abstractions.CRUD.Interfaces
+@using BlazorBase.CRUD.Enums;
 @using BlazorBase.CRUD.Models
 @using Blazorise.Icons.FontAwesome
 @using BlazorBase.CRUD.Attributes
@@ -23,11 +25,11 @@
 
                     <BasePageActions Source="this" BaseModel="ComponentModelInstance"
                                      InvokeActionParameter="SelectedEntryPrimaryKeys"
-                                     BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices"
+                                     BaseModelType="TModelType" GUIType="GUIType.List" EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
                                      AdditionalPageActions="AdditionalHeaderPageActions" />
 
-                    <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+                    <Alert Class="invalid-summary-feedback" Color="Blazorise.Color.Danger" Visible="ShowInvalidFeedback">
                         @InvalidSummaryFeedback
                     </Alert>
                 </th>
@@ -37,7 +39,7 @@
                 <th class="base-list-actions">
                     @if (UserCanAddEntries)
                     {
-                        <Button Color="Color.Success" Clicked="() => AddEntryAsync()" title="@Localizer["Add new {0}", SingleDisplayName ?? String.Empty]"><Blazorise.Icon Name="IconName.Add" /></Button>
+                        <Button Color="Blazorise.Color.Success" Clicked="() => AddEntryAsync()" title="@Localizer["Add new {0}", SingleDisplayName ?? String.Empty]"><Blazorise.Icon Name="IconName.Add" /></Button>
                     }
                 </th>
                 @foreach (var displayGroup in DisplayGroups)
@@ -57,9 +59,9 @@
                                 </span>
 
 
-                                @if (displayItem.SortDirection != Enums.SortDirection.None)
+                                @if (displayItem.SortDirection != BlazorBase.Abstractions.CRUD.Enums.SortDirection.None)
                                 {
-                                    <Blazorise.Icon Name="@(displayItem.SortDirection == Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
+                                    <Blazorise.Icon Name="@(displayItem.SortDirection == BlazorBase.Abstractions.CRUD.Enums.SortDirection.Ascending ? IconName.SortUp : IconName.SortDown)" />
                                 }
                             </div>
                         </th>
@@ -81,15 +83,15 @@
                             {
                                 @if (UserCanEditEntries)
                                 {
-                                    <Button Color="Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
+                                    <Button Color="Blazorise.Color.Primary" Clicked="() => EditEntryAsync(context)" Class="base-list-edit-button"><Blazorise.Icon Name="IconName.Edit" /></Button>
                                 }
                                 @if (UserCanOpenCardReadOnly)
                                 {
-                                    <Button Color="Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
+                                    <Button Color="Blazorise.Color.Primary" Clicked="() => ViewEntryAsync(context)" Class="base-list-view-button"><Blazorise.Icon Name="IconName.Search" /></Button>
                                 }
                                 @if (UserCanDeleteEntries)
                                 {
-                                    <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
+                                    <Button Color="Blazorise.Color.Danger" Clicked="() => RemoveEntryAsync(context)" Class="base-list-delete-button"><Blazorise.Icon Name="IconName.Delete" /></Button>
                                 }
                             }
 
@@ -134,7 +136,7 @@
                                             if (displayItem.Property.PropertyType == typeof(DateTime) || displayItem.Property.PropertyType == typeof(DateTime?))
                                             {
                                                 string? currentValue;
-                                                if (displayItem.DateInputMode == DateInputMode.Date)
+                                                if (displayItem.PresentationDataType == PresentationDataType.Date)
                                                 {
                                                     currentValue = ((DateTime?)displayItem.Property.GetValue(context))?.ToShortDateString();
                                                 }
@@ -176,36 +178,6 @@
 
     @if (!DontRenderCard)
     {
-        <BaseModalCard @ref="BaseModalCard"
-                   TModel="TModel"
-                   SingleDisplayName="@SingleDisplayName"
-                   ExplainText="@ExplainText"
-                   ComponentModelInstance="ComponentModelInstance"
-                   AdditionalHeaderPageActions="AdditionalHeaderPageActions"
-                   OnCardClosed="OnCardClosedAsync"
-                   OnCreateNewEntryInstance="OnCreateNewEntryInstance"
-                   OnGuiLoadData="OnGuiLoadData"
-                   OnShowEntry="OnShowEntry"
-                   OnAfterGetVisibleProperties="OnAfterGetVisibleProperties"
-                   OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
-                   OnBeforeAddEntry="OnBeforeAddEntry"
-                   OnAfterAddEntry="OnAfterAddEntry"
-                   OnBeforeUpdateEntry="OnBeforeUpdateEntry"
-                   OnAfterUpdateEntry="OnAfterUpdateEntry"
-                   OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
-                   OnBeforePropertyChanged="OnBeforePropertyChanged"
-                   OnAfterPropertyChanged="OnAfterPropertyChanged"
-                   OnBeforeSaveChanges="OnBeforeSaveChangesAsync"
-                   OnAfterSaveChanges="OnAfterSaveChangesAsync"
-                   OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-                   OnBeforeAddListEntry="OnBeforeAddListEntry"
-                   OnAfterAddListEntry="OnAfterAddListEntry"
-                   OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-                   OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-                   OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-                   OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-                   OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-                   OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-                   OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
+        @BaseModalCardRenderFragment
     }
 </div>

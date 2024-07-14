@@ -1,11 +1,13 @@
 ﻿@inherits BaseDisplayComponent
-@using BlazorBase.CRUD.Attributes;
-@using BlazorBase.CRUD.Enums;
+@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.CRUD.Attributes
+@using BlazorBase.CRUD.Enums
 @using BlazorBase.CRUD.Helper
+@using BlazorBase.CRUD.Extensions
 
 <tr class="base-list-filter @Class">
     <th class="base-list-filter-actions">
-        <Button Color="Color.Success" title="@BaseListFilterLocalizer["Reset all filters"]" Clicked="ResetAllFiltersAsync"><Icon Name="IconName.Clear" /></Button>
+        <Button Color="Blazorise.Color.Success" title="@BaseListFilterLocalizer["Reset all filters"]" Clicked="ResetAllFiltersAsync"><Icon Name="IconName.Clear" /></Button>
     </th>
 
     @foreach (var displayGroup in ListDisplayGroups)
@@ -35,7 +37,7 @@
                         }
                         else if (displayItem.DisplayPropertyType == typeof(DateTime) || displayItem.DisplayPropertyType == typeof(DateTime?))
                         {
-                            <DateEdit @ref="AddToComponents" Date="(DateTime?)displayItem.FilterValue" TValue="DateTime?" DateChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" InputMode="displayItem.DateInputMode" />
+                            <DateEdit @ref="AddToComponents" Date="(DateTime?)displayItem.FilterValue" TValue="DateTime?" DateChanged="async (v) => await FilterChangedAsync(displayItem, v)" DelayTextOnKeyPressInterval="200" DelayTextOnKeyPress="true" InputMode="displayItem?.PresentationDataType?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" />
                         }
                         else if (displayItem.DisplayPropertyType == typeof(TimeSpan) || displayItem.DisplayPropertyType == typeof(TimeSpan?))
                         {

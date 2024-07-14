@@ -1,22 +1,21 @@
-﻿using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.Files.Models;
+using BlazorBase.Files.Services;
 using BlazorBase.MessageHandling.Interfaces;
+using BlazorBase.RichTextEditor.Models;
 using Blazorise.RichTextEdit;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Net.Http;
-using BlazorBase.RichTextEditor.Models;
 using System.Net;
-using BlazorBase.Files.Services;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace BlazorBase.RichTextEditor.Components;
 

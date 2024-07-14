@@ -1,7 +1,8 @@
-﻿using BlazorBase.CRUD.Components.Inputs;
-using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -31,7 +32,7 @@ public partial class BaseRichTextEditorInput : BaseInput, IBasePropertyCardInput
         SkipCustomSetParametersAsync = true;
     }
 
-    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         var presentationDataType = displayItem.Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
 

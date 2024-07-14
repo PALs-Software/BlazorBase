@@ -17,11 +17,11 @@ public class BaseResourceManagerStringLocalizer : ResourceManagerStringLocalizer
         IResourceNamesCache resourceNamesCache,
         ILogger logger,
         BaseResourceManagerStringLocalizerFactory factory)
-        :  base(new ResourceManager(CorrectBaseNameForGenericClasses(baseName), resourceAssembly), resourceAssembly, CorrectBaseNameForGenericClasses(baseName), resourceNamesCache, logger)
+        : base(new ResourceManager(CorrectBaseNameForGenericClasses(baseName), resourceAssembly), resourceAssembly, CorrectBaseNameForGenericClasses(baseName), resourceNamesCache, logger)
     {
         Factory = factory;
 
-        var type = Type.GetType($"{baseName}, {resourceAssembly.FullName}");
+        var type = resourceAssembly.GetType(baseName);
         if (type == null)
             throw new Exception($"Can not initiate base string localizer, because the type {baseName} can not be found in the assembly {resourceAssembly.FullName}");
 
@@ -44,7 +44,8 @@ public class BaseResourceManagerStringLocalizer : ResourceManagerStringLocalizer
         return new LocalizedString(name, String.Format(name, arguments), true);
     }
 
-    protected static string CorrectBaseNameForGenericClasses(string baseName) {
+    protected static string CorrectBaseNameForGenericClasses(string baseName)
+    {
         if (baseName.Contains('`'))
             baseName = baseName.Remove(baseName.IndexOf('`'));
 

@@ -1,8 +1,9 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.SortableItem;
 using BlazorBase.Files.Models;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;

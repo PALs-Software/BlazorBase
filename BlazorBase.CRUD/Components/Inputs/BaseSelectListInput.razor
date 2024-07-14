@@ -1,11 +1,12 @@
-﻿@inherits BaseInput
+﻿@using BlazorBase.Abstractions.CRUD.Enums
+@inherits BaseInput
 
-<div class="base-select-list-input @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.InputDiv]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.InputDiv]">
+<div class="base-select-list-input @DisplayItem?.CustomizationClasses[CustomizationLocation.InputDiv]" style="@DisplayItem?.CustomizationStyles[CustomizationLocation.InputDiv]">
     @if (Model != null)
     {
         @if (IsReadOnly)
         {
-            <input type="text" value="@ReadOnlyDisplayValue" disabled class="form-control @InputClass @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]" />
+            <input type="text" value="@ReadOnlyDisplayValue" disabled class="form-control @InputClass @DisplayItem?.CustomizationClasses[CustomizationLocation.Input]" style="@DisplayItem?.CustomizationStyles[CustomizationLocation.Input]" />
 
             <div class="@FeedbackClass">
                 @Feedback
@@ -13,7 +14,7 @@
         }
         else
         {
-            <Addons Class="@DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" Style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]">
+            <Addons Class="@DisplayItem?.CustomizationClasses[CustomizationLocation.Input]" Style="@DisplayItem?.CustomizationStyles[CustomizationLocation.Input]">
                 <SelectList @ref="SelectList" Data="@Data" TItem="KeyValuePair<string, string>" TValue="string" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValue="SelectedValue" SelectedValueChanged="(x) => OnSelectedValueChangedAsync(x)" Class="@InputClass" Attributes="InputAttributes" />
 
                 @if (IsForeignKeyProperty && (BaseInputDisplayOptions == null || BaseInputDisplayOptions.ShowSelectExistingEntityButton))
@@ -24,7 +25,7 @@
                                              OnSelectListClosed="AddEntryFromSelectListModalAsync" />
 
                     <Addon AddonType="AddonType.End">
-                        <Button Color="Color.Secondary" Clicked="OpenForeignKeySelectListModal">
+                        <Button Color="Blazorise.Color.Secondary" Clicked="OpenForeignKeySelectListModal">
                             <Blazorise.Icons.FontAwesome.Icon Name="IconName.SearchPlus" />
                         </Button>
                     </Addon>

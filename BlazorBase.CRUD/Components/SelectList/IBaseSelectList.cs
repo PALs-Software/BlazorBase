@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 
 namespace BlazorBase.CRUD.Components.SelectList;
 

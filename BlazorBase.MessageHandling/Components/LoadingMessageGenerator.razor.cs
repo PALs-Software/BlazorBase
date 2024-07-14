@@ -3,22 +3,25 @@ using BlazorBase.MessageHandling.Models;
 using BlazorBase.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlazorBase.MessageHandling.Components;
 
 public partial class LoadingMessageGenerator
 {
-    #region Properties
-    protected ConcurrentDictionary<Guid, ShowLoadingMessageArgs> LoadingMessages { get; set; } = new ConcurrentDictionary<Guid, ShowLoadingMessageArgs>();
-    #endregion
-
     #region Injects
     [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
     [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     [Inject] protected IStringLocalizer<MessageGenerator> Localizer { get; set; } = null!;
+    #endregion
+
+    #region Members
+    protected SortedDictionary<ulong, ShowLoadingMessageArgs> LoadingMessages = [];
+    protected ulong LastUsedId = 0;
+    protected bool Visible = false;
+    private ReaderWriterLockSlim Lock = new();
     #endregion
 
     #region Init
@@ -37,7 +40,7 @@ public partial class LoadingMessageGenerator
     #endregion
 
     #region Message Handler
-    protected Guid MessageHandler_OnShowLoadingMessage(ShowLoadingMessageArgs args)
+    protected ulong MessageHandler_OnShowLoadingMessage(ShowLoadingMessageArgs args)
     {
         return ShowLoadingMessage(args);
     }
@@ -47,12 +50,12 @@ public partial class LoadingMessageGenerator
         return UpdateLoadingMessage(args);
     }
 
-    private bool MessageHandler_OnCloseLoadingMessage(Guid id)
+    private bool MessageHandler_OnCloseLoadingMessage(ulong id)
     {
         return CloseLoadingMessage(id);
     }
 
-    private Guid MessageHandler_OnShowLoadingProgressMessage(ShowLoadingProgressMessageArgs args)
+    private ulong MessageHandler_OnShowLoadingProgressMessage(ShowLoadingProgressMessageArgs args)
     {
         return ShowLoadingMessage(args);
     }
@@ -61,7 +64,7 @@ public partial class LoadingMessageGenerator
         return UpdateLoadingMessage(args);
     }
 
-    private bool MessageHandler_OnCloseLoadingProgressMessage(Guid id)
+    private bool MessageHandler_OnCloseLoadingProgressMessage(ulong id)
     {
         return CloseLoadingMessage(id);
     }
@@ -70,15 +73,28 @@ public partial class LoadingMessageGenerator
     #region Methods
 
     #region Show
-    protected Guid ShowLoadingMessage(ShowLoadingMessageArgs args)
+    protected ulong ShowLoadingMessage(ShowLoadingMessageArgs args)
     {
         if (args.IsHandled)
             return args.Id;
 
         args.IsHandled = true;
-        while (!LoadingMessages.TryAdd(args.Id = Guid.NewGuid(), args)) ;
+        Lock.EnterWriteLock();
+        var id = LastUsedId;
+        if (LoadingMessages.Count == 0)
+            id = 0;
+        id++;
 
-        InvokeAsync(() => { StateHasChanged(); });
+        LastUsedId = id;
+        args.Id = id;
+        LoadingMessages.Add(id, args);
+        Lock.ExitWriteLock();
+
+        if (args is ShowLoadingProgressMessageArgs progressArgs)
+            progressArgs.AbortButtonText ??= Localizer["Abort"];
+
+        Visible = LoadingMessages.Count > 0;
+        InvokeAsync(StateHasChanged);
 
         return args.Id;
     }
@@ -101,7 +117,10 @@ public partial class LoadingMessageGenerator
     #region Update
     protected bool UpdateLoadingMessage(ShowLoadingMessageArgs args)
     {
-        if (!LoadingMessages.TryGetValue(args.Id, out ShowLoadingMessageArgs? loadingMessage))
+        Lock.EnterReadLock();
+        var success = LoadingMessages.TryGetValue(args.Id, out ShowLoadingMessageArgs? loadingMessage);
+        Lock.ExitReadLock();
+        if (!success || loadingMessage == null)
             return false;
 
         loadingMessage.Message = args.Message;
@@ -118,14 +137,14 @@ public partial class LoadingMessageGenerator
         return true;
     }
 
-    public void UpdateLoadingMessage(Guid id,
+    public void UpdateLoadingMessage(ulong id,
                                      string message,
                                      RenderFragment? loadingChildContent = null)
     {
         UpdateLoadingMessage(new ShowLoadingMessageArgs(message, loadingChildContent) { Id = id });
     }
 
-    public void UpdateLoadingProgressMessage(Guid id,
+    public void UpdateLoadingProgressMessage(ulong id,
                                              string message,
                                              int currentProgress = 0,
                                              string? progressText = null,
@@ -137,16 +156,29 @@ public partial class LoadingMessageGenerator
     #endregion
 
     #region Close
-    public bool CloseLoadingMessage(Guid id)
+    public bool CloseLoadingMessage(ulong id)
     {
-        var success = LoadingMessages.TryRemove(id, out var _);
+        Lock.EnterWriteLock();
+        var success = LoadingMessages.Remove(id, out var _);
+        Lock.ExitWriteLock();
+
+        Visible = LoadingMessages.Count > 0;
         InvokeAsync(StateHasChanged);
         return success;
     }
 
-    public void CloseLoadingProgressMessage(Guid id)
+    public void CloseLoadingProgressMessage(ulong id)
     {
         CloseLoadingMessage(id);
+    }
+    #endregion
+
+    #region Abort
+    protected Task OnAbortButtonClickedAsync(ulong id, ShowLoadingProgressMessageArgs progressArgs)
+    {
+        return Task.Run(() =>
+            progressArgs.OnAborting?.Invoke(id)
+        );
     }
     #endregion
 

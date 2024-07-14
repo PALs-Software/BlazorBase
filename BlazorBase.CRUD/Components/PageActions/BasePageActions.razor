@@ -1,5 +1,5 @@
-﻿@using BlazorBase.CRUD.Components.PageActions.Models
-@using BlazorBase.CRUD.EventArguments;
+﻿@using BlazorBase.Abstractions.CRUD.Structures
+@using BlazorBase.Abstractions.CRUD.Arguments;
 
 @if (VisiblePageActionGroups != null && VisiblePageActionGroups.Count > 0)
 {
@@ -31,7 +31,7 @@
                                 <TabPanel @key="group" Name="@group.Caption">
                                     @foreach (var action in group.PageActions)
                                     {
-                                        <Button @key="action" Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]" Margin="Margin.Is2.FromRight">
+                                        <Button @key="action" Color="(Blazorise.Color)action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]" Margin="Margin.Is2.FromRight">
                                             <BaseIcon IconName="@action.Image" Margin="Margin.Is2.FromRight" />
 
                                             @ModelLocalizer[action.Caption ?? String.Empty]
@@ -55,7 +55,7 @@
         {
             @foreach (var action in group.PageActions)
             {
-                <Button @key="action" Color="action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
+                <Button @key="action" Color="(Blazorise.Color)action.Color" Clicked="async () => await InvokePageAction(action)" title="@ModelLocalizer[action.ToolTip ?? String.Empty]">
                     <BaseIcon IconName="@action.Image" />
 
                     @ModelLocalizer[action.Caption ?? String.Empty]

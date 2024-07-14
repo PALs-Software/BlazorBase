@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Models;
 using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;

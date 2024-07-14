@@ -197,27 +197,29 @@ public class MessageHandler : IMessageHandler
     #endregion
 
     #region ShowLoadingMessage
-    public Guid ShowLoadingMessage(string message, RenderFragment? loadingChildContent = null)
+    public ulong ShowLoadingMessage(string message, RenderFragment? loadingChildContent = null)
     {
-        return OnShowLoadingMessage?.Invoke(new ShowLoadingMessageArgs(message, loadingChildContent)) ?? Guid.Empty;
+        return OnShowLoadingMessage?.Invoke(new ShowLoadingMessageArgs(message, loadingChildContent)) ?? 0;
     }
 
-    public bool UpdateLoadingMessage(Guid id, string message, RenderFragment? loadingChildContent = null)
+    public bool UpdateLoadingMessage(ulong id, string message, RenderFragment? loadingChildContent = null)
     {
         return OnUpdateLoadingMessage?.Invoke(new ShowLoadingMessageArgs(message, loadingChildContent) { Id = id }) ?? false;
     }
-    public bool CloseLoadingMessage(Guid id)
+    public bool CloseLoadingMessage(ulong id)
     {
         return OnCloseLoadingMessage?.Invoke(id) ?? false;
     }
     #endregion
 
     #region ShowLoadingProgressMessage
-    public Guid ShowLoadingProgressMessage(string message,
+    public ulong ShowLoadingProgressMessage(string message,
                                            int currentProgress = 0,
                                            string? progressText = null,
                                            bool showProgressInText = true,
-                                           RenderFragment? loadingChildContent = null)
+                                           RenderFragment? loadingChildContent = null,
+                                           string? abortButtonText = null,
+                                           Func<ulong, Task>? onAborting = null)
     {
         return OnShowLoadingProgressMessage?.Invoke(
             new ShowLoadingProgressMessageArgs(
@@ -225,11 +227,13 @@ public class MessageHandler : IMessageHandler
                 currentProgress,
                 progressText,
                 showProgressInText,
-                loadingChildContent)
-            ) ?? Guid.Empty;
+                loadingChildContent,
+                abortButtonText,
+                onAborting)
+            ) ?? 0;
     }
 
-    public bool UpdateLoadingProgressMessage(Guid id,
+    public bool UpdateLoadingProgressMessage(ulong id,
                                              string message,
                                              int currentProgress = 0,
                                              string? progressText = null,
@@ -246,7 +250,7 @@ public class MessageHandler : IMessageHandler
            { Id = id }) ?? false;
     }
 
-    public bool CloseLoadingProgressMessage(Guid id)
+    public bool CloseLoadingProgressMessage(ulong id)
     {
         return OnCloseLoadingProgressMessage?.Invoke(id) ?? false;
     }

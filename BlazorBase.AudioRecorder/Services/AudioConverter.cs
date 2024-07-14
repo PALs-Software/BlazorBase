@@ -4,6 +4,11 @@ public class AudioConverter
 {
     public short[] ConvertFloatToShortSamples(float[] floatSamples)
     {
+        return ConvertFloatToShortSamples(floatSamples.AsSpan());
+    }
+
+    public short[] ConvertFloatToShortSamples(Span<float> floatSamples)
+    {
         var shortSamples = new short[floatSamples.Length];
         for (int i = 0; i < floatSamples.Length; i++)
             shortSamples[i] = (short)(floatSamples[i] * 32767); // Convert float (-1 to 1) to int16 (−2^15 and 2^15−1)

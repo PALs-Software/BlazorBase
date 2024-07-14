@@ -1,6 +1,7 @@
-﻿using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Extensions;
-using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -64,6 +65,11 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
 
     #endregion
 
+    #region Custom Render
+    [Parameter] public Type? CustomBaseModalCardType { get; set; } = null;
+    [Parameter] public Type? CustomBaseCardType { get; set; } = null;
+    #endregion
+
     #endregion
 
     #region Injects
@@ -73,6 +79,9 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
     #endregion
 
     #region Members
+    protected IBaseModalCard? BaseModalCard = null!;
+    protected RenderFragment? BaseModalCardRenderFragment;
+
     protected bool IsSelfNavigating = false;
     protected string ListNavigationBasePath = null!;
     protected EventHandler<LocationChangedEventArgs>? LocationEventHandler;
@@ -92,7 +101,55 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             LocationEventHandler = async (sender, args) => await NavigationManager_LocationChanged(sender, args);
             NavigationManager.LocationChanged += LocationEventHandler;
         }
+
+        if (CustomBaseModalCardType == null)
+            BaseModalCardRenderFragment = CreateBaseModalCardRenderFragment(typeof(BaseModalCard<TModel>));
+        else
+            BaseModalCardRenderFragment = CreateBaseModalCardRenderFragment(CustomBaseModalCardType);
     }
+
+    protected virtual RenderFragment CreateBaseModalCardRenderFragment(Type type) => builder =>
+    {
+        builder.OpenComponent(0, type);
+        
+        builder.AddAttribute(1, "SingleDisplayName", SingleDisplayName);
+        builder.AddAttribute(2, "ExplainText", ExplainText);
+        builder.AddAttribute(3, "ComponentModelInstance", ComponentModelInstance);
+        builder.AddAttribute(4, "OnCardClosed", EventCallback.Factory.Create(this, OnCardClosedAsync));
+
+        builder.AddAttribute(5, "OnShowEntry", OnShowEntry);
+        builder.AddAttribute(6, "AdditionalHeaderPageActions", AdditionalHeaderPageActions);
+
+        builder.AddAttribute(50, "CustomBaseCardType", CustomBaseCardType);
+
+        builder.AddAttribute(100, "OnAfterGetVisibleProperties", OnAfterGetVisibleProperties);
+        builder.AddAttribute(110, "OnAfterSetUpDisplayLists", OnAfterSetUpDisplayLists);
+        builder.AddAttribute(120, "OnCreateNewEntryInstance", OnCreateNewEntryInstance);
+        builder.AddAttribute(130, "OnGuiLoadData", OnGuiLoadData);
+        builder.AddAttribute(140, "OnBeforeAddEntry", OnBeforeAddEntry);
+        builder.AddAttribute(150, "OnAfterAddEntry", OnAfterAddEntry);
+        builder.AddAttribute(160, "OnBeforeUpdateEntry", OnBeforeUpdateEntry);
+        builder.AddAttribute(170, "OnAfterUpdateEntry", OnAfterUpdateEntry);
+        builder.AddAttribute(180, "OnBeforeConvertPropertyType", OnBeforeConvertPropertyType);
+        builder.AddAttribute(190, "OnBeforePropertyChanged", OnBeforePropertyChanged);
+        builder.AddAttribute(200, "OnAfterPropertyChanged", OnAfterPropertyChanged);
+        builder.AddAttribute(210, "OnBeforeSaveChanges", EventCallback.Factory.Create<OnBeforeCardSaveChangesArgs>(this, OnBeforeSaveChangesAsync));
+        builder.AddAttribute(220, "OnAfterSaveChanges", EventCallback.Factory.Create<OnAfterCardSaveChangesArgs>(this, OnAfterSaveChangesAsync));
+        builder.AddAttribute(230, "OnCreateNewListEntryInstance", OnCreateNewListEntryInstance);
+        builder.AddAttribute(240, "OnBeforeAddListEntry", OnBeforeAddListEntry);
+        builder.AddAttribute(250, "OnAfterAddListEntry", OnAfterAddListEntry);
+        builder.AddAttribute(260, "OnBeforeRemoveListEntry", OnBeforeRemoveListEntry);
+        builder.AddAttribute(270, "OnAfterRemoveListEntry", OnAfterRemoveListEntry);
+        builder.AddAttribute(280, "OnBeforeConvertListPropertyType", OnBeforeConvertListPropertyType);
+        builder.AddAttribute(290, "OnBeforeListPropertyChanged", OnBeforeListPropertyChanged);
+        builder.AddAttribute(300, "OnAfterListPropertyChanged", OnAfterListPropertyChanged);
+        builder.AddAttribute(310, "OnAfterMoveListEntryUp", OnAfterMoveListEntryUp);
+        builder.AddAttribute(320, "OnAfterMoveListEntryDown", OnAfterMoveListEntryDown);
+
+        builder.AddComponentReferenceCapture(1000, (modalCard) => BaseModalCard = (IBaseModalCard?)modalCard);
+
+        builder.CloseComponent();
+    };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

@@ -1,5 +1,6 @@
-﻿using BlazorBase.CRUD.Extensions;
-using BlazorBase.CRUD.Services;
+﻿using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Extensions;
 using BlazorBase.User.Extensions;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components.Authorization;

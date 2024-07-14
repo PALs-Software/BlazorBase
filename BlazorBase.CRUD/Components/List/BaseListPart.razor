@@ -1,8 +1,10 @@
 ﻿@inherits BaseDisplayComponent
-@using BlazorBase.CRUD.Enums;
+@using BlazorBase.Abstractions.CRUD.Arguments
+@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.Abstractions.CRUD.Interfaces
+@using BlazorBase.CRUD.Enums
 @using BlazorBase.CRUD.Models
 @using BlazorBase.CRUD.Extensions
-@using BlazorBase.CRUD.EventArguments
 
 <div class="base-list-part base-list-part-@(ModelListEntryType.Name)">
     <BaseTypeBasedSelectList @ref="BaseSelectList"
@@ -18,12 +20,12 @@
                                      BaseModel="Model"
                                      InvokeActionParameter="SelectedEntry"
                                      BaseModelType="ModelListEntryType"
-                                     GUIType="Enums.GUIType.ListPart"
+                                     GUIType="GUIType.ListPart"
                                      EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer"
                                      OnPageActionInvoked="OnPageActionInvokedAsync" />
 
-                    <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+                    <Alert Class="invalid-summary-feedback" Color="Blazorise.Color.Danger" Visible="ShowInvalidFeedback">
                         @InvalidSummaryFeedback
                     </Alert>
                 </th>
@@ -35,11 +37,11 @@
                     {
                         @if (DisplayOptions.ShowAddButton)
                         {
-                            <Button Color="Color.Success" Clicked="AddEntryAsync" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
+                            <Button Color="Blazorise.Color.Success" Clicked="AddEntryAsync" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
                         }
                         @if (DisplayOptions.ShowAddExistingEntryButton)
                         {
-                            <Button Color="Color.Primary" Clicked="AddExistingEntryAsync" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
+                            <Button Color="Blazorise.Color.Primary" Clicked="AddExistingEntryAsync" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
                         }
                     }
                 </th>
@@ -68,22 +70,22 @@
                                 {
                                     @if (DisplayOptions.ShowAddButton)
                                     {
-                                        <Button Color="Color.Success" Clicked="() => AddEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Add" /></Button>
+                                        <Button Color="Blazorise.Color.Success" Clicked="() => AddEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Add" /></Button>
                                     }
                                     @if (DisplayOptions.ShowAddExistingEntryButton)
                                     {
-                                        <Button Color="Color.Primary" Clicked="() => AddExistingEntryAsync(entry)" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
+                                        <Button Color="Blazorise.Color.Primary" Clicked="() => AddExistingEntryAsync(entry)" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
                                     }
                                 }
                                 @if (DisplayOptions.ShowDeleteButton)
                                 {
-                                    <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
+                                    <Button Color="Blazorise.Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
                                 }
                                 @if (ModelImplementedISortableItem)
                                 {
                                     <Buttons Orientation="Orientation.Vertical">
-                                        <Button Color="Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
-                                        <Button Color="Color.Secondary" Clicked="() => MoveEntryDownAsync(entry)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
+                                        <Button Color="Blazorise.Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
+                                        <Button Color="Blazorise.Color.Secondary" Clicked="() => MoveEntryDownAsync(entry)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
                                     </Buttons>
                                 }
                             </Buttons>
@@ -104,7 +106,7 @@
                                     }
                                     else if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                     {
-                                        <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="OnBeforeListPropertyChangedAsync" OnAfterPropertyChanged="OnAfterListPropertyChangedAsync" />
+                                        <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property].LookupData" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="OnBeforeListPropertyChangedAsync" OnAfterPropertyChanged="OnAfterListPropertyChangedAsync" />
                                     }
                                     else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                     {

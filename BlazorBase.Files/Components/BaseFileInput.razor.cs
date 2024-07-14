@@ -1,8 +1,9 @@
-﻿using BlazorBase.CRUD.Components.Inputs;
-using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
 using BlazorBase.Files.Services;
@@ -17,7 +18,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.Files.Components;
 
@@ -58,7 +58,7 @@ public partial class BaseFileInput : BaseInput, IBasePropertyCardInput, IBasePro
         EventServices = GetEventServices();
     }
 
-    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(typeof(IBaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
     }

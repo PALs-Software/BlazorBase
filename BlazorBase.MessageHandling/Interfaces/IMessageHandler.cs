@@ -92,7 +92,7 @@ public interface IMessageHandler
     public event ShowTextInputDialogHandler OnShowTextInputDialog;
     public void ShowTextInputDialog(
         string title,
-        string message,     
+        string message,
         string? textInputCaption = null,
         bool maskText = false,
         MessageType messageType = MessageType.Information,
@@ -107,41 +107,43 @@ public interface IMessageHandler
     #endregion
 
     #region Show Loading Message
-    public delegate Guid ShowLoadingMessageHandler(ShowLoadingMessageArgs args);
+    public delegate ulong ShowLoadingMessageHandler(ShowLoadingMessageArgs args);
     public event ShowLoadingMessageHandler OnShowLoadingMessage;
-    public Guid ShowLoadingMessage(string message, RenderFragment? loadingChildContent = null);
+    public ulong ShowLoadingMessage(string message, RenderFragment? loadingChildContent = null);
 
     public delegate bool UpdateLoadingMessageHandler(ShowLoadingMessageArgs args);
     public event UpdateLoadingMessageHandler OnUpdateLoadingMessage;
-    public bool UpdateLoadingMessage(Guid id, string message, RenderFragment? loadingChildContent = null);
+    public bool UpdateLoadingMessage(ulong id, string message, RenderFragment? loadingChildContent = null);
 
-    public delegate bool CloseLoadingMessageHandler(Guid id);
+    public delegate bool CloseLoadingMessageHandler(ulong id);
     public event CloseLoadingMessageHandler OnCloseLoadingMessage;
-    public bool CloseLoadingMessage(Guid id);
+    public bool CloseLoadingMessage(ulong id);
     #endregion
 
     #region Show Loading Message
-    public delegate Guid ShowLoadingProgressMessageHandler(ShowLoadingProgressMessageArgs args);
+    public delegate ulong ShowLoadingProgressMessageHandler(ShowLoadingProgressMessageArgs args);
     public event ShowLoadingProgressMessageHandler OnShowLoadingProgressMessage;
-    public Guid ShowLoadingProgressMessage(
+    public ulong ShowLoadingProgressMessage(
         string message,
         int currentProgress = 0,
         string? progressText = null,
         bool showProgressInText = true,
-        RenderFragment? loadingChildContent = null);
+        RenderFragment? loadingChildContent = null,
+        string? abortButtonText = null,
+        Func<ulong, Task>? onAborting = null);
 
     public delegate bool UpdateLoadingProgressMessageHandler(ShowLoadingProgressMessageArgs args);
     public event UpdateLoadingProgressMessageHandler OnUpdateLoadingProgressMessage;
     public bool UpdateLoadingProgressMessage(
-        Guid id,
+        ulong id,
         string message,
         int currentProgress = 0,
         string? progressText = null,
         bool showProgressInText = true,
         RenderFragment? loadingChildContent = null);
 
-    public delegate bool CloseLoadingProgressMessageHandler(Guid id);
+    public delegate bool CloseLoadingProgressMessageHandler(ulong id);
     public event CloseLoadingProgressMessageHandler OnCloseLoadingProgressMessage;
-    public bool CloseLoadingProgressMessage(Guid id);
+    public bool CloseLoadingProgressMessage(ulong id);
     #endregion
 }

@@ -1,7 +1,7 @@
-﻿using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
 using Blazorise;
@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.Files.Components;
 
@@ -24,7 +23,7 @@ public partial class MultiFileUploadInput : BaseFileInput
     protected int CurrentFileUploadNo { get; set; } = 0;
     #endregion
 
-    public override Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public override Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(
             Attribute.IsDefined(displayItem.Property, typeof(ShowAsMultiFileUploadInputAttribute)) &&

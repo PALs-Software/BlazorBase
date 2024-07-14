@@ -1,7 +1,7 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
 using System;
 
-namespace BlazorBase.CRUD.Attributes;
+namespace BlazorBase.Abstractions.CRUD.Attributes;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class DefaultListFilterAttribute : Attribute

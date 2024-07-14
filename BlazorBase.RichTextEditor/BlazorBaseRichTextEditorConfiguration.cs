@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.RichTextEditor.Components;
 using BlazorBase.RichTextEditor.Models;
 using Microsoft.Extensions.DependencyInjection;

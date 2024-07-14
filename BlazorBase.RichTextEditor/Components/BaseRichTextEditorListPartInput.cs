@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 using System.Threading.Tasks;
 
 namespace BlazorBase.RichTextEditor.Components;

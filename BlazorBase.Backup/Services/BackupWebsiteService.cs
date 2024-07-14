@@ -48,7 +48,7 @@ public class BackupWebsiteService(DbContext dbContext, IStringLocalizer<BackupWe
         MessageHandler.CloseLoadingProgressMessage(progressId);
     }
 
-    protected virtual async Task CreateDatabaseBackupAsync(ZipArchive zipArchive, Guid progressId)
+    protected virtual async Task CreateDatabaseBackupAsync(ZipArchive zipArchive, ulong progressId)
     {
         MessageHandler.UpdateLoadingProgressMessage(
             id: progressId,
@@ -93,7 +93,7 @@ public class BackupWebsiteService(DbContext dbContext, IStringLocalizer<BackupWe
         }
     }
 
-    protected virtual void CreateFileStoreBackup(ZipArchive zipArchive, Guid progressId)
+    protected virtual void CreateFileStoreBackup(ZipArchive zipArchive, ulong progressId)
     {
         MessageHandler.UpdateLoadingProgressMessage(
             id: progressId,

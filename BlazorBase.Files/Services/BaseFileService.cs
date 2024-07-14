@@ -1,6 +1,6 @@
-﻿using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.Files.Models;
 using Microsoft.Extensions.DependencyInjection;
 using System;

@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Services;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.Server.Services;
 using BlazorBase.Server.User.Models;
 using BlazorBase.User.Services;

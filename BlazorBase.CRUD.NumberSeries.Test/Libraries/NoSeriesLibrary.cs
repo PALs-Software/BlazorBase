@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Services;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.NumberSeries.Test.Libraries;

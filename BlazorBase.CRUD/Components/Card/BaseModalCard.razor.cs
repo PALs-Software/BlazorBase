@@ -1,7 +1,6 @@
-﻿using BlazorBase.CRUD.Components.PageActions.Models;
-using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
@@ -12,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.Card;
 
-public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new()
+public partial class BaseModalCard<TModel> : IBaseModalCard where TModel : class, IBaseModel, new()
 {
     #region Parameter
 
@@ -56,7 +55,11 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; }
     [Parameter] public TModel? ComponentModelInstance { get; set; }
     [Parameter] public bool ShowActions { get; set; } = true;
+
+    #region Custom Render
+    [Parameter] public Type? CustomBaseCardType { get; set; } = null;
     [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs> AdditionalHeaderPageActions { get; set; } = null!;
+    #endregion
 
     #endregion
 
@@ -67,16 +70,18 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     #endregion
 
     #region Properties
-    public TModel? CurrentModelInstance { get { return BaseCard?.CurrentModelInstance; } }
+    public TModel? CurrentModelInstance { get { return (TModel?)BaseCard?.CurrentBaseModelInstance; } }
     #endregion
 
     #region Member
     protected Modal? Modal = null;
-    protected BaseCard<TModel>? BaseCard = null;
+    protected IBaseCard? BaseCard = null;
     protected bool ContinueByUnsavedChanges = false;
     protected bool ViewMode = false;
 
     protected string Title = String.Empty;
+
+    protected RenderFragment? BaseCardRenderFragment;
     #endregion
 
     #region Init
@@ -88,12 +93,60 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
         else
             SingleDisplayName = ModelLocalizer[SingleDisplayName];
 
+        if (CustomBaseCardType == null)
+            BaseCardRenderFragment = CreateBaseCardRenderFragment(typeof(BaseCard<TModel>));
+        else
+            BaseCardRenderFragment = CreateBaseCardRenderFragment(CustomBaseCardType);
+
         return base.OnInitializedAsync();
     }
 
+    protected virtual RenderFragment CreateBaseCardRenderFragment(Type type) => builder =>
+    {
+        builder.OpenComponent(0, type);
+
+        builder.AddAttribute(1, "SingleDisplayName", SingleDisplayName);
+        builder.AddAttribute(2, "Embedded", true);
+        builder.AddAttribute(3, "ShowActions", ShowActions);
+        builder.AddAttribute(4, "ShowEntryByStart", ShowEntryByStart);
+        builder.AddAttribute(5, "ComponentModelInstance", ComponentModelInstance);
+        builder.AddAttribute(6, "EntryToBeShownByStart", EntryToBeShownByStart);
+        builder.AddAttribute(7, "OnShowEntry", OnShowEntry);
+        builder.AddAttribute(8, "AdditionalHeaderPageActions", AdditionalHeaderPageActions);
+        builder.AddAttribute(9, "OnTitleCalculated", EventCallback.Factory.Create<string>(this, OnTitleCalculated));
+
+        builder.AddAttribute(100, "OnAfterGetVisibleProperties", EventCallback.Factory.Create<OnAfterGetVisiblePropertiesArgs>(this, GetVisiblePropertiesAsync));
+        builder.AddAttribute(110, "OnAfterSetUpDisplayLists", OnAfterSetUpDisplayLists);
+        builder.AddAttribute(120, "OnCreateNewEntryInstance", OnCreateNewEntryInstance);
+        builder.AddAttribute(130, "OnGuiLoadData", OnGuiLoadData);
+        builder.AddAttribute(140, "OnBeforeAddEntry", OnBeforeAddEntry);
+        builder.AddAttribute(150, "OnAfterAddEntry", OnAfterAddEntry);
+        builder.AddAttribute(160, "OnBeforeUpdateEntry", OnBeforeUpdateEntry);
+        builder.AddAttribute(170, "OnAfterUpdateEntry", OnAfterUpdateEntry);
+        builder.AddAttribute(180, "OnBeforeConvertPropertyType", OnBeforeConvertPropertyType);
+        builder.AddAttribute(190, "OnBeforePropertyChanged", OnBeforePropertyChanged);
+        builder.AddAttribute(200, "OnAfterPropertyChanged", OnAfterPropertyChanged);
+        builder.AddAttribute(210, "OnBeforeSaveChanges", OnBeforeSaveChanges);
+        builder.AddAttribute(220, "OnAfterSaveChanges", OnAfterSaveChanges);
+        builder.AddAttribute(230, "OnCreateNewListEntryInstance", OnCreateNewListEntryInstance);
+        builder.AddAttribute(240, "OnBeforeAddListEntry", OnBeforeAddListEntry);
+        builder.AddAttribute(250, "OnAfterAddListEntry", OnAfterAddListEntry);
+        builder.AddAttribute(260, "OnBeforeRemoveListEntry", OnBeforeRemoveListEntry);
+        builder.AddAttribute(270, "OnAfterRemoveListEntry", OnAfterRemoveListEntry);
+        builder.AddAttribute(280, "OnBeforeConvertListPropertyType", OnBeforeConvertListPropertyType);
+        builder.AddAttribute(290, "OnBeforeListPropertyChanged", OnBeforeListPropertyChanged);
+        builder.AddAttribute(300, "OnAfterListPropertyChanged", OnAfterListPropertyChanged);
+        builder.AddAttribute(310, "OnAfterMoveListEntryUp", OnAfterMoveListEntryUp);
+        builder.AddAttribute(320, "OnAfterMoveListEntryDown", OnAfterMoveListEntryDown);
+
+        builder.AddComponentReferenceCapture(1000, (card) => BaseCard = (IBaseCard?)card);
+
+        builder.CloseComponent();
+    };
+
     #endregion
 
-    public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, object?[]? primaryKeys = null, TModel? template = null)
+    public async Task ShowModalAsync(bool addingMode = false, bool viewMode = false, object?[]? primaryKeys = null, IBaseModel? template = null)
     {
         ContinueByUnsavedChanges = false;
         ViewMode = viewMode;

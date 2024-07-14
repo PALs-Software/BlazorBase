@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Models;
 using BlazorBase.Files.Components;
 using BlazorBase.Files.Controller;
 using BlazorBase.Files.Models;

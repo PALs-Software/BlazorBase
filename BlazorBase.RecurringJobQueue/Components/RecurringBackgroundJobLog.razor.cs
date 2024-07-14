@@ -1,12 +1,11 @@
-﻿using BlazorBase.RecurringBackgroundJobQueue.Models;
-using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
+using BlazorBase.RecurringBackgroundJobQueue.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Reflection;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.RecurringBackgroundJobQueue.Components;
 
@@ -19,7 +18,7 @@ public partial class RecurringBackgroundJobLog : ComponentBase, IBasePropertyCar
     [Parameter] public bool? ReadOnly { get; set; }
     [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
-    [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
+    [Parameter] public IDisplayItem DisplayItem { get; set; } = null!;
 
     #region Events
 
@@ -33,7 +32,7 @@ public partial class RecurringBackgroundJobLog : ComponentBase, IBasePropertyCar
 
     #region Interface Methods
 
-    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(displayItem.Property.DeclaringType == typeof(RecurringBackgroundJobEntry) && (displayItem.Property.Name == nameof(RecurringBackgroundJobEntry.Log) || displayItem.Property.Name == nameof(RecurringBackgroundJobEntry.LastErrors)));
     }

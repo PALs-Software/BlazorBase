@@ -1,4 +1,4 @@
-﻿using BlazorBase.Extensions;
+﻿using BlazorBase.Abstractions.CRUD.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;

@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.ViewModels;
+﻿using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.Files.Models;
 using System;
 using System.IO;

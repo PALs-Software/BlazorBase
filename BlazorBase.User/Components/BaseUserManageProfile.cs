@@ -1,7 +1,7 @@
-﻿using BlazorBase.CRUD.Components.Card;
-using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Extensions;
-using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Components.Card;
 using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;

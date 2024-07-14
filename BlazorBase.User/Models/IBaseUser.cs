@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using System;
 

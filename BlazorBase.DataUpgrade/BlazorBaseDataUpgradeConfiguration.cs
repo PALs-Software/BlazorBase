@@ -1,4 +1,5 @@
 ﻿
+using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.CRUD.Models;
 using Microsoft.Extensions.DependencyInjection;
 

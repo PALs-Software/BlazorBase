@@ -1,10 +1,15 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.Abstractions.General.Extensions;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Services;
 using Blazorise.Utilities;
 using Microsoft.AspNetCore.Components;
@@ -19,8 +24,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
-using static BlazorBase.CRUD.Models.BaseModel;
+using static BlazorBase.Abstractions.CRUD.Interfaces.IBaseModel;
 
 namespace BlazorBase.CRUD.Components.Inputs;
 
@@ -32,8 +36,8 @@ public partial class BaseInput
     [Parameter] public bool? ReadOnly { get; set; }
     [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
-    [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
-    [Parameter] public DataType? InputPresentationDataType { get; set; } = null;
+    [Parameter] public IDisplayItem DisplayItem { get; set; } = null!;
+    [Parameter] public PresentationDataType? PresentationDataTypeParameter { get; set; } = null;
     [Parameter] public List<ValidationAttribute>? AdditionalValidationAttributes { get; set; } = null;
     [Parameter] public ValidationTranslationResource? ValidationTranslationResource { get; set; } = null;
     [Parameter] public bool UserCanViewPasswords { get; set; } = false;
@@ -65,7 +69,7 @@ public partial class BaseInput
     protected string? Feedback;
     protected bool IsReadOnly;
     protected Type RenderType = null!;
-    protected DataType? PresentationDataType = null;
+    protected PresentationDataType? InputPresentationDataType = null;
     protected bool LastValueConversionFailed = false;
 
     protected ValidationContext PropertyValidationContext = null!;
@@ -99,7 +103,7 @@ public partial class BaseInput
             IsReadOnly = ReadOnly.Value;
 
         RenderType = DisplayItem?.DisplayPropertyType ?? Property.PropertyType;
-        PresentationDataType = InputPresentationDataType ?? Property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
+        InputPresentationDataType = PresentationDataTypeParameter ?? DisplayItem?.PresentationDataType;
 
         var dict = new Dictionary<object, object?>()
         {
@@ -123,7 +127,7 @@ public partial class BaseInput
         if (Property.TryGetAttribute(out PresentationRulesAttribute? presentationRules))
             PresentationRules = presentationRules;
 
-        if (PresentationDataType == DataType.Password && RenderType == typeof(string))
+        if (InputPresentationDataType == PresentationDataType.Password && RenderType == typeof(string))
         {
             IsPasswordInput = true;
             if (Property.TryGetAttribute(out AllowUserPasswordAccessAttribute? allowUserPasswordAccess))
@@ -371,24 +375,30 @@ public partial class BaseInput
     protected void SetInputType()
     {
         if (RenderType == typeof(string))
-            InputType = GetInputTypeByDataType(PresentationDataType);
+            InputType = GetInputTypeByDataType(InputPresentationDataType);
         else if (BaseParser.DecimalTypes.Contains(RenderType))
             InputType = "number";
     }
 
-    protected string GetInputTypeByDataType(DataType? dataType)
+    protected string GetInputTypeByDataType(PresentationDataType? dataType)
     {
         if (dataType == null)
             return "text";
 
         switch (dataType)
         {
-            case DataType.EmailAddress:
-                return "email";
-            case DataType.Password:
+            case PresentationDataType.Password:
                 return "password";
-            case DataType.Url:
+
+            case PresentationDataType.EmailAddress:
+                return "email";
+
+            case PresentationDataType.Url:
                 return "url";
+
+            case PresentationDataType.Color:
+                return "color";
+
             default:
                 return "text";
         }

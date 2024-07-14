@@ -1,7 +1,7 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.User.Enums;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;

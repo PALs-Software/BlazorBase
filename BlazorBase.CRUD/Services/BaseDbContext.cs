@@ -1,7 +1,7 @@
-﻿using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Abstractions.CRUD.Structures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +12,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using BlazorBase.Abstractions.CRUD.Interfaces;
 
 namespace BlazorBase.CRUD.Services;
 

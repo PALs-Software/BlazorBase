@@ -1,6 +1,6 @@
-﻿using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.DependencyInjection;

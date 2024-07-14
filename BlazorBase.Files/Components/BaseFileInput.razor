@@ -1,4 +1,6 @@
-﻿@inherits BaseInput
+﻿@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.Abstractions.CRUD.Interfaces
+@inherits BaseInput
 
 @if (Model != null)
 {
@@ -21,7 +23,7 @@
                     <div class="@InputClass">
                         <Row Margin="Margin.Is0">
                             <Column ColumnSize="ColumnSize.Is6" Padding="Padding.Is0.FromLeft">
-                                <BaseFileListDisplay Model="Model" Property="Property" DbContext="DbContext" ModelLocalizer="ModelLocalizer" IsDisplayedInGuiType="CRUD.Enums.GUIType.Card" />
+                                <BaseFileListDisplay Model="Model" Property="Property" DbContext="DbContext" ModelLocalizer="ModelLocalizer" IsDisplayedInGuiType="GUIType.Card" />
                             </Column>
                             @if (!IsReadOnly)
                             {
@@ -32,7 +34,7 @@
                                     @if (Property.CanWrite)
                                     {
                                         <Row Float="Float.Right">
-                                            <Button Color="Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
+                                            <Button Color="Blazorise.Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
                                         </Row>
                                     }
                                 </Column>

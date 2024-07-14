@@ -1,5 +1,4 @@
-﻿using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.Files.Services;
 using System;
 using System.Reflection;

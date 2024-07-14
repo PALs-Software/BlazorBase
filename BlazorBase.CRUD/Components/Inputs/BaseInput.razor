@@ -1,13 +1,15 @@
 ﻿@using System.ComponentModel.DataAnnotations;
+@using BlazorBase.Abstractions.CRUD.Enums
 @using BlazorBase.CRUD.Services;
 @using Blazorise.Icons.FontAwesome;
+@using BlazorBase.CRUD.Extensions;
 
-<div class="base-input @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.InputDiv]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.InputDiv]">
+<div class="base-input @DisplayItem?.CustomizationClasses[CustomizationLocation.InputDiv]" style="@DisplayItem?.CustomizationStyles[CustomizationLocation.InputDiv]">
     @if (Model != null)
     {
         if (RenderType == typeof(string) || BaseParser.DecimalTypes.Contains(RenderType))
         {
-            if (PresentationDataType == DataType.MultilineText)
+            if (InputPresentationDataType == PresentationDataType.MultilineText)
             {
                 <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
             }
@@ -18,7 +20,7 @@
                     <Addons>
                         <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
                         <Addon AddonType="AddonType.End">
-                            <Button Color="Color.Secondary" Clicked="OnViewPasswordClicked">
+                            <Button Color="Blazorise.Color.Secondary" Clicked="OnViewPasswordClicked">
                                 @if (PasswordViewEnabled)
                                 {
                                     <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.EyeSlash" />
@@ -47,19 +49,19 @@
         }
         else if (RenderType == typeof(DateTime))
         {
-            <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.DateInputMode ?? DateInputMode.DateTime" Attributes="InputAttributes" />
+            <DateEdit TValue="DateTime" Date="(DateTime)Property.GetValue(Model)!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.PresentationDataType?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(DateTime?))
         {
-            <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.DateInputMode ?? DateInputMode.DateTime" Attributes="InputAttributes" />
+            <DateEdit TValue="DateTime?" Date="(DateTime?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.PresentationDataType?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(DateTimeOffset))
         {
-            <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.DateInputMode ?? DateInputMode.DateTime" Attributes="InputAttributes" />
+            <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Property.GetValue(Model)!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.PresentationDataType?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(DateTimeOffset?))
         {
-            <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.DateInputMode ?? DateInputMode.DateTime" Attributes="InputAttributes" />
+            <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Property.GetValue(Model)" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="IsReadOnly" Class="@InputClass" InputMode="DisplayItem?.PresentationDataType?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
         }
         else if (RenderType == typeof(TimeSpan))
         {

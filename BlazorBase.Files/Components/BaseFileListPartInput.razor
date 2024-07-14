@@ -1,4 +1,5 @@
-﻿@inherits BaseFileInput
+﻿@using BlazorBase.Abstractions.CRUD.Enums
+@inherits BaseFileInput
 
 @if (Model != null)
 {
@@ -21,12 +22,12 @@
                 @if (Property.CanWrite)
                 {
                     <Row Float="Float.Right" Margin="Margin.Is0">
-                        <Button Color="Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
+                        <Button Color="Blazorise.Color.Danger" Clicked="DeleteAttachedFilePropertyAsync" Margin="Margin.Is3.FromTop">@Localizer["Delete"]</Button>
                     </Row>
                 }
             }
             <Row Margin="Margin.Is0.OnAll.Is3.FromTop">
-                <BaseFileListDisplay Model="Model" Property="Property" DbContext="DbContext" ModelLocalizer="ModelLocalizer" IsDisplayedInGuiType="CRUD.Enums.GUIType.ListPart" />
+                <BaseFileListDisplay Model="Model" Property="Property" DbContext="DbContext" ModelLocalizer="ModelLocalizer" IsDisplayedInGuiType="GUIType.ListPart" />
             </Row>
         </Row>
     </div>

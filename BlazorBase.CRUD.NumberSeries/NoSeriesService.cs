@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using Microsoft.Extensions.Localization;
 using System;

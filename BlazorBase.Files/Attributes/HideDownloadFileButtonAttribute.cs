@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
 using System;
 
 namespace BlazorBase.Files.Attributes

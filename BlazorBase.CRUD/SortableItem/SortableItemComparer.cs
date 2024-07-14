@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using System.Collections.Generic;
 
 namespace BlazorBase.CRUD.SortableItem;
 

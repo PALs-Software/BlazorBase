@@ -1,9 +1,8 @@
 ﻿using BlazorBase.AudioRecorder.Models;
 using BlazorBase.CRUD.Components.Inputs;
-using BlazorBase.CRUD.EventArguments;
+using BlazorBase.Abstractions.CRUD.Arguments;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Files.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using static BlazorBase.AudioRecorder.Services.JSAudioRecorder;
 using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.Abstractions.CRUD.Interfaces;
 
 namespace BlazorBase.AudioRecorder.Components;
 
@@ -29,7 +30,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
     protected IBaseAudioRecord CurrentAudioRecord = null!;
 
     protected BaseInput? FileNameInput;
-    protected DisplayItem FileNameDisplayItem = null!;
+    protected IDisplayItem FileNameDisplayItem = null!;
 
     protected bool ComponentIsInitialized = false;
     #endregion
@@ -48,7 +49,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
             await CreateCurrentAudioRecordInstanceAsync(currentValue);
 
         var fileNameProperty = ServiceProvider.GetRequiredService<IBaseAudioRecord>().GetType().GetProperty(nameof(IBaseAudioRecord.FileName))!;
-        FileNameDisplayItem = DisplayItem.CreateFromProperty(fileNameProperty, DisplayItem.GUIType, ServiceProvider);
+        FileNameDisplayItem = CRUD.Components.General.BaseDisplayComponent.DisplayItem.CreateFromProperty(fileNameProperty, DisplayItem.GUIType, ServiceProvider);
         ComponentIsInitialized = true;
     }
 
@@ -72,7 +73,7 @@ public partial class BaseAudioRecordInput : BaseInput, IBasePropertyCardInput
 
     #region Input Interface
 
-    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public virtual Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(typeof(IBaseAudioRecord).IsAssignableFrom(displayItem.Property.PropertyType));
     }

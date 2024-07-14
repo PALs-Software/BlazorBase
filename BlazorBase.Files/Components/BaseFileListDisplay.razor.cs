@@ -1,7 +1,10 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.Files.Attributes;
 using BlazorBase.Files.Models;
 using Microsoft.AspNetCore.Components;
@@ -20,7 +23,7 @@ public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDispl
     [Parameter] public PropertyInfo Property { get; set; } = null!;
     [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
-    [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
+    [Parameter] public IDisplayItem DisplayItem { get; set; } = null!;
     [Parameter] public GUIType IsDisplayedInGuiType { get; set; }
 
     #endregion
@@ -46,7 +49,7 @@ public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDispl
                                      !hideDownloadButtonAttr.HideInGUITypes.Contains(IsDisplayedInGuiType);
     }
 
-    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(typeof(IBaseFile).IsAssignableFrom(displayItem.Property.PropertyType));
     }

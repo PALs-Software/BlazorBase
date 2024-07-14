@@ -131,6 +131,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\BlazorBase.Abstractions\BlazorBase.Abstractions.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Content Update="wwwroot\blazorBase.js">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</Content>

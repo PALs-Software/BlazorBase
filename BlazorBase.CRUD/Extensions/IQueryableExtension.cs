@@ -1,6 +1,6 @@
-﻿using BlazorBase.CRUD.Enums;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.CRUD.Helper;
-using Blazorise;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.CRUD.Extensions;
 
@@ -44,7 +43,7 @@ public static class IQueryableExtension
         return source.ThenByDescending(CreateKeySelectExpression<T>(propertyPath));
     }
 
-    public static IQueryable<T> Where<T>(this IQueryable<T> source, DisplayItem displayItem, bool useEfFilters = true)
+    public static IQueryable<T> Where<T>(this IQueryable<T> source, IDisplayItem displayItem, bool useEfFilters = true)
     {
         if (displayItem.FilterType != FilterType.IsNull && displayItem.FilterType != FilterType.IsEmpty && String.IsNullOrEmpty(displayItem.FilterValue?.ToString()))
             return source;
@@ -72,7 +71,7 @@ public static class IQueryableExtension
     }
 
 
-    private static Expression<Func<TModel, bool>> CreateFilterExpression<TModel>(DisplayItem displayItem, bool useEfFilters = true)
+    private static Expression<Func<TModel, bool>> CreateFilterExpression<TModel>(IDisplayItem displayItem, bool useEfFilters = true)
     {
         var filterValue = displayItem.FilterValue;
         var filterType = displayItem.FilterType;
@@ -83,14 +82,14 @@ public static class IQueryableExtension
                 if (filterType == FilterType.Equal)
                 {
                     filterType = FilterType.Like;
-                    if (displayItem.DateInputMode == DateInputMode.Date)
+                    if (displayItem.PresentationDataType == PresentationDataType.Date)
                         filterValue = dateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                     else
                         filterValue = dateTime.ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture);
                 }
                 else if (filterType == FilterType.Greater || filterType == FilterType.LessOrEqual)
                 {
-                    if (displayItem.DateInputMode == DateInputMode.Date)
+                    if (displayItem.PresentationDataType == PresentationDataType.Date)
                         filterValue = dateTime.Date + new TimeSpan(0, 23, 59, 59, 999);
                     else
                         filterValue = dateTime.Date + new TimeSpan(0, dateTime.Hour, dateTime.Minute, dateTime.Second, 999);

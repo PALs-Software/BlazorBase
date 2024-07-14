@@ -1,13 +1,11 @@
-﻿using BlazorBase.AudioRecorder.Models;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.AudioRecorder.Models;
 using BlazorBase.Files.Attributes;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Reflection;
-using static BlazorBase.CRUD.Components.General.BaseDisplayComponent;
 
 namespace BlazorBase.AudioRecorder.Components;
 
@@ -18,7 +16,7 @@ public partial class BaseAudioRecordListDisplay : ComponentBase, IBasePropertyLi
     [Parameter] public PropertyInfo Property { get; set; } = null!;
     [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
-    [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
+    [Parameter] public IDisplayItem DisplayItem { get; set; } = null!;
     [Parameter] public GUIType IsDisplayedInGuiType { get; set; }
     [Parameter] public string? Class { get; set; }
     #endregion
@@ -44,7 +42,7 @@ public partial class BaseAudioRecordListDisplay : ComponentBase, IBasePropertyLi
                                      !hideDownloadButtonAttr.HideInGUITypes.Contains(IsDisplayedInGuiType);
     }
 
-    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(typeof(IBaseAudioRecord).IsAssignableFrom(displayItem.Property.PropertyType));
     }

@@ -1,6 +1,8 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
-using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.Helper;
 using BlazorBase.CRUD.Services;
@@ -23,7 +25,7 @@ public partial class BaseListFilter : BaseDisplayComponent
     [Parameter] public EventCallback OnFilterChanged { get; set; }
     #endregion
 
-    [Parameter] public Dictionary<string, DisplayGroup> ListDisplayGroups { get; set; } = new();
+    [Parameter] public Dictionary<string, IDisplayGroup> ListDisplayGroups { get; set; } = new();
 
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
@@ -81,7 +83,7 @@ public partial class BaseListFilter : BaseDisplayComponent
         typeof(Guid),
         typeof(Guid?)
     };
-    protected List<DisplayItem> SortedColumns = new();
+    protected List<IDisplayItem> SortedColumns = new();
 
     protected SelectList<KeyValuePair<string, string>, string>? AddToSelectLists { set { SelectLists.Add(value); } }
     protected List<SelectList<KeyValuePair<string, string>, string>?> SelectLists = new();
@@ -159,11 +161,6 @@ public partial class BaseListFilter : BaseDisplayComponent
         }
     }
 
-    protected virtual DateInputMode GetDateInputMode(DisplayItem displayItem)
-    {
-        return displayItem.Property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
-    }
-
     protected override List<KeyValuePair<string?, string>> GetEnumValues(Type enumType)
     {
         long key = GetEnumTypeDictionaryKey(enumType);
@@ -188,13 +185,13 @@ public partial class BaseListFilter : BaseDisplayComponent
 
     #region Input Filtering
 
-    protected async virtual Task FilterTypeChangedAsync(DisplayItem displayItem, FilterType newFilterType)
+    protected async virtual Task FilterTypeChangedAsync(IDisplayItem displayItem, FilterType newFilterType)
     {
         displayItem.FilterType = newFilterType;
         await OnFilterChanged.InvokeAsync();
     }
 
-    protected async virtual Task FilterChangedAsync(DisplayItem displayItem, object? newValue, bool setFilterValue = true)
+    protected async virtual Task FilterChangedAsync(IDisplayItem displayItem, object? newValue, bool setFilterValue = true)
     {
         if (displayItem.DisplayPropertyType != typeof(Guid) && displayItem.DisplayPropertyType != typeof(Guid?))
             ConvertValueIfNeeded(ref newValue, displayItem.DisplayPropertyType);
@@ -205,7 +202,7 @@ public partial class BaseListFilter : BaseDisplayComponent
         await OnFilterChanged.InvokeAsync();
     }
 
-    protected async virtual Task BooleanFilterChangedAsync(DisplayItem displayItem, string newValue)
+    protected async virtual Task BooleanFilterChangedAsync(IDisplayItem displayItem, string newValue)
     {
         if (!Enum.TryParse(typeof(BooleanValue), newValue, out object? filterType))
             return;

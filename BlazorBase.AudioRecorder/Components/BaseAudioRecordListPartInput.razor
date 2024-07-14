@@ -1,4 +1,5 @@
-﻿@inherits BaseAudioRecordInput
+﻿@using BlazorBase.Abstractions.CRUD.Enums
+@inherits BaseAudioRecordInput
 
 @if (Model != null && CurrentAudioRecord != null && ComponentIsInitialized)
 {
@@ -11,7 +12,7 @@
                                             Property="Property"
                                             DbContext="DbContext"
                                             ModelLocalizer="ModelLocalizer"
-                                            IsDisplayedInGuiType="CRUD.Enums.GUIType.Card" />
+                                            IsDisplayedInGuiType="GUIType.Card" />
                 </Column>
 
                 <Column Class="pl-0">
@@ -24,7 +25,7 @@
                         <BaseAudioRecorder @ref="AudioRecorder" OnRecordFinished="OnRecordFinishedAsync">
                             @if (AudioRecorder != null && AudioRecorder.AudioRecordState == BaseAudioRecordState.Stopped)
                             {
-                                <Button Color="Color.Danger" Clicked="DeleteAttachedAudioFilePropertyAsync" Class="ml-2" title="@Localizer["Deletes the currently saved recording"]"><BaseIcon IconName="FontAwesomeIcons.Trash" /></Button>
+                                <Button Color="Blazorise.Color.Danger" Clicked="DeleteAttachedAudioFilePropertyAsync" Class="ml-2" title="@Localizer["Deletes the currently saved recording"]"><BaseIcon IconName="FontAwesomeIcons.Trash" /></Button>
                             }
                         </BaseAudioRecorder>
                     </Column>

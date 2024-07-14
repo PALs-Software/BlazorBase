@@ -8,11 +8,5 @@
     <EmbeddedResource Update="Components\General\BaseDisplayComponent.de.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="Components\PageActions\Models\PageActionGroup.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
 </Project>

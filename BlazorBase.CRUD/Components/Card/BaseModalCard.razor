@@ -28,40 +28,9 @@
                 </ModalHeader>
             }
             <ModalBody>
-                <BaseCard @ref="BaseCard"
-                          TModel="TModel"
-                          SingleDisplayName="@SingleDisplayName"
-                          Embedded="true"
-                          ShowActions="ShowActions"
-                          ShowEntryByStart="ShowEntryByStart"
-                          ComponentModelInstance="ComponentModelInstance"
-                          EntryToBeShownByStart="EntryToBeShownByStart"
-                          OnShowEntry="OnShowEntry"
-                          AdditionalHeaderPageActions="AdditionalHeaderPageActions"
-                          OnTitleCalculated="OnTitleCalculated"
-                          OnAfterGetVisibleProperties="GetVisiblePropertiesAsync"
-                          OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
-                          OnCreateNewEntryInstance="OnCreateNewEntryInstance"
-                          OnGuiLoadData="OnGuiLoadData"
-                          OnBeforeAddEntry="OnBeforeAddEntry"
-                          OnAfterAddEntry="OnAfterAddEntry"
-                          OnBeforeUpdateEntry="OnBeforeUpdateEntry"
-                          OnAfterUpdateEntry="OnAfterUpdateEntry"
-                          OnBeforeConvertPropertyType="OnBeforeConvertPropertyType"
-                          OnBeforePropertyChanged="OnBeforePropertyChanged"
-                          OnAfterPropertyChanged="OnAfterPropertyChanged"
-                          OnBeforeSaveChanges="OnBeforeSaveChanges"
-                          OnAfterSaveChanges="OnAfterSaveChanges"
-                          OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-                          OnBeforeAddListEntry="OnBeforeAddListEntry"
-                          OnAfterAddListEntry="OnAfterAddListEntry"
-                          OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-                          OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-                          OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-                          OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-                          OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-                          OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-                          OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
+                 
+                @BaseCardRenderFragment
+
             </ModalBody>
             @if (ExplainText != null && ExplainText.Location == ExplainTextLocation.Bottom)
             {

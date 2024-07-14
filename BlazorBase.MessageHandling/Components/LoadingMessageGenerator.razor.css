@@ -1,0 +1,9 @@
+﻿.blazor-base-loading-message-generator-abort-button {
+    text-align: right;
+    margin-right: 1.5rem;
+}
+
+    .blazor-base-loading-message-generator-abort-button a {
+        color: #007bff;
+        text-decoration: underline;
+    }

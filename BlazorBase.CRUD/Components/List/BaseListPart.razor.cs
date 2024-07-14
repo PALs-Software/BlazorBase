@@ -1,30 +1,30 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Attributes;
+using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.SelectList;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.SortableItem;
-using BlazorBase.CRUD.ViewModels;
-using BlazorBase.CRUD.Components.Inputs;
-using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
-using Microsoft.AspNetCore.Components;
-using System;
-using BlazorBase.MessageHandling.Interfaces;
-using Microsoft.Extensions.Localization;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Collections;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.Services;
+using BlazorBase.CRUD.SortableItem;
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -125,6 +125,7 @@ public partial class BaseListPart : BaseDisplayComponent
         Entries = (IList)entries;
 
         Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
+        Model.OnRecalculateCustomLookupData += async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
 
         await PrepareForeignKeyProperties(DbContext);
         await PrepareCustomLookupData(Model, EventServices);
@@ -146,7 +147,12 @@ public partial class BaseListPart : BaseDisplayComponent
         InvokeAsync(() => StateHasChanged());
     }
 
-    protected async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly, IBaseModel model)
+    protected Task Model_OnRecalculateCustomLookupDataAsync(object? sender, string[] propertyNames)
+    {
+        return RecalculateCustomLookupData(Model, EventServices, propertyNames);
+    }
+
+    protected async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(IDisplayItem displayItem, bool isReadonly, IBaseModel model)
     {
         foreach (var baseinput in BaseInputExtensions)
             if (await baseinput.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
@@ -155,7 +161,7 @@ public partial class BaseListPart : BaseDisplayComponent
         return null;
     }
 
-    protected virtual RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
+    protected virtual RenderFragment GetBaseInputExtensionAsRenderFragment(IDisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
     {
         builder.OpenComponent(0, baseInputExtensionType);
 

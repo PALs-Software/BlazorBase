@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.Models;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Models;
 using BlazorBase.RecurringBackgroundJobQueue.Abstracts;
 using BlazorBase.RecurringBackgroundJobQueue.Components;
 using BlazorBase.RecurringBackgroundJobQueue.Models;

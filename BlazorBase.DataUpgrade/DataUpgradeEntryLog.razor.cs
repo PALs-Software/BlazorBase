@@ -1,7 +1,7 @@
-﻿using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System.Reflection;
@@ -18,7 +18,7 @@ public partial class DataUpgradeEntryLog : ComponentBase, IBasePropertyCardInput
     [Parameter] public bool? ReadOnly { get; set; }
     [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public IStringLocalizer ModelLocalizer { get; set; } = null!;
-    [Parameter] public DisplayItem DisplayItem { get; set; } = null!;
+    [Parameter] public IDisplayItem DisplayItem { get; set; } = null!;
 
     #region Events
 
@@ -32,7 +32,7 @@ public partial class DataUpgradeEntryLog : ComponentBase, IBasePropertyCardInput
 
     #region Interface Methods
 
-    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, DisplayItem displayItem, EventServices eventServices)
+    public Task<bool> IsHandlingPropertyRenderingAsync(IBaseModel model, IDisplayItem displayItem, EventServices eventServices)
     {
         return Task.FromResult(displayItem.Property.DeclaringType == typeof(DataUpgradeEntry) && displayItem.Property.Name == nameof(DataUpgradeEntry.Log));
     }

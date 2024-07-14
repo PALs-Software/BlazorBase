@@ -1,14 +1,15 @@
-﻿using BlazorBase.CRUD.Attributes;
+﻿using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Extensions;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
+using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.List;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
 using BlazorBase.Models;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
@@ -25,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.Card;
 
-public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : class, IBaseModel, new()
+public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TModel : class, IBaseModel, new()
 {
     #region Parameter
 
@@ -79,6 +80,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
     #region Properties
     public TModel? CurrentModelInstance { get { return Model; } }
+    public IBaseModel? CurrentBaseModelInstance { get { return Model; } }
     #endregion
 
     #region Member
@@ -141,7 +143,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         }
     }
 
-    protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly)
+    protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(IDisplayItem displayItem, bool isReadonly)
     {
         foreach (var baseinput in BaseInputExtensions)
             if (await baseinput.IsHandlingPropertyRenderingAsync(Model, displayItem, EventServices))
@@ -149,7 +151,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
         return null;
     }
-    protected RenderFragment GetBaseInputExtensionAsRenderFragment(DisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
+    protected RenderFragment GetBaseInputExtensionAsRenderFragment(IDisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
     {
         builder.OpenComponent(0, baseInputExtensionType);
 
@@ -172,7 +174,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #endregion
 
     #region Actions
-    public async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, TModel? template = null)
+    public virtual async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, IBaseModel? template = null)
     {
         await DbContext.RefreshDbContextAsync();
 
@@ -191,7 +193,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             if (template == null)
                 model = new TModel();
             else
-                model = template;
+                model = (TModel)template;
 
             if (model is IModelInjectServiceProvider injectModel)
                 injectModel.ServiceProvider = ServiceProvider;
@@ -213,6 +215,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
         var onAfterShowEntryArgs = new OnShowEntryArgs(GUIType.Card, Model, addingMode, viewMode, VisibleProperties, DisplayGroups, EventServices);
         await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
+        await Model.OnShowEntry(onAfterShowEntryArgs);
 
         await PrepareForeignKeyProperties(DbContext, Model);
         await PrepareCustomLookupData(Model, EventServices);
@@ -225,13 +228,14 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
         CalculateTitle(addingMode: AddingMode);
 
-        Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
+        Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabaseAsync(sender, e);
+        Model.OnRecalculateCustomLookupData += async(sender, e) => await Entry_OnRecalculateCustomLookupDataAsync(sender, e);
         ModelLoaded = true;
     }
 
-    protected async Task Entry_OnReloadEntityFromDatabase(object? sender, EventArgs e)
+    protected Task Entry_OnReloadEntityFromDatabaseAsync(object? sender, EventArgs e)
     {
-        await ReloadEntityFromDatabase();
+        return ReloadEntityFromDatabase();
     }
 
     public virtual async Task ReloadEntityFromDatabase()
@@ -241,6 +245,11 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
         await ShowAsync(false, ViewMode, Model.GetPrimaryKeys());
         await InvokeAsync(StateHasChanged);
+    }
+
+    protected Task Entry_OnRecalculateCustomLookupDataAsync(object? sender, string[] propertyNames)
+    {
+        return RecalculateCustomLookupData(Model, EventServices, propertyNames);
     }
 
     public virtual async Task<bool> SaveCardAsync(bool showSnackBar = true)
@@ -327,7 +336,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         ModelLoaded = false;
     }
 
-    public TModel GetCurrentModel()
+    public IBaseModel GetCurrentModel()
     {
         return Model;
     }

@@ -1,32 +1,47 @@
 ﻿@using BlazorBase.Modules;
 @using BlazorBase.MessageHandling.Models;
 
-@foreach (var loadingMessage in LoadingMessages)
-{
-    <LoadingIndicator @key="loadingMessage" Visible="true">
-        @loadingMessage.Value.Message
+<LoadingIndicator Visible="Visible">
+    @foreach (var messagePair in LoadingMessages)
+    {
+        var message = messagePair.Value;
+        var progressArgs = message as ShowLoadingProgressMessageArgs;
 
-        @if (loadingMessage.Value.LoadingChildContent != null)
-        {
-            @loadingMessage.Value.LoadingChildContent
-        }
+        <div @key="message" class="mb-4">
 
-        @if (loadingMessage.Value is ShowLoadingProgressMessageArgs progressArgs)
-        {
-            <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
-                <ProgressBar Value="progressArgs.CurrentProgress" Animated="true" Striped="true">
-                    @if (!String.IsNullOrEmpty(progressArgs.ProgressText))
-                    {
-                        @progressArgs.ProgressText
-                    }
+            @if (progressArgs != null && progressArgs.OnAborting != null)
+            {
+                <div class="blazor-base-loading-message-generator-abort-button">
+                    <a @onclick="() => OnAbortButtonClickedAsync(messagePair.Key, progressArgs)">
+                        @progressArgs.AbortButtonText
+                    </a>
+                </div>
+            }
+            <div>
+                @message.Message
 
-                    @if (progressArgs.ShowProgressInText)
-                    {
-                        <text>@progressArgs.CurrentProgress %</text>
-                    }
-                </ProgressBar>
-            </Progress>
+                @if (message.LoadingChildContent != null)
+                {
+                    @message.LoadingChildContent
+                }
+            </div>
 
-        }
-    </LoadingIndicator>
-}
+            @if (progressArgs != null)
+            {
+                <Progress Size="Size.ExtraLarge" Margin="Margin.Is4.FromLeft.Is4.FromRight">
+                    <ProgressBar Value="progressArgs.CurrentProgress" Animated="true" Striped="true">
+                        @if (!String.IsNullOrEmpty(progressArgs.ProgressText))
+                        {
+                            @progressArgs.ProgressText
+                        }
+
+                        @if (progressArgs.ShowProgressInText)
+                        {
+                            <text>@progressArgs.CurrentProgress %</text>
+                        }
+                    </ProgressBar>
+                </Progress>
+            }
+        </div>
+    }
+</LoadingIndicator>

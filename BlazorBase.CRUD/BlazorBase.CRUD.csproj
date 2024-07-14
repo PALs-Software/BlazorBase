@@ -29,16 +29,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\BlazorBase.Abstractions\BlazorBase.Abstractions.csproj" />
 		<ProjectReference Include="..\BlazorBase.MessageHandling\BlazorBase.MessageHandling.csproj" />
 		<ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Compile Update="Resources\ValidationAttributes\ValidationAttributesTranslations.Designer.cs">
-			<DesignTime>True</DesignTime>
-			<AutoGen>True</AutoGen>
-			<DependentUpon>ValidationAttributesTranslations.resx</DependentUpon>
-		</Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -53,14 +46,6 @@
 	<ItemGroup>
 		<EmbeddedResource Update="Components\Card\BaseCard.razor.resx">
 			<Generator></Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.de.resx">
-			<LastGenOutput>ValidationAttributesTranslations.de.Designer.cs</LastGenOutput>
-			<Generator>PublicResXFileCodeGenerator</Generator>
-		</EmbeddedResource>
-		<EmbeddedResource Update="Resources\ValidationAttributes\ValidationAttributesTranslations.resx">
-			<Generator>PublicResXFileCodeGenerator</Generator>
-			<LastGenOutput>ValidationAttributesTranslations.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 		<EmbeddedResource Update="Services\BaseParser.resx">
 			<Generator></Generator>

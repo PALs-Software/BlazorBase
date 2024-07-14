@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.NumberSeries.Test.Mocks;
+﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.NumberSeries.Test.Mocks;
 using BlazorBase.CRUD.Services;
 using BlazorBase.MessageHandling;
 using Bunit;

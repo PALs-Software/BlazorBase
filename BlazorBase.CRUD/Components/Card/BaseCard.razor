@@ -1,4 +1,6 @@
-﻿@using BlazorBase.CRUD.Models
+﻿@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.Abstractions.CRUD.Interfaces
+@using BlazorBase.CRUD.Models
 
 @typeparam TModel
 @inherits BaseDisplayComponent
@@ -15,7 +17,7 @@
             else
             {
                 <span>@Title</span>
-                <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
+                <Button Color="Blazorise.Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
             }
         </Heading>
     }
@@ -30,14 +32,14 @@
                      BaseModel="Model"
                      InvokeActionParameter="Model"
                      BaseModelType="TModelType"
-                     GUIType="Enums.GUIType.Card"
+                     GUIType="GUIType.Card"
                      EventServices="EventServices"
                      ModelLocalizer="ModelLocalizer"
                      OnPageActionInvoked="OnPageActionInvokedAsync"
                      AdditionalPageActions="AdditionalHeaderPageActions" />
         }
 
-        <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
+        <Alert Class="invalid-summary-feedback" Color="Blazorise.Color.Danger" Visible="ShowInvalidFeedback">
             @InvalidSummaryFeedback
         </Alert>
 
@@ -88,7 +90,7 @@
                                                 <FieldBody ColumnSize="ColumnSize.Is8">
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
-                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="UsesCustomLookupDataProperties[displayItem.Property]" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                        <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="UsesCustomLookupDataProperties[displayItem.Property].LookupData" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {

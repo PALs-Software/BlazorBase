@@ -1,9 +1,8 @@
-using BlazorBase.CRUD.EventArguments;
+using BlazorBase.Abstractions.CRUD.Arguments;
+using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.NumberSeries.Test.Libraries;
-using BlazorBase.CRUD.Services;
-using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;

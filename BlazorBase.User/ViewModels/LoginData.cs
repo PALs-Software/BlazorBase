@@ -1,4 +1,4 @@
-﻿using BlazorBase.CRUD.Resources.ValidationAttributes;
+﻿using BlazorBase.Abstractions.CRUD.Resources.ValidationAttributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace BlazorBase.User.ViewModels;

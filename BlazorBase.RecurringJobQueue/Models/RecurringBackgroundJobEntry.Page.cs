@@ -1,6 +1,5 @@
-﻿using BlazorBase.CRUD.Components.PageActions.Models;
-using BlazorBase.CRUD.Enums;
-using BlazorBase.CRUD.ViewModels;
+﻿using BlazorBase.Abstractions.CRUD.Enums;
+using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.MessageHandling.Interfaces;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.Extensions.DependencyInjection;
