@@ -32,14 +32,16 @@ public class BaseDbContext : IBaseDbContext
 
     public IStringLocalizer Localizer { get; set; }
 
-    public SemaphoreSlim Semaphore { get; init; } = new(1, 1);
-
     /// <summary>
     /// Currently there is a performance problem in the .net SQLClient when data records are loaded from the database that contain large amounts of data of type string.
     /// This performance problem only occurs with the async methods.
     /// For this reason, it may be useful to use the sync methods of the db context.
     /// </summary>
     public bool UseAsyncDbContextMethods { get; set; }
+    #endregion
+
+    #region Members
+    protected SemaphoreSlim Semaphore = new(1, 1);
     #endregion
 
     public BaseDbContext(DbContext dbContext, IServiceProvider serviceProvider, IStringLocalizer<BaseDbContext> localizer, IBlazorBaseCRUDOptions options)
@@ -74,14 +76,72 @@ public class BaseDbContext : IBaseDbContext
     /// <summary>
     /// Super Slow -> use only if neccessary!!!
     /// </summary>
-    public virtual IQueryable<object> Set(Type type)
+    public virtual async Task<TResult> SetAsync<TResult>(Type type, Func<IQueryable<object>, Task<TResult>> queryFunc, CancellationToken cancellationToken = default)
     {
-        return DbContext.Set(type);
+        await Semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            return await queryFunc.Invoke(DbContext.Set(type)).ConfigureAwait(false);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
     }
 
-    public virtual IQueryable<T> Set<T>() where T : class
+    /// <summary>
+    /// Super Slow -> use only if neccessary!!!
+    /// </summary>
+    public virtual async Task<TResult> SetAsync<TResult>(Type type, Func<IQueryable<object>, TResult> queryFunc, CancellationToken cancellationToken = default)
     {
-        return DbContext.Set<T>();
+        await Semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            return queryFunc.Invoke(DbContext.Set(type));
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public virtual async Task<TResult> SetAsync<TEntity, TResult>(Func<IQueryable<TEntity>, Task<TResult>> queryFunc, CancellationToken cancellationToken = default) where TEntity : class
+    {
+        await Semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            return await queryFunc.Invoke(DbContext.Set<TEntity>()).ConfigureAwait(false);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public virtual async Task<TResult> SetAsync<TEntity, TResult>(Func<IQueryable<TEntity>, TResult> queryFunc, CancellationToken cancellationToken = default) where TEntity : class
+    {
+        await Semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            return queryFunc.Invoke(DbContext.Set<TEntity>());
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public virtual async Task SetAsync<TEntity>(Action<IQueryable<TEntity>> queryAction, CancellationToken cancellationToken = default) where TEntity : class
+    {
+        await Semaphore.WaitAsync().ConfigureAwait(false);
+        try
+        {
+            queryAction.Invoke(DbContext.Set<TEntity>());
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
     }
 
     #endregion
@@ -507,6 +567,94 @@ public class BaseDbContext : IBaseDbContext
         await LoadAllNavigationPropertiesAsync(entry, skipNavigationList, useAsyncDbContextMethod, cancellationToken).ConfigureAwait(false);
 
         return entry;
+    }
+
+    #endregion
+
+    #region FirstOrDefault
+
+    public virtual async Task<T> FirstAsync<T>(bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            IQueryable<T> query = DbContext.Set<T>();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await query.FirstAsync(cancellationToken).ConfigureAwait(false);
+            else
+                return query.First();
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public virtual async Task<T> FirstAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            IQueryable<T> query = DbContext.Set<T>();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await query.FirstAsync(dataLoadCondition, cancellationToken).ConfigureAwait(false);
+            else
+                return query.First(dataLoadCondition);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public virtual async Task<T?> FirstOrDefaultAsync<T>(bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            IQueryable<T> query = DbContext.Set<T>();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await query.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+            else
+                return query.FirstOrDefault();
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
+    }
+
+    public virtual async Task<T?> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class
+    {
+        await Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        try
+        {
+            IQueryable<T> query = DbContext.Set<T>();
+
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            if (useAsyncDbContextMethod == null && UseAsyncDbContextMethods || useAsyncDbContextMethod != null && useAsyncDbContextMethod.Value)
+                return await query.FirstOrDefaultAsync(dataLoadCondition, cancellationToken).ConfigureAwait(false);
+            else
+                return query.FirstOrDefault(dataLoadCondition);
+        }
+        finally
+        {
+            Semaphore.Release();
+        }
     }
 
     #endregion

@@ -6,6 +6,7 @@ using BlazorBase.User.Models;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorBase.User.Components;
@@ -32,6 +33,6 @@ public class BaseUserManageProfile : ComponentBase
     {
         args.ViewMode = true;
 
-        return (IBaseModel?)await args.EventServices.DbContext.Set(BaseUser.GetType()).FirstOrDefaultTSAsync(args.EventServices.DbContext);
+        return (IBaseModel?)await args.EventServices.DbContext.SetAsync(BaseUser.GetType(), query => query.FirstOrDefault());
     }
 }

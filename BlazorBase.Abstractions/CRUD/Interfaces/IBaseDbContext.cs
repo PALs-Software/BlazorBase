@@ -15,7 +15,6 @@ public interface IBaseDbContext
     #region Properties
     ChangeTracker ChangeTracker { get; }
     IStringLocalizer Localizer { get; set; }
-    SemaphoreSlim Semaphore { get; init; }
 
     /// <summary>
     /// Currently there is a performance problem in the .net SQLClient when data records are loaded from the database that contain large amounts of data of type string.
@@ -33,9 +32,16 @@ public interface IBaseDbContext
     /// <summary>
     /// Super Slow -> use only if neccessary!!!
     /// </summary>
-    IQueryable<object> Set(Type type);
+    Task<TResult> SetAsync<TResult>(Type type, Func<IQueryable<object>, Task<TResult>> queryFunc, CancellationToken cancellationToken = default);
 
-    IQueryable<T> Set<T>() where T : class;
+    /// <summary>
+    /// Super Slow -> use only if neccessary!!!
+    /// </summary>
+    Task<TResult> SetAsync<TResult>(Type type, Func<IQueryable<object>, TResult> queryFunc, CancellationToken cancellationToken = default);
+
+    Task<TResult> SetAsync<TEntity, TResult>(Func<IQueryable<TEntity>, Task<TResult>> queryFunc, CancellationToken cancellationToken = default) where TEntity : class;
+    Task<TResult> SetAsync<TEntity, TResult>(Func<IQueryable<TEntity>, TResult> queryFunc, CancellationToken cancellationToken = default) where TEntity : class;
+    Task SetAsync<TEntity>(Action<IQueryable<TEntity>> queryAction, CancellationToken cancellationToken = default) where TEntity : class;
 
     #endregion
 
@@ -123,6 +129,15 @@ public interface IBaseDbContext
     Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
     Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, bool useAsyncDbContextMethod, params object?[]? keyValues) where T : class;
     Task<T?> FindWithAllNavigationPropertiesAsync<T>(IEnumerable<string> skipNavigationList, bool useAsyncDbContextMethod, CancellationToken cancellationToken, params object?[]? keyValues) where T : class;
+    #endregion
+
+    #region First / FirstOrDefault
+    Task<T> FirstAsync<T>(bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
+    Task<T> FirstAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
+
+    Task<T?> FirstOrDefaultAsync<T>(bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
+    Task<T?> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> dataLoadCondition, bool asNoTracking = false, bool? useAsyncDbContextMethod = null, CancellationToken cancellationToken = default) where T : class;
+
     #endregion
 
     #region Where

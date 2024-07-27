@@ -1,10 +1,8 @@
 ﻿using BlazorBase.Abstractions.CRUD.Arguments;
 using BlazorBase.Abstractions.CRUD.Enums;
-using BlazorBase.Abstractions.CRUD.Extensions;
 using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Attributes;
-using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
@@ -117,7 +115,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         SetInitalSortOfPropertyColumns();
 
-        await PrepareForeignKeyProperties(DbContext);
+        await PrepareForeignKeyPropertiesAsync(DbContext);
     }
 
     public override async Task SetParametersAsync(ParameterView parameters)
@@ -199,15 +197,17 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
     protected virtual async ValueTask<ItemsProviderResult<TModel>> LoadListDataProviderAsync(ItemsProviderRequest request)
     {
         if (request.Count == 0)
-            return new ItemsProviderResult<TModel>(new List<TModel>(), 0);
+            return new ItemsProviderResult<TModel>([], 0);
 
         var dbContext = ServiceProvider.GetRequiredService<IBaseDbContext>(); // Use new instance for that, to get always current data
-        var query = CreateLoadDataQuery(dbContext.Set<TModel>());
+        return await dbContext.SetAsync((IQueryable<TModel> query) =>
+        {
+            query = CreateLoadDataQuery(query);
+            var totalEntries = query.Count();
+            Entries = query.Skip(request.StartIndex).Take(request.Count).ToList();
 
-        var totalEntries = await query.CountTSAsync(dbContext, cancellationToken: request.CancellationToken);
-        Entries = await query.Skip(request.StartIndex).Take(request.Count).ToListTSAsync(dbContext, cancellationToken: request.CancellationToken);
-
-        return new ItemsProviderResult<TModel>(Entries, totalEntries);
+            return new ItemsProviderResult<TModel>(Entries, totalEntries);
+        }, request.CancellationToken);
     }
 
     protected virtual IQueryable<TModel> CreateLoadDataQuery(IQueryable<TModel> query, bool useEFFilters = true)

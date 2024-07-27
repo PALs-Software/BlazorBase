@@ -127,7 +127,7 @@ public partial class BaseListPart : BaseDisplayComponent
         Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
         Model.OnRecalculateCustomLookupData += async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
 
-        await PrepareForeignKeyProperties(DbContext);
+        await PrepareForeignKeyPropertiesAsync(DbContext);
         await PrepareCustomLookupData(Model, EventServices);
     }
 

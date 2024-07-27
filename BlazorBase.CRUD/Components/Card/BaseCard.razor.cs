@@ -217,7 +217,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
         await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
         await Model.OnShowEntry(onAfterShowEntryArgs);
 
-        await PrepareForeignKeyProperties(DbContext, Model);
+        await PrepareForeignKeyPropertiesAsync(DbContext, Model);
         await PrepareCustomLookupData(Model, EventServices);
 
         ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object?>()

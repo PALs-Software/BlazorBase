@@ -103,7 +103,7 @@ public class BaseDisplayComponent : ComponentBase
         DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
     }
 
-    protected virtual async Task PrepareForeignKeyProperties(IBaseDbContext dbContext, IBaseModel? instance = null)
+    protected virtual async Task PrepareForeignKeyPropertiesAsync(IBaseDbContext dbContext, IBaseModel? instance = null)
     {
         if (ForeignKeyProperties != null)
             return;
@@ -164,11 +164,14 @@ public class BaseDisplayComponent : ComponentBase
                 continue;
             }
 
-            dynamic query = dbContext.Set(foreignKeyType);
-            query = EntityFrameworkQueryableExtensions.AsNoTracking(query);
-            for (int i = 0; i < displayKeyProperties.Count; i++)
-                query = i == 0 ? IQueryableExtension.OrderBy(query, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(query, displayKeyProperties[i].Name);
-            var entries = await ThreadSafeQueryableExtension.ToListTSAsync(query, dbContext);
+            var entries = await dbContext.SetAsync(foreignKeyType, query =>
+            {
+                dynamic dynamicQuery = query.AsNoTracking();
+                for (int i = 0; i < displayKeyProperties.Count; i++)
+                    dynamicQuery = i == 0 ? IQueryableExtension.OrderBy(dynamicQuery, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(dynamicQuery, displayKeyProperties[i].Name);
+
+                return query.ToList();
+            });
 
             foreach (var entry in entries)
                 AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);
@@ -181,7 +184,7 @@ public class BaseDisplayComponent : ComponentBase
     protected void AddEntryToForeignKeyList(IBaseModel model, List<KeyValuePair<string?, string>> foreignKeyList, List<PropertyInfo> displayKeyProperties)
     {
         var primaryKeys = model.GetPrimaryKeys();
-        var primaryKeysAsJson = JsonConvert.SerializeObject(model.GetPrimaryKeys());
+        var primaryKeysAsJson = JsonConvert.SerializeObject(primaryKeys);
 
         if (displayKeyProperties.Count == 0)
             foreignKeyList.Add(new KeyValuePair<string?, string>(primaryKeysAsJson, String.Join(", ", primaryKeys ?? Array.Empty<string>())));

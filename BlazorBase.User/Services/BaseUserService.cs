@@ -62,16 +62,19 @@ public class BaseUserService<TUser, TIdentityUser, TIdentityRole>(
         return UserManager.GetUserId(authenticationState.User);
     }
 
-    public virtual async Task<TUser?> GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string? id, bool asNoTracking = true)
+    public virtual Task<TUser?> GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string? id, bool asNoTracking = true)
     {
         if (id == null)
-            return null;
+            return Task.FromResult<TUser?>(null);
 
-        var query = dbContext.Set<TUser>().Where(user => user.IdentityUserId == id);
-        if (asNoTracking)
-            query = query.AsNoTracking();
+        return dbContext.SetAsync((IQueryable<TUser> query) =>
+        {
+            if (asNoTracking)
+                query = query.AsNoTracking();
 
-        return await query.FirstOrDefaultTSAsync(dbContext).ConfigureAwait(false);
+            return query.Where(user => user.IdentityUserId == id)
+                        .FirstOrDefault();
+        });
     }
 
     async Task<IBaseUser?> IBaseUserService.GetUserByApplicationUserIdAsync(IBaseDbContext dbContext, string id, bool asNoTracking)

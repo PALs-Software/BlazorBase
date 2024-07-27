@@ -313,7 +313,7 @@ public class BaseModel : ComponentBase, IBaseModel
 
     public virtual async Task<IBaseModel?> GetShowOnlySingleEntryInstance(OnEntryToBeShownByStartArgs args)
     {
-        return (IBaseModel?)await args.EventServices.DbContext.Set(GetType()).FirstOrDefaultTSAsync(args.EventServices.DbContext);
+        return (IBaseModel?)await args.EventServices.DbContext.SetAsync(GetType(), query => query.FirstOrDefault());
     }
     #endregion
 
