@@ -34,7 +34,12 @@ public class BaseResourceManagerStringLocalizer : ResourceManagerStringLocalizer
     public override LocalizedString this[string name, params object[] arguments] => GetTranslation(name, arguments);
     protected virtual LocalizedString GetTranslation(string name, params object[] arguments)
     {
-        var baseResult = base[name, arguments];
+        LocalizedString baseResult;
+        if (arguments.Length == 0)
+            baseResult = base[name];
+        else
+            baseResult = base[name, arguments];
+        
         if (!baseResult.ResourceNotFound)
             return baseResult;
 
