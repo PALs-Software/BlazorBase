@@ -35,6 +35,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Content Update="Components\List\BasePrimitiveListPart.razor">
+		  <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
 		<Content Update="wwwroot\card.css">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</Content>

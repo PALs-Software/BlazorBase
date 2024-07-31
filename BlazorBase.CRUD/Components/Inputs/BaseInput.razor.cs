@@ -1,5 +1,4 @@
 ﻿using BlazorBase.Abstractions.CRUD.Arguments;
-using BlazorBase.Abstractions.CRUD.Attributes;
 using BlazorBase.Abstractions.CRUD.Enums;
 using BlazorBase.Abstractions.CRUD.Extensions;
 using BlazorBase.Abstractions.CRUD.Interfaces;

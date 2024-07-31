@@ -104,16 +104,18 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
     #endregion
 
     #region Property Infos
-    protected List<BaseInput?> BaseInputs = new();
-    protected List<BaseSelectListInput?> BaseSelectListInputs = new();
-    protected List<BaseListPart?> BaseListParts = new();
-    protected List<IBasePropertyCardInput> BasePropertyCardInputs = new();
+    protected List<BaseInput?> BaseInputs = [];
+    protected List<BaseSelectListInput?> BaseSelectListInputs = [];
+    protected List<BaseListPart?> BaseListParts = [];
+    protected List<BasePrimitiveListPart?> BasePrimitiveListParts = [];
+    protected List<IBasePropertyCardInput> BasePropertyCardInputs = [];
 
     protected BaseInput? AddToBaseInputs { set { BaseInputs.Add(value); } }
     protected BaseSelectListInput? AddToBaseSelectListInputs { set { BaseSelectListInputs.Add(value); } }
     protected BaseListPart? AddToBaseListParts { set { BaseListParts.Add(value); } }
+    protected BasePrimitiveListPart? AddToBasePrimitiveListParts { set { BasePrimitiveListParts.Add(value); } }
 
-    protected List<IBasePropertyCardInput> BaseInputExtensions = new();
+    protected List<IBasePropertyCardInput> BaseInputExtensions = [];
     #endregion
 
     #region Init
@@ -184,6 +186,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
         BaseInputs.Clear();
         BaseSelectListInputs.Clear();
         BaseListParts.Clear();
+        BasePrimitiveListParts.Clear();
         BasePropertyCardInputs.Clear();
         ResetInvalidFeedback();
 
@@ -330,6 +333,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
         BaseInputs?.Clear();
         BaseSelectListInputs?.Clear();
         BaseListParts?.Clear();
+        BasePrimitiveListParts?.Clear();
         ForeignKeyProperties = null!;
         CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string?, string>>>();
         Model = null!;
@@ -421,6 +425,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
 
         foreach (var baseListPart in BaseListParts)
             baseListPart?.OnAfterCardSaveChanges();
+
+        foreach (var baseListPart in BasePrimitiveListParts)
+            baseListPart?.OnAfterCardSaveChanges();
     }
 
     #endregion
@@ -448,6 +455,10 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
                 valid = false;
 
         foreach (var listPart in BaseListParts)
+            if (listPart != null && !await listPart.ListPartIsValidAsync())
+                valid = false;
+
+        foreach (var listPart in BasePrimitiveListParts)
             if (listPart != null && !await listPart.ListPartIsValidAsync())
                 valid = false;
 

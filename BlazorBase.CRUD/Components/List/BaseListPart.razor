@@ -7,10 +7,14 @@
 @using BlazorBase.CRUD.Extensions
 
 <div class="base-list-part base-list-part-@(ModelListEntryType.Name)">
-    <BaseTypeBasedSelectList @ref="BaseSelectList"
-                             BaseModelType="ModelListEntryType"
-                             Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
-                             OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
+
+    @if (ModelListEntryImplementedIBaseModel)
+    {
+        <BaseTypeBasedSelectList @ref="BaseSelectList"
+                                 BaseModelType="ModelListEntryType"
+                                 Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
+                                 OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
+    }
 
     <table class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
         <thead class="base-list-part-table-header">
@@ -32,14 +36,14 @@
                 <th class="bottom-border-line" />
             </tr>
             <tr>
-                <th class="base-list-part-actions text-center" style="@(ModelImplementedISortableItem ? "min-width:100px;" : String.Empty)">
+                <th class="base-list-part-actions text-center" style="@(ModelListEntryImplementedISortableItem ? "min-width:100px;" : String.Empty)">
                     @if (!IsReadOnly)
                     {
                         @if (DisplayOptions.ShowAddButton)
                         {
                             <Button Color="Blazorise.Color.Success" Clicked="AddEntryAsync" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
                         }
-                        @if (DisplayOptions.ShowAddExistingEntryButton)
+                        @if (DisplayOptions.ShowAddExistingEntryButton && ModelListEntryImplementedIBaseModel)
                         {
                             <Button Color="Blazorise.Color.Primary" Clicked="AddExistingEntryAsync" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
                         }
@@ -66,7 +70,7 @@
                         @if (!IsReadOnly)
                         {
                             <Buttons>
-                                @if (ModelImplementedISortableItem)
+                                @if (ModelListEntryImplementedISortableItem)
                                 {
                                     @if (DisplayOptions.ShowAddButton)
                                     {
@@ -81,7 +85,7 @@
                                 {
                                     <Button Color="Blazorise.Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
                                 }
-                                @if (ModelImplementedISortableItem)
+                                @if (ModelListEntryImplementedISortableItem)
                                 {
                                     <Buttons Orientation="Orientation.Vertical">
                                         <Button Color="Blazorise.Color.Secondary" Clicked="() => MoveEntryUpAsync(entry)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>

@@ -1,0 +1,92 @@
+﻿@inherits BaseDisplayComponent
+@using BlazorBase.Abstractions.CRUD.Arguments
+@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.Abstractions.CRUD.Interfaces
+@using BlazorBase.CRUD.Enums
+@using BlazorBase.CRUD.Models
+@using BlazorBase.CRUD.Extensions
+
+<div class="base-list-part base-list-part-@(ModelListEntryType.Name)">
+
+    <table class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
+        <thead class="base-list-part-table-header">
+            <tr>
+                <th class="root-base-list-part-table-header-item" colspan="100">
+                    <BasePageActions Source="this"
+                                     BaseModel="Model"
+                                     InvokeActionParameter="SelectedEntryIndex"
+                                     BaseModelType="ModelListEntryType"
+                                     GUIType="GUIType.ListPart"
+                                     EventServices="EventServices"
+                                     ModelLocalizer="ModelLocalizer"
+                                     OnPageActionInvoked="OnPageActionInvokedAsync" />
+
+                    <Alert Class="invalid-summary-feedback" Color="Blazorise.Color.Danger" Visible="ShowInvalidFeedback">
+                        @InvalidSummaryFeedback
+                    </Alert>
+                </th>
+                <th class="bottom-border-line" />
+            </tr>
+            <tr>
+                <th class="base-list-part-actions text-center">
+                    @if (!IsReadOnly)
+                    {
+                        @if (DisplayOptions.ShowAddButton)
+                        {
+                            <Button Color="Blazorise.Color.Success" Clicked="() => AddEntryAsync()" Size="Size.Small"><Icon Name="IconName.Add" /></Button>
+                        }
+                    }
+                </th>
+
+                <th class="base-list-part-table-header-column">
+                    @Caption
+                </th>
+
+                <th class="bottom-border-line" />
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Entries.Count; i++)
+            {
+                var index = i;
+                var entry = Entries[index];
+
+                <tr @onclick="() => OnRowSelected(index)" class="@(index == SelectedEntryIndex ? "base-list-part-row-selected" : "")">
+                    <td class="base-list-part-row-buttons text-center">
+                        @if (!IsReadOnly)
+                        {
+                            <Buttons>
+
+                                @if (DisplayOptions.ShowAddButton)
+                                {
+                                    <Button Color="Blazorise.Color.Success" Clicked="() => AddEntryAsync(index)" Size="Size.Small"><Icon Name=" IconName.Add" /></Button>
+                                }
+
+                                @if (DisplayOptions.ShowDeleteButton)
+                                {
+                                    <Button Color="Blazorise.Color.Danger" Clicked="() => RemoveEntryAsync(index)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
+                                }
+
+                                <Buttons Orientation="Orientation.Vertical">
+                                    <Button Color="Blazorise.Color.Secondary" Clicked="() => MoveEntryUpAsync(index)" Size="Size.ExtraSmall" style="border-top-right-radius: .25rem;"><Icon Name=" IconName.SortUp" /></Button>
+                                    <Button Color="Blazorise.Color.Secondary" Clicked="() => MoveEntryDownAsync(index)" Size="Size.ExtraSmall" Margin="Margin.Is0.FromLeft"><Icon Name=" IconName.SortDown" /></Button>
+                                </Buttons>
+                            </Buttons>
+                        }
+                    </td>
+
+                    <td class="base-list-part-table-cell base-list-part-table-cell">
+                        <BasePrimitiveInput @ref="AddToBaseInputs"
+                                            Value="entry"
+                                            Type="ModelListEntryType"
+                                            ReadOnly="IsReadOnly"
+                                            OnBeforeConvertType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(Model, Property.Name, args.NewValue, args.OldValue, EventServices))"
+                                            OnValueChanged="(args) => OnValueChangedAsync(args, index)" />
+                    </td>
+
+                    <td class="bottom-border-line" />
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

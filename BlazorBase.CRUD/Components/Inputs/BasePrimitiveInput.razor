@@ -1,0 +1,87 @@
+﻿@using System.ComponentModel.DataAnnotations;
+@using BlazorBase.Abstractions.CRUD.Enums
+@using BlazorBase.CRUD.Services;
+@using Blazorise.Icons.FontAwesome;
+@using BlazorBase.CRUD.Extensions;
+
+<div class="base-input">
+    @if (Type != null)
+    {
+        if (Type == typeof(string) || BaseParser.DecimalTypes.Contains(Type))
+        {
+            if (PresentationDataTypeParameter == PresentationDataType.MultilineText)
+            {
+                <textarea value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @attributes="InputAttributes" class="form-control @InputClass"></textarea>
+            }
+            else
+            {
+                @if (IsPasswordInput && AllowUserPasswordAccess != null)
+                {
+                    <Addons>
+                        <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
+                        <Addon AddonType="AddonType.End">
+                            <Button Color="Blazorise.Color.Secondary" Clicked="OnViewPasswordClicked">
+                                @if (PasswordViewEnabled)
+                                {
+                                    <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.EyeSlash" />
+                                }
+                                else
+                                {
+                                    <Blazorise.Icons.FontAwesome.Icon Name="FontAwesomeIcons.Eye" />
+                                }
+                            </Button>
+                        </Addon>
+                    </Addons>
+                }
+                else
+                {
+                    <input type="@InputType" value="@CurrentValueAsString" @onchange="async (v) => await OnValueChangedAsync(v)" @onfocusin="OnInputFocusIn" @onfocusout="OnInputFocusOut" @attributes="InputAttributes" class="form-control @InputClass" />
+                }
+            }
+        }
+        else if (Type == typeof(bool))
+        {
+            <Check TValue="bool" Checked="(bool)Value!" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="ReadOnly" ReadOnly="ReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(bool?))
+        {
+            <Check TValue="bool?" Checked="(bool?)Value" CheckedChanged="(v) => OnValueChangedAsync(v)" Disabled="ReadOnly" ReadOnly="ReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(DateTime))
+        {
+            <DateEdit TValue="DateTime" Date="(DateTime)Value!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" InputMode="PresentationDataTypeParameter?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(DateTime?))
+        {
+            <DateEdit TValue="DateTime?" Date="(DateTime?)Value" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" InputMode="PresentationDataTypeParameter?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(DateTimeOffset))
+        {
+            <DateEdit TValue="DateTimeOffset" Date="(DateTimeOffset)Value!" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" InputMode="PresentationDataTypeParameter?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(DateTimeOffset?))
+        {
+            <DateEdit TValue="DateTimeOffset?" Date="(DateTimeOffset?)Value" DateChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" InputMode="PresentationDataTypeParameter?.ToDateInputModel() ?? Blazorise.DateInputMode.DateTime" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(TimeSpan))
+        {
+            <TimeEdit TValue="TimeSpan" Time="(TimeSpan)Value!" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(TimeSpan?))
+        {
+            <TimeEdit TValue="TimeSpan?" Time="(TimeSpan?)Value" TimeChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(Guid))
+        {
+            <TextEdit Text="@(Value!.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+        else if (Type == typeof(Guid?))
+        {
+            <TextEdit Text="@(Value?.ToString())" TextChanged="(v) => OnValueChangedAsync(v)" ReadOnly="ReadOnly" Class="@InputClass" Attributes="InputAttributes" />
+        }
+
+        <div class="@FeedbackClass">
+            @Feedback
+        </div>
+    }
+</div>

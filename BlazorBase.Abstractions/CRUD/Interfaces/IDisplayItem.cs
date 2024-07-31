@@ -19,6 +19,7 @@ public interface IDisplayItem
     bool IsReadOnly { get; set; }
     bool IsKey { get; set; }
     bool IsListProperty { get; set; }
+    bool IsPrimitiveListType { get; set; }
     PresentationDataType? PresentationDataType { get; set; }
     SortDirection SortDirection { get; set; }
     FilterType FilterType { get; set; }

@@ -7,26 +7,20 @@ using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
-using BlazorBase.CRUD.Components.SelectList;
-using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.CRUD.SortableItem;
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
+using static BlazorBase.Abstractions.CRUD.Arguments.BasePrimitiveInputArgs;
 
 namespace BlazorBase.CRUD.Components.List;
 
-public partial class BaseListPart : BaseDisplayComponent
+public partial class BasePrimitiveListPart : BaseDisplayComponent
 {
     #region Parameters
 
@@ -45,10 +39,9 @@ public partial class BaseListPart : BaseDisplayComponent
 
     [Parameter] public IBaseModel Model { get; set; } = null!;
     [Parameter] public PropertyInfo Property { get; set; } = null!;
+    [Parameter] public string? Caption { get; set; } = null!;
     [Parameter] public IBaseDbContext DbContext { get; set; } = null!;
     [Parameter] public bool? ReadOnly { get; set; }
-    [Parameter] public string? SingleDisplayName { get; set; }
-    [Parameter] public string? PluralDisplayName { get; set; }
 
     [Parameter] public bool StickyRowButtons { get; set; } = true;
     #endregion
@@ -63,27 +56,17 @@ public partial class BaseListPart : BaseDisplayComponent
     protected IStringLocalizer ModelLocalizer { get; set; } = null!;
     protected Type IStringModelLocalizerType { get; set; } = null!;
     protected IList Entries { get; set; } = null!;
-    protected Dictionary<object, bool> EntryIsInAddingMode { get; set; } = new();
     protected Type ModelListEntryType { get; set; } = null!;
-    protected object? SelectedEntry = null;
+    protected int? SelectedEntryIndex = null;
 
     protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; } = new();
-    protected bool ModelListEntryImplementedISortableItem { get; set; }
-    protected bool ModelListEntryImplementedIBaseModel { get; set; }
-    protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
 
     #region Property Infos
 
     protected bool IsReadOnly;
-    protected List<BaseInput> BaseInputs = new List<BaseInput>();
-    protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
-    protected List<IBasePropertyListPartInput> BasePropertyListPartInputs = new List<IBasePropertyListPartInput>();
+    protected List<BasePrimitiveInput> BaseInputs = [];
 
-    protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
-    protected BaseSelectListInput AddToBaseInputSelectLists { set { BaseSelectListInputs.Add(value); } }
-    protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
-
-    protected BaseTypeBasedSelectList BaseSelectList = null!;
+    protected BasePrimitiveInput AddToBaseInputs { set { BaseInputs.Add(value); } }
 
     #endregion
 
@@ -95,9 +78,10 @@ public partial class BaseListPart : BaseDisplayComponent
         ModelListEntryType = Property.GetCustomAttribute<RenderTypeAttribute>()?.RenderType ?? Property.PropertyType.GenericTypeArguments[0];
         DisplayOptions = Property.GetCustomAttribute<BaseListPartDisplayOptionsAttribute>() ?? new BaseListPartDisplayOptionsAttribute();
 
-        ModelListEntryImplementedISortableItem = ModelListEntryType.ImplementedISortableItem();
-        ModelListEntryImplementedIBaseModel = typeof(IBaseModel).IsAssignableFrom(ModelListEntryType);
-   
+        var modelListEntryIsPrimitiveType = ModelListEntryType.IsPrimitive || ModelListEntryType == typeof(string) || ModelListEntryType == typeof(decimal);
+        if (!modelListEntryIsPrimitiveType)
+            throw new Exception("Only primitive types are allowed in BasePrimitiveListPart");
+
         IStringModelLocalizerType = typeof(IStringLocalizer<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]);
         ModelLocalizer = StringLocalizerFactory.Create(Property.PropertyType.GenericTypeArguments[0]);
         EventServices = GetEventServices();
@@ -107,28 +91,11 @@ public partial class BaseListPart : BaseDisplayComponent
         else
             IsReadOnly = ReadOnly.Value;
 
-        await SetUpDisplayListsAsync(ModelListEntryType, GUIType.ListPart);
-
-        if (String.IsNullOrEmpty(SingleDisplayName))
-            SingleDisplayName = ModelLocalizer[ModelListEntryType.Name];
-        if (String.IsNullOrEmpty(PluralDisplayName))
-            PluralDisplayName = ModelLocalizer[$"{ModelListEntryType.Name}_Plural"];
-
         if (Property.GetValue(Model) == null)
             Property.SetValue(Model, CreateGenericListInstance());
-
-        BaseInputExtensions = ServiceProvider.GetServices<IBasePropertyListPartInput>().ToList();
-
-        dynamic entries = Property.GetValue(Model)!;
-        if (ModelListEntryImplementedISortableItem)
-            entries.Sort(SortableItemComparer);
-        Entries = (IList)entries;
+        Entries = (IList)Property.GetValue(Model)!;
 
         Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
-        Model.OnRecalculateCustomLookupData += async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
-
-        await PrepareForeignKeyPropertiesAsync(DbContext);
-        await PrepareCustomLookupData(Model, EventServices);
     }
 
     protected async override Task OnParametersSetAsync()
@@ -144,54 +111,28 @@ public partial class BaseListPart : BaseDisplayComponent
         if (!propertyNames.Contains(Property.Name))
             return;
 
-        InvokeAsync(() => StateHasChanged());
+        InvokeAsync(StateHasChanged);
     }
-
-    protected Task Model_OnRecalculateCustomLookupDataAsync(object? sender, string[] propertyNames)
-    {
-        return RecalculateCustomLookupData(Model, EventServices, propertyNames);
-    }
-
-    protected async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(IDisplayItem displayItem, bool isReadonly, IBaseModel model)
-    {
-        foreach (var baseinput in BaseInputExtensions)
-            if (await baseinput.IsHandlingPropertyRenderingAsync(model, displayItem, EventServices))
-                return GetBaseInputExtensionAsRenderFragment(displayItem, isReadonly, baseinput.GetType(), model);
-
-        return null;
-    }
-
-    protected virtual RenderFragment GetBaseInputExtensionAsRenderFragment(IDisplayItem displayItem, bool isReadonly, Type baseInputExtensionType, IBaseModel model) => builder =>
-    {
-        builder.OpenComponent(0, baseInputExtensionType);
-
-        builder.AddAttribute(1, "Model", model);
-        builder.AddAttribute(2, "Property", displayItem.Property);
-        builder.AddAttribute(3, "ReadOnly", isReadonly);
-        builder.AddAttribute(4, "DbContext", DbContext);
-        builder.AddAttribute(5, "ModelLocalizer", ModelLocalizer);
-        builder.AddAttribute(6, "DisplayItem", displayItem);
-        builder.AddAttribute(7, "OnBeforeConvertPropertyType", EventCallback.Factory.Create<OnBeforeConvertPropertyTypeArgs>(this, (args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))));
-        builder.AddAttribute(8, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))));
-        builder.AddAttribute(9, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))));
-
-        builder.AddComponentReferenceCapture(10, (input) => BasePropertyListPartInputs.Add((IBasePropertyListPartInput)input));
-
-        builder.CloseComponent();
-    };
 
     #endregion
 
     #region CRUD
 
-    public virtual Task OnRowSelected(object entry)
+    protected async Task OnValueChangedAsync(OnValueChangedArgs args, int index)
     {
-        if (entry == SelectedEntry)
-            SelectedEntry = null;
-        else
-            SelectedEntry = entry;
+        args.NewValue = await OnBeforeListPropertyChangedAsync(new OnBeforePropertyChangedArgs(Model, Property.Name, args.NewValue, args.OldValue, EventServices));
 
-        return Task.CompletedTask;
+        Entries[index] = args.NewValue;
+
+        await OnAfterListPropertyChangedAsync(new OnAfterPropertyChangedArgs(Model, Property.Name, args.NewValue, args.OldValue, args.IsValid, EventServices));
+    }
+
+    public virtual void OnRowSelected(int index)
+    {
+        if (index == SelectedEntryIndex)
+            SelectedEntryIndex = null;
+        else
+            SelectedEntryIndex = index;
     }
 
     protected object CreateGenericListInstance()
@@ -201,12 +142,13 @@ public partial class BaseListPart : BaseDisplayComponent
         return Activator.CreateInstance(constructedListType)!;
     }
 
-    protected async Task AddEntryAsync(object? aboveEntry = null)
+    protected async Task AddEntryAsync(int? aboveEntryIndex = null)
     {
-        var newEntry = Activator.CreateInstance(ModelListEntryType)!;
-
-        if (newEntry is IModelInjectServiceProvider injectModel)
-            injectModel.ServiceProvider = ServiceProvider;
+        object? newEntry;
+        if (ModelListEntryType == typeof(string))
+            newEntry = String.Empty;
+        else
+            newEntry = Activator.CreateInstance(ModelListEntryType)!;
 
         await OnCreateNewListEntryInstanceAsync(newEntry);
 
@@ -215,118 +157,55 @@ public partial class BaseListPart : BaseDisplayComponent
         if (args.Handled)
             return;
 
-        if (ModelListEntryImplementedISortableItem && aboveEntry != null)
-            Entries.Insert(Entries.IndexOf(aboveEntry), newEntry);
+        if (aboveEntryIndex != null)
+            Entries.Insert(aboveEntryIndex.Value, newEntry);
         else
             Entries.Add(newEntry);
-
-        EntryIsInAddingMode[newEntry] = true;
-        SetSortIndex();
 
         await OnAfterAddEntryAsync(newEntry);
     }
 
-    protected Task AddExistingEntryAsync(object? aboveEntry = null)
+    protected async Task RemoveEntryAsync(int index)
     {
-        BaseSelectList.ShowModal(aboveEntry);
-
-        return Task.CompletedTask;
-    }
-
-    protected async Task AddExistingEntrySelectListClosedAsync(OnSelectListClosedArgs args)
-    {
-        if (args.SelectedModel == null)
-            return;
-
-        var entryToAdd = await DbContext.FindAsync(ModelListEntryType, args.SelectedModel.GetPrimaryKeys());
-        if (entryToAdd == null)
-            return;
-
-        var handledEventArgs = new HandledEventArgs();
-        await OnBeforeAddEntryAsync(entryToAdd, handledEventArgs, callAddEventOnListEntry: false);
-        if (handledEventArgs.Handled)
-            return;
-
-        var aboveEntry = args.AdditionalData;
-        if (ModelListEntryImplementedISortableItem && aboveEntry != null)
-            Entries.Insert(Entries.IndexOf(aboveEntry), entryToAdd);
-        else
-            Entries.Add(entryToAdd);
-
-        EntryIsInAddingMode[entryToAdd] = true;
-        SetSortIndex();
-
-        await OnAfterAddEntryAsync(entryToAdd, callAddEventOnListEntry: false);
-    }
-
-    protected async Task RemoveEntryAsync(object entry)
-    {
+        var entry = Entries[index]!;
         var args = new HandledEventArgs();
         await OnBeforeRemoveEntryAsync(entry, args);
         if (args.Handled)
             return;
 
-        Entries.Remove(entry);
-        BaseInputs.RemoveAll(input => input.Model == entry);
-        BaseSelectListInputs.RemoveAll(input => input.Model == entry);
-        BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
-
-        var entityEntry = await DbContext.EntryAsync(entry);
-        if (entityEntry.State == EntityState.Added)
-            entityEntry.State = EntityState.Detached;
+        Entries.RemoveAt(index);
+        BaseInputs.RemoveAt(index);
 
         await OnAfterRemoveEntryAsync(entry);
     }
 
-    protected async Task MoveEntryUpAsync(object entry)
+    protected async Task MoveEntryUpAsync(int index)
     {
-        if (!ModelListEntryImplementedISortableItem)
-            return;
-
-        var index = Entries.IndexOf(entry);
         if (index == 0)
             return;
 
-        SwapEntries(entry, index, index - 1);
-        SetSortIndex();
+        SwapEntries(index, index - 1);
 
-        await OnAfterMoveListEntryUpAsync(entry);
+        await OnAfterMoveListEntryUpAsync(Entries[index - 1]!);
     }
 
-    protected async Task MoveEntryDownAsync(object entry)
+    protected async Task MoveEntryDownAsync(int index)
     {
-        if (!ModelListEntryImplementedISortableItem)
-            return;
-
-        var index = Entries.IndexOf(entry);
         if (index == Entries.Count - 1)
             return;
 
-        SwapEntries(entry, index, index + 1);
-        SetSortIndex();
+        SwapEntries(index, index + 1);
 
-        await OnAfterMoveListEntryDownAsync(entry);
+        await OnAfterMoveListEntryDownAsync(Entries[index + 1]!);
     }
 
-    protected void SwapEntries(object entry, int currentIndex, int targetIndex)
+    protected void SwapEntries(int currentIndex, int targetIndex)
     {
         var tempEntry = Entries[targetIndex];
-        Entries[targetIndex] = entry;
+        Entries[targetIndex] = Entries[currentIndex];
         Entries[currentIndex] = tempEntry;
     }
 
-    protected void SetSortIndex()
-    {
-        if (!ModelListEntryImplementedISortableItem)
-            return;
-
-        for (int index = 0; index < Entries.Count; index++)
-        {
-            var entry = Entries[index];
-            if (entry != null)
-                ((ISortableItem)entry).SortIndex = index;
-        }
-    }
     #endregion
 
     #region Events
@@ -414,9 +293,6 @@ public partial class BaseListPart : BaseDisplayComponent
         var args = new OnAfterMoveListEntryUpArgs(Model, entry, EventServices);
         await OnAfterMoveListEntryUp.InvokeAsync(args);
         await Model.OnAfterMoveListEntryUp(args);
-
-        if (entry is IBaseModel baseModel)
-            await baseModel.OnAfterMoveEntryUp(new OnAfterMoveEntryUpArgs(Model, EventServices));
     }
 
     protected async Task OnAfterMoveListEntryDownAsync(object entry)
@@ -424,16 +300,15 @@ public partial class BaseListPart : BaseDisplayComponent
         var args = new OnAfterMoveListEntryDownArgs(Model, entry, EventServices);
         await OnAfterMoveListEntryDown.InvokeAsync(args);
         await Model.OnAfterMoveListEntryDown(args);
-
-        if (entry is IBaseModel baseModel)
-            await baseModel.OnAfterMoveEntryDown(new OnAfterMoveEntryDownArgs(Model, EventServices));
     }
 
-    protected async Task OnBeforeListPropertyChangedAsync(OnBeforePropertyChangedArgs args)
+    protected async Task<object?> OnBeforeListPropertyChangedAsync(OnBeforePropertyChangedArgs args)
     {
         var listArgs = new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices);
         await OnBeforeListPropertyChanged.InvokeAsync(listArgs);
         await Model.OnBeforeListPropertyChanged(listArgs);
+
+        return listArgs.NewValue;
     }
 
     protected async Task OnAfterListPropertyChangedAsync(OnAfterPropertyChangedArgs args)
@@ -449,8 +324,6 @@ public partial class BaseListPart : BaseDisplayComponent
 
     public void OnAfterCardSaveChanges()
     {
-        foreach (var entry in Entries)
-            EntryIsInAddingMode[entry] = false;
     }
 
     #endregion
@@ -464,46 +337,14 @@ public partial class BaseListPart : BaseDisplayComponent
             if (!await input.ValidatePropertyValueAsync())
                 valid = false;
 
-        foreach (var input in BaseSelectListInputs)
-            if (!await input.ValidatePropertyValueAsync())
-                valid = false;
-
-        foreach (var basePropertyListPartInput in BasePropertyListPartInputs)
-            if (!await basePropertyListPartInput.ValidatePropertyValueAsync())
-                valid = false;
-
-        foreach (var item in Entries)
-        {
-            if (item is IBaseModel baseModel)
-            {
-                var validationContext = new ValidationContext(item, ServiceProvider, new Dictionary<object, object?>()
-                {
-                    [typeof(IStringLocalizer)] = ModelLocalizer,
-                    [typeof(IBaseDbContext)] = DbContext
-                });
-
-                if (!baseModel.TryValidate(out List<ValidationResult> validationResults, validationContext))
-                    valid = false;
-            }
-        }
-
         return valid;
     }
     #endregion
 
     #region MISC
-
     protected EventServices GetEventServices()
     {
         return new EventServices(ServiceProvider, DbContext, ModelLocalizer);
-    }
-
-    public bool CheckIfModelIsInAddingMode(object entry)
-    {
-        if (EntryIsInAddingMode.TryGetValue(entry, out bool isInAddingMode))
-            return isInAddingMode;
-
-        return false;
     }
     #endregion
 }

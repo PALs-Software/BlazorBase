@@ -331,6 +331,9 @@ public class BaseDisplayComponent : ComponentBase
             SortDirection = sortDirection;
             IsFilterable = isFilterable;
 
+            if (IsListProperty)
+                IsPrimitiveListType = Property.PropertyType.GenericTypeArguments[0].IsPrimitive || Property.PropertyType.GenericTypeArguments[0] == typeof(string) || Property.PropertyType.GenericTypeArguments[0] == typeof(decimal);
+
             CustomizationAttributes = property.GetCustomAttributes<BaseCustomizationAttribute>().ToList();
             FillCustomizationAttributesClasses(guiType);
             FillCustomizationAttributesStyles(guiType);
@@ -374,6 +377,7 @@ public class BaseDisplayComponent : ComponentBase
         public bool IsReadOnly { get; set; }
         public bool IsKey { get; set; }
         public bool IsListProperty { get; set; }
+        public bool IsPrimitiveListType { get; set; }
         public PresentationDataType? PresentationDataType { get; set; }
         public SortDirection SortDirection { get; set; }
         public FilterType FilterType { get; set; }
