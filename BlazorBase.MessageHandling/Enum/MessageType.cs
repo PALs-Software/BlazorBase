@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace BlazorBase.MessageHandling.Enum;
 
-namespace BlazorBase.MessageHandling.Enum
+public enum MessageType
 {
-    public enum MessageType
-    {
-        Information,
-        Error,
-        Warning
-    }
+    Information,
+    Success,
+    Error,
+    Warning
 }

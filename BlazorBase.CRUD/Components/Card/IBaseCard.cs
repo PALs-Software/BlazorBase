@@ -9,7 +9,7 @@ public interface IBaseCard
 
     Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, IBaseModel? template = null);
     Task ReloadEntityFromDatabase();
-    Task<bool> SaveCardAsync(bool showSnackBar = true);
+    Task<bool> SaveCardAsync();
     void ResetCard();
     IBaseModel GetCurrentModel();
     Task StateHasChangedAsync();

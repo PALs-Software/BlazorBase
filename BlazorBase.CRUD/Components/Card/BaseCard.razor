@@ -147,18 +147,3 @@
         </Accordion>
     }
 </div>
-
-<Snackbar @ref="Snackbar"
-          Color="ShowInvalidFeedback ? SnackbarColor.Danger : SnackbarColor.Success"
-          Multiline="true">
-    <SnackbarBody>
-        @if (ShowInvalidFeedback)
-        {
-            @InvalidSummaryFeedback
-        }
-        else
-        {
-            @Localizer["Information was saved successfully"]
-        }
-    </SnackbarBody>
-</Snackbar>

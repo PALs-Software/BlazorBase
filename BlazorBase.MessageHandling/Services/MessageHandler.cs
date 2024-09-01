@@ -2,6 +2,7 @@
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.MessageHandling.Models;
 using Blazorise;
+using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Threading.Tasks;
@@ -29,6 +30,8 @@ public class MessageHandler : IMessageHandler
     public event ShowLoadingProgressMessageHandler? OnShowLoadingProgressMessage;
     public event UpdateLoadingProgressMessageHandler? OnUpdateLoadingProgressMessage;
     public event CloseLoadingProgressMessageHandler? OnCloseLoadingProgressMessage;
+
+    public event ShowSnackbarEventHandler? OnShowSnackbar;
     #endregion
 
     #region ShowMessage
@@ -255,4 +258,28 @@ public class MessageHandler : IMessageHandler
         return OnCloseLoadingProgressMessage?.Invoke(id) ?? false;
     }
     #endregion
+
+    #region Show Snackbar
+    public void ShowSnackbar(string message,
+                        string? title = null,
+                        MessageType messageType = MessageType.Information,
+                        double millisecondsBeforeClose = 2000,
+                        bool showActionButton = false,
+                        string? actionButtonText = null,
+                        object? actionButtonIcon = null,
+                        bool showCloseButton = false,
+                        string? closeButtonText = null,
+                        object? closeButtonIcon = null,
+                        RenderFragment? messageTemplate = null,
+                        Func<SnackbarClosedEventArgs, Task>? onClosing = null)
+    {
+        ShowSnackbar(new ShowSnackbarArgs(message, title, messageType, millisecondsBeforeClose, showActionButton, actionButtonText, actionButtonIcon, showCloseButton, closeButtonText, closeButtonIcon, messageTemplate, onClosing));
+    }
+
+    public void ShowSnackbar(ShowSnackbarArgs args)
+    {
+        OnShowSnackbar?.Invoke(args);
+    }
+    #endregion
+
 }

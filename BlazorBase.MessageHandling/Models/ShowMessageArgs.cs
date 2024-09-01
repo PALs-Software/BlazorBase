@@ -45,6 +45,10 @@ public class ShowMessageArgs
             case MessageType.Information:
                 Icon = FontAwesomeIcons.InfoCircle;
                 break;
+            case MessageType.Success:
+                Icon = FontAwesomeIcons.CheckCircle;
+                IconStyle = "color: green";
+                break;
             case MessageType.Error:
                 Icon = FontAwesomeIcons.ExclamationTriangle;
                 IconStyle = "color: red";

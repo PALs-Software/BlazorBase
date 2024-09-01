@@ -10,6 +10,8 @@ using BlazorBase.CRUD.Components.List;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
+using BlazorBase.MessageHandling.Enum;
+using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Models;
 using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
@@ -76,6 +78,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
+    [Inject] protected IMessageHandler MessageHandler { get; set; } = null!;
     #endregion
 
     #region Properties
@@ -85,8 +88,6 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
 
     #region Member
     protected EventServices EventServices = null!;
-
-    protected Snackbar? Snackbar;
 
     protected TModel Model = null!;
     protected Type TModelType = null!;
@@ -255,7 +256,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
         return RecalculateCustomLookupData(Model, EventServices, propertyNames);
     }
 
-    public virtual async Task<bool> SaveCardAsync(bool showSnackBar = true)
+    public virtual async Task<bool> SaveCardAsync()
     {
         ResetInvalidFeedback();
 
@@ -276,8 +277,6 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
                 if (await DbContext.ExistsAsync<TModel>(Model))
                 {
                     ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
-                    if (showSnackBar)
-                        Snackbar?.Show();
                     return false;
                 }
                 await DbContext.AddAsync(Model);
@@ -323,8 +322,8 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
             success = false;
         }
 
-        if (showSnackBar)
-            Snackbar?.Show();
+        if (success)
+            MessageHandler.ShowSnackbar(@Localizer["Information was saved successfully"], messageType: MessageType.Success);
         return success;
     }
 
@@ -470,12 +469,17 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
             valid = false;
 
         if (!valid)
-        {
             ShowFormattedInvalidFeedback(Localizer["Some properties are not valid"]);
-            Snackbar?.Show();
-        }
 
         return valid;
+    }
+    #endregion
+
+    #region Feedback
+    protected override void ShowFormattedInvalidFeedback(string feedback)
+    {
+        base.ShowFormattedInvalidFeedback(feedback);
+        MessageHandler.ShowSnackbar(feedback, messageType: MessageType.Error);
     }
     #endregion
 
