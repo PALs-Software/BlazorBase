@@ -42,12 +42,12 @@ public static class BlazorBaseUserConfiguration
             .AddTransient<TUserService>()
 
         .AddControllers().AddApplicationPart(typeof(UserLoginController).Assembly).AddControllersAsServices();
-
-        if (OperatingSystem.IsWindows())
-            serviceCollection.AddTransient<BaseMailService<UserMailTemplate>>();
-
+     
         var options = new TOptions();
         configureOptions.Invoke(options);
+
+        if (!options.SkipLoadingMailServices && OperatingSystem.IsWindows())
+            serviceCollection.AddTransient<BaseMailService<UserMailTemplate>>();
 
         serviceCollection.ConfigureApplicationCookie(acOptions =>
         {
