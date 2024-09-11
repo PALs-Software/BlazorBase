@@ -35,7 +35,7 @@ public partial class BaseUserManagePassword : ComponentBase
     protected string Feedback { get; set; } = String.Empty;
     #endregion
 
-    #region Submit Login
+    #region Submit
     public async Task OnSubmit()
     {
         Feedback = String.Empty;
@@ -44,11 +44,29 @@ public partial class BaseUserManagePassword : ComponentBase
         if (user == null)
             return;
 
+        if (String.IsNullOrEmpty(Data.CurrentPassword))
+        {
+            Feedback = Localizer["The \"Current Password\" field is required."];
+            return;
+        }
+
+        if (String.IsNullOrEmpty(Data.NewPassword))
+        {
+            Feedback = Localizer["The \"New Password\" field is required."];
+            return;
+        }
+
+        if (Data.NewPassword != Data.ConfirmPassword)
+        {
+            Feedback = Localizer["• The new password and confirmation password do not match"];
+            return;
+        }
+
         var changePasswordResult = await UserManager.ChangePasswordAsync(user, Data.CurrentPassword, Data.NewPassword);
         if (changePasswordResult.Succeeded)
         {
             Logger.LogInformation("User changed their password successfully.");
-            
+
             // Needed because SignInManager.RefreshSignInAsync is not possible over Blazor Session, so post values also to a standard controller
             await JSRuntime.InvokeVoidAsync("blazorBase.user.submitForm", "logout-form");
         }

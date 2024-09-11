@@ -6,24 +6,20 @@
     @Localizer["Manage Account"]
 </Heading>
 
-<FullHeightTabs SelectedTab="change-password">
+<FullHeightTabs SelectedTab="profile">
     <Items>
         <Tab Name="profile">@Localizer["Profile"]</Tab>
         <Tab Name="change-password">@Localizer["Change Password"]</Tab>
-
-        @*
-        <Tab Name="personal data">@Localizer["Personal data"]</Tab>
-        *@
     </Items>
     <Content>
-
         <TabPanel Name="profile" Class="h-100">
-            <BaseUserManageProfile />
+            <BaseUserManageProfile @ref="UserManageProfile" />
+
+            <Button Class="btn-block" Size="Size.Large" Color="Blazorise.Color.Primary" Clicked="OnUserProfileSaveClickedAsync">@Localizer["Save"]</Button>
         </TabPanel>
 
         <TabPanel Name="change-password" Class="h-100">
             <BaseUserManagePassword />
         </TabPanel>
-
     </Content>
 </FullHeightTabs>

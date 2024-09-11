@@ -126,4 +126,7 @@
   <data name="Profile" xml:space="preserve">
     <value>Profil</value>
   </data>
+  <data name="Save" xml:space="preserve">
+    <value>Speichern</value>
+  </data>
 </root>
