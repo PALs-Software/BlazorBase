@@ -13,7 +13,7 @@ public class NativeImageService : IImageService
 {
     protected const string NotWindowsError = "This feature is only supported on Windows";
 
-    public async Task CreateThumbnailAsync(byte[] inputImageBytes, int imageThumbnailSize, string destinationPath)
+    public async Task CreateThumbnailAsync(byte[] inputImageBytes, uint imageThumbnailSize, string destinationPath)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);
@@ -22,7 +22,7 @@ public class NativeImageService : IImageService
         await File.WriteAllBytesAsync(destinationPath, thumbnail).ConfigureAwait(false);
     }
 
-    public Task ResizeImageAsync(string path, int width, int height)
+    public Task ResizeImageAsync(string path, uint width, uint height)
     {
         return Task.Run(() =>
         {
@@ -38,7 +38,7 @@ public class NativeImageService : IImageService
         });
     }
 
-    public Task<byte[]> ResizeImageAsync(byte[] inputImageBytes, int width, int height)
+    public Task<byte[]> ResizeImageAsync(byte[] inputImageBytes, uint width, uint height)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);
@@ -56,7 +56,7 @@ public class NativeImageService : IImageService
         return Task.FromResult(outputMemoryStream.ToArray());
     }
 
-    public Task<byte[]> ResizeImageToMaxSizeAsync(byte[] inputImageBytes, int maxSize)
+    public Task<byte[]> ResizeImageToMaxSizeAsync(byte[] inputImageBytes, uint maxSize)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);
@@ -77,7 +77,7 @@ public class NativeImageService : IImageService
         return Task.FromResult(outputMemoryStream.ToArray());
     }
 
-    public Image ResizeImage(Image inputImage, int width, int height)
+    public Image ResizeImage(Image inputImage, uint width, uint height)
     {
         if (!OperatingSystem.IsWindows())
             throw new NotSupportedException(NotWindowsError);

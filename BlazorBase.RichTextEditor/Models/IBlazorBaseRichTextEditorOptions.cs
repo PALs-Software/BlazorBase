@@ -5,5 +5,5 @@ namespace BlazorBase.RichTextEditor.Models;
 public interface IBlazorBaseRichTextEditorOptions : IBaseOptions
 {
     bool ResizeBigImagesToMaxImageSize { get; set; }
-    int MaxImageSize { get; set; }
+    uint MaxImageSize { get; set; }
 }

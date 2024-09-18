@@ -124,9 +124,9 @@
 		<PackageReference Include="Blazorise.DataGrid" Version="0.9.3.6" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.6" />
 		<PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="8.0.8" />
 		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
 	</ItemGroup>
 
