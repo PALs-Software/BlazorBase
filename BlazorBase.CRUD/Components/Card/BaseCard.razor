@@ -28,7 +28,7 @@
 
         if (ShowActions)
         {
-            <BasePageActions Source="this"
+            <BasePageActions @ref="PageActions" Source="this"
                              BaseModel="Model"
                              InvokeActionParameter="Model"
                              BaseModelType="TModelType"
@@ -145,5 +145,10 @@
                 </Collapse>
             }
         </Accordion>
+    }
+
+    @if (PageActions?.CurrentActionRenderFragment != null)
+    {
+        @PageActions?.CurrentActionRenderFragment
     }
 </div>

@@ -2,6 +2,7 @@
 using BlazorBase.Abstractions.CRUD.Extensions;
 using BlazorBase.Abstractions.CRUD.Interfaces;
 using BlazorBase.CRUD.Components.Card;
+using BlazorBase.CRUD.Components.PageActions;
 using BlazorBase.CRUD.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
@@ -81,7 +82,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
     #region Members
     protected IBaseModalCard? BaseModalCard = null!;
     protected RenderFragment? BaseModalCardRenderFragment;
-
+    protected BasePageActions? PageActions = null;
     protected bool IsSelfNavigating = false;
     protected string ListNavigationBasePath = null!;
     protected EventHandler<LocationChangedEventArgs>? LocationEventHandler;

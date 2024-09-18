@@ -7,6 +7,7 @@ using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
+using BlazorBase.CRUD.Components.PageActions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Localization;
 using System;
@@ -60,6 +61,7 @@ public partial class BasePrimitiveListPart : BaseDisplayComponent
     protected int? SelectedEntryIndex = null;
 
     protected BaseListPartDisplayOptionsAttribute DisplayOptions { get; set; } = new();
+    protected BasePageActions? PageActions = null;
 
     #region Property Infos
 

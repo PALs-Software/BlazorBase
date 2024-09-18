@@ -1,4 +1,5 @@
 ﻿using BlazorBase.Abstractions.CRUD.Interfaces;
+using BlazorBase.CRUD.Components.PageActions;
 using BlazorBase.Modules;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web.Virtualization;
@@ -16,6 +17,7 @@ public partial class BaseMemoryList<TModel> : BaseGenericList<TModel> where TMod
 
     #region Members
     protected BaseObservableCollection<TModel> ModelCollection = [];
+    protected BasePageActions? PageActions = null;
     #endregion
 
     protected override void OnParametersSet()

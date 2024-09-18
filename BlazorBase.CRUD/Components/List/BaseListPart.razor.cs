@@ -7,6 +7,7 @@ using BlazorBase.Abstractions.CRUD.Structures;
 using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
+using BlazorBase.CRUD.Components.PageActions;
 using BlazorBase.CRUD.Components.SelectList;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.SortableItem;
@@ -71,6 +72,7 @@ public partial class BaseListPart : BaseDisplayComponent
     protected bool ModelListEntryImplementedISortableItem { get; set; }
     protected bool ModelListEntryImplementedIBaseModel { get; set; }
     protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
+    protected BasePageActions? PageActions = null;
 
     #region Property Infos
 

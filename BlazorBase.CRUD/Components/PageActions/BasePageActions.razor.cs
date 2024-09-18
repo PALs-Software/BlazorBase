@@ -42,7 +42,7 @@ public partial class BasePageActions
     protected string? SelectedPageActionGroup { get; set; }
     public IBaseModel? OldBaseModel { get; set; }
 
-    protected RenderFragment? CurrentActionRenderFragment = null;
+    public RenderFragment? CurrentActionRenderFragment { get; set; } = null;
 
     #endregion
 

@@ -7,6 +7,7 @@ using BlazorBase.CRUD.Attributes;
 using BlazorBase.CRUD.Components.General;
 using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.List;
+using BlazorBase.CRUD.Components.PageActions;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
@@ -102,6 +103,8 @@ public partial class BaseCard<TModel> : BaseDisplayComponent, IBaseCard where TM
     protected string PageTitle = String.Empty;
 
     protected Dictionary<string, SkipExplicitNavigationLoadingOnCardOpenAttribute> SkipNavigationLoadingOnCardOpenProperties = new();
+
+    protected BasePageActions? PageActions = null;
     #endregion
 
     #region Property Infos

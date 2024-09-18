@@ -23,7 +23,7 @@
                         </Heading>
                     }
 
-                    <BasePageActions Source="this" BaseModel="ComponentModelInstance"
+                    <BasePageActions @ref="PageActions" Source="this" BaseModel="ComponentModelInstance"
                                      InvokeActionParameter="SelectedEntryPrimaryKeys"
                                      BaseModelType="TModelType" GUIType="GUIType.List" EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
@@ -160,4 +160,9 @@
             </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
         </tbody>
     </table>
+
+    @if (PageActions?.CurrentActionRenderFragment != null)
+    {
+        @PageActions?.CurrentActionRenderFragment
+    }
 </div>

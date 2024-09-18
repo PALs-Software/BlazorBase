@@ -12,7 +12,7 @@
         <thead class="base-list-part-table-header">
             <tr>
                 <th class="root-base-list-part-table-header-item" colspan="100">
-                    <BasePageActions Source="this"
+                    <BasePageActions @ref="PageActions" Source="this"
                                      BaseModel="Model"
                                      InvokeActionParameter="SelectedEntryIndex"
                                      BaseModelType="ModelListEntryType"
@@ -89,4 +89,9 @@
             }
         </tbody>
     </table>
+
+    @if (PageActions?.CurrentActionRenderFragment != null)
+    {
+        @PageActions?.CurrentActionRenderFragment
+    }
 </div>
