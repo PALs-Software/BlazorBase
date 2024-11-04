@@ -56,7 +56,9 @@
     --scrollbar-background-color: #e8e8e8;
     /*Icons*/
     --icon-color: #484848;
-    --button-icon-color: #fff
+    --button-icon-color: #fff;
+    /*Text-Editor*/
+    --bb-rich-text-editor-color: var(--bs-body-color);
 }
 
 input[type=date], input[type=datetime], input[type=datetime-local] {

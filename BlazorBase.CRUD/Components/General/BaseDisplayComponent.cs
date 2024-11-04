@@ -166,7 +166,8 @@ public class BaseDisplayComponent : ComponentBase
 
             var entries = await dbContext.SetAsync(foreignKeyType, query =>
             {
-                dynamic dynamicQuery = query.AsNoTracking();
+                dynamic dynamicQuery = query;
+                dynamicQuery = EntityFrameworkQueryableExtensions.AsNoTracking(dynamicQuery);
                 for (int i = 0; i < displayKeyProperties.Count; i++)
                     dynamicQuery = i == 0 ? IQueryableExtension.OrderBy(dynamicQuery, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(dynamicQuery, displayKeyProperties[i].Name);
 

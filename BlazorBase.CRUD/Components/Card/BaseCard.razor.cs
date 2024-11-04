@@ -14,7 +14,6 @@ using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Models;
-using Blazorise.Snackbar;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

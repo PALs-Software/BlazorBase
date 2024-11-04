@@ -1,0 +1,9 @@
+﻿@using BlazorBase.Abstractions.CRUD.Interfaces
+@inherits IBasePropertyListDisplay
+
+@if (Model != null)
+{
+    <div class="blazor-base-rich-text-list-display">
+        @((MarkupString)(Property.GetValue(Model) as String ?? String.Empty))
+    </div>
+}

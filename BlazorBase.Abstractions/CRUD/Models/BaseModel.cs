@@ -108,7 +108,7 @@ public class BaseModel : ComponentBase, IBaseModel
         return query;
     }
 
-    public string GetDisplayKey(string seperator)
+    public virtual string GetDisplayKey(string seperator)
     {
         var displayKeyProperties = GetType().GetDisplayKeyProperties();
         if (displayKeyProperties.Count == 0)
@@ -117,7 +117,7 @@ public class BaseModel : ComponentBase, IBaseModel
             return GetDisplayKeyKeyValuePair(displayKeyProperties);
     }
 
-    public string GetDisplayKey()
+    public virtual string GetDisplayKey()
     {
         return GetDisplayKey(", ");
     }
