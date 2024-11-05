@@ -7,11 +7,13 @@ public class AudioConverter
         return ConvertFloatToShortSamples(floatSamples.AsSpan());
     }
 
-    public short[] ConvertFloatToShortSamples(Span<float> floatSamples)
+    public short[] ConvertFloatToShortSamples(Span<float> floatSamples, bool withScaling = true)
     {
+        float scaleFactor = withScaling ? 32767 : 1; // Convert float (-1 to 1) to int16 (−2^15 and 2^15−1)
+
         var shortSamples = new short[floatSamples.Length];
         for (int i = 0; i < floatSamples.Length; i++)
-            shortSamples[i] = (short)(floatSamples[i] * 32767); // Convert float (-1 to 1) to int16 (−2^15 and 2^15−1)
+            shortSamples[i] = (short)(floatSamples[i] * scaleFactor);
 
         return shortSamples;
     }
@@ -49,5 +51,29 @@ public class AudioConverter
             binaryWriter.Write(item);
 
         return memoryStream.ToArray();
+    }
+
+    public float[] Resample(Span<float> inputBuffer, int inputSampleRate, int outputSampleRate)
+    {
+        double sampleRateRatio = (double)outputSampleRate / inputSampleRate;
+        int outputBufferLength = (int)(inputBuffer.Length * sampleRateRatio);
+
+        float[] outputBuffer = new float[outputBufferLength];
+
+        for (int i = 0; i < outputBufferLength; i++)
+        {
+            double position = i / sampleRateRatio;
+            int leftIndex = (int)Math.Floor(position);
+            int rightIndex = leftIndex + 1;
+
+            double fraction = position - leftIndex;
+
+            if (rightIndex >= inputBuffer.Length)
+                outputBuffer[i] = inputBuffer[leftIndex];
+            else
+                outputBuffer[i] = (float)(inputBuffer[leftIndex] * (1 - fraction) + inputBuffer[rightIndex] * fraction);
+        }
+
+        return outputBuffer;
     }
 }
