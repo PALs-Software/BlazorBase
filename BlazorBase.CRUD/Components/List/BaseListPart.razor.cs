@@ -25,6 +25,8 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.Services;
+using BlazorBase.CRUD.Components.Card;
+using System.Reflection.Metadata.Ecma335;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -73,15 +75,19 @@ public partial class BaseListPart : BaseDisplayComponent
     protected bool ModelImplementedISortableItem { get; set; }
     protected SortableItemComparer SortableItemComparer { get; set; } = new SortableItemComparer();
 
+    protected RenderFragment? CardModalEdit { get; set; } = null;
+
     #region Property Infos
 
     protected bool IsReadOnly;
     protected List<BaseInput> BaseInputs = new List<BaseInput>();
     protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
+    protected List<BaseSelectListPopupInput> BaseSelectListPopupInputs = new List<BaseSelectListPopupInput>();
     protected List<IBasePropertyListPartInput> BasePropertyListPartInputs = new List<IBasePropertyListPartInput>();
 
     protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
     protected BaseSelectListInput AddToBaseInputSelectLists { set { BaseSelectListInputs.Add(value); } }
+    protected BaseSelectListPopupInput AddToBaseInputSelectListPopups { set { BaseSelectListPopupInputs.Add(value); } }
     protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
 
     protected BaseTypeBasedSelectList BaseSelectList = null!;
@@ -125,8 +131,9 @@ public partial class BaseListPart : BaseDisplayComponent
         Entries = (IList)entries;
 
         Model.OnForcePropertyRepaint += Model_OnForcePropertyRepaint;
+        Model.OnRecalculateCustomLookupData += async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
 
-        await PrepareForeignKeyProperties(DbContext);
+        await PrepareForeignKeyProperties(DbContext, GUIType.ListPart);
         await PrepareCustomLookupData(Model, EventServices);
     }
 
@@ -138,12 +145,18 @@ public partial class BaseListPart : BaseDisplayComponent
             IsReadOnly = ReadOnly.Value;
     }
 
-    private void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
+    protected void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
     {
         if (!propertyNames.Contains(Property.Name))
             return;
 
-        InvokeAsync(() => StateHasChanged());
+        InvokeAsync(StateHasChanged);
+    }
+
+    protected async Task Model_OnRecalculateCustomLookupDataAsync(object? sender, EventArgs e)
+    {
+        await PrepareCustomLookupData(Model, EventServices);
+        _ = InvokeAsync(StateHasChanged);
     }
 
     protected async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly, IBaseModel model)
@@ -262,6 +275,7 @@ public partial class BaseListPart : BaseDisplayComponent
         Entries.Remove(entry);
         BaseInputs.RemoveAll(input => input.Model == entry);
         BaseSelectListInputs.RemoveAll(input => input.Model == entry);
+        BaseSelectListPopupInputs.RemoveAll(input => input.Model == entry);
         BasePropertyListPartInputs.RemoveAll(input => input.Model == entry);
 
         var entityEntry = await DbContext.EntryAsync(entry);
@@ -320,6 +334,34 @@ public partial class BaseListPart : BaseDisplayComponent
                 ((ISortableItem)entry).SortIndex = index;
         }
     }
+    #endregion
+
+    #region Card Modal Edit
+
+    protected Task ShowCardEditModalAsync(object entry)
+    {
+        CardModalEdit = GetBaseModalCardAsRenderFragment(new Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>((OnEntryToBeShownByStartArgs args) => Task.FromResult((IBaseModel)entry)));
+        InvokeAsync(StateHasChanged);
+
+        return Task.CompletedTask;
+    }
+
+    protected virtual RenderFragment GetBaseModalCardAsRenderFragment(Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>> entryToBeShown) => builder =>
+    {
+        builder.OpenComponent(0, typeof(BaseModalCard<>).MakeGenericType(Property.PropertyType.GenericTypeArguments[0]));
+        builder.AddAttribute(1, "ShowEntryByStart", true);
+        builder.AddAttribute(2, "EntryToBeShownByStart", entryToBeShown);
+        builder.AddAttribute(3, "ParentDbContext", DbContext);
+        builder.AddAttribute(4, "CloseButtonText", Localizer["Back"].ToString());
+        builder.AddAttribute(5, "OnCardClosed", EventCallback.Factory.Create(this, (args) =>
+        {
+            CardModalEdit = null;
+            InvokeAsync(StateHasChanged);
+        }));
+
+        builder.CloseComponent();
+    };
+
     #endregion
 
     #region Events
@@ -458,6 +500,10 @@ public partial class BaseListPart : BaseDisplayComponent
                 valid = false;
 
         foreach (var input in BaseSelectListInputs)
+            if (!await input.ValidatePropertyValueAsync())
+                valid = false;
+
+        foreach (var input in BaseSelectListPopupInputs)
             if (!await input.ValidatePropertyValueAsync())
                 valid = false;
 

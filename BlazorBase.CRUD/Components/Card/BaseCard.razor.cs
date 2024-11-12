@@ -63,11 +63,13 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
     [Parameter] public string? SingleDisplayName { get; set; }
     [Parameter] public bool Embedded { get; set; }
+    [Parameter] public IBaseDbContext? ParentDbContext { get; set; }
     [Parameter] public bool ShowEntryByStart { get; set; }
     [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; } = null;
     [Parameter] public TModel? ComponentModelInstance { get; set; } = null;
     [Parameter] public bool ShowActions { get; set; } = true;
     [Parameter] public RenderFragment<AdditionalHeaderPageActionsArgs> AdditionalHeaderPageActions { get; set; } = null!;
+
     #endregion
 
     #region Injects
@@ -104,11 +106,13 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #region Property Infos
     protected List<BaseInput?> BaseInputs = new();
     protected List<BaseSelectListInput?> BaseSelectListInputs = new();
+    protected List<BaseSelectListPopupInput?> BaseSelectListPopupInputs = new();
     protected List<BaseListPart?> BaseListParts = new();
     protected List<IBasePropertyCardInput> BasePropertyCardInputs = new();
 
     protected BaseInput? AddToBaseInputs { set { BaseInputs.Add(value); } }
     protected BaseSelectListInput? AddToBaseSelectListInputs { set { BaseSelectListInputs.Add(value); } }
+    protected BaseSelectListPopupInput? AddToBaseSelectListPopupInputs { set { BaseSelectListPopupInputs.Add(value); } }
     protected BaseListPart? AddToBaseListParts { set { BaseListParts.Add(value); } }
 
     protected List<IBasePropertyCardInput> BaseInputExtensions = new();
@@ -117,6 +121,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #region Init
     protected override async Task OnInitializedAsync()
     {
+        if (ParentDbContext != null)
+            DbContext = ParentDbContext;
+
         EventServices = GetEventServices();
 
         TModelType = typeof(TModel);
@@ -137,8 +144,20 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             var task = EntryToBeShownByStart?.Invoke(args);
             if (task != null)
                 entry = await task;
-            await ShowAsync(entry == null, args.ViewMode, entry?.GetPrimaryKeys());
+            await ShowAsync(entry == null, args.ViewMode, entry?.GetPrimaryKeys(), backupModelInstance: ParentDbContext == null ? null : entry as TModel);
         }
+    }
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        if (ParentDbContext != null)
+            if (DbContext != ParentDbContext)
+            {
+                DbContext = ParentDbContext;
+                EventServices = GetEventServices();
+            }
     }
 
     protected virtual async Task<RenderFragment?> CheckIfPropertyRenderingIsHandledAsync(DisplayItem displayItem, bool isReadonly)
@@ -172,15 +191,17 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #endregion
 
     #region Actions
-    public async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, TModel? template = null)
+    public async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, TModel? template = null, TModel? backupModelInstance = null)
     {
-        await DbContext.RefreshDbContextAsync();
+        if (ParentDbContext == null)
+            await DbContext.RefreshDbContextAsync();
 
         ModelLoaded = false;
         AddingMode = addingMode;
         ViewMode = viewMode;
         BaseInputs.Clear();
         BaseSelectListInputs.Clear();
+        BaseSelectListPopupInputs.Clear();
         BaseListParts.Clear();
         BasePropertyCardInputs.Clear();
         ResetInvalidFeedback();
@@ -204,6 +225,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             model = await DbContext.FindWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
         if (model == null)
+            model = backupModelInstance;
+
+        if (model == null)
             throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys ?? new object())]);
         Model = model;
 
@@ -214,7 +238,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         var onAfterShowEntryArgs = new OnShowEntryArgs(GUIType.Card, Model, addingMode, viewMode, VisibleProperties, DisplayGroups, EventServices);
         await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
 
-        await PrepareForeignKeyProperties(DbContext, Model);
+        await PrepareForeignKeyProperties(DbContext, GUIType.Card, Model);
         await PrepareCustomLookupData(Model, EventServices);
 
         ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object?>()
@@ -226,12 +250,19 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         CalculateTitle(addingMode: AddingMode);
 
         Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
+        Model.OnRecalculateCustomLookupData += async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
         ModelLoaded = true;
     }
 
     protected async Task Entry_OnReloadEntityFromDatabase(object? sender, EventArgs e)
     {
         await ReloadEntityFromDatabase();
+    }
+
+    protected async Task Model_OnRecalculateCustomLookupDataAsync(object? sender, EventArgs e)
+    {
+        await PrepareCustomLookupData(Model, EventServices);
+        _ = InvokeAsync(StateHasChanged);
     }
 
     public virtual async Task ReloadEntityFromDatabase()
@@ -260,7 +291,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
                 await Model.OnBeforeAddEntry(args);
                 if (args.AbortAdding)
                     return false;
-               
+
                 if (await DbContext.ExistsAsync<TModel>(Model))
                 {
                     ShowFormattedInvalidFeedback(Localizer["EntryAlreadyExistError", Model.GetPrimaryKeysAsString()]);
@@ -320,8 +351,10 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     {
         BaseInputs?.Clear();
         BaseSelectListInputs?.Clear();
+        BaseSelectListPopupInputs?.Clear();
         BaseListParts?.Clear();
         ForeignKeyProperties = null!;
+        UseForeignKeyPopupInput = [];
         CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string?, string>>>();
         Model = null!;
         ModelLoaded = false;
@@ -426,7 +459,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         return await DbContext.HasUnsavedChangesAsync();
     }
 
-    protected virtual async Task<bool> CardIsValidAsync()
+    public virtual async Task<bool> CardIsValidAsync()
     {
         var valid = true;
 
@@ -438,6 +471,10 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
             if (input != null && !await input.ValidatePropertyValueAsync())
                 valid = false;
 
+        foreach (var input in BaseSelectListPopupInputs)
+            if (input != null && !await input.ValidatePropertyValueAsync())
+                valid = false;
+        
         foreach (var listPart in BaseListParts)
             if (listPart != null && !await listPart.ListPartIsValidAsync())
                 valid = false;

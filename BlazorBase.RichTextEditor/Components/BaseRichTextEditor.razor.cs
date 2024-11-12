@@ -139,7 +139,8 @@ public partial class BaseRichTextEditor
         if (onBeforeModifyHtmlContentArgs.IsHandled)
             return document.DocumentNode.OuterHtml;
 
-        await ChangeImagesToLocalFilesAsync(document);
+        if (Options.ChangeImagesInEditorToLocalFiles)
+            await ChangeImagesToLocalFilesAsync(document);
 
         var onAfterModifyHtmlContentArgs = new OnAfterModifyHtmlContentArgs(ConnectedModel, document) { AdditionalInformations = args?.AdditionalInformations };
         await OnAfterModifyHtmlContent.InvokeAsync();

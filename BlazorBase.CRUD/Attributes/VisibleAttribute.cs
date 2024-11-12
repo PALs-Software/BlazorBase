@@ -24,14 +24,14 @@ public class VisibleAttribute : Attribute
         if (!hideInGUI)
             return;
 
-        HideInGUITypes = new GUIType[] {
+        HideInGUITypes = [
             GUIType.List,
             GUIType.ListPart,
             GUIType.Card
-        };
+        ];
     }
 
-    public GUIType[] HideInGUITypes { get; set; } = Array.Empty<GUIType>();
+    public GUIType[] HideInGUITypes { get; set; } = [];
 
     public string? DisplayGroup { get; set; }
 

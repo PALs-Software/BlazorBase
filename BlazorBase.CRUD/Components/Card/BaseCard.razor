@@ -8,14 +8,14 @@
     @if (!Embedded)
     {
         <Heading Margin="Margin.Is2.FromTop">
-            @if (ViewMode)
+            @if (ViewMode || ParentDbContext != null)
             {
                 <span>@Title</span>
             }
             else
             {
                 <span>@Title</span>
-                <Button Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
+                <Button Class="base-card-top-save-button" Color="Color.Success" Clicked="async () => await SaveCardAsync()">@Localizer["Save"]</Button>
             }
         </Heading>
     }
@@ -89,6 +89,10 @@
                                                     @if (UsesCustomLookupDataProperties.ContainsKey(displayItem.Property))
                                                     {
                                                         <BaseSelectListInput @ref="AddToBaseSelectListInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" Data="UsesCustomLookupDataProperties[displayItem.Property]" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
+                                                    }
+                                                    else if (UseForeignKeyPopupInput.GetValueOrDefault(displayItem.Property))
+                                                    {
+                                                        <BaseSelectListPopupInput @ref="AddToBaseSelectListPopupInputs" Model="Model" Property="displayItem.Property" ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertPropertyType.InvokeAsync(args)" OnBeforePropertyChanged="(args) => OnBeforePropertyChanged.InvokeAsync(args)" OnAfterPropertyChanged="(args) => OnAfterPropertyChanged.InvokeAsync(args)" />
                                                     }
                                                     else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                                     {

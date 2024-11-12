@@ -23,5 +23,6 @@ public class BlazorBaseCRUDOptions : IBlazorBaseCRUDOptions
     /// </summary>
     public bool UseAsyncDbContextMethodsPerDefaultInBaseDbContext { get; set; }
 
+    public uint UseSelectListModalWhenForeignKeyTableLargerThenX { get; set; } = 50;
     #endregion
 }

@@ -13,7 +13,6 @@ using Blazorise;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Localization;
 using System;
@@ -35,6 +34,7 @@ namespace BlazorBase.CRUD.Models
         public event EventHandler? OnReloadEntityFromDatabase;
 
         public event EventHandler? OnRecalculateVisibilityStatesOfActions;
+        public event EventHandler? OnRecalculateCustomLookupData;
         #endregion
 
         public BaseModel()
@@ -175,6 +175,11 @@ namespace BlazorBase.CRUD.Models
         public void RecalculateVisibilityStatesOfActions()
         {
             OnRecalculateVisibilityStatesOfActions?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void RecalculateCustomLookupData()
+        {
+            OnRecalculateCustomLookupData?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task InvokeStateHasChangedAsync()

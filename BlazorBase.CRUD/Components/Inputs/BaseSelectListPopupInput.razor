@@ -1,0 +1,39 @@
+﻿@inherits BaseInput
+
+<div class="base-select-list-popup-input @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.InputDiv]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.InputDiv]">
+    @if (Model != null)
+    {
+        @if (IsReadOnly)
+        {
+            <input type="text" value="@DisplayValue" disabled class="form-control @InputClass @DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]" />
+
+            <div class="@FeedbackClass">
+                @Feedback
+            </div>
+        }
+        else
+        {
+            <Addons Class="@DisplayItem?.CustomizationClasses[Enums.CustomizationLocation.Input]" Style="@DisplayItem?.CustomizationStyles[Enums.CustomizationLocation.Input]">
+
+                <button type="button" class="form-control custom-select @InputClass" @attributes="InputAttributes" @onclick="OpenForeignKeySelectListModalAsync">
+                    <span class="base-select-list-popup-input-display">@DisplayValue</span>
+                </button>
+
+                <BaseTypeBasedSelectList @ref="BaseSelectList"
+                                         BaseModelType="ForeignKeyBaseModelType"
+                                         Title="@Localizer["Search for {0}", ModelLocalizer[Property.Name]]"
+                                         OnSelectListClosed="AddEntryFromSelectListModalAsync" />
+
+                <Addon AddonType="AddonType.End">
+                    <Button Color="Color.Danger" Clicked="ClearValueAsync">
+                        <Blazorise.Icons.FontAwesome.Icon Name="IconName.Clear" />
+                    </Button>
+                </Addon>
+
+                <div class="@FeedbackClass">
+                    @Feedback
+                </div>
+            </Addons>
+        }
+    }
+</div>

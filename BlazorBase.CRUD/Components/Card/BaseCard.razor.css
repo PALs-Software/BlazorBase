@@ -1,3 +1,7 @@
 ﻿::deep .card-body:has(.base-list-part) {
     padding-top: 0;
 }
+
+::deep .base-card-top-save-button {
+    vertical-align: top;
+}

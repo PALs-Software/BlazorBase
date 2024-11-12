@@ -75,6 +75,10 @@
                                         <Button Color="Color.Primary" Clicked="() => AddExistingEntryAsync(entry)" Size="Size.Small"><Icon Name="IconName.SearchPlus" /></Button>
                                     }
                                 }
+                                @if (DisplayOptions.ShowCardEditButton)
+                                {
+                                    <Button Color="Color.Primary" Clicked="() => ShowCardEditModalAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Edit" /></Button>
+                                }
                                 @if (DisplayOptions.ShowDeleteButton)
                                 {
                                     <Button Color="Color.Danger" Clicked="() => RemoveEntryAsync(entry)" Size="Size.Small"><Icon Name=" IconName.Delete" /></Button>
@@ -106,6 +110,10 @@
                                     {
                                         <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="UsesCustomLookupDataProperties[displayItem.Property]" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="OnBeforeListPropertyChangedAsync" OnAfterPropertyChanged="OnAfterListPropertyChangedAsync" />
                                     }
+                                    else if (UseForeignKeyPopupInput.GetValueOrDefault(displayItem.Property))
+                                    {
+                                        <BaseSelectListPopupInput @ref="AddToBaseInputSelectListPopups" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="OnBeforeListPropertyChangedAsync" OnAfterPropertyChanged="OnAfterListPropertyChangedAsync" />
+                                    }
                                     else if (ForeignKeyProperties.ContainsKey(displayItem.Property))
                                     {
                                         <BaseSelectListInput @ref="AddToBaseInputSelectLists" Model="baseEntry" Property="displayItem.Property" ReadOnly="IsReadOnly || displayItem.IsReadOnly || !modelIsInAddingMode && displayItem.IsKey" Data="ForeignKeyProperties[displayItem.Property]" DbContext="DbContext" ModelLocalizer="ModelLocalizer" DisplayItem="displayItem" OnBeforeConvertPropertyType="(args) => OnBeforeConvertListPropertyType.InvokeAsync(new OnBeforeConvertListPropertyTypeArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.EventServices))" OnBeforePropertyChanged="OnBeforeListPropertyChangedAsync" OnAfterPropertyChanged="OnAfterListPropertyChangedAsync" />
@@ -135,4 +143,6 @@
             }
         </tbody>
     </table>
+
+    @CardModalEdit
 </div>

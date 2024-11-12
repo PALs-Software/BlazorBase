@@ -1,15 +1,11 @@
 ﻿using BlazorBase.CRUD.Components.PageActions.Models;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
-using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -26,6 +22,8 @@ namespace BlazorBase.CRUD.Models
         event EventHandler? OnReloadEntityFromDatabase;
 
         event EventHandler? OnRecalculateVisibilityStatesOfActions;
+
+        event EventHandler? OnRecalculateCustomLookupData;
         #endregion
 
         #region Attribute Methods

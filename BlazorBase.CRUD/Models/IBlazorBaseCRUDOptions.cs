@@ -10,4 +10,6 @@ public interface IBlazorBaseCRUDOptions : IBaseOptions
     /// For this reason, it may be useful to use the sync methods of the db context.
     /// </summary>
     bool UseAsyncDbContextMethodsPerDefaultInBaseDbContext { get; set; }
+
+    uint UseSelectListModalWhenForeignKeyTableLargerThenX { get; set; }
 }

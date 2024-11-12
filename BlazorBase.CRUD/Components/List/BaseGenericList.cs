@@ -117,7 +117,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
         SetInitalSortOfPropertyColumns();
 
-        await PrepareForeignKeyProperties(DbContext);
+        await PrepareForeignKeyProperties(DbContext, GUIType.List);
     }
 
     public override async Task SetParametersAsync(ParameterView parameters)

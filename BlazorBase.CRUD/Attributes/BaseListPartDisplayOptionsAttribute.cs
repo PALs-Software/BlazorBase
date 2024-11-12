@@ -16,5 +16,6 @@ public class BaseListPartDisplayOptionsAttribute : Attribute
 
     public bool ShowAddButton { get; set; } = true;
     public bool ShowAddExistingEntryButton { get; set; } = true;
+    public bool ShowCardEditButton { get; set; } = false;
     public bool ShowDeleteButton { get; set; } = true;
 }

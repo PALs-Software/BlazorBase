@@ -6,4 +6,6 @@ public interface IBlazorBaseRichTextEditorOptions : IBaseOptions
 {
     bool ResizeBigImagesToMaxImageSize { get; set; }
     int MaxImageSize { get; set; }
+
+    bool ChangeImagesInEditorToLocalFiles { get; set; }
 }

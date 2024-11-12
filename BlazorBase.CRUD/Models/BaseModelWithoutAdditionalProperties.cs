@@ -7,11 +7,11 @@ namespace BlazorBase.CRUD.Models;
 public class BaseModelWithoutAdditionalProperties : BaseModel
 {
     [NotMapped]
-    [Visible(false)]
+    [Visible(hideInGUI: true)]
     public override DateTime CreatedOn { get => base.CreatedOn; set => base.CreatedOn = value; }
 
     [NotMapped]
-    [Visible(false)]
+    [Visible(hideInGUI: true)]
     public override DateTime ModifiedOn { get => base.ModifiedOn; set => base.ModifiedOn = value; }
 
 }

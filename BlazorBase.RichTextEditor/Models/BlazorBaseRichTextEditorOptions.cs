@@ -17,6 +17,8 @@ public class BlazorBaseRichTextEditorOptions: IBlazorBaseRichTextEditorOptions
 
     public bool ResizeBigImagesToMaxImageSize { get; set; } = false;
     public int MaxImageSize { get; set; } = 1024;
+
+    public bool ChangeImagesInEditorToLocalFiles { get; set; } = true;
     #endregion
 
 }

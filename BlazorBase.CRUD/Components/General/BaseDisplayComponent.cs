@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
@@ -34,6 +35,7 @@ namespace BlazorBase.CRUD.Components.General
         #region Injects        
         [Inject] protected IServiceProvider ServiceProvider { get; set; } = null!;
         [Inject] protected BaseErrorHandler ErrorHandler { get; set; } = null!;
+        [Inject] protected IBlazorBaseCRUDOptions CrudOptions { get; set; } = null!;
         [Inject] protected IStringLocalizerFactory StringLocalizerFactory { get; set; } = null!;
         [Inject] protected IStringLocalizer<BaseDisplayComponent> BaseDisplayComponentLocalizer { get; set; } = null!;
         [Inject] protected IBaseAuthenticationService BaseAuthenticationService { get; set; } = null!;
@@ -43,6 +45,7 @@ namespace BlazorBase.CRUD.Components.General
         protected virtual Dictionary<PropertyInfo, DisplayItem> VisibleProperties { get; set; } = new();
         protected virtual Dictionary<string, DisplayGroup> DisplayGroups { get; set; } = new();
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string?, string>>> ForeignKeyProperties { get; set; } = null!;
+        protected virtual Dictionary<PropertyInfo, bool> UseForeignKeyPopupInput { get; set; } = [];
         protected static ConcurrentDictionary<long, List<KeyValuePair<string?, string>>> CachedEnumValueDictionary { get; set; } = new();
         protected virtual Dictionary<Type, List<KeyValuePair<string?, string>>> CachedForeignKeys { get; set; } = new();
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string?, string>>> UsesCustomLookupDataProperties { get; set; } = new();
@@ -101,7 +104,7 @@ namespace BlazorBase.CRUD.Components.General
             DisplayGroups = DisplayGroups.OrderBy(entry => entry.Value.GroupAttribute.DisplayGroupOrder).ToDictionary(x => x.Key, x => x.Value);
         }
 
-        protected virtual async Task PrepareForeignKeyProperties(IBaseDbContext dbContext, IBaseModel? instance = null)
+        protected virtual async Task PrepareForeignKeyProperties(IBaseDbContext dbContext, GUIType guiType, IBaseModel? instance = null)
         {
             if (ForeignKeyProperties != null)
                 return;
@@ -163,13 +166,21 @@ namespace BlazorBase.CRUD.Components.General
                 }
 
                 dynamic query = dbContext.Set(foreignKeyType);
-                query = EntityFrameworkQueryableExtensions.AsNoTracking(query);
-                for (int i = 0; i < displayKeyProperties.Count; i++)
-                    query = i == 0 ? IQueryableExtension.OrderBy(query, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(query, displayKeyProperties[i].Name);
-                var entries = await ThreadSafeQueryableExtension.ToListTSAsync(query, dbContext);
+                var numberOfEntries = await ThreadSafeQueryableExtension.CountTSAsync(query, dbContext);
+                if (numberOfEntries > CrudOptions.UseSelectListModalWhenForeignKeyTableLargerThenX && guiType != GUIType.List)
+                {
+                    UseForeignKeyPopupInput.Add(foreignKeyProperty, true);
+                }
+                else
+                {
+                    query = EntityFrameworkQueryableExtensions.AsNoTracking(query);
+                    for (int i = 0; i < displayKeyProperties.Count; i++)
+                        query = i == 0 ? IQueryableExtension.OrderBy(query, displayKeyProperties[i].Name) : IQueryableExtension.ThenBy(query, displayKeyProperties[i].Name);
+                    var entries = await ThreadSafeQueryableExtension.ToListTSAsync(query, dbContext);
 
-                foreach (var entry in entries)
-                    AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);
+                    foreach (var entry in entries)
+                        AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);
+                }
 
                 CachedForeignKeys.Add(foreignKeyType, primaryKeys);
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);

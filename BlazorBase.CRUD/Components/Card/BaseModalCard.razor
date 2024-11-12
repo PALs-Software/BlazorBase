@@ -3,21 +3,29 @@
 @typeparam TModel
 
 <div class="base-card">
-    <Modal @ref="Modal" Class="modal-fullscreen" Closing="async (args) => await OnModalClosing(args)">
+    <BaseModal @ref="Modal" Class="modal-fullscreen" Closing="OnModalClosing">
         <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
             <ModalHeader>
                 <ModalTitle>
-                    @if (ViewMode)
+                    @if (ViewMode || ParentDbContext != null)
                     {
                         <span>@Title</span>
+                        if (ParentDbContext != null)
+                        {
+                            <Button Class="base-card-top-action-button" Margin="Margin.Is2.FromLeft" Color="Color.Secondary" Clicked="HideModalAsync">@(CloseButtonText ?? @Localizer["Close"])</Button>
+                        }
                     }
                     else
                     {
                         <span>@Title</span>
-                        <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
+                        <Button Class="base-card-top-action-button" Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
                     }
                 </ModalTitle>
-                <CloseButton />
+
+                @if (ParentDbContext == null)
+                {
+                    <BaseModalCloseButton />
+                }
             </ModalHeader>
             @if (ExplainText != null && ExplainText.Location == ExplainTextLocation.Top)
             {
@@ -35,6 +43,7 @@
                           ShowActions="ShowActions"
                           ShowEntryByStart="ShowEntryByStart"
                           ComponentModelInstance="ComponentModelInstance"
+                          ParentDbContext="ParentDbContext"
                           EntryToBeShownByStart="EntryToBeShownByStart"
                           OnShowEntry="OnShowEntry"
                           AdditionalHeaderPageActions="AdditionalHeaderPageActions"
@@ -72,13 +81,13 @@
                 </ModalFooter>
             }
             <ModalFooter>
-                <Button Color="Color.Secondary" Clicked="HideModal">@Localizer["Close"]</Button>
-                @if (!ViewMode)
+                <Button Color="Color.Secondary" Clicked="HideModalAsync">@(CloseButtonText ?? @Localizer["Close"])</Button>
+                @if (!ViewMode && ParentDbContext == null)
                 {
                     <Button Color="Color.Success" Clicked="SaveModalAsync">@Localizer["Save"]</Button>
                     <Button Color="Color.Primary" Clicked="SaveAndCloseModalAsync">@Localizer["Save & Close"]</Button>
                 }
             </ModalFooter>
         </ModalContent>
-    </Modal>
+    </BaseModal>
 </div>

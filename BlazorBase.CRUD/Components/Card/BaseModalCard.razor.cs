@@ -1,7 +1,8 @@
-﻿using BlazorBase.CRUD.Components.PageActions.Models;
+﻿using BlazorBase.CRUD.Components.Modals;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Models;
-using BlazorBase.CRUD.ViewModels;
+using BlazorBase.CRUD.Services;
+using BlazorBase.Helper;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using Blazorise;
@@ -52,6 +53,8 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
 
     [Parameter] public string? SingleDisplayName { get; set; }
     [Parameter] public ExplainText? ExplainText { get; set; }
+    [Parameter] public string? CloseButtonText { get; set; }
+    [Parameter] public IBaseDbContext? ParentDbContext { get; set; }
     [Parameter] public bool ShowEntryByStart { get; set; }
     [Parameter] public Func<OnEntryToBeShownByStartArgs, Task<IBaseModel>>? EntryToBeShownByStart { get; set; }
     [Parameter] public TModel? ComponentModelInstance { get; set; }
@@ -71,7 +74,7 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     #endregion
 
     #region Member
-    protected Modal? Modal = null;
+    protected BaseModal? Modal = null;
     protected BaseCard<TModel>? BaseCard = null;
     protected bool ContinueByUnsavedChanges = false;
     protected bool ViewMode = false;
@@ -89,6 +92,14 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
             SingleDisplayName = ModelLocalizer[SingleDisplayName];
 
         return base.OnInitializedAsync();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && ShowEntryByStart)
+            Modal?.Show();
+
+        base.OnAfterRender(firstRender);
     }
 
     #endregion
@@ -115,23 +126,42 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
     public async Task SaveAndCloseModalAsync()
     {
         if (await SaveModalAsync())
-            HideModal();
+            await HideModalAsync();
     }
 
-    public void HideModal()
+    public Task HideModalAsync()
     {
-        Modal?.Hide();
+        if (Modal == null)
+            return Task.CompletedTask;
+
+        return Modal.HideAsync();
     }
 
-    public async Task OnModalClosing(ModalClosingEventArgs args)
+    protected async Task OnModalClosing(ModalClosingEventArgs args)
     {
-        if (!ContinueByUnsavedChanges && await HasUnsavedChangesAsync())
+        if (BaseCard == null)
         {
+            await OnCardClosed.InvokeAsync(null);
+            return;
+        }
+
+        var cardIsValid = await BaseCard.CardIsValidAsync(); // Trigger validation and also get all changed informations from inputs to the model
+        if (ParentDbContext == null)
+        {
+            if (!ContinueByUnsavedChanges && await HasUnsavedChangesAsync())
+            {
+                args.Cancel = true;
+                return;
+            }
+        }
+        else if (!cardIsValid)
+        {
+            _ = InvokeAsync(StateHasChanged);
             args.Cancel = true;
             return;
         }
 
-        BaseCard?.ResetCard();
+        BaseCard.ResetCard();
         await OnCardClosed.InvokeAsync(null);
     }
 
@@ -150,20 +180,18 @@ public partial class BaseModalCard<TModel> where TModel : class, IBaseModel, new
             confirmButtonColor: Color.Secondary,
             abortButtonText: Localizer["Abort"],
             abortButtonColor: Color.Primary,
-            onClosing: (closingArgs, result) => UserHandleUnsavedChangesConfirmDialog(result));
+            onClosing: (closingArgs, result) => UserHandleUnsavedChangesConfirmDialogAsync(result));
 
         return true;
     }
 
-    protected virtual Task UserHandleUnsavedChangesConfirmDialog(ConfirmDialogResult result)
+    protected virtual async Task UserHandleUnsavedChangesConfirmDialogAsync(ConfirmDialogResult result)
     {
         if (result == ConfirmDialogResult.Aborted)
-            return Task.CompletedTask;
+            return;
 
         ContinueByUnsavedChanges = true;
-        HideModal();
-
-        return Task.CompletedTask;
+        await HideModalAsync();
     }
 
     protected virtual void OnTitleCalculated(string title)

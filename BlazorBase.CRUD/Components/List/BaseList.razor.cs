@@ -271,10 +271,12 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
         }   
     }
 
-    public virtual void HideCardModal()
+    public virtual Task HideCardModalAsync()
     {
         if (BaseModalCard != null)
-            BaseModalCard.HideModal();
+            return BaseModalCard.HideModalAsync();
+
+        return Task.CompletedTask;
     }
 
 

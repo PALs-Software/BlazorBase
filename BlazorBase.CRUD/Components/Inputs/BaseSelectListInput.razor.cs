@@ -120,11 +120,19 @@ public partial class BaseSelectListInput : BaseInput
         }
 
         for (int i = 0; i < primaryKeys.Length; i++)
-            primaryKeys[i] = Convert.ChangeType(primaryKeys[i], ForeignKeyProperties[i].PropertyType, CultureInfo.InvariantCulture);
+            primaryKeys[i] = ChangeInputType(primaryKeys[i], ForeignKeyProperties[i].PropertyType);
 
         var entry = await DbContext.FindAsync(ForeignKeyBaseModelType!, primaryKeys);
         await OnValueChangedAsync(entry);
         UpdateSelectedValue();
+    }
+
+    protected virtual object? ChangeInputType(object? primaryKey, Type destinationPropertyType)
+    {
+        if (destinationPropertyType == typeof(Guid))
+            return Guid.Parse(primaryKey?.ToString() ?? String.Empty);
+
+        return Convert.ChangeType(primaryKey, destinationPropertyType, CultureInfo.InvariantCulture);
     }
 
     protected override void Model_OnForcePropertyRepaint(object? sender, string[] propertyNames)
