@@ -17,9 +17,12 @@
                 {
                     <Addons Class="flex-nowrap">
 
-                        <Addon AddonType="AddonType.Start">
-                            <SelectList @ref="AddToComponents" SelectedValue="displayItem.FilterType" Data="@TypeFilterTypesDictionary[displayItem.DisplayPropertyType]" TItem="KeyValuePair<FilterType, string>" TValue="FilterType" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (newValue) => await FilterTypeChangedAsync(displayItem, newValue)" />
-                        </Addon>
+                        @if (!HideListFilterTypes)
+                        {
+                            <Addon AddonType="AddonType.Start">
+                                <SelectList @ref="AddToComponents" SelectedValue="displayItem.FilterType" Data="@TypeFilterTypesDictionary[displayItem.DisplayPropertyType]" TItem="KeyValuePair<FilterType, string>" TValue="FilterType" TextField="(item) => item.Value" ValueField="(item) => item.Key" SelectedValueChanged="async (newValue) => await FilterTypeChangedAsync(displayItem, newValue)" />
+                            </Addon>
+                        }                        
 
                         @if (displayItem.DisplayPropertyType == typeof(string) || TypeHelper.NumericTypes.Contains(displayItem.DisplayPropertyType))
                         {

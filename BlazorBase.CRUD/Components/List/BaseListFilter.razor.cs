@@ -28,6 +28,9 @@ public partial class BaseListFilter : BaseDisplayComponent
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
     [Parameter] public string? Class { get; set; }
+
+    [Parameter] public bool HideListFilterTypes { get; set; } = false;
+    
     #endregion
 
     #region Injects

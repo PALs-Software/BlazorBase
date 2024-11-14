@@ -123,7 +123,7 @@ public static class IQueryableExtension
                     filterValue = filterValue?.ToString();
                     Thread.CurrentThread.CurrentCulture = savedCulture;
                 }
-               
+
                 if (useEfFilters)
                 {
                     var propertyAsObject = Expression.Convert(property, typeof(object));
@@ -134,7 +134,10 @@ public static class IQueryableExtension
                 }
                 else
                 {
-                    var propertyAsString = Expression.Call(property, ToStringMethodInfo);
+                    var propertyAsString = Expression.Condition(Expression.Equal(property, Expression.Constant(null)),
+                        Expression.Constant(String.Empty),
+                        Expression.Call(property, ToStringMethodInfo)
+                     );
 
                     List<Expression> partExpressions = new();
                     foreach (var filterPart in ((string)filterValue!).Split(" "))
@@ -165,7 +168,7 @@ public static class IQueryableExtension
             case FilterType.Greater:
                 body = Expression.GreaterThan(property, constant!);
                 break;
-            case FilterType.NotGreater:                    
+            case FilterType.NotGreater:
                 body = Expression.Not(Expression.GreaterThan(property, constant!));
                 break;
             case FilterType.GreaterOrEqual:

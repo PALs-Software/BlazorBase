@@ -2,6 +2,7 @@
 @using BlazorBase.CRUD.Models
 @using Blazorise.Icons.FontAwesome
 @using BlazorBase.CRUD.Attributes
+@using System.ComponentModel.DataAnnotations
 
 @typeparam TModel
 @inherits BaseGenericList<TModel>
@@ -44,7 +45,7 @@
                 {
                     @foreach (var displayItem in displayGroup.Value.DisplayItems.Where(p => !p.IsListProperty))
                     {
-                        <th class="base-list-table-header-column @displayItem.CustomizationClasses[CustomizationLocation.ListHeaderCell]"
+                        <th class="base-list-table-header-column base-list-table-header-column-@displayItem.Property.Name.ToLower() @displayItem.CustomizationClasses[CustomizationLocation.ListHeaderCell]"
                     @onclick="async () => await OnSortClicked(displayItem, false)"
                     @oncontextmenu="async () => await OnSortClicked(displayItem, true)"
                     @oncontextmenu:preventDefault="true"
@@ -69,7 +70,7 @@
             </tr>
             @if (Filterable)
             {
-                <BaseListFilter ListDisplayGroups="DisplayGroups" OnFilterChanged="OnFilterChangedAsync" Class="sticky-border" />
+                <BaseListFilter ListDisplayGroups="DisplayGroups" OnFilterChanged="OnFilterChangedAsync" HideListFilterTypes="HideListFilterTypes" Class="sticky-border" />
             }
         </thead>
         <tbody>
@@ -153,6 +154,10 @@
                                                 {
                                                     <Check TValue="bool?" Checked="@((bool?) displayItem.Property.GetValue(context))" Disabled="true" ReadOnly="true" />
                                                 }
+                                            }
+                                            else if (displayItem.PresentationDataType == DataType.Html)
+                                            {
+                                                <SafeHtmlDisplay Html="@displayItem.Property.GetValue(context)?.ToString()" />
                                             }
                                             else
                                             {

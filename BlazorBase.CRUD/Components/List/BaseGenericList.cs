@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BlazorBase.CRUD.Components.List;
@@ -93,6 +94,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
 
     protected List<DisplayItem> SortedColumns = [];
     protected List<string> IncludePropertiesInListLoadQuery = [];
+    protected bool HideListFilterTypes = false;
     #endregion
 
     #region Init
@@ -115,6 +117,7 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
             .Where(entry => ((IncludeNavigationPropertyOnListLoadAttribute?)Attribute.GetCustomAttribute(entry, typeof(IncludeNavigationPropertyOnListLoadAttribute)))?.Include ?? false)
             .Select(entry => entry.Name).ToList();
 
+        HideListFilterTypes = TModelType.GetCustomAttribute<HideListFilterTypesAttribute>()?.Hide ?? false;
         SetInitalSortOfPropertyColumns();
 
         await PrepareForeignKeyProperties(DbContext, GUIType.List);

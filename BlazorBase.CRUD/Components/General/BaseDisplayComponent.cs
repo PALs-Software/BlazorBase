@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Globalization;
 using System.Linq;
@@ -306,7 +307,7 @@ namespace BlazorBase.CRUD.Components.General
         public class DisplayItem
         {
             public DisplayItem(PropertyInfo property, VisibleAttribute attribute, GUIType guiType, bool isReadonly, bool isKey, bool isListProperty,
-                DateInputMode dateInputMode, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
+                DateInputMode dateInputMode, DataType? presentationDataType, string displayPropertyPath, Type displayPropertyType, bool isSortable, Enums.SortDirection sortDirection, bool isFilterable)
             {
                 Property = property;
                 Attribute = attribute;
@@ -315,6 +316,7 @@ namespace BlazorBase.CRUD.Components.General
                 IsKey = isKey;
                 IsListProperty = isListProperty;
                 DateInputMode = dateInputMode;
+                PresentationDataType = presentationDataType;
                 DisplayPropertyPath = displayPropertyPath;
                 DisplayPropertyType = displayPropertyType;
                 IsSortable = isSortable;
@@ -364,6 +366,7 @@ namespace BlazorBase.CRUD.Components.General
             public bool IsReadOnly { get; set; }
             public bool IsKey { get; set; }
             public bool IsListProperty { get; set; }
+            public DataType? PresentationDataType { get; set; }
             public DateInputMode DateInputMode { get; set; }
             public Enums.SortDirection SortDirection { get; set; }
             public FilterType FilterType { get; set; }
@@ -389,6 +392,7 @@ namespace BlazorBase.CRUD.Components.General
 
                 attribute.DisplayGroup = String.IsNullOrEmpty(attribute.DisplayGroup) ? defaultDisplayGroup : attribute.DisplayGroup;
                 var dateInputMode = property.GetCustomAttribute<DateDisplayModeAttribute>()?.DateInputMode ?? DateInputMode.Date;
+                var presentationDataType = property.GetCustomAttribute<DataTypeAttribute>()?.DataType;
                 var customPropertyPath = property.GetCustomAttribute<CustomSortAndFilterPropertyPathAttribute>();
                 var defaultListFilter = property.GetCustomAttribute<DefaultListFilterAttribute>();
 
@@ -398,7 +402,7 @@ namespace BlazorBase.CRUD.Components.General
                     if (foreignKey != null && foreignKey.Name.Contains(",")) // Reference has more than one primary key
                     {
                         return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(guiType, userRoles),
-                                property.IsKey(), property.IsListProperty(), dateInputMode,
+                                property.IsKey(), property.IsListProperty(), dateInputMode, presentationDataType,
                                 property.Name, property.PropertyType,
                                 false, attribute.SortDirection, false)
                         { FilterType = defaultListFilter?.Type ?? FilterType.Like, FilterValue = defaultListFilter?.Value };
@@ -419,7 +423,7 @@ namespace BlazorBase.CRUD.Components.General
                 }
 
                 return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(guiType, userRoles),
-                    property.IsKey(), property.IsListProperty(), dateInputMode,
+                    property.IsKey(), property.IsListProperty(), dateInputMode, presentationDataType,
                     displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
                     sortAndFilterable, attribute.SortDirection, sortAndFilterable)
                 { FilterType = defaultListFilter?.Type ?? FilterType.Like, FilterValue = defaultListFilter?.Value };
