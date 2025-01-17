@@ -75,6 +75,8 @@ namespace BlazorBase.CRUD.Models
         Task OnAfterUpdateEntry(OnAfterUpdateEntryArgs args);
         Task OnBeforeRemoveEntry(OnBeforeRemoveEntryArgs args);
         Task OnAfterRemoveEntry(OnAfterRemoveEntryArgs args);
+        Task OnBeforeRemoveEntryFromList(OnBeforeRemoveEntryFromListArgs args);
+        Task OnAfterRemoveEntryFromList(OnAfterRemoveEntryFromListArgs args);
         Task OnBeforeCardSaveChanges(OnBeforeCardSaveChangesArgs args);
         Task OnAfterCardSaveChanges(OnAfterCardSaveChangesArgs args);
         Task OnAfterMoveEntryUp(OnAfterMoveEntryUpArgs args);

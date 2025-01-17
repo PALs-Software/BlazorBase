@@ -424,9 +424,9 @@ public partial class BaseListPart : BaseDisplayComponent
 
         if (entry is IBaseModel newBaseEntry)
         {
-            var onBeforeRemoveEntryArgs = new OnBeforeRemoveEntryArgs(Model, false, EventServices);
-            await newBaseEntry.OnBeforeRemoveEntry(onBeforeRemoveEntryArgs);
-            if (onBeforeRemoveEntryArgs.AbortRemoving)
+            var onBeforeRemoveEntryFromListArgs = new OnBeforeRemoveEntryFromListArgs(Model, false, EventServices);
+            await newBaseEntry.OnBeforeRemoveEntryFromList(onBeforeRemoveEntryFromListArgs);
+            if (onBeforeRemoveEntryFromListArgs.AbortRemoving)
             {
                 args.Handled = true;
                 return;
@@ -441,7 +441,7 @@ public partial class BaseListPart : BaseDisplayComponent
         await Model.OnAfterRemoveListEntry(onAfterRemoveListEntryArgs);
 
         if (entry is IBaseModel RemovedBaseEntry)
-            await RemovedBaseEntry.OnAfterRemoveEntry(new OnAfterRemoveEntryArgs(Model, EventServices));
+            await RemovedBaseEntry.OnAfterRemoveEntryFromList(new OnAfterRemoveEntryFromListArgs(Model, EventServices));
     }
 
     protected async Task OnAfterMoveListEntryUpAsync(object entry)

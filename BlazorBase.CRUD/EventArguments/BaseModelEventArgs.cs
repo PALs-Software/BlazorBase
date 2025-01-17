@@ -71,6 +71,12 @@ namespace BlazorBase.CRUD.EventArguments
         public bool AbortRemoving { get; set; }
     }
     public record OnAfterRemoveEntryArgs(IBaseModel Model, EventServices EventServices);
+    public record OnBeforeRemoveEntryFromListArgs(IBaseModel Model, EventServices EventServices)
+    {
+        public OnBeforeRemoveEntryFromListArgs(IBaseModel model, bool abortRemoving, EventServices eventServices) : this(model, eventServices) => AbortRemoving = abortRemoving;
+        public bool AbortRemoving { get; set; }
+    }
+    public record OnAfterRemoveEntryFromListArgs(IBaseModel Model, EventServices EventServices);
     public record OnBeforeCardSaveChangesArgs(IBaseModel Model, bool IsNavigationProperty, EventServices EventServices);
     public record OnAfterCardSaveChangesArgs(IBaseModel Model, bool IsNavigationProperty, EventServices EventServices);
     public record OnAfterMoveEntryUpArgs(IBaseModel Model, EventServices EventServices);
