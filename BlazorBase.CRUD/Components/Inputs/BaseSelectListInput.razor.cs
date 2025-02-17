@@ -149,10 +149,13 @@ public partial class BaseSelectListInput : BaseInput
 
     protected virtual string GetReadOnlyDisplayText()
     {
-        var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == SelectedValue);
+        var selectedValue = SelectedValue;
+        if (selectedValue == "[null]")
+            selectedValue = null;
 
+        var foreignKeyPair = Data.FirstOrDefault(entry => entry.Key == selectedValue);
         if (foreignKeyPair.Equals(default(KeyValuePair<string, string>)))
-            return SelectedValue ?? String.Empty;
+            return selectedValue ?? String.Empty;
         else
             return foreignKeyPair.Value?.ToString() ?? String.Empty;
     }
