@@ -28,6 +28,7 @@ public static class BaseMarkupStringValidator
         input = AllowHtmlTag(input, "b");
         input = AllowHtmlTag(input, "span");
         input = AllowHtmlTag(input, "p");
+        input = AllowHtmlTag(input, "img");
 
         if (input.Contains("&lt;h"))
             for (int i = 1; i <= 6; i++)
