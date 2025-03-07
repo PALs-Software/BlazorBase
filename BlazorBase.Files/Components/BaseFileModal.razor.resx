@@ -117,46 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Email" xml:space="preserve">
-    <value>E-Mail</value>
+  <data name="Download" xml:space="preserve">
+    <value>Download</value>
   </data>
-  <data name="IdentityRole" xml:space="preserve">
-    <value>Role</value>
-  </data>
-  <data name="Reset Password" xml:space="preserve">
-    <value>Reset Password</value>
-  </data>
-  <data name="Send account setup email" xml:space="preserve">
-    <value>Send account setup email</value>
-  </data>
-  <data name="Sending e-mail..." xml:space="preserve">
-    <value>Sending e-mail...</value>
-  </data>
-  <data name="Sends the user an email to reset the password" xml:space="preserve">
-    <value>Sends the user an email to reset the password</value>
-  </data>
-  <data name="Sends the user an email to set up his account with an password" xml:space="preserve">
-    <value>Sends the user an email to set up his account with an password</value>
-  </data>
-  <data name="Setup email" xml:space="preserve">
-    <value>Setup email</value>
-  </data>
-  <data name="The password reset email was sent successfully" xml:space="preserve">
-    <value>The password reset email was sent successfully</value>
-  </data>
-  <data name="The setup email was sent successfully" xml:space="preserve">
-    <value>The setup email was sent successfully</value>
-  </data>
-  <data name="The user card cannot be saved to call actions: {0}" xml:space="preserve">
-    <value>The user card cannot be saved to call actions: {0}</value>
-  </data>
-  <data name="User" xml:space="preserve">
-    <value>User</value>
-  </data>
-  <data name="UserName" xml:space="preserve">
-    <value>Username</value>
-  </data>
-  <data name="User_Plural" xml:space="preserve">
-    <value>Users</value>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
   </data>
 </root>

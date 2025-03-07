@@ -21,4 +21,10 @@
     <ProjectReference Include="..\BlazorBase\BlazorBase.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Update="Services\BackupWebsiteService.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+
 </Project>

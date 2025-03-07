@@ -117,6 +117,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Background job &quot;{0}&quot; executed" xml:space="preserve">
+    <value>Background job "{0}" executed</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Last Errors" xml:space="preserve">
+    <value>Last Errors</value>
+  </data>
   <data name="LastRuntime" xml:space="preserve">
     <value>Last Runtime</value>
   </data>
@@ -129,10 +138,22 @@
   <data name="NextRuntime" xml:space="preserve">
     <value>Next Runtime</value>
   </data>
+  <data name="No recurring background job is selected" xml:space="preserve">
+    <value>No recurring background job is selected</value>
+  </data>
   <data name="RecurringBackgroundJobEntry" xml:space="preserve">
     <value>Recurring Background Job</value>
   </data>
   <data name="RecurringBackgroundJobEntry_Plural" xml:space="preserve">
     <value>Recurring Background Jobs</value>
+  </data>
+  <data name="Run Job Manually" xml:space="preserve">
+    <value>Run Job Manually</value>
+  </data>
+  <data name="Runs the recurring background job manually." xml:space="preserve">
+    <value>Runs the recurring background job manually.</value>
+  </data>
+  <data name="The background job &quot;{0}&quot; ran successfully." xml:space="preserve">
+    <value>The background job "{0}" ran successfully.</value>
   </data>
 </root>
