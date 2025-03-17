@@ -194,6 +194,12 @@ public partial class BaseGenericList<TModel> : BaseDisplayComponent where TModel
         }
     }
 
+    protected override async Task OnPageActionInvokedAsync(Exception e)
+    {
+        await base.OnPageActionInvokedAsync(e);
+        await RefreshDataAsync();
+    }
+
     #endregion
 
     #endregion
