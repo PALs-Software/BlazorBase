@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace BlazorBase.Restore;
 
@@ -10,9 +10,16 @@ public class AppSettings
 
     public static AppSettings? LoadAppSettings(string projectPath)
     {
-        var appSettingsPath = Path.Join(Path.GetDirectoryName(projectPath), "appsettings.json");
-        var appSettingsJson = File.ReadAllText(appSettingsPath);
-        return JsonConvert.DeserializeObject<AppSettings>(appSettingsJson);
+        var basePath = Path.GetDirectoryName(projectPath);
+        if (String.IsNullOrEmpty(basePath))
+            return null;
+
+        var configurationBuilder = new ConfigurationBuilder()
+            .SetBasePath(basePath)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+            .AddJsonFile("appsettings.User.json", optional: true, reloadOnChange: false);
+
+        return configurationBuilder.Build().Get<AppSettings?>();
     }
 }
 

@@ -137,11 +137,30 @@ public class RestoreService
         Console.WriteLine($"Restore database {dbName} from backup {bakPath}");
 
         using var connection = new SqlConnection(sqlConnectionStringBuilder.ConnectionString);
-        var query = $"RESTORE DATABASE {dbName} FROM DISK='{bakPath}' WITH REPLACE";
-
-        using var command = new SqlCommand(query, connection);
-        command.CommandTimeout = 0;
         connection.Open();
+
+        GetLogicalFileNamesFromBackup(connection, bakPath, out var logicalDbName, out var logicalLogName);
+        GetDatabasePaths(connection, dbName, out var dbPath, out var logPath);
+
+        if (String.IsNullOrEmpty(logicalDbName) || String.IsNullOrEmpty(logicalLogName))
+        {
+            Console.WriteLine($"ERROR: Can not get logical db and log name of the backup...");
+            return;
+        }
+        if (String.IsNullOrEmpty(dbPath) || String.IsNullOrEmpty(logPath))
+        {
+            Console.WriteLine($"ERROR: Can not get db and log path of current existing database...");
+            return;
+        }
+
+        var query = $@"
+            RESTORE DATABASE {dbName} 
+            FROM DISK = '{bakPath}' 
+            WITH REPLACE, 
+            MOVE '{logicalDbName}' TO '{dbPath}', 
+            MOVE '{logicalLogName}' TO '{logPath}';";
+
+        using var command = new SqlCommand(query, connection) { CommandTimeout = 0 };
         var result = command.ExecuteNonQuery();
         Console.WriteLine($"Restore database result: {result}");
 
@@ -154,4 +173,48 @@ public class RestoreService
         File.Delete(bakPath);
     }
 
+    protected virtual void GetLogicalFileNamesFromBackup(SqlConnection connection, string bakPath, out string? logicalDbName, out string? logicalLogName)
+    {
+        logicalDbName = null;
+        logicalLogName = null;
+
+        var query = $@"RESTORE FILELISTONLY FROM DISK = '{bakPath}';";
+
+        using var command = new SqlCommand(query, connection) { CommandTimeout = 0 };
+        using SqlDataReader reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var physicalName = reader["PhysicalName"].ToString() ?? String.Empty;
+
+            if (physicalName.EndsWith(".mdf"))
+                logicalDbName = reader["LogicalName"].ToString();
+            else if (physicalName.EndsWith(".ldf"))
+                logicalLogName = reader["LogicalName"].ToString();
+        }
+    }
+
+    protected virtual void GetDatabasePaths(SqlConnection connection, string databaseName, out string? dbPath, out string? logPath)
+    {
+        dbPath = null;
+        logPath = null;
+
+        string query = $@"
+                SELECT mf.physical_name AS PhysicalName
+                FROM sys.master_files mf
+                WHERE mf.database_id = DB_ID('{databaseName}');";
+
+        using var command = new SqlCommand(query, connection) { CommandTimeout = 0 };
+        using SqlDataReader reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var physicalName = reader["PhysicalName"].ToString() ?? String.Empty;
+
+            if (physicalName.EndsWith(".mdf"))
+                dbPath = physicalName;
+            else if (physicalName.EndsWith(".ldf"))
+                logPath = physicalName;
+        }
+    }
 }

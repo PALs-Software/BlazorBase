@@ -84,6 +84,7 @@ public partial class BaseSelectListInput : BaseInput
     {
         if (IsReadOnly)
             ReadOnlyDisplayValue = GetReadOnlyDisplayText();
+        UpdateSelectedValue();
 
         base.OnParametersSet();
     }
