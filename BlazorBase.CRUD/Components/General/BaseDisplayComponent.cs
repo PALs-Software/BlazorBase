@@ -57,6 +57,11 @@ namespace BlazorBase.CRUD.Components.General
         protected bool ShowInvalidFeedback = false;
         #endregion
 
+        public void InvokeStateHasChanged()
+        {
+            InvokeAsync(StateHasChanged);
+        }
+
         protected virtual async Task<List<PropertyInfo>> GetVisiblePropertiesAsync(Type modelType, GUIType guiType, List<string> userRoles, IBaseModel? componentModelInstance = null)
         {
             List<PropertyInfo> visibleProperties;
