@@ -56,9 +56,12 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var entry in Entries)
-            {
-                var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
+            <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
+                @{
+                    var entry = context;
+                    var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
+                }
+
                 <tr @key="entry" @onclick="() => OnRowSelected(entry)" class="@(entry == SelectedEntry ? "base-list-part-row-selected" : "")">
                     <td class="base-list-part-row-buttons text-center">
                         @if (!IsReadOnly)
@@ -140,7 +143,7 @@
                     }
                     <td class="bottom-border-line" />
                 </tr>
-            }
+            </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
         </tbody>
     </table>
 

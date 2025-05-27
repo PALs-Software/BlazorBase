@@ -1,32 +1,30 @@
 ﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.SelectList;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.CRUD.Components.Inputs;
-using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 using Microsoft.AspNetCore.Components;
-using System;
-using BlazorBase.MessageHandling.Interfaces;
-using Microsoft.Extensions.Localization;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Collections;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
+using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.Services;
-using BlazorBase.CRUD.Components.Card;
-using System.Reflection.Metadata.Ecma335;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 
 namespace BlazorBase.CRUD.Components.List;
 
@@ -77,6 +75,7 @@ public partial class BaseListPart : BaseDisplayComponent
 
     protected RenderFragment? CardModalEdit { get; set; } = null;
 
+    protected Virtualize<object>? VirtualizeList = null!;
     #region Property Infos
 
     protected bool IsReadOnly;
@@ -191,6 +190,27 @@ public partial class BaseListPart : BaseDisplayComponent
 
     #region CRUD
 
+    protected virtual ValueTask<ItemsProviderResult<object>> LoadListDataProviderAsync(ItemsProviderRequest request)
+    {
+        if (request.Count == 0)
+            return ValueTask.FromResult(new ItemsProviderResult<object>([], 0));
+
+        var listEntries = new List<object>();
+        for (int i = 0; i < Entries.Count; i++)
+        {
+            var entry = Entries[i];
+            if (i < request.StartIndex || entry == null)
+                continue;
+            
+            listEntries.Add(entry);
+
+            if (listEntries.Count >= request.Count)
+                break;
+        }
+
+        return ValueTask.FromResult(new ItemsProviderResult<object>(listEntries, Entries.Count));
+    }
+
     public virtual Task OnRowSelected(object entry)
     {
         if (entry == SelectedEntry)
@@ -230,6 +250,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterAddEntryAsync(newEntry);
+        await RefreshListViewAsync();
     }
 
     protected Task AddExistingEntryAsync(object? aboveEntry = null)
@@ -263,6 +284,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterAddEntryAsync(entryToAdd, callAddEventOnListEntry: false);
+        await RefreshListViewAsync();
     }
 
     protected async Task RemoveEntryAsync(object entry)
@@ -283,6 +305,7 @@ public partial class BaseListPart : BaseDisplayComponent
             entityEntry.State = EntityState.Detached;
 
         await OnAfterRemoveEntryAsync(entry);
+        await RefreshListViewAsync();
     }
 
     protected async Task MoveEntryUpAsync(object entry)
@@ -298,6 +321,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterMoveListEntryUpAsync(entry);
+        await RefreshListViewAsync();
     }
 
     protected async Task MoveEntryDownAsync(object entry)
@@ -313,6 +337,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterMoveListEntryDownAsync(entry);
+        await RefreshListViewAsync();
     }
 
     protected void SwapEntries(object entry, int currentIndex, int targetIndex)
@@ -543,6 +568,14 @@ public partial class BaseListPart : BaseDisplayComponent
             return isInAddingMode;
 
         return false;
+    }
+
+    public virtual Task RefreshListViewAsync()
+    {
+        if (VirtualizeList == null)
+            return Task.CompletedTask;
+
+        return VirtualizeList.RefreshDataAsync();
     }
     #endregion
 }
