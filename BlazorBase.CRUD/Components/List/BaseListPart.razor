@@ -10,7 +10,7 @@
                              Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
                              OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
 
-    <table class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
+    <table id="@Id" class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
         <thead class="base-list-part-table-header">
             <tr>
                 <th class="root-base-list-part-table-header-item" colspan="100">
@@ -56,7 +56,7 @@
             </tr>
         </thead>
         <tbody>
-            <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="10">
+            <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="30">
                 @{
                     var entry = context;
                     var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);

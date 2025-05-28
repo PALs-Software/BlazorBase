@@ -1,17 +1,17 @@
-class blazorbaseDataListInput {
+class BlazorbaseDataListInput {
     static dotNetReferences = new Object();
     static listActive;
 
     static init(id, dotNetReference, resetValueAfterSelection) {
-        document.getElementById(id).addEventListener('focusin', blazorbaseDataListInput.listShow);
-        document.getElementById(id).addEventListener('focusout', blazorbaseDataListInput.onFocusOut);
+        document.getElementById(id).addEventListener('focusin', BlazorbaseDataListInput.listShow);
+        document.getElementById(id).addEventListener('focusout', BlazorbaseDataListInput.onFocusOut);
 
-        blazorbaseDataListInput.dotNetReferences[id] = { dotNetReference: dotNetReference, resetValueAfterSelection: resetValueAfterSelection, isSelfNavigating: false };
+        BlazorbaseDataListInput.dotNetReferences[id] = { dotNetReference: dotNetReference, resetValueAfterSelection: resetValueAfterSelection, isSelfNavigating: false };
     }
 
     static listShow(e) {
 
-        const input = blazorbaseDataListInput.target(e);
+        const input = BlazorbaseDataListInput.target(e);
         if (!input) return;
 
         if (input.list) {
@@ -25,21 +25,21 @@ class blazorbaseDataListInput {
             dl.setAttribute('tabindex', -1);
 
             // event handlers
-            input.addEventListener('input', blazorbaseDataListInput.listLimit);
-            input.addEventListener('keydown', blazorbaseDataListInput.listControl);
-            dl.addEventListener('keydown', blazorbaseDataListInput.listKey);
-            dl.addEventListener('click', blazorbaseDataListInput.listSet);
-            dl.addEventListener('focusout', blazorbaseDataListInput.onFocusOut);
+            input.addEventListener('input', BlazorbaseDataListInput.listLimit);
+            input.addEventListener('keydown', BlazorbaseDataListInput.listControl);
+            dl.addEventListener('keydown', BlazorbaseDataListInput.listKey);
+            dl.addEventListener('click', BlazorbaseDataListInput.listSet);
+            dl.addEventListener('focusout', BlazorbaseDataListInput.onFocusOut);
         }
 
         // show datalist
         const dl = input.datalist;
         if (dl && !dl.shown) {
 
-            blazorbaseDataListInput.listHide(blazorbaseDataListInput.listActive);
+            BlazorbaseDataListInput.listHide(BlazorbaseDataListInput.listActive);
 
             dl.shown = true;
-            blazorbaseDataListInput.listLimit(e);
+            BlazorbaseDataListInput.listLimit(e);
             if (input.offsetWidth < 230)
                 dl.style.width = '230px';
             else
@@ -47,14 +47,14 @@ class blazorbaseDataListInput {
 
             dl.style.left = input.offsetLeft + 'px';
             dl.style.display = 'block';
-            blazorbaseDataListInput.listActive = dl;
+            BlazorbaseDataListInput.listActive = dl;
 
         }
 
     }
 
     static onFocusOut(e) {
-        const element = blazorbaseDataListInput.target(e);
+        const element = BlazorbaseDataListInput.target(e);
         if (!element)
             return;
 
@@ -72,8 +72,8 @@ class blazorbaseDataListInput {
             return;
         }
 
-        if (blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating) {
-            blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating = false;
+        if (BlazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating) {
+            BlazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating = false;
             return;
         }
 
@@ -86,7 +86,7 @@ class blazorbaseDataListInput {
                 ))
                 return;
 
-            blazorbaseDataListInput.listHide(input.datalist);
+            BlazorbaseDataListInput.listHide(input.datalist);
         }, 2);
     }
 
@@ -103,17 +103,17 @@ class blazorbaseDataListInput {
     // enable valid and disable invalid options
     static listLimit(e) {
 
-        const input = blazorbaseDataListInput.target(e);
+        const input = BlazorbaseDataListInput.target(e);
         if (!input || !input.datalist) return;
 
         if (!input.datalist.shown)
-            blazorbaseDataListInput.listShow({ target: input });
+            BlazorbaseDataListInput.listShow({ target: input });
 
         const v = input.value.trim().toLowerCase();
         const valueArr = v.split(' ');
         Array.from(input.datalist.getElementsByTagName('option')).forEach(opt => {
             opt.setAttribute('tabindex', 0);
-            opt.style.display = !v || blazorbaseDataListInput.valueContainsAllSearchArrValues(valueArr, opt.getAttribute('label').toLowerCase()) ? 'block' : 'none';
+            opt.style.display = !v || BlazorbaseDataListInput.valueContainsAllSearchArrValues(valueArr, opt.getAttribute('label').toLowerCase()) ? 'block' : 'none';
         });
 
     }
@@ -130,7 +130,7 @@ class blazorbaseDataListInput {
     // key event on input
     static listControl(e) {
 
-        const input = blazorbaseDataListInput.target(e);
+        const input = BlazorbaseDataListInput.target(e);
         if (!input || !input.datalist) return;
 
         switch (e.keyCode) {
@@ -138,24 +138,24 @@ class blazorbaseDataListInput {
             case 40: {
                 // arrow down
                 let opt = input.datalist.firstElementChild;
-                if (!opt.offsetHeight) opt = blazorbaseDataListInput.visibleSibling(opt, 1);
+                if (!opt.offsetHeight) opt = BlazorbaseDataListInput.visibleSibling(opt, 1);
                 if (opt) {
-                    blazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating = true;
+                    BlazorbaseDataListInput.dotNetReferences[input.id].isSelfNavigating = true;
                     opt.focus();
                 }
                 break;
             }
 
             case 9:   // tab
-                blazorbaseDataListInput.listHide(input.datalist);
+                BlazorbaseDataListInput.listHide(input.datalist);
                 break;
 
             case 13:  // enter
-                blazorbaseDataListInput.listSet(e);
+                BlazorbaseDataListInput.listSet(e);
                 break;
 
             case 27:  // esc
-                blazorbaseDataListInput.listHide(input.datalist);
+                BlazorbaseDataListInput.listHide(input.datalist);
                 break;
 
         }
@@ -171,19 +171,19 @@ class blazorbaseDataListInput {
     };
 
     static listKey(e) {
-        const t = blazorbaseDataListInput.target(e);
+        const t = BlazorbaseDataListInput.target(e);
         if (!t) return;
 
         const
             kc = e.keyCode,
-            dir = blazorbaseDataListInput.keymap[kc],
+            dir = BlazorbaseDataListInput.keymap[kc],
             dl = t.parentElement;
 
         if (dir) {
             // move through list
-            let opt = blazorbaseDataListInput.visibleSibling(t, dir);
+            let opt = BlazorbaseDataListInput.visibleSibling(t, dir);
             if (opt) {
-                blazorbaseDataListInput.dotNetReferences[dl.input.id].isSelfNavigating = true;
+                BlazorbaseDataListInput.dotNetReferences[dl.input.id].isSelfNavigating = true;
                 opt.focus();
             }
             e.preventDefault();
@@ -192,7 +192,7 @@ class blazorbaseDataListInput {
         else if (kc === 9 || kc === 13 || kc === 32) {
 
             // tab, enter, space: use value
-            blazorbaseDataListInput.listSet(e);
+            BlazorbaseDataListInput.listSet(e);
 
         }
         else if (kc === 8) {
@@ -204,7 +204,7 @@ class blazorbaseDataListInput {
         else if (kc === 27) {
 
             // esc: hide list
-            blazorbaseDataListInput.listHide(dl);
+            BlazorbaseDataListInput.listHide(dl);
 
         }
     }
@@ -236,7 +236,7 @@ class blazorbaseDataListInput {
 
     // set datalist option to input value
     static async listSet(e) {
-        let t = blazorbaseDataListInput.target(e);
+        let t = BlazorbaseDataListInput.target(e);
         let dl = t && t.parentElement;
         let input = dl.input;
 
@@ -245,7 +245,7 @@ class blazorbaseDataListInput {
             const v = t.value.trim().toLowerCase();
             const valueArr = v.split(' ');
             let firstOpenOption = Array.from(t.datalist.getElementsByTagName('option')).find(opt => {
-                return blazorbaseDataListInput.valueContainsAllSearchArrValues(valueArr, opt.getAttribute('label').toLowerCase())
+                return BlazorbaseDataListInput.valueContainsAllSearchArrValues(valueArr, opt.getAttribute('label').toLowerCase())
             });
 
             if (!firstOpenOption)
@@ -258,10 +258,10 @@ class blazorbaseDataListInput {
 
         input.value = (t && t.getAttribute('label')) || '';
         input.setAttribute('data-value', (t && t.value) || '');
-        await blazorbaseDataListInput.dotNetReferences[input.id].dotNetReference.invokeMethodAsync('ValueChanged', (t && t.value) || '');
-        blazorbaseDataListInput.listHide(dl);
+        await BlazorbaseDataListInput.dotNetReferences[input.id].dotNetReference.invokeMethodAsync('ValueChanged', (t && t.value) || '');
+        BlazorbaseDataListInput.listHide(dl);
 
-        if (blazorbaseDataListInput.dotNetReferences[input.id].resetValueAfterSelection) {
+        if (BlazorbaseDataListInput.dotNetReferences[input.id].resetValueAfterSelection) {
             input.value = '';
         }
     }
@@ -272,6 +272,136 @@ class blazorbaseDataListInput {
     }
 }
 
+class InputVisibilityObserver {
+    constructor(containerId) {
+        this.containerId = containerId;
+        this.container = null;
+        this.intersectionObserver = null;
+        this.mutationObserver = null;
+        this.observedInputs = new WeakSet();
+    }
+
+    start() {
+        this.container = document.getElementById(this.containerId);
+        if (!this.container) {
+            console.warn('Container not found with selector:', this.tableSelector);
+            return;
+        }
+
+        this.intersectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const input = entry.target;
+                if (!entry.isIntersecting && document.activeElement === input)
+                    input.blur();
+            });
+        }, {
+            root: null,
+            threshold: 0.01,
+        });
+
+        this.observeExistingInputs();
+
+        this.mutationObserver = new MutationObserver((mutations) => {
+            mutations.forEach(mutation => {
+                this.handleRemovedNodes(mutation.removedNodes);
+                this.handleAddedNodes(mutation.addedNodes);
+            });
+        });
+
+        this.mutationObserver.observe(this.container, {
+            childList: true,
+            subtree: true,
+        });
+    }
+
+    observeExistingInputs() {
+        const inputs = this.container.querySelectorAll('input');
+        inputs.forEach(input => {
+            if (!this.observedInputs.has(input)) {
+                this.intersectionObserver.observe(input);
+                this.observedInputs.add(input);
+            }
+        });
+    }
+
+    handleAddedNodes(nodes) {
+        nodes.forEach(node => {
+            if (node.nodeType !== 1) return; // not an element
+            if (node.tagName === 'INPUT') {
+                if (!this.observedInputs.has(node)) {
+                    this.intersectionObserver.observe(node);
+                    this.observedInputs.add(node);
+                }
+            } else {
+                node.querySelectorAll?.('input')?.forEach(input => {
+                    if (!this.observedInputs.has(input)) {
+                        this.intersectionObserver.observe(input);
+                        this.observedInputs.add(input);
+                    }
+                });
+            }
+        });
+    }
+
+    handleRemovedNodes(nodes) {
+        nodes.forEach(node => {
+            if (node.nodeType !== 1) return; // not an element
+            if (node.tagName === 'INPUT') {
+                this.intersectionObserver.unobserve(node);
+                this.observedInputs.delete(node);
+            } else {
+                node.querySelectorAll?.('input')?.forEach(input => {
+                    this.intersectionObserver.unobserve(input);
+                    this.observedInputs.delete(input);
+                });
+            }
+        });
+    }
+
+    stop() {
+        if (this.intersectionObserver) {
+            if (this.container) {
+                this.container.querySelectorAll('input').forEach(input => {
+                    this.intersectionObserver.unobserve(input);
+                });
+            }
+            this.intersectionObserver.disconnect();
+            this.intersectionObserver = null;
+        }
+
+        if (this.mutationObserver) {
+            this.mutationObserver.disconnect();
+            this.mutationObserver = null;
+        }
+
+        this.observedInputs = new WeakSet();
+        this.container = null;
+    }
+}
+
 window.blazorBase.crud = {
-    blazorbaseDataListInput: blazorbaseDataListInput
+    blazorbaseDataListInput: BlazorbaseDataListInput,
+    inputVisibilityObserver: {
+        observers: {},
+
+        createObserver: (id, containerId) => {
+            const observers = window.blazorBase.crud.inputVisibilityObserver.observers;
+
+            if (observers[id]) {
+                console.warn(`Observer with id '${id}' already exists.`);
+                return;
+            }
+
+            observers[id] = new InputVisibilityObserver(containerId);
+            observers[id]?.start();
+        },
+
+        deleteObserver: (id) => {
+            const observers = window.blazorBase.crud.inputVisibilityObserver.observers;
+            if (observers[id]) {
+                observers[id].stop();
+                delete observers[id];
+            }
+        }
+    }
 };
