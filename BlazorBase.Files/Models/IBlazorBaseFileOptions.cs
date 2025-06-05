@@ -10,5 +10,5 @@ public interface IBlazorBaseFileOptions : IBaseOptions
     uint DeleteTemporaryFilesOlderThanXSeconds { get; set; }
 
     bool UseImageThumbnails { get; set; }
-    int ImageThumbnailSize { get; set; }
+    uint ImageThumbnailSize { get; set; }
 }

@@ -261,6 +261,7 @@ public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider
             Port = MailingOptions.Port,
             EnableSsl = MailingOptions.EnableSSL,
         };
+
         if (!MailingOptions.UseDefaultCredentials)
             client.Credentials = new NetworkCredential(MailingOptions.Host, MailingOptions.HostPassword, MailingOptions.Domain);
 

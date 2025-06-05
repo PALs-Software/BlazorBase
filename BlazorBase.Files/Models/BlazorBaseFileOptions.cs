@@ -26,7 +26,7 @@ public class BlazorBaseFileOptions : IBlazorBaseFileOptions
     public uint DeleteTemporaryFilesOlderThanXSeconds { get; set; } = 60 * 60 * 24 * 7; // 7 days
 
     public bool UseImageThumbnails { get; set; } = true;
-    public int ImageThumbnailSize { get; set; } = 256;
+    public uint ImageThumbnailSize { get; set; } = 256;
 
     #endregion
 }

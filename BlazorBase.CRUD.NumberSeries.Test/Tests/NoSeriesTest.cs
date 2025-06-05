@@ -3,11 +3,11 @@ using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.NumberSeries.Test.Libraries;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.MessageHandling.Interfaces;
 using Bunit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace BlazorBase.CRUD.NumberSeries.Test.Tests;
@@ -44,7 +44,7 @@ public class NoSeriesTest : TestContext
     }
 
     [Fact]
-    public async void TestFirstIncreaseNo()
+    public async Task TestFirstIncreaseNo()
     {
         // Setup
         var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
@@ -62,7 +62,7 @@ public class NoSeriesTest : TestContext
     }
 
     [Fact]
-    public async void TestRealIncreaseNo()
+    public async Task TestRealIncreaseNo()
     {
         // Setup
         var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
@@ -79,7 +79,7 @@ public class NoSeriesTest : TestContext
     }
 
     [Fact]
-    public async void TestIncreaseNoUntilEnd()
+    public async Task TestIncreaseNoUntilEnd()
     {
         // Setup
         var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
@@ -97,7 +97,7 @@ public class NoSeriesTest : TestContext
     }
 
     [Fact]
-    public async void TestIncreaseNoOverEndingNo()
+    public async Task TestIncreaseNoOverEndingNo()
     {
         // Setup
         var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
@@ -113,7 +113,7 @@ public class NoSeriesTest : TestContext
     }
 
     [Fact]
-    public async void TestNoSeriesCanNotFoundException()
+    public async Task TestNoSeriesCanNotFoundException()
     {
         // Setup
         var seriesId = await NoSeriesLibrary.AddBasicNoSeriesToDbAsync(DbContext);
