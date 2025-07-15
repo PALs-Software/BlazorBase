@@ -20,7 +20,7 @@ public interface IBaseOptions
         if (dbContext == null)
             throw new Exception("No \"DbContext\" is registered in the service provider, but this service is required if you choose the option import mode \"Database\"");
 
-        var entry = dbContext.Set<T>().FirstOrDefault();
+        var entry = dbContext.Set<T>().AsNoTracking().FirstOrDefault();
 
         if (entry == null)
             return;
