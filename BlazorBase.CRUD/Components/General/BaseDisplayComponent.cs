@@ -430,7 +430,7 @@ namespace BlazorBase.CRUD.Components.General
                 return new DisplayItem(property, attribute, guiType, property.IsReadOnlyInGUI(guiType, userRoles),
                     property.IsKey(), property.IsListProperty(), dateInputMode, presentationDataType,
                     displayPathAndType.DisplayPath, displayPathAndType.DisplayType,
-                    sortAndFilterable, attribute.SortDirection, sortAndFilterable)
+                    sortAndFilterable && attribute.IsSortable, attribute.SortDirection, sortAndFilterable && attribute.IsFilterable)
                 { FilterType = defaultListFilter?.Type ?? FilterType.Like, FilterValue = defaultListFilter?.Value };
             }
         }
