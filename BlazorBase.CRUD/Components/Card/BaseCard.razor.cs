@@ -367,6 +367,10 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
 
     public async Task StateHasChangedAsync()
     {
+        foreach (var listPart in BaseListParts)
+            if (listPart != null)
+                await listPart.RefreshListViewAsync();
+
         await InvokeAsync(StateHasChanged);
     }
 
