@@ -27,14 +27,14 @@
         if (ShowActions)
         {
             <BasePageActions Source="this"
-                     BaseModel="Model"
-                     InvokeActionParameter="Model"
-                     BaseModelType="TModelType"
-                     GUIType="Enums.GUIType.Card"
-                     EventServices="EventServices"
-                     ModelLocalizer="ModelLocalizer"
-                     OnPageActionInvoked="OnPageActionInvokedAsync"
-                     AdditionalPageActions="AdditionalHeaderPageActions" />
+                             BaseModel="Model"
+                             InvokeActionParameter="Model"
+                             BaseModelType="TModelType"
+                             GUIType="Enums.GUIType.Card"
+                             EventServices="EventServices"
+                             ModelLocalizer="ModelLocalizer"
+                             OnPageActionInvoked="OnPageActionInvokedAsync"
+                             AdditionalPageActions="AdditionalHeaderPageActions" />
         }
 
         <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
@@ -61,23 +61,28 @@
                                 }
                                 else if (displayItem.IsListProperty)
                                 {
+                                    @if (IBaseModel.GetFieldHelpCaption(ModelLocalizer, displayItem, out string fieldHelpCaption))
+                                    {
+                                        <FieldHelp Class="pl-3 pr-3">@fieldHelpCaption</FieldHelp>
+                                    }
+
                                     <BaseListPart @ref="AddToBaseListParts"
-                                        Model="Model"
-                                        Property="displayItem.Property"
-                                        DbContext="DbContext"
-                                        ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
-                                        OnAfterGetVisibleProperties="OnAfterGetVisibleProperties"
-                                        OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
-                                        OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
-                                        OnBeforeAddListEntry="OnBeforeAddListEntry"
-                                        OnAfterAddListEntry="OnAfterAddListEntry"
-                                        OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
-                                        OnAfterRemoveListEntry="OnAfterRemoveListEntry"
-                                        OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
-                                        OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
-                                        OnAfterListPropertyChanged="OnAfterListPropertyChanged"
-                                        OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
-                                        OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
+                                                  Model="Model"
+                                                  Property="displayItem.Property"
+                                                  DbContext="DbContext"
+                                                  ReadOnly="displayItem.IsReadOnly || !AddingMode && displayItem.IsKey || ViewMode"
+                                                  OnAfterGetVisibleProperties="OnAfterGetVisibleProperties"
+                                                  OnAfterSetUpDisplayLists="OnAfterSetUpDisplayLists"
+                                                  OnCreateNewListEntryInstance="OnCreateNewListEntryInstance"
+                                                  OnBeforeAddListEntry="OnBeforeAddListEntry"
+                                                  OnAfterAddListEntry="OnAfterAddListEntry"
+                                                  OnBeforeRemoveListEntry="OnBeforeRemoveListEntry"
+                                                  OnAfterRemoveListEntry="OnAfterRemoveListEntry"
+                                                  OnBeforeConvertListPropertyType="OnBeforeConvertListPropertyType"
+                                                  OnBeforeListPropertyChanged="OnBeforeListPropertyChanged"
+                                                  OnAfterListPropertyChanged="OnAfterListPropertyChanged"
+                                                  OnAfterMoveListEntryUp="OnAfterMoveListEntryUp"
+                                                  OnAfterMoveListEntryDown="OnAfterMoveListEntryDown" />
                                 }
                                 else
                                 {
