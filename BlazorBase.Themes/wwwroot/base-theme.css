@@ -130,6 +130,10 @@ button.close {
         color: var(--bs-body-hover-color);
     }
 
+#components-reconnect-modal {
+    color: black !important;
+}
+
 ::-webkit-scrollbar {
     width: 10px;
 }
