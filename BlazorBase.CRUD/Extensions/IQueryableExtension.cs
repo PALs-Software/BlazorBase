@@ -134,10 +134,12 @@ public static class IQueryableExtension
                 }
                 else
                 {
-                    var propertyAsString = Expression.Condition(Expression.Equal(property, Expression.Constant(null)),
-                        Expression.Constant(String.Empty),
-                        Expression.Call(property, ToStringMethodInfo)
-                     );
+                    Expression propertyAsString;
+                    var isNullableType = Nullable.GetUnderlyingType(property.Type) != null || !property.Type.IsValueType;
+                    if (isNullableType)
+                        propertyAsString = Expression.Condition(Expression.Equal(property, Expression.Constant(null)), Expression.Constant(String.Empty), Expression.Call(property, ToStringMethodInfo));
+                    else
+                        propertyAsString = Expression.Call(property, ToStringMethodInfo);
 
                     List<Expression> partExpressions = new();
                     foreach (var filterPart in ((string)filterValue!).Split(" "))

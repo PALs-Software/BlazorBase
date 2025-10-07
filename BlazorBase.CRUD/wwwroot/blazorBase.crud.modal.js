@@ -15,6 +15,38 @@ window.blazoriseBootstrap = {
 
     modal: {
         openedModals: new Set(),
+
+        setModalBodyScrollable: (element) => {
+            const modalContent = element.querySelector('.modal-content');
+            if (!modalContent)
+                return;
+
+            const modalBody = modalContent.querySelector('.modal-body');
+            if (!modalBody)
+                return;
+
+            let totalHeight = 0;
+            Array.from(modalContent.children).forEach(child => {
+                if (!child.classList.contains('modal-body')) {
+                    totalHeight += child.offsetHeight;
+                }
+            });
+
+            modalBody.style.maxHeight = `calc(100dvh - ${totalHeight}px - 3.5rem - 10px)`;
+
+            if (!modalBody.classList.contains('overflow-auto')) {
+                modalBody.classList.add('overflow-auto');
+            }
+        },
+
+        recalculateOpenedModalsBodyMaxHeight: () => {
+            window.blazoriseBootstrap.modal.openedModals.forEach(modalId => {
+                const modalElement = document.getElementById(modalId);
+                if (modalElement)
+                    window.blazoriseBootstrap.modal.setModalBodyScrollable(modalElement);
+            });
+        },
+
         open: (element, scrollToTop) => {
             window.blazoriseBootstrap.modal.openedModals.add(element.id);
             var modals = Number(document.body.getAttribute("data-modals") || "0");
@@ -24,8 +56,9 @@ window.blazoriseBootstrap = {
             }
 
             modals += 1;
-
             document.body.setAttribute("data-modals", modals.toString());
+
+            window.blazoriseBootstrap.modal.setModalBodyScrollable(element);
 
             if (scrollToTop) {
                 element.querySelector('.modal-body').scrollTop = 0;
@@ -79,3 +112,8 @@ function mutateDOMChange(id) {
     ev.initEvent('change', true, false);
     el.dispatchEvent(ev);
 }
+
+window.addEventListener('resize', () => {
+    if (window.blazoriseBootstrap && window.blazoriseBootstrap.modal)
+        window.blazoriseBootstrap.modal.recalculateOpenedModalsBodyMaxHeight();
+});

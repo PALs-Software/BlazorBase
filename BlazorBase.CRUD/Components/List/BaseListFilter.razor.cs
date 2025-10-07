@@ -21,6 +21,7 @@ public partial class BaseListFilter : BaseDisplayComponent
     #region Parameters
     #region Events
     [Parameter] public EventCallback OnFilterChanged { get; set; }
+    [Parameter] public EventCallback OnResetAllFilters { get; set; }
     #endregion
 
     [Parameter] public Dictionary<string, DisplayGroup> ListDisplayGroups { get; set; } = new();
@@ -240,6 +241,7 @@ public partial class BaseListFilter : BaseDisplayComponent
                     displayItem.FilterValue = null;
                 }
 
+        await OnResetAllFilters.InvokeAsync();
         await OnFilterChanged.InvokeAsync();
     }
 
