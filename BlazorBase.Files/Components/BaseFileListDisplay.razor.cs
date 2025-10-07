@@ -30,6 +30,7 @@ public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDispl
     #endregion
 
     #region Member
+    protected bool DisplayFilePreview;
     protected bool DisplayShowFileButton;
     protected bool DisplayDownloadFileButton;
     protected BaseFileModal? BaseFileModal = null;
@@ -40,6 +41,8 @@ public partial class BaseFileListDisplay : ComponentBase, IBasePropertyListDispl
     {
         await base.OnInitializedAsync();
 
+        DisplayFilePreview = Property.GetCustomAttribute(typeof(HideFilePreviewAttribute)) is not HideFilePreviewAttribute hideFilePreviewAttr ||
+                                    !hideFilePreviewAttr.HideInGUITypes.Contains(IsDisplayedInGuiType);
         DisplayShowFileButton = Property.GetCustomAttribute(typeof(HideShowFileButtonAttribute)) is not HideShowFileButtonAttribute hideShowButtonAttr ||
                                     !hideShowButtonAttr.HideInGUITypes.Contains(IsDisplayedInGuiType);
         DisplayDownloadFileButton = Property.GetCustomAttribute(typeof(HideDownloadFileButtonAttribute)) is not HideDownloadFileButtonAttribute hideDownloadButtonAttr ||

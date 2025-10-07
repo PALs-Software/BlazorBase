@@ -3,21 +3,24 @@
 @if (Model != null && (Property.GetValue(Model) is IBaseFile baseFile))
 {
     <div class="blazor-base-file-list-display-container">
-        @if (baseFile.IsImage())
+        @if (DisplayFilePreview)
         {
-            <div>
-                <img @onclick="() => BaseFileModal?.Show()" src="@baseFile.GetFileLink(useThumbnailIfImage: true)" class="figure-img img-fluid rounded blazor-base-file-list-display" style="margin-bottom:0px;">
-            </div>
-        }
-        else if (baseFile.IsDocument())
-        {
-            <iframe class="blazor-base-file-list-display" src="@baseFile.GetFileLink()" allowfullscreen="allowfullscreen"></iframe>
-        }
-        else if (baseFile.IsAudio())
-        {
-            <audio controls class="blazor-base-file-list-display">
-                <source src="@baseFile.GetFileLink()" type="@baseFile.MimeFileType">
-            </audio>
+            @if (baseFile.IsImage())
+            {
+                <div>
+                    <img @onclick="() => BaseFileModal?.Show()" src="@baseFile.GetFileLink(useThumbnailIfImage: true)" class="figure-img img-fluid rounded blazor-base-file-list-display" style="margin-bottom:0px;">
+                </div>
+            }
+            else if (baseFile.IsDocument())
+            {
+                <iframe class="blazor-base-file-list-display" src="@baseFile.GetFileLink()" allowfullscreen="allowfullscreen"></iframe>
+            }
+            else if (baseFile.IsAudio())
+            {
+                <audio controls class="blazor-base-file-list-display">
+                    <source src="@baseFile.GetFileLink()" type="@baseFile.MimeFileType">
+                </audio>
+            }
         }
         <div>
             @if (DisplayShowFileButton)
