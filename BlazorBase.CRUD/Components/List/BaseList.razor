@@ -11,6 +11,8 @@
 
     <PageTitle>@PluralDisplayName | @BlazorBaseOptions.ShortWebsiteName</PageTitle>
 
+    <BaseExternalPageActionFragement @ref="ExternalPageActionFragement" />
+
     <table class="base-list-table table table-hover @TableClass @(StickyRowButtons ? "base-list-with-sticky-row-buttons" : "")">
         <thead class="base-list-table-header">
             <tr>
@@ -26,7 +28,8 @@
                                      InvokeActionParameter="SelectedEntryPrimaryKeys"
                                      BaseModelType="TModelType" GUIType="Enums.GUIType.List" EventServices="EventServices"
                                      ModelLocalizer="ModelLocalizer" OnPageActionInvoked="OnPageActionInvokedAsync"
-                                     AdditionalPageActions="AdditionalHeaderPageActions" />
+                                     AdditionalPageActions="AdditionalHeaderPageActions" 
+                                     ExternalPageActionFragement="ExternalPageActionFragement" />
 
                     <Alert Class="invalid-summary-feedback" Color="Color.Danger" Visible="ShowInvalidFeedback">
                         @InvalidSummaryFeedback

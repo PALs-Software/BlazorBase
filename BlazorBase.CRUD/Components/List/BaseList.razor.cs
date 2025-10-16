@@ -1,4 +1,5 @@
-﻿using BlazorBase.CRUD.EventArguments;
+﻿using BlazorBase.CRUD.Components.PageActions;
+using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
@@ -78,6 +79,8 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
     protected EventHandler<LocationChangedEventArgs>? LocationEventHandler;
 
     protected bool CardIsCurrentlyInAddingMode = false;
+
+    protected BaseExternalPageActionFragement? ExternalPageActionFragement;
     #endregion
 
     #region Init
@@ -100,6 +103,7 @@ public partial class BaseList<TModel> : BaseGenericList<TModel>, IDisposable whe
             return;
 
         await ProcessQueryParameters(isFirstPageLoadNavigation: true);
+        await InvokeAsync(StateHasChanged); // Ensure that every reference (e.g. ExternalPageActionFragment) is passed through the child components
     }
 
     public virtual void Dispose()
