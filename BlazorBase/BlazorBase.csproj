@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
@@ -124,10 +124,10 @@
 		<PackageReference Include="Blazorise.DataGrid" Version="0.9.3.6" />
 		<PackageReference Include="Blazorise.Icons.FontAwesome" Version="0.9.3.6" />
 		<PackageReference Include="Blazorise.Snackbar" Version="0.9.3.6" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.5" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.5" />
-		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+		<PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.10" />
+		<PackageReference Include="System.Runtime.Serialization.Formatters" Version="9.0.10" />
 	</ItemGroup>
 
 	<ItemGroup>
