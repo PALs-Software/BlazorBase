@@ -10,7 +10,7 @@
                              Title="@Localizer["Add existing {0}", ModelLocalizer[ModelListEntryType.Name]]"
                              OnSelectListClosed="AddExistingEntrySelectListClosedAsync" />
 
-    <table class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
+    <table id="@Id" class="base-list-part-table table table-hover table-sm @(StickyRowButtons ? "base-list-part-with-sticky-row-buttons" : "")">
         <thead class="base-list-part-table-header">
             <tr>
                 <th class="root-base-list-part-table-header-item" colspan="100">
@@ -56,9 +56,12 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var entry in Entries)
-            {
-                var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
+            <Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize ItemsProvider="LoadListDataProviderAsync" @ref="VirtualizeList" OverscanCount="30">
+                @{
+                    var entry = context;
+                    var modelIsInAddingMode = CheckIfModelIsInAddingMode(entry);
+                }
+
                 <tr @key="entry" @onclick="() => OnRowSelected(entry)" class="@(entry == SelectedEntry ? "base-list-part-row-selected" : "")">
                     <td class="base-list-part-row-buttons text-center">
                         @if (!IsReadOnly)
@@ -140,7 +143,7 @@
                     }
                     <td class="bottom-border-line" />
                 </tr>
-            }
+            </Microsoft.AspNetCore.Components.Web.Virtualization.Virtualize>
         </tbody>
     </table>
 

@@ -158,13 +158,13 @@ public partial class BaseRichTextEditor
 
         var internalImageCount = images.Count(htmlNode =>
         {
-            string src = htmlNode.GetAttributeValue("src", null) ?? String.Empty;
+            string src = htmlNode.GetAttributeValue("src", String.Empty);
             return src.StartsWith(NavigationManager.BaseUri) || src.StartsWith($"/{FileOptions.ControllerRoute}/GetFile");
         });
 
         var imageFileName = $"{BaseImageFileNames ?? String.Empty}";
         if (ConnectedModel != null)
-            imageFileName += $"{ConnectedModel.GetUnproxiedType().Name}_{String.Join("_", ConnectedModel.GetPrimaryKeys() ?? Array.Empty<string>())}";
+            imageFileName += $"{ConnectedModel.GetUnproxiedType().Name}_{String.Join("_", ConnectedModel.GetPrimaryKeys() ?? [])}";
 
         ChangeInternalImagesWithBaseUrlToLocalFiles(images);
         internalImageCount = await ChangeBase64ImagesToLocalFilesAsync(images, eventServices, imageFileName, internalImageCount);
@@ -175,13 +175,13 @@ public partial class BaseRichTextEditor
     {
         var base64DataImages = images.Where(htmlNode =>
         {
-            string src = htmlNode.GetAttributeValue("src", null) ?? String.Empty;
+            string src = htmlNode.GetAttributeValue("src", String.Empty);
             return !String.IsNullOrWhiteSpace(src) && src.StartsWith("data:image");
         }).ToList();
 
         foreach (var image in base64DataImages)
         {
-            string srcValue = image.GetAttributeValue("src", null);
+            string srcValue = image.GetAttributeValue("src", String.Empty);
             var mimeType = srcValue[5..srcValue.IndexOf(';')];
             var baseType = $".{mimeType.Split("/")[1]}";
             var base64ImageData = srcValue[(srcValue.IndexOf(',') + 1)..];
@@ -196,7 +196,7 @@ public partial class BaseRichTextEditor
             var file = await FileService.CreateFileAsync(eventServices, imageName, baseType, mimeType, imageData);
             await DbContext.AddAsync(file);
 
-            image.SetAttributeValue("src", file.GetFileLink(ignoreTemporaryLink: true));
+            image.SetAttributeValue("src", file.GetFileLink(ignoreTemporaryLink: true) ?? String.Empty);
         }
 
         return internalImageCount;
@@ -206,13 +206,13 @@ public partial class BaseRichTextEditor
     {
         var externalImages = images.Where(htmlNode =>
         {
-            string src = htmlNode.GetAttributeValue("src", null) ?? String.Empty;
+            string src = htmlNode.GetAttributeValue("src", String.Empty);
             return !String.IsNullOrWhiteSpace(src) && !src.StartsWith("data:image") && !src.StartsWith("/api/BaseFile/GetFile") && !src.StartsWith(NavigationManager.BaseUri);
         }).ToList();
 
         foreach (var image in externalImages)
         {
-            string srcValue = image.GetAttributeValue("src", null);
+            string srcValue = image.GetAttributeValue("src", String.Empty);
             srcValue = WebUtility.HtmlDecode(srcValue);
             byte[]? imageData = null;
             try
@@ -251,7 +251,7 @@ public partial class BaseRichTextEditor
             var file = await FileService.CreateFileAsync(eventServices, imageName, baseType, mimeType, imageData);
             await DbContext.AddAsync(file);
 
-            image.SetAttributeValue("src", file.GetFileLink(ignoreTemporaryLink: true));
+            image.SetAttributeValue("src", file.GetFileLink(ignoreTemporaryLink: true) ?? String.Empty);
         }
 
         return internalImageCount;
@@ -261,13 +261,13 @@ public partial class BaseRichTextEditor
     {
         var internalImagesWithBaseUrl = images.Where(htmlNode =>
         {
-            string src = htmlNode.GetAttributeValue("src", null) ?? String.Empty;
+            string src = htmlNode.GetAttributeValue("src", String.Empty);
             return src.StartsWith(NavigationManager.BaseUri);
         }).ToList();
 
         foreach (var image in internalImagesWithBaseUrl)
         {
-            string srcValue = image.GetAttributeValue("src", null);
+            string srcValue = image.GetAttributeValue("src", String.Empty);
             srcValue = $"/{srcValue.Replace(NavigationManager.BaseUri, String.Empty)}";
             image.SetAttributeValue("src", srcValue);
         }

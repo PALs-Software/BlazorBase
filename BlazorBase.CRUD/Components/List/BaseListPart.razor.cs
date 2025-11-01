@@ -1,36 +1,35 @@
 ﻿using BlazorBase.CRUD.Attributes;
+using BlazorBase.CRUD.Components.Card;
 using BlazorBase.CRUD.Components.General;
+using BlazorBase.CRUD.Components.Inputs;
 using BlazorBase.CRUD.Components.SelectList;
 using BlazorBase.CRUD.Enums;
 using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Extensions;
 using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.SortableItem;
 using BlazorBase.CRUD.ViewModels;
-using BlazorBase.CRUD.Components.Inputs;
-using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 using Microsoft.AspNetCore.Components;
-using System;
-using BlazorBase.MessageHandling.Interfaces;
-using Microsoft.Extensions.Localization;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Collections;
-using Microsoft.Extensions.DependencyInjection;
-using System.Linq;
+using Microsoft.AspNetCore.Components.Web.Virtualization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
+using Microsoft.JSInterop;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using BlazorBase.CRUD.ModelServiceProviderInjection;
-using BlazorBase.Services;
-using BlazorBase.CRUD.Components.Card;
-using System.Reflection.Metadata.Ecma335;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using static BlazorBase.CRUD.Components.SelectList.BaseTypeBasedSelectList;
 
 namespace BlazorBase.CRUD.Components.List;
 
-public partial class BaseListPart : BaseDisplayComponent
+public partial class BaseListPart : BaseDisplayComponent, IAsyncDisposable
 {
     #region Parameters
 
@@ -59,9 +58,11 @@ public partial class BaseListPart : BaseDisplayComponent
 
     #region Injects
     [Inject] protected IStringLocalizer<BaseListPart> Localizer { get; set; } = null!;
+    [Inject] protected IJSRuntime JSRuntime { get; set; } = null!;
     #endregion
 
     #region Members
+    protected Guid Id = Guid.NewGuid();
     protected EventServices EventServices = null!;
 
     protected IStringLocalizer ModelLocalizer { get; set; } = null!;
@@ -77,19 +78,41 @@ public partial class BaseListPart : BaseDisplayComponent
 
     protected RenderFragment? CardModalEdit { get; set; } = null;
 
+    protected Virtualize<object>? VirtualizeList = null!;
     #region Property Infos
 
     protected bool IsReadOnly;
-    protected List<BaseInput> BaseInputs = new List<BaseInput>();
-    protected List<BaseSelectListInput> BaseSelectListInputs = new List<BaseSelectListInput>();
-    protected List<BaseSelectListPopupInput> BaseSelectListPopupInputs = new List<BaseSelectListPopupInput>();
-    protected List<IBasePropertyListPartInput> BasePropertyListPartInputs = new List<IBasePropertyListPartInput>();
+    protected List<BaseInput> BaseInputs = [];
+    protected List<BaseSelectListInput> BaseSelectListInputs = [];
+    protected List<BaseSelectListPopupInput> BaseSelectListPopupInputs = [];
+    protected List<IBasePropertyListPartInput> BasePropertyListPartInputs = [];
 
-    protected BaseInput AddToBaseInputs { set { BaseInputs.Add(value); } }
-    protected BaseSelectListInput AddToBaseInputSelectLists { set { BaseSelectListInputs.Add(value); } }
-    protected BaseSelectListPopupInput AddToBaseInputSelectListPopups { set { BaseSelectListPopupInputs.Add(value); } }
-    protected List<IBasePropertyListPartInput> BaseInputExtensions = new List<IBasePropertyListPartInput>();
+    protected BaseInput AddToBaseInputs
+    {
+        set
+        {
+            BaseInputs.RemoveAll(entry => entry.Model == value.Model && entry.Property.Name == value.Property.Name);
+            BaseInputs.Add(value);
+        }
+    }
+    protected BaseSelectListInput AddToBaseInputSelectLists
+    {
+        set
+        {
+            BaseSelectListInputs.RemoveAll(entry => entry.Model == value.Model && entry.Property.Name == value.Property.Name);
+            BaseSelectListInputs.Add(value);
+        }
+    }
+    protected BaseSelectListPopupInput AddToBaseInputSelectListPopups
+    {
+        set
+        {
+            BaseSelectListPopupInputs.RemoveAll(entry => entry.Model == value.Model && entry.Property.Name == value.Property.Name);
+            BaseSelectListPopupInputs.Add(value);
+        }
+    }
 
+    protected List<IBasePropertyListPartInput> BaseInputExtensions = [];
     protected BaseTypeBasedSelectList BaseSelectList = null!;
 
     #endregion
@@ -137,6 +160,20 @@ public partial class BaseListPart : BaseDisplayComponent
         await PrepareCustomLookupData(Model, EventServices);
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (!firstRender)
+            return;
+
+        await JSRuntime.InvokeVoidAsync("window.blazorBase.crud.inputVisibilityObserver.createObserver", Id.ToString(), Id.ToString());
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        return JSRuntime.InvokeVoidAsync("window.blazorBase.crud.inputVisibilityObserver.deleteObserver", Id.ToString());
+    }
+
     protected async override Task OnParametersSetAsync()
     {
         if (ReadOnly == null)
@@ -182,7 +219,12 @@ public partial class BaseListPart : BaseDisplayComponent
         builder.AddAttribute(8, "OnBeforePropertyChanged", EventCallback.Factory.Create<OnBeforePropertyChangedArgs>(this, (args) => OnBeforeListPropertyChanged.InvokeAsync(new OnBeforeListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.EventServices))));
         builder.AddAttribute(9, "OnAfterPropertyChanged", EventCallback.Factory.Create<OnAfterPropertyChangedArgs>(this, (args) => OnAfterListPropertyChanged.InvokeAsync(new OnAfterListPropertyChangedArgs(args.Model, args.PropertyName, args.NewValue, args.OldValue, args.IsValid, args.EventServices))));
 
-        builder.AddComponentReferenceCapture(10, (input) => BasePropertyListPartInputs.Add((IBasePropertyListPartInput)input));
+        builder.AddComponentReferenceCapture(10, (input) =>
+        {
+            var listPartInput = (IBasePropertyListPartInput)input;
+            BaseSelectListPopupInputs.RemoveAll(entry => entry.Model == listPartInput.Model && entry.Property.Name == listPartInput.Property.Name);
+            BasePropertyListPartInputs.Add(listPartInput);
+        });
 
         builder.CloseComponent();
     };
@@ -190,6 +232,27 @@ public partial class BaseListPart : BaseDisplayComponent
     #endregion
 
     #region CRUD
+
+    protected virtual ValueTask<ItemsProviderResult<object>> LoadListDataProviderAsync(ItemsProviderRequest request)
+    {
+        if (request.Count == 0)
+            return ValueTask.FromResult(new ItemsProviderResult<object>([], 0));
+
+        var listEntries = new List<object>();
+        for (int i = 0; i < Entries.Count; i++)
+        {
+            var entry = Entries[i];
+            if (i < request.StartIndex || entry == null)
+                continue;
+
+            listEntries.Add(entry);
+
+            if (listEntries.Count >= request.Count)
+                break;
+        }
+
+        return ValueTask.FromResult(new ItemsProviderResult<object>(listEntries, Entries.Count));
+    }
 
     public virtual Task OnRowSelected(object entry)
     {
@@ -230,6 +293,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterAddEntryAsync(newEntry);
+        await RefreshListViewAsync();
     }
 
     protected Task AddExistingEntryAsync(object? aboveEntry = null)
@@ -263,6 +327,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterAddEntryAsync(entryToAdd, callAddEventOnListEntry: false);
+        await RefreshListViewAsync();
     }
 
     protected async Task RemoveEntryAsync(object entry)
@@ -283,6 +348,7 @@ public partial class BaseListPart : BaseDisplayComponent
             entityEntry.State = EntityState.Detached;
 
         await OnAfterRemoveEntryAsync(entry);
+        await RefreshListViewAsync();
     }
 
     protected async Task MoveEntryUpAsync(object entry)
@@ -298,6 +364,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterMoveListEntryUpAsync(entry);
+        await RefreshListViewAsync();
     }
 
     protected async Task MoveEntryDownAsync(object entry)
@@ -313,6 +380,7 @@ public partial class BaseListPart : BaseDisplayComponent
         SetSortIndex();
 
         await OnAfterMoveListEntryDownAsync(entry);
+        await RefreshListViewAsync();
     }
 
     protected void SwapEntries(object entry, int currentIndex, int targetIndex)
@@ -543,6 +611,14 @@ public partial class BaseListPart : BaseDisplayComponent
             return isInAddingMode;
 
         return false;
+    }
+
+    public virtual Task RefreshListViewAsync()
+    {
+        if (VirtualizeList == null)
+            return Task.CompletedTask;
+
+        return VirtualizeList.RefreshDataAsync();
     }
     #endregion
 }
