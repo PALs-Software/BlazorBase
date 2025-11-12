@@ -13,6 +13,8 @@ using BlazorBase.CRUD.EventArguments;
 using BlazorBase.CRUD.Services;
 using System.Reflection;
 using BlazorBase.Files.Services;
+using BlazorBase.Files.Attributes;
+using BlazorBase.CRUD.Enums;
 
 namespace BlazorBase.Files.Models;
 
@@ -56,6 +58,7 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
     [NotMapped]
     [Editable(false)]
     [Visible(DisplayOrder = 100)]
+    [HideFilePreview(HideInGUITypes = [GUIType.List, GUIType.ListPart])]
     public virtual BaseFile DisplayFile { get { return this; } }
 
     [NotMapped]
@@ -113,9 +116,9 @@ public class BaseFile : BaseModel, IBaseFile, ISortableItem
             additionalParameters = $"thumbnail=true&";
 
         if (TempFileId == Guid.Empty || ignoreTemporaryLink)
-            return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetFile/{Id}/{Uri.EscapeDataString(FileName)}?{additionalParameters}hash={Hash}"; //Append Hash for basic browser file cache refresh notification
+            return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetFile/{Id}/{Uri.EscapeDataString($"{FileName}{BaseFileType}")}?{additionalParameters}hash={Hash}"; //Append Hash for basic browser file cache refresh notification
         else
-            return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetTemporaryFile/{TempFileId}/{Uri.EscapeDataString(FileName)}?{additionalParameters}hash={Hash}";
+            return $"/{BlazorBaseFileOptions.Instance.ControllerRoute}/GetTemporaryFile/{TempFileId}/{Uri.EscapeDataString($"{FileName}{BaseFileType}")}?{additionalParameters}hash={Hash}";
     }
 
     public string GetPhysicalFilePath()

@@ -1,4 +1,8 @@
-﻿.blazor-base-file-list-display {
+﻿.blazor-base-file-list-display-container {
+    min-width: 40px;
+}
+
+.blazor-base-file-list-display {
     max-height: 100px;
     max-width: 200px;
 }
