@@ -629,6 +629,9 @@ public class BaseDbContext : IBaseDbContext
                 if (skipNavigationList != null && skipNavigationList.Contains(navigationProperty.Name))
                     continue;
 
+                if (navigationProperty.TargetEntityType.IsMappedToJson())
+                    continue;
+
                 Microsoft.EntityFrameworkCore.ChangeTracking.NavigationEntry navigationEntry;
                 if (navigationProperty.IsCollection)
                     navigationEntry = DbContext.Entry(entry).Collection(navigationProperty.Name);
