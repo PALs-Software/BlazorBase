@@ -48,7 +48,7 @@ namespace BlazorBase.CRUD.Components.General
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string?, string>>> ForeignKeyProperties { get; set; } = null!;
         protected virtual Dictionary<PropertyInfo, bool> UseForeignKeyPopupInput { get; set; } = [];
         protected static ConcurrentDictionary<long, List<KeyValuePair<string?, string>>> CachedEnumValueDictionary { get; set; } = new();
-        protected virtual Dictionary<Type, List<KeyValuePair<string?, string>>> CachedForeignKeys { get; set; } = new();
+        protected virtual Dictionary<Type, (List<KeyValuePair<string?, string>> Data, bool UseForeignKeyPopupInput)> CachedForeignKeys { get; set; } = new();
         protected virtual Dictionary<PropertyInfo, List<KeyValuePair<string?, string>>> UsesCustomLookupDataProperties { get; set; } = new();
         #endregion
 
@@ -147,7 +147,10 @@ namespace BlazorBase.CRUD.Components.General
 
                 if (CachedForeignKeys.ContainsKey(foreignKeyType))
                 {
-                    ForeignKeyProperties.Add(foreignKeyProperty, CachedForeignKeys[foreignKeyType]);
+                    if (CachedForeignKeys[foreignKeyType].UseForeignKeyPopupInput)
+                        UseForeignKeyPopupInput.Add(foreignKeyProperty, true);
+
+                    ForeignKeyProperties.Add(foreignKeyProperty, CachedForeignKeys[foreignKeyType].Data);
                     continue;
                 }
 
@@ -173,8 +176,10 @@ namespace BlazorBase.CRUD.Components.General
 
                 dynamic query = dbContext.Set(foreignKeyType);
                 var numberOfEntries = await ThreadSafeQueryableExtension.CountTSAsync(query, dbContext);
+                var useForeignKeyPopupInput = false;
                 if (numberOfEntries > CrudOptions.UseSelectListModalWhenForeignKeyTableLargerThenX && guiType != GUIType.List)
                 {
+                    useForeignKeyPopupInput = true;
                     UseForeignKeyPopupInput.Add(foreignKeyProperty, true);
                 }
                 else
@@ -188,7 +193,7 @@ namespace BlazorBase.CRUD.Components.General
                         AddEntryToForeignKeyList((IBaseModel)entry, primaryKeys, displayKeyProperties);
                 }
 
-                CachedForeignKeys.Add(foreignKeyType, primaryKeys);
+                CachedForeignKeys.Add(foreignKeyType, (primaryKeys, useForeignKeyPopupInput));
                 ForeignKeyProperties.Add(foreignKeyProperty, primaryKeys);
             }
         }

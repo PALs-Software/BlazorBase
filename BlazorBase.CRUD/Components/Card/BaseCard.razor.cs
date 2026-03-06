@@ -355,7 +355,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         BaseListParts?.Clear();
         ForeignKeyProperties = null!;
         UseForeignKeyPopupInput = [];
-        CachedForeignKeys = new Dictionary<Type, List<KeyValuePair<string?, string>>>();
+        CachedForeignKeys = [];
         Model = null!;
         ModelLoaded = false;
     }
