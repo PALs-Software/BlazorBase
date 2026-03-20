@@ -12,7 +12,7 @@ using Xunit;
 
 namespace BlazorBase.CRUD.NumberSeries.Test.Tests;
 
-public class NoSeriesTest : TestContext
+public class NoSeriesTest : BunitContext
 {
     protected IBaseDbContext DbContext { get; set; }
     protected NoSeriesService NoSeriesService { get; set; }

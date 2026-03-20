@@ -1,10 +1,12 @@
 ﻿using BlazorBase.CRUD.NumberSeries.Test.Mocks;
+using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.Services;
 using BlazorBase.MessageHandling;
 using Bunit;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
@@ -13,7 +15,7 @@ namespace BlazorBase.CRUD.NumberSeries.Test
 {
     public static class TestConfiguration
     {
-        public static void AddTestConfiguration(TestServiceProvider services)
+        public static void AddTestConfiguration(BunitServiceProvider services)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.GetCultureInfo("en");
             CultureInfo.DefaultThreadCurrentCulture = Thread.CurrentThread.CurrentCulture;
@@ -29,6 +31,9 @@ namespace BlazorBase.CRUD.NumberSeries.Test
             });
 
             services.AddTransient<IBaseDbContext, BaseDbContext>();
+            Action<BlazorBaseCRUDOptions> configureOptions = _ => { };
+            services.AddSingleton(configureOptions);
+            services.AddTransient<IBlazorBaseCRUDOptions, BlazorBaseCRUDOptions>();
             services.AddSingleton<NoSeriesService>();
 
             services.AddBlazorBaseMessageHandling();

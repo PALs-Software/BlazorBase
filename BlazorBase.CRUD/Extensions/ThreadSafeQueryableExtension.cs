@@ -877,7 +877,7 @@ public static class ThreadSafeQueryableExtension
         }
     }
 
-    public static async Task<TSource?> MaxByTSAsync<TSource, TKey>(this IQueryable<TSource> queryable, IBaseDbContext dbContext, Expression<Func<TSource, TKey>> keySelector, IComparer<TSource>? comparer, CancellationToken cancellationToken = default)
+    public static async Task<TSource?> MaxByTSAsync<TSource, TKey>(this IQueryable<TSource> queryable, IBaseDbContext dbContext, Expression<Func<TSource, TKey>> keySelector, IComparer<TKey>? comparer, CancellationToken cancellationToken = default)
     {
         await dbContext.Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
@@ -950,7 +950,7 @@ public static class ThreadSafeQueryableExtension
         }
     }
 
-    public static async Task<TSource?> MinByTSAsync<TSource, TKey>(this IQueryable<TSource> queryable, IBaseDbContext dbContext, Expression<Func<TSource, TKey>> keySelector, IComparer<TSource>? comparer, CancellationToken cancellationToken = default)
+    public static async Task<TSource?> MinByTSAsync<TSource, TKey>(this IQueryable<TSource> queryable, IBaseDbContext dbContext, Expression<Func<TSource, TKey>> keySelector, IComparer<TKey>? comparer, CancellationToken cancellationToken = default)
     {
         await dbContext.Semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
         try

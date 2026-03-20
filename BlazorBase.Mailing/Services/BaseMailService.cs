@@ -441,7 +441,9 @@ public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider
     protected virtual (SmtpClient Client, MailMessage MailMessage) PrepareMail(List<string> receivers, string subject, string body, MailPriority priority, params string[] attachmentPathes)
     {
 #if DEBUG
+        #pragma warning disable SYSLIB0014
         ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
+        #pragma warning restore SYSLIB0014
 #endif
 
         var client = new SmtpClient()
