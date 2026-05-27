@@ -43,8 +43,7 @@ public static class BlazorBaseUserConfiguration
 
         .AddControllers().AddApplicationPart(typeof(UserLoginController).Assembly).AddControllersAsServices();
 
-        if (OperatingSystem.IsWindows())
-            serviceCollection.AddTransient<BaseMailService<UserMailTemplate>>();
+        serviceCollection.AddTransient<BaseMailService<UserMailTemplate>>();
 
         var options = new TOptions();
         configureOptions.Invoke(options);

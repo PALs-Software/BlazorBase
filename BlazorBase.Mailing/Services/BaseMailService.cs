@@ -1,17 +1,20 @@
-﻿using BlazorBase.Mailing.Models;
+using BlazorBase.Mailing.Enums;
+using BlazorBase.Mailing.Models;
 using BlazorBase.MessageHandling.Enum;
 using BlazorBase.MessageHandling.Interfaces;
 using BlazorBase.Services;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
+using MimeKit;
 using System.Net;
-using System.Net.Mail;
-using System.Runtime.Versioning;
+using System.Runtime.InteropServices;
+using System.Security;
 
 namespace BlazorBase.Mailing.Services;
 
-[SupportedOSPlatform("windows")]
 public class BaseMailService<TTemplateLocalizer>(IBlazorBaseMailingOptions options, IServiceProvider serviceProvider, BaseErrorHandler errorHandler,
                 IStringLocalizer<BaseMailService> localizer,
                 IStringLocalizer<TTemplateLocalizer> templateLocalizer, ILogger<BaseMailService> logger) : BaseMailService(options, serviceProvider, errorHandler, localizer, logger)
@@ -282,7 +285,6 @@ public class BaseMailService<TTemplateLocalizer>(IBlazorBaseMailingOptions optio
     }
 }
 
-[SupportedOSPlatform("windows")]
 public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider serviceProvider, BaseErrorHandler errorHandler,
                    IStringLocalizer<BaseMailService> localizer, ILogger<BaseMailService> logger)
 {
@@ -386,8 +388,16 @@ public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider
 
         try
         {
-            var preparedMail = PrepareMail(receivers, subject, body, priority, attachmentPathes);
-            await preparedMail.Client.SendMailAsync(preparedMail.MailMessage);
+            using var client = new SmtpClient();
+            ConfigureClientCertificateValidation(client);
+
+            var message = BuildMessage(receivers, subject, body, priority, attachmentPathes);
+            var secureSocketOptions = MapEncryption(MailingOptions.Encryption);
+
+            await client.ConnectAsync(MailingOptions.Server, MailingOptions.Port, secureSocketOptions);
+            await AuthenticateAsync(client);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(true);
         }
         catch (Exception e)
         {
@@ -426,8 +436,16 @@ public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider
 
         try
         {
-            var preparedMail = PrepareMail(receivers, subject, body, priority, attachmentPathes);
-            preparedMail.Client.Send(preparedMail.MailMessage);
+            using var client = new SmtpClient();
+            ConfigureClientCertificateValidation(client);
+
+            var message = BuildMessage(receivers, subject, body, priority, attachmentPathes);
+            var secureSocketOptions = MapEncryption(MailingOptions.Encryption);
+
+            client.Connect(MailingOptions.Server, MailingOptions.Port, secureSocketOptions);
+            Authenticate(client);
+            client.Send(message);
+            client.Disconnect(true);
         }
         catch (Exception e)
         {
@@ -438,42 +456,69 @@ public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider
         return true;
     }
 
-    protected virtual (SmtpClient Client, MailMessage MailMessage) PrepareMail(List<string> receivers, string subject, string body, MailPriority priority, params string[] attachmentPathes)
+    protected virtual MimeMessage BuildMessage(List<string> receivers, string subject, string body, MailPriority priority, params string[] attachmentPathes)
     {
-#if DEBUG
-        #pragma warning disable SYSLIB0014
-        ServicePointManager.ServerCertificateValidationCallback = delegate { return true; };
-        #pragma warning restore SYSLIB0014
-#endif
-
-        var client = new SmtpClient()
+        var message = new MimeMessage
         {
-            Host = MailingOptions.Server,
-            UseDefaultCredentials = MailingOptions.UseDefaultCredentials,
-            Port = MailingOptions.Port,
-            EnableSsl = MailingOptions.EnableSSL,
-        };
-
-        if (!MailingOptions.UseDefaultCredentials)
-            client.Credentials = new NetworkCredential(MailingOptions.Host, MailingOptions.HostPassword, MailingOptions.Domain);
-
-        var mailMessage = new MailMessage
-        {
-            From = new MailAddress(MailingOptions.SenderAddress),
-            Body = body,
             Subject = subject,
-            IsBodyHtml = true,
-            Priority = priority
+            Priority = MapPriority(priority)
         };
 
-        foreach (var item in attachmentPathes)
-            mailMessage.Attachments.Add(new Attachment(item));
+        message.From.Add(MailboxAddress.Parse(MailingOptions.SenderAddress));
 
         foreach (var item in receivers)
             if (!String.IsNullOrEmpty(item))
-                mailMessage.To.Add(item);
+                message.To.Add(MailboxAddress.Parse(item));
 
-        return (client, mailMessage);
+        var bodyBuilder = new BodyBuilder { HtmlBody = body };
+
+        foreach (var path in attachmentPathes)
+            bodyBuilder.Attachments.Add(path);
+
+        message.Body = bodyBuilder.ToMessageBody();
+        return message;
+    }
+
+    protected virtual Task AuthenticateAsync(SmtpClient client)
+    {
+        if (MailingOptions.UseDefaultCredentials)
+            return Task.CompletedTask;
+
+        var credentials = BuildCredentials();
+
+        if (!String.IsNullOrEmpty(credentials.Domain))
+            return client.AuthenticateAsync(new SaslMechanismNtlm(credentials));
+
+        return client.AuthenticateAsync(credentials.UserName, credentials.Password);
+    }
+
+    protected virtual void Authenticate(SmtpClient client)
+    {
+        if (MailingOptions.UseDefaultCredentials)
+            return;
+
+        var credentials = BuildCredentials();
+
+        if (!String.IsNullOrEmpty(credentials.Domain))
+        {
+            client.Authenticate(new SaslMechanismNtlm(credentials));
+            return;
+        }
+
+        client.Authenticate(credentials.UserName, credentials.Password);
+    }
+
+    protected virtual NetworkCredential BuildCredentials()
+    {
+        var password = SecureStringToPlainText(MailingOptions.HostPassword);
+        return new NetworkCredential(MailingOptions.Host, password, MailingOptions.Domain ?? String.Empty);
+    }
+
+    protected virtual void ConfigureClientCertificateValidation(SmtpClient client)
+    {
+#if DEBUG
+        client.ServerCertificateValidationCallback = (_, _, _, _) => true;
+#endif
     }
 
     protected virtual void HandleMailError(List<string> receivers, string subject, Exception e)
@@ -489,4 +534,34 @@ public class BaseMailService(IBlazorBaseMailingOptions options, IServiceProvider
         }
     }
 
+    private static MessagePriority MapPriority(MailPriority priority) => priority switch
+    {
+        MailPriority.Low => MessagePriority.NonUrgent,
+        MailPriority.High => MessagePriority.Urgent,
+        _ => MessagePriority.Normal
+    };
+
+    private static SecureSocketOptions MapEncryption(MailEncryption encryption) => encryption switch
+    {
+        MailEncryption.StartTls => SecureSocketOptions.StartTls,
+        MailEncryption.Ssl => SecureSocketOptions.SslOnConnect,
+        _ => SecureSocketOptions.None
+    };
+
+    private static string SecureStringToPlainText(SecureString secureString)
+    {
+        if (secureString == null || secureString.Length == 0)
+            return String.Empty;
+
+        var pointer = Marshal.SecureStringToGlobalAllocUnicode(secureString);
+
+        try
+        {
+            return Marshal.PtrToStringUni(pointer) ?? String.Empty;
+        }
+        finally
+        {
+            Marshal.ZeroFreeGlobalAllocUnicode(pointer);
+        }
+    }
 }
