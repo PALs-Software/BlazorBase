@@ -16,7 +16,7 @@
                 }
                 @foreach (var navigationEntry in navigationGroup)
                 {
-                    <BarDropdownItem @key="navigationEntry" To="@navigationEntry.Link">
+                    <BarDropdownItem @key="navigationEntry" To="@navigationEntry.Link" Target="@(navigationEntry.OpenInNewTab ? Blazorise.Target.Blank : Blazorise.Target.None)">
                         <BarIcon Class="@($"fa-fw {navigationEntry.Icon}")" />
                         @navigationEntry.Name
                     </BarDropdownItem>
