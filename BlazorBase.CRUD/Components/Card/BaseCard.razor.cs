@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -77,6 +78,7 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     [Inject] protected IStringLocalizer<TModel> ModelLocalizer { get; set; } = null!;
     [Inject] protected IStringLocalizer<BaseCard<TModel>> Localizer { get; set; } = null!;
     [Inject] protected IBlazorBaseOptions BlazorBaseOptions { get; set; } = null!;
+    [Inject] protected ILogger<BaseCard<TModel>> Logger { get; set; } = null!;
     #endregion
 
     #region Properties
@@ -101,6 +103,9 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     protected string PageTitle = String.Empty;
 
     protected Dictionary<string, SkipExplicitNavigationLoadingOnCardOpenAttribute> SkipNavigationLoadingOnCardOpenProperties = new();
+
+    protected EventHandler? ReloadEntityFromDatabaseHandler;
+    protected EventHandler? RecalculateCustomLookupDataHandler;
     #endregion
 
     #region Property Infos
@@ -193,9 +198,6 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
     #region Actions
     public async Task ShowAsync(bool addingMode, bool viewMode, object?[]? primaryKeys = null, TModel? template = null, TModel? backupModelInstance = null)
     {
-        if (ParentDbContext == null)
-            await DbContext.RefreshDbContextAsync();
-
         ModelLoaded = false;
         AddingMode = addingMode;
         ViewMode = viewMode;
@@ -205,53 +207,71 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         BaseListParts.Clear();
         BasePropertyCardInputs.Clear();
         ResetInvalidFeedback();
+        UnsubscribeModelEvents();
 
-        TModel? model;
-        if (AddingMode)
+        try
         {
-            if (template == null)
-                model = new TModel();
+            if (ParentDbContext == null)
+                await DbContext.RefreshDbContextAsync();
+
+            TModel? model;
+            if (AddingMode)
+            {
+                if (template == null)
+                    model = new TModel();
+                else
+                    model = template;
+
+                if (model is IModelInjectServiceProvider injectModel)
+                    injectModel.ServiceProvider = ServiceProvider;
+
+                var args = new OnCreateNewEntryInstanceArgs(model, EventServices);
+                await OnCreateNewEntryInstance.InvokeAsync(args);
+                await model.OnCreateNewEntryInstance(args);
+            }
             else
-                model = template;
+                model = await DbContext.FindWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
 
-            if (model is IModelInjectServiceProvider injectModel)
-                injectModel.ServiceProvider = ServiceProvider;
+            if (model == null)
+                model = backupModelInstance;
 
-            var args = new OnCreateNewEntryInstanceArgs(model, EventServices);
-            await OnCreateNewEntryInstance.InvokeAsync(args);
-            await model.OnCreateNewEntryInstance(args);
+            if (model == null)
+                throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys ?? new object())]);
+            Model = model;
+
+            var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
+            await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
+            Model.OnGuiLoadData(onGuiLoadDataArgs);
+
+            var onAfterShowEntryArgs = new OnShowEntryArgs(GUIType.Card, Model, addingMode, viewMode, VisibleProperties, DisplayGroups, EventServices);
+            await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
+
+            await PrepareForeignKeyProperties(DbContext, GUIType.Card, Model);
+            await PrepareCustomLookupData(Model, EventServices);
+
+            ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object?>()
+            {
+                [typeof(IStringLocalizer)] = ModelLocalizer,
+                [typeof(IBaseDbContext)] = DbContext
+            });
+
+            CalculateTitle(addingMode: AddingMode);
+
+            ReloadEntityFromDatabaseHandler ??= async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
+            RecalculateCustomLookupDataHandler ??= async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
+            Model.OnReloadEntityFromDatabase += ReloadEntityFromDatabaseHandler;
+            Model.OnRecalculateCustomLookupData += RecalculateCustomLookupDataHandler;
+
+            ModelLoaded = true;
+            await InvokeAsync(StateHasChanged);
         }
-        else
-            model = await DbContext.FindWithAllNavigationPropertiesAsync<TModel>(SkipNavigationLoadingOnCardOpenProperties.Keys, primaryKeys); //Load all properties so the dbcontext dont load entries via lazy loading in parallel and crash
-
-        if (model == null)
-            model = backupModelInstance;
-
-        if (model == null)
-            throw new CRUDException(Localizer["Can not find Entry with the Primarykeys {0} for displaying in Card", String.Join(", ", primaryKeys ?? new object())]);
-        Model = model;
-
-        var onGuiLoadDataArgs = new OnGuiLoadDataArgs(GUIType.Card, Model, null, EventServices);
-        await OnGuiLoadData.InvokeAsync(onGuiLoadDataArgs);
-        Model.OnGuiLoadData(onGuiLoadDataArgs);
-
-        var onAfterShowEntryArgs = new OnShowEntryArgs(GUIType.Card, Model, addingMode, viewMode, VisibleProperties, DisplayGroups, EventServices);
-        await OnShowEntry.InvokeAsync(onAfterShowEntryArgs);
-
-        await PrepareForeignKeyProperties(DbContext, GUIType.Card, Model);
-        await PrepareCustomLookupData(Model, EventServices);
-
-        ValidationContext = new ValidationContext(Model, ServiceProvider, new Dictionary<object, object?>()
+        catch (Exception exception)
         {
-            [typeof(IStringLocalizer)] = ModelLocalizer,
-            [typeof(IBaseDbContext)] = DbContext
-        });
-
-        CalculateTitle(addingMode: AddingMode);
-
-        Model.OnReloadEntityFromDatabase += async (sender, e) => await Entry_OnReloadEntityFromDatabase(sender, e);
-        Model.OnRecalculateCustomLookupData += async (sender, e) => await Model_OnRecalculateCustomLookupDataAsync(sender, e);
-        ModelLoaded = true;
+            Logger.LogError(exception, "BaseCard.ShowAsync failed while loading the card for model type {ModelType} (AddingMode={AddingMode}, ViewMode={ViewMode}, PrimaryKeys={PrimaryKeys}). The card body stays empty because ModelLoaded remains false.", TModelType?.FullName, addingMode, viewMode, primaryKeys == null ? "<none>" : String.Join(", ", primaryKeys));
+            ShowFormattedInvalidFeedback(ErrorHandler.PrepareExceptionErrorMessage(exception));
+            Snackbar?.Show();
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     protected async Task Entry_OnReloadEntityFromDatabase(object? sender, EventArgs e)
@@ -356,8 +376,21 @@ public partial class BaseCard<TModel> : BaseDisplayComponent where TModel : clas
         ForeignKeyProperties = null!;
         UseForeignKeyPopupInput = [];
         CachedForeignKeys = [];
+        UnsubscribeModelEvents();
         Model = null!;
         ModelLoaded = false;
+    }
+
+    protected void UnsubscribeModelEvents()
+    {
+        if (Model == null)
+            return;
+
+        if (ReloadEntityFromDatabaseHandler != null)
+            Model.OnReloadEntityFromDatabase -= ReloadEntityFromDatabaseHandler;
+
+        if (RecalculateCustomLookupDataHandler != null)
+            Model.OnRecalculateCustomLookupData -= RecalculateCustomLookupDataHandler;
     }
 
     public TModel GetCurrentModel()
