@@ -1,8 +1,10 @@
-﻿using BlazorBase.CRUD.Models;
+using BlazorBase.CRUD.Models;
 using BlazorBase.CRUD.ModelServiceProviderInjection;
 using BlazorBase.CRUD.Services;
 using BlazorBase.CRUD.Translation;
 using BlazorBase.MessageHandling;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
@@ -34,7 +36,9 @@ public static class BlazorBaseCRUDConfiguration
         .AddScoped<ScopedServiceProvider>()
         .AddSingleton<IStringLocalizerFactory, BaseResourceManagerStringLocalizerFactory>()
 
-        .AddBlazorBaseMessageHandling();
+        .AddDataProtection();
+
+        serviceCollection.AddBlazorBaseMessageHandling();
 
         return serviceCollection;
     }
@@ -49,5 +53,17 @@ public static class BlazorBaseCRUDConfiguration
         where TDbContextImplementation : DbContext
     {
         return AddBlazorBaseCRUD<BlazorBaseCRUDOptions, TDbContextImplementation>(serviceCollection, configureOptions);
+    }
+
+    /// <summary>
+    /// Initializes the static <see cref="BlazorBaseDataProtection"/> provider so that <c>EncryptString</c> /
+    /// <c>DecryptString</c> extension methods can be used from contexts without dependency injection.
+    /// Call once during application startup, after the <see cref="IApplicationBuilder"/> has been built.
+    /// </summary>
+    public static IApplicationBuilder UseBlazorBaseCRUD(this IApplicationBuilder app)
+    {
+        var provider = app.ApplicationServices.GetRequiredService<IDataProtectionProvider>();
+        BlazorBaseDataProtection.Initialize(provider);
+        return app;
     }
 }

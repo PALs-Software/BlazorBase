@@ -1,4 +1,5 @@
-﻿using BlazorBase.Models;
+﻿using BlazorBase.Mailing.Enums;
+using BlazorBase.Models;
 using System.Security;
 
 namespace BlazorBase.Mailing.Models;
@@ -9,7 +10,7 @@ public interface IBlazorBaseMailingOptions : IBaseOptions
     string Server { get; set; }
     bool UseDefaultCredentials { get; set; }
     int Port { get; set; }
-    bool EnableSSL { get; set; }
+    MailEncryption Encryption { get; set; }
     string SenderAddress { get; set; }
 
     string? Domain { get; set; }

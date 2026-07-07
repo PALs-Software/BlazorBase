@@ -1,4 +1,5 @@
-﻿using System;
+using BlazorBase.CRUD.Services;
+using System;
 using System.IO;
 using System.Security;
 using System.Security.Cryptography;
@@ -24,10 +25,7 @@ namespace BlazorBase.CRUD.Extensions
             if (String.IsNullOrEmpty(input))
                 return input;
 
-#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
-            byte[] encryptedData = ProtectedData.Protect(Encoding.Unicode.GetBytes(input), null, DataProtectionScope.CurrentUser);
-#pragma warning restore CA1416 // Plattformkompatibilität überprüfen
-            return Convert.ToBase64String(encryptedData);
+            return BlazorBaseDataProtection.Protect(input);
         }
 
         public static SecureString DecryptString(this string? encryptedData)
@@ -37,10 +35,7 @@ namespace BlazorBase.CRUD.Extensions
                 if (String.IsNullOrEmpty(encryptedData))
                     return new SecureString();
 
-#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
-                byte[] decryptedData = ProtectedData.Unprotect(Convert.FromBase64String(encryptedData), null, DataProtectionScope.CurrentUser);
-#pragma warning restore CA1416 // Plattformkompatibilität überprüfen
-                return ToSecureString(Encoding.Unicode.GetString(decryptedData));
+                return ToSecureString(BlazorBaseDataProtection.Unprotect(encryptedData));
             }
             catch (Exception)
             {
@@ -53,11 +48,14 @@ namespace BlazorBase.CRUD.Extensions
             if (String.IsNullOrEmpty(encryptedData))
                 return null;
 
-#pragma warning disable CA1416 // Plattformkompatibilität überprüfen
-            byte[] decryptedData = ProtectedData.Unprotect(Convert.FromBase64String(encryptedData), null, DataProtectionScope.CurrentUser);
-#pragma warning restore CA1416 // Plattformkompatibilität überprüfen
-
-            return Encoding.Unicode.GetString(decryptedData);
+            try
+            {
+                return BlazorBaseDataProtection.Unprotect(encryptedData);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public static string CreateSHA512Hash(this string input)
@@ -67,7 +65,7 @@ namespace BlazorBase.CRUD.Extensions
             var hashedInputBytes = hash.ComputeHash(bytes);
 
             // Convert to text
-            // StringBuilder Capacity is 128, because 512 bits / 8 bits in byte * 2 symbols for byte 
+            // StringBuilder Capacity is 128, because 512 bits / 8 bits in byte * 2 symbols for byte
             var hashedInputStringBuilder = new StringBuilder(128);
             foreach (var b in hashedInputBytes)
                 hashedInputStringBuilder.Append(b.ToString("X2"));
@@ -84,8 +82,9 @@ namespace BlazorBase.CRUD.Extensions
                 throw new ArgumentNullException("Key");
             if (iv == null || iv.Length <= 0)
                 throw new ArgumentNullException("IV");
-            if (!OperatingSystem.IsWindows())
-                throw new PlatformNotSupportedException();
+
+            if (OperatingSystem.IsBrowser())
+                throw new PlatformNotSupportedException("AES encryption is not supported on the browser platform.");
 
             using Aes aes = Aes.Create();
             aes.Key = key;
